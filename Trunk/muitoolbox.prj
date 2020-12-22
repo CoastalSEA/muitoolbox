@@ -1,0 +1,172 @@
+<deployment-project plugin="plugin.toolbox" plugin-version="1.0">
+  <configuration file="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\MUItoolbox.prj" location="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox" name="MUItoolbox" target="target.toolbox" target-name="Package Toolbox">
+    <param.appname>MUItoolbox</param.appname>
+    <param.authnamewatermark>Ian Towend</param.authnamewatermark>
+    <param.email>i.townend@coastalsea.uk</param.email>
+    <param.company>University of Southampton</param.company>
+    <param.summary>muitoolbox is used to create bespoke interfaces for modelling applications.</param.summary>
+    <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
+    <param.screenshot />
+    <param.version>1.0</param.version>
+    <param.output>${PROJECT_ROOT}\MUItoolbox.mltbx</param.output>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.guid>9a2fccd2-c7d2-4f3e-88be-ef429a30cee7</param.guid>
+    <param.exclude.filters>% List files contained in your toolbox folder that you would like to exclude
+% from packaging.  Excludes should be listed relative to the toolbox folder.
+% Some examples of how to specify excludes are provided below:
+%
+% A single file in the toolbox folder:
+setMUIpaths.m
+rmMUIpaths.m
+File exclusion list.txt
+%
+% A single file in a subfolder of the toolbox folder:
+% example/.svn
+%
+% All subfolders of the toolbox folder:
+% example
+*svn
+%
+% All files of a certain name in all subfolders of the toolbox folder:
+**/.svn
+**/Working Docs
+**/Data
+%
+% All files matching a pattern in all subfolders of the toolbox folder:
+**/*.docx
+**/run*.m
+%</param.exclude.filters>
+    <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
+    <param.examples>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;examples&gt;
+   &lt;exampleCategory name="help"&gt;
+      &lt;example name="dstoolbox" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/dstoolbox.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/dstoolbox.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="muitbx_examples" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/muitbx_examples.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/muitbx_examples.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+      &lt;example name="muitoolbox" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/muitoolbox.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/muitoolbox.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
+   &lt;/exampleCategory&gt;
+&lt;/examples&gt;</param.examples>
+    <param.demosxml />
+    <param.apps />
+    <param.registered.apps />
+    <param.docs>${PROJECT_ROOT}\info.xml</param.docs>
+    <param.getting.started.guide>${PROJECT_ROOT}\doc\GettingStarted.mlx</param.getting.started.guide>
+    <param.matlabpath.excludes />
+    <param.javaclasspath.excludes />
+    <param.exported.on.package>false</param.exported.on.package>
+    <param.required.addons>
+      <requiredaddons>
+        <requiredAddOn downloadURL="" earliest="earliest" fromRepository="false" id="3fed2193-17cc-4e12-9a85-874c6bf5fd0d" include="true" latest="latest">dstoolbox</requiredAddOn>
+        <requiredAddOn downloadURL="" earliest="earliest" fromRepository="false" id="ec62b662-4ca0-4e6d-bd1b-8792aaffb8dd" include="false" latest="latest">MUImodels</requiredAddOn>
+      </requiredaddons>
+    </param.required.addons>
+    <param.matlab.project.id />
+    <param.matlab.project.name />
+    <param.release.start>R2018a</param.release.start>
+    <param.release.end>latest</param.release.end>
+    <param.release.current.only>false</param.release.current.only>
+    <param.compatiblity.windows>true</param.compatiblity.windows>
+    <param.compatiblity.macos>true</param.compatiblity.macos>
+    <param.compatiblity.linux>true</param.compatiblity.linux>
+    <param.compatiblity.matlabonline>true</param.compatiblity.matlabonline>
+    <param.installation.map />
+    <param.additional.sw.names />
+    <param.additional.sw.licenses />
+    <param.additional.sw.win.url />
+    <param.additional.sw.mac.url />
+    <param.additional.sw.linux.url />
+    <unset>
+      <param.screenshot />
+      <param.version />
+      <param.output />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.exclude.pcodedmfiles />
+      <param.demosxml />
+      <param.apps />
+      <param.registered.apps />
+      <param.matlabpath.excludes />
+      <param.javaclasspath.excludes />
+      <param.exported.on.package />
+      <param.matlab.project.id />
+      <param.matlab.project.name />
+      <param.release.current.only />
+      <param.compatiblity.windows />
+      <param.compatiblity.macos />
+      <param.compatiblity.linux />
+      <param.compatiblity.matlabonline />
+      <param.installation.map />
+      <param.additional.sw.names />
+      <param.additional.sw.licenses />
+      <param.additional.sw.win.url />
+      <param.additional.sw.mac.url />
+      <param.additional.sw.linux.url />
+    </unset>
+    <fileset.rootdir>
+      <file>${PROJECT_ROOT}</file>
+    </fileset.rootdir>
+    <fileset.rootfiles>
+      <file>${PROJECT_ROOT}\demos.xml</file>
+      <file>${PROJECT_ROOT}\doc</file>
+      <file>${PROJECT_ROOT}\Docs</file>
+      <file>${PROJECT_ROOT}\example</file>
+      <file>${PROJECT_ROOT}\help</file>
+      <file>${PROJECT_ROOT}\info.xml</file>
+      <file>${PROJECT_ROOT}\mui_help.txt</file>
+      <file>${PROJECT_ROOT}\mui_logo.jpg</file>
+      <file>${PROJECT_ROOT}\muicatalogue.m</file>
+      <file>${PROJECT_ROOT}\muiConstants.m</file>
+      <file>${PROJECT_ROOT}\muiDataUI.m</file>
+      <file>${PROJECT_ROOT}\muiModelUI.m</file>
+      <file>${PROJECT_ROOT}\muiProject.m</file>
+      <file>${PROJECT_ROOT}\muiPropertyUI.m</file>
+      <file>${PROJECT_ROOT}\muiRunProperties.m</file>
+      <file>${PROJECT_ROOT}\test_menu.asv</file>
+      <file>${PROJECT_ROOT}\test_menu.m</file>
+    </fileset.rootfiles>
+    <fileset.depfun.included />
+    <fileset.depfun.excluded>
+      <file>D:\Work\Tools\MATLAB\MUImodels\ModelUI\NumInputdlg.m</file>
+    </fileset.depfun.excluded>
+    <fileset.package />
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}" name="MUItoolbox.mltbx" optional="false">D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\MUItoolbox.mltbx</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2020b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
