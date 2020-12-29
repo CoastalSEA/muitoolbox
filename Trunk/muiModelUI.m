@@ -95,6 +95,7 @@ classdef muiModelUI < handle
         end 
 %%
         function setGuiFigure(obj)
+            %initialise the figure for the main UI
             if isempty(obj)
                 error('No input')
             end
@@ -192,7 +193,7 @@ classdef muiModelUI < handle
             end
         end
         
-%% functions to initialise tabs --------------------------------------------
+%% functions to initialise tabs -------------------------------------------
         function setAppTabs(obj)
             %initialise the user defined tabs and subtabs
             [tabs,subtabs] = setTabs(obj);
@@ -239,8 +240,25 @@ classdef muiModelUI < handle
 %%
 %--------------------------------------------------------------------------
 % FILE menu functions
-%-------------------------------------------------------------------------- 
+%--------------------------------------------------------------------------
+        function fileMenuOptions(obj,src,~)
+            %callback function for File menu options
+            switch src.Text
+                case 'New'
+                    obj.newproject;
+                case 'Open'
+                    obj.openfile;
+                case 'Save'
+                    obj.savefile;
+                case 'Save as'
+                    obj.saveasfile;
+                case 'Exit'  
+                    obj.exitprogram;
+            end                     
+        end
+%%
         function newproject(obj,~,~)
+            %clear any existing model and initialise a new project
             obj.clearModel;
             hInfo = obj.Info;
             Prompt = {'Project Name','Date'};
@@ -293,6 +311,7 @@ classdef muiModelUI < handle
         end
 %%        
         function obj = savefile(obj,~,~)
+            %save the current project to a mat file
             pname = obj.Info.PathName;
             fname = obj.Info.FileName;
             if exist([pname,fname],'file')==2
@@ -336,6 +355,7 @@ classdef muiModelUI < handle
         end
 %%
         function exitprogram(obj,~,~)
+            %delete all existing figures and delete UI
 %             choice = questdlg('Do you want to save model before exiting?', ...
 %                 'Exit','Yes','No','Cancel','No');
 %             if strcmp(choice,'Yes')
@@ -356,7 +376,7 @@ classdef muiModelUI < handle
             delete(obj.mUI.Figure);
             delete(obj);    %delete the class object
         end 
-%%
+%% functions called by File menu options ----------------------------------
         function loadModel(obj)
             %load sobj from mat file contents and assign to model handles
             ipath = obj.Info.PathName;
@@ -392,7 +412,19 @@ classdef muiModelUI < handle
         function refresh(obj,src,~)
             obj.DrawMap(src);
         end
-%%        
+%%   
+        function toolsMenuOptions(obj,src,~)
+            %callback function for Tools menu options
+            switch src.Text
+                case 'Model'
+                    obj.clearModel;
+                case 'Figures'
+                    obj.clearFigures;
+                case 'Cases'
+                    obj.clearCases;
+            end
+        end
+%%
         function clearModel(obj,~,~)     %%why is this in ModelUI?*****
             %delete the current model object, obj, and reinitialise
             %called when closing and when opening or creating a new project             
@@ -432,23 +464,8 @@ classdef muiModelUI < handle
         end      
 %%        
         function clearCases(obj,~,~)
-            %delete selected cases from Case list and delete case
-            casetypes = unique(obj.Cases.Catatlogue.CaseType);
-            
-            if length(casetypes)>1
-                %add All option and use button or list to get user to choose 
-                casetypes = [casetypes,'All']; 
-                if length(casetypes)<4
-                    type = questdlg('Clear which data type?','Clear cases',...
-                                     casetypes,'All');
-                else
-                    selection = listdlg('ListString',casetypes);
-                    type = casetypes{selection};
-                end
-            else
-                type = 'All';  
-            end
-
+            %delete selected cases from Case list and delete case            
+            type = getCaseType(obj);
             deleteCases(obj.Cases,type,'All');
             obj.DrawMap;
         end
@@ -456,40 +473,53 @@ classdef muiModelUI < handle
 %-------------------------------------------------------------------------
 % Project menu functions
 %--------------------------------------------------------------------------                    
-        function editProject(obj,~,~)
+        function editProjectInfo(obj,~,~)
             %call function to edit Project details (name, date, etc)
             editProject(obj.Info)
             obj.DrawMap;
         end
 %%
-        function projectScenario(obj,src,~)
+        function projectMenuOptions(obj,src,~)
             %call functions to edit, save, delete or reload a scenario
-            mobj = obj.Data;   %handle to muiCatalogue
+            muicat = obj.Cases;   %handle to muiCatalogue
             switch src.Text
                 case 'Edit Description'            
-                    editCase(mobj);
+                    editRecord(muicat);
                     obj.DrawMap; 
                 case 'Edit Data Set'
-                    obj.mUI.Edit = DataEdit.getEditGui(mobj);    
+                    obj.mUI.Edit = DataEdit.getEditGui(muicat);    
                 case 'Save'
-                    saveCase(mobj);
+                    saveCase(muicat);
                 case 'Delete'
-                    deleteCases(mobj);
+                    deleteCases(muicat,getCaseType(obj));
                     obj.DrawMap;
                 case 'Reload'
-                    reloadCase(mobj);      
+                    reloadCase(muicat,obj,getCaseType(obj));      
                 case 'View settings'
-                    viewCaseSettings(mobj);
-            end   
-        end                                                    
-%%
-        function runExpImp(obj,src,~)
-            %call functions to export or import a dataset
-            switch src.Text
-                case 'Export'
-                    DataSet.exportDataSet(obj);
+                    viewCaseSettings(muicat,getCaseType(obj));
+                 case 'Export'
+%                     DataSet.exportDataSet(obj);
                 case 'Import'
-                    DataSet.importDataSet(obj);
+%                     DataSet.importDataSet(obj); 
+            end   
+        end   
+%%
+        function type = getCaseType(obj)
+            %option to select type of data to use in project option
+            casetypes = unique(obj.Cases.Catalogue.CaseType);
+
+            if length(casetypes)>1
+                %add All option and use button or list to get user to choose
+                casetypes = [casetypes,'All'];
+                if length(casetypes)<4
+                    type = questdlg('Clear which data type?','Clear cases',...
+                        casetypes,'All');
+                else
+                    selection = listdlg('ListString',casetypes);
+                    type = casetypes{selection};
+                end
+            else
+                type = 'All';
             end
         end
 %%
@@ -499,12 +529,221 @@ classdef muiModelUI < handle
         function Help(~,~,~)
             doc muitoolbox
         end
-    end
 %%
 %--------------------------------------------------------------------------
-% Tab Case list and Property tables and function for Case list callback 
+% Functions for Case list, Property tables and Case list callback 
+%--------------------------------------------------------------------------        
+        function MapTable(obj,ht)
+            % load case descriptions and display on tab
+            % called by DrawMap
+            idx = tabSubset(obj,ht.Tag);
+            
+            caseid = obj.Cases.Catalogue.CaseID(idx);
+            casedesc = obj.Cases.Catalogue.CaseDescription(idx);
+            cdata = {'0','Description of individual Data (input data or model output)'};
+            for i=1:length(caseid)
+                case_id = num2str(caseid(i));
+                cdata(i,:) = {case_id,char(casedesc{i})};
+            end
+            % draw table of case descriptions
+            tc=uitable('Parent',ht,'Units','normalized',...
+                'CellSelectionCallback',@obj.caseCallback,...
+                'Tag','cstab');
+            tc.ColumnName = {'Case ID','Case Description'};
+            tc.RowName = {};
+            tc.Data = cdata;
+            %width = tc.Extent(3);
+            tc.ColumnWidth = {50 469};
+            tc.RowStriping = 'on';
+            tc.Position(3:4)=[0.935 0.8];    %may need to use tc.Extent?
+            tc.Position(2)=0.9-tc.Position(4);
+        end
+%%
+        function subset = tabSubset(obj,srctxt)  
+            %get the cases of a given CaseType and return as logical array
+            %in CoastalTools seperate data from everything else
+            % srctxt - Tag for selected tab (eg src.Tag)
+            % Called by MapTable. Separate function so that it can be 
+            % overloaded for specific model implementation
+            casetype = obj.Cases.Catalogue.CaseType;
+            switch srctxt
+                case 'Cases'
+                    subset = true(length(casetype),1);
+                case 'Data'
+                    subset = contains(casetype,'data');
+                case 'Models'
+                    subset = ~contains(casetype,'data');    
+                otherwise
+                    subset = [];
+            end
+        end
+ %%
+        function tabRunModel(gobj)
+            %run the model (assumes the default model call is used in UI)
+            src.Text = 'Run Model';
+            runMenuOptions(gobj,src,[]);
+        end 
+
+
+%%  Need to see if this is needed
+%         function getTabData(obj,src,~,varargin)
+%             %get data required for a tab action (eg plot or tabulation)
+%             %user selected data are held in the structure 'inp' including:
+%             %caseid, handle, idh, dprop, id_rec, casedesc.
+%             refresh;
+%             if isempty(obj.Cases.Catalogue)                            
+%                 %there are no model results saved so run model
+%                 tabRunModel(obj);
+%                 %check whether model returned a result
+%                 if isempty(obj.Cases.Catalogue)
+%                     ht = findobj(src,'Type','axes');
+%                     delete(ht);
+%                     return;
+%                 end
+%             end
+%             %get the model type or class to used for selection
+%             if ~isempty(varargin), varargin = varargin{1}; end
+%             %prompt to select a case and then retrieve data pointers
+%             %see Results.getCaseRecord for details of output
+%             if height(obj.Cases.Catalogue)>1
+%                 [inp.useCase,~,~,ok] = ScenarioList(obj.Data,varargin,...
+%                                                     'ListSize',[200,140]);
+%                 if ok<1, return; end
+%             else
+%                 inp.useCase = 1;
+%             end
+%             
+%             cobj = obj.Cases.Catalogue;
+%             inp.caseid = cobj.CaseID(inp.useCase); 
+%             if ~isempty(varargin)  && ~contains(cobj.CaseType(inp.useCase),varargin)
+%                 return;
+%             end
+%             
+%             [inp.handle,inp.idh,inp.dprop,inp.id_rec,...
+%                 inp.aprop] = getCaseRecord(cobj,obj,inp.caseid);
+%             if isempty(inp.handle), return; end
+%             obj = obj.(inp.handle)(inp.idh);
+%             dataset = obj.(inp.dprop{1}){inp.id_rec};
+%             if isa(dataset,'tscollection')
+%                 tsnames = gettimeseriesnames(dataset);
+%                 metatxt = dataset.(tsnames{1}).Name;
+%             else
+%                 metatxt = dataset.Properties.VariableDescriptions{1};
+%             end
+%             cdesc = obj.Cases.Catalogue.CaseDescription{inp.useCase}; 
+%             if isempty(metatxt)
+%                 inp.casedesc = cdesc;
+%             else
+%                 inp.casedesc = sprintf('%s - %s',cdesc,metatxt);  
+%             end
+%             %pass the input data used for the model case
+%             inp.casemodel = obj.Cases.Catalogue.CaseModel{inp.useCase};
+%             setTabAction(obj,src,obj,inp);
+%         end
+
+%%        
+        function InputTabSummary(obj,src,~)
+            %display table(s) of Property values on tab defined by src
+            %calls displayProperties for all classes with PropertyTab set
+            %to the same value as src.Tag            
+            ht1 = findobj(src,'Type','uitable');
+            delete(ht1);
+            ht2 = findobj(src,'Tag','TableTitle');
+            delete(ht2);
+            if isempty(obj.Inputs), return; end
+            h_mdl = fieldnames(obj.Inputs);
+            for k=1:length(h_mdl)
+                sobj = obj.Inputs.(h_mdl{k});
+                if ~isempty(sobj) && isprop(sobj(1),'TabDisplay')...
+                                  && strcmp(sobj.TabDisplay.Tab,src.Tag)
+                    %obj inherits PropertyInterface
+                    displayProperties(sobj,src);
+                end
+            end
+        end
+%%
+%--------------------------------------------------------------------------
+% Additional Functions
 %--------------------------------------------------------------------------    
-    methods
+        function caseCallback(obj,src,evt)
+            %called from tabs listing cases by clicking on a tab row
+            %check that there are some cases
+            if isempty(obj.Cases.Catalogue.CaseID), return; end 
+            %get selected case            
+            selrow = evt.Indices(1);
+            idx = find(tabSubset(obj,src.Parent.Tag));       
+            caserec = idx(selrow);
+
+            classnames = obj.Cases.Catalogue.CaseClass;
+            dsc = obj.Cases.DataSets.(classnames{caserec})(caserec);
+            
+            dst = dsc.Data;
+            source = dst.Source;
+            lastmod = datestr(dst.LastModified);
+            meta = dst.MetaData;
+            
+            name = dst.VariableNames;
+            desc = dst.VariableDescriptions;
+            unit = dst.VariableUnits;            
+            cbtable = table(name,desc,unit);
+            %output summary to tablefigure
+            tabletxt = sprintf('Metadata for %s dated: %s\n%s',...
+                                                    source,lastmod,meta);
+            tc = tablefigure('Case Metadata',tabletxt,cbtable); 
+            %adjust position on screen
+            screendata = get(0,'ScreenSize');
+            tc.Position(2)=  screendata(4)-tc.Position(2)-tc.Position(4);             
+       end
+        
+%%
+        function isvalidhandle = isValidHandle(obj,inphandles)
+            %check whether classes needed to run model have been instantiated
+            % called by IsValidModel
+            nhandles = length(inphandles);
+            definedinput = fieldnames(obj.Inputs);
+            isvalidhandle = false(nhandles,1);
+            for i=1:nhandles
+                if any(strcmp(definedinput,inphandles{i}))
+                    localObj = obj.Inputs.(inphandles{i});
+                    if ~isempty(localObj) && isvalid(localObj(end))
+                        %checks that handle is not empty and that it is a valid
+                        %handle variable (ie is a subclass of handle class)
+                        isvalidhandle(i) = true; 
+                    end
+                else
+                    warndlg(sprintf('Input handle %s is not in ModelHandles list',inphandles{i}));
+                end
+            end    
+        end
+%%
+        function deleteFigObj(obj,figObj,objtype)
+            %delete any figures created by a Data UI
+            % called by clearDataUI
+            if ~isempty(figObj)
+                %check whether user wants to delete plots
+                %generated by this GUI
+                answer = questdlg('Delete existing plots?',...
+                                     objtype,'Yes','No','No');
+                if strcmp(answer,'Yes')
+                    %delete each plot and then clear GUI handle
+                    for i=1:length(figObj)
+                        hf = figObj(i);
+                        delete(hf);
+                    end
+                    clear hf
+                    delete(obj.mUI.(objtype))
+                    obj.mUI.(objtype) = [];
+                end
+            else
+                delete(obj.mUI.(objtype))
+                obj.mUI.(objtype) = [];
+            end
+        end
+    end  
+%--------------------------------------------------------------------------
+% Unprotected functions that can be called from any class
+%--------------------------------------------------------------------------   
+    methods 
         function DrawMap(obj,src)
             if nargin<2 || ~isgraphics(src,'uitab')
                 src = [];
@@ -548,180 +787,40 @@ classdef muiModelUI < handle
                 'Units','normalized', ...
                 'Position',[0.6 0.955 0.3 0.04]);
             MapTable(obj,ht);
-        end
-%%       
-        function MapTable(obj,ht)
-            % load case descriptions
-            idx = tabSubset(obj,ht.Tag);
-            
-            caseid = obj.Cases.Catalogue.CaseID(idx);
-            casedesc = obj.Cases.Catalogue.CaseDescription(idx);
-            cdata = {'0','Description of individual Data (input data or model output)'};
-            for i=1:length(caseid)
-                case_id = num2str(caseid(i));
-                cdata(i,:) = {case_id,char(casedesc{i})};
-            end
-            % draw table of case descriptions
-            tc=uitable('Parent',ht,'Units','normalized',...
-                'CellSelectionCallback',@obj.scenarioCallback,...
-                'Tag','cstab');
-            tc.ColumnName = {'Case ID','Case Description'};
-            tc.RowName = {};
-            tc.Data = cdata;
-            %width = tc.Extent(3);
-            tc.ColumnWidth = {50 469};
-            tc.RowStriping = 'on';
-            tc.Position(3:4)=[0.935 0.8];    %may need to use tc.Extent?
-            tc.Position(2)=0.9-tc.Position(4);
-        end
+        end        
 %%
-        function subset = tabSubset(obj,srctxt)  
-            %get the cases of a given CaseType and return as logical array
-            %in CoastalTools seperate data from everything else
-            %srctxt - Tag for selected tab (eg src.Tag)
-            %default version. can be overloaded for specific model
-            %implementation
-            casetype = obj.Cases.Catalogue.CaseType;
-            switch srctxt
-                case 'Cases'
-                    subset = true(length(casetype),1);
-                case 'Data'
-                    subset = contains(casetype,'data');
-                case 'Models'
-                    subset = ~contains(casetype,'data');    
-                otherwise
-                    subset = [];
-            end
-        end
-%%
-        function getTabData(obj,src,~,varargin)
-            %get data required for a tab action (eg plot or tabulation)
-            %user selected data are held in the structure 'inp' including:
-            %caseid, handle, idh, dprop, id_rec, casedesc.
-            refresh;
-            if isempty(obj.Cases.Catalogue)                            
-                %there are no model results saved so run model
-                tabRunModel(obj);
-                %check whether model returned a result
-                if isempty(obj.Cases.Catalogue)
-                    ht = findobj(src,'Type','axes');
-                    delete(ht);
-                    return;
+        function isvalidmodel = isValidModel(obj,modelname)
+            %check whether the minimum set of classes needed to run model
+            %have valid data. This function uses getCharProperties in
+            %PropertyInterface and so the input handles checked need to
+            %inherit this interface for this function to work.
+            inphandles = obj.ModelInputs.(modelname);
+            ishandle = isValidHandle(obj,inphandles);    
+            if any(~ishandle)  
+                %at least one of the input classes isempty
+                isvalidmodel = false;
+            else
+                %all the input handles are valid handles
+                nhandles = length(inphandles);
+                isvalidmodel = false(nhandles,1);
+                for i=1:nhandles
+                    localObj = obj.Inputs.(inphandles{i});                         
+                    if isprop(localObj(end),'Data') && ...
+                            ~isempty(localObj(end).Data.DataTable) &&...
+                            ~isempty(localObj(end).Data.DataTable{:,1})
+                        %an input timeseries or table has been loaded
+                        isvalidmodel(i) = true;    
+                    else
+                        %input data is loaded using PropertyInterface
+                        isvalidmodel(i) = isValidInstance(localObj);
+                    end
                 end
+                isvalidmodel = all(isvalidmodel);
             end
-            %get the model type or class to used for selection
-            if ~isempty(varargin), varargin = varargin{1}; end
-            %prompt to select a case and then retrieve data pointers
-            %see Results.getCaseRecord for details of output
-            if height(obj.Cases.Catalogue)>1
-                [inp.useCase,~,~,ok] = ScenarioList(obj.Data,varargin,...
-                                                    'ListSize',[200,140]);
-                if ok<1, return; end
-            else
-                inp.useCase = 1;
-            end
-            
-            cobj = obj.Cases.Catalogue;
-            inp.caseid = cobj.CaseID(inp.useCase); 
-            if ~isempty(varargin)  && ~contains(cobj.CaseType(inp.useCase),varargin)
-                return;
-            end
-            
-            [inp.handle,inp.idh,inp.dprop,inp.id_rec,...
-                inp.aprop] = getCaseRecord(cobj,obj,inp.caseid);
-            if isempty(inp.handle), return; end
-            obj = obj.(inp.handle)(inp.idh);
-            dataset = obj.(inp.dprop{1}){inp.id_rec};
-            if isa(dataset,'tscollection')
-                tsnames = gettimeseriesnames(dataset);
-                metatxt = dataset.(tsnames{1}).Name;
-            else
-                metatxt = dataset.Properties.VariableDescriptions{1};
-            end
-            cdesc = obj.Cases.Catalogue.CaseDescription{inp.useCase}; 
-            if isempty(metatxt)
-                inp.casedesc = cdesc;
-            else
-                inp.casedesc = sprintf('%s - %s',cdesc,metatxt);  
-            end
-            %pass the input data used for the model case
-            inp.casemodel = obj.Cases.Catalogue.CaseModel{inp.useCase};
-            setTabAction(obj,src,obj,inp);
-        end
- %%
-        function tabRunModel(gobj)
-            %run the model and assign results to model handle
-            src.Text = 'Run Model';
-            runModel(gobj,src,[]);
-        end   
-%%        
-        function InputTabSummary(obj,src,~)
-            %display table(s) of Property values on tab defined by src
-            %calls displayProperties for all classes with PropertyTab set
-            %to the same value as src.Tag            
-            ht1 = findobj(src,'Type','uitable');
-            delete(ht1);
-            ht2 = findobj(src,'Tag','TableTitle');
-            delete(ht2);
-            if isempty(obj.Inputs), return; end
-            h_mdl = fieldnames(obj.Inputs);
-            for k=1:length(h_mdl)
-                sobj = obj.Inputs.(h_mdl{k});
-                if ~isempty(sobj) && isprop(sobj(1),'TabDisplay')...
-                                  && strcmp(sobj.TabDisplay.Tab,src.Tag)
-                    %obj inherits PropertyInterface
-                    displayProperties(sobj,src);
-                end
-            end
-        end
-%--------------------------------------------------------------------------
-% Additional Functions
-%--------------------------------------------------------------------------    
-       function caseCallback(obj,src,evt)
-            %called from tabs listing cases by clicking on a tab row
-            %check that there are some cases
-            if isempty(obj.Cases.Catalogue.CaseID), return; end 
-            %get selected case
-            selrow = evt.Indices(1);
-            idx = find(tabSubset(obj,src.Parent.Tag));           %%************
-            caserec = idx(selrow);
-            [dataset,~] = getCaseDataSet(obj.Data,obj,caserec); %%**************
-            if istable(dataset)
-                name = dataset.Properties.VariableNames;
-                desc = dataset.Properties.VariableDescriptions;
-                unit =  dataset.Properties.VariableUnits;
-                meta = dataset.Properties.UserData.MetaData;
-                %output summary of Table to the command line
-                format compact
-                summary(dataset)
-%             else
-%                 name = gettimeseriesnames(dataset);
-% %                 desc = localObj.ResDef.varDesc;
-%                 for i = 1:length(name)
-%                     desc{1,i} = dataset.(name{i}).DataInfo.UserData;
-%                     unit{1,i} = dataset.(name{i}).DataInfo.Units;
-%                     meta{1,i} = dataset.(name{i}).UserData.MetaData; 
-%                 end
-            end
-%             desc = desc(1:length(name));
-            userdata = horzcat(name',desc',unit',meta');
-            hf = figure('Name','Scenrios summary', ...
-                'Units','normalized', ...
-                'Position',[0.04,0.65,0.3,0.2],...
-                'Resize','on','HandleVisibility','on', ...
-                'Tag','PlotFig');
-            colnames = {'Variable','Description','Units','Metadata'};
-            tc = uitable('Parent',hf, ...
-                'Units','normalized', ...
-                'ColumnName', colnames,'ColumnWidth',{60 120 40 1800}, ...
-                'Data',userdata);
-            tc.Position(3:4)=[0.935 0.8];  
-            tc.Position(2)=0.9-tc.Position(4);
-        end
+        end     
 %%  
-
 %%possibly move this function??????????????????????????????
-        function clearGui(obj,guiobj)
+        function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs
             %first input variable is the ModelUI handle (unused)
             name = class(guiobj);
@@ -791,29 +890,6 @@ classdef muiModelUI < handle
                 case 'DataManip'
                     delete(obj.mUI.Manip)
                     obj.mUI.Manip = [];
-            end
-        end
-    
-%%
-        function deleteFigObj(obj,figObj,objtype)
-            if ~isempty(figObj)
-                %check whether user wants to delete plots
-                %generated by this GUI
-                answer = questdlg('Delete existing plots?',...
-                                     objtype,'Yes','No','No');
-                if strcmp(answer,'Yes')
-                    %delete each plot and then clear GUI handle
-                    for i=1:length(figObj)
-                        hf = figObj(i);
-                        delete(hf);
-                    end
-                    clear hf
-                    delete(obj.mUI.(objtype))
-                    obj.mUI.(objtype) = [];
-                end
-            else
-                delete(obj.mUI.(objtype))
-                obj.mUI.(objtype) = [];
             end
         end
     end

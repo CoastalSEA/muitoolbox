@@ -236,6 +236,16 @@ classdef muiPropertyUI  < handle
             end                     
         end
 %%
+        function isvalid = isValidInstance(obj)
+            %check whether the data in a single class has been added
+            %input data is loaded using PropertyInterface
+            localProperties = getCharProperties(obj);
+            checkProps = cellfun(@isempty,localProperties);
+            if all(~checkProps)
+                isvalid = true;
+            end
+        end
+%%
         function obj = editPropertySubset(obj,idx)
             %create inputdlg for a subset of properties and update values
             propdesc = obj.PropertyLabels;

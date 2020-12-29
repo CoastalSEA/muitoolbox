@@ -27,19 +27,21 @@ classdef muiCatalogue < dscatalogue
         end
 %%
         function saveCase(obj)  
-            %write the results for a selected case to an excel file
-            
-            [caserec,ok] = selectCase(obj,'PromptText','Select case to save:',...
-                                                    'ListSize',[250,200]);
+            %write the results for a selected case to an excel file            
+            [caserec,ok] = selectCase(obj,'Select case to save:','single');
             if ok<1, return; end 
+            
+            
+            
+            
         end         
 %%
         function deleteCases(obj,type,caserec)
             %select one or more records and delete records from catalogue 
             %and class instances
-            if nargin<3  %if case to reload has not been specified
-                [caserec,ok] = selectCase(obj,'PromptText','Select cases to delete:',...
-                                      'CaseType',type,'ListSize',[250,200]);
+            if nargin<3  %if case to delete has not been specified
+                [caserec,ok] = selectCase(obj,'Select cases to delete:',...
+                                                         'multiple',type);                                      
                 if ok<1, return; end  
             elseif contains(caserec,'All')
                 if isempty(type) || strcmp(type,'All')
@@ -50,11 +52,9 @@ classdef muiCatalogue < dscatalogue
             end 
             
             %sort in reverse order so that record ids do not change as
-            %deleted  (NOT NEEDED NOW as catalogue cleared after Datasets
-            %deleted) CHECK!!!
             msg = sprintf('Deleting %d cases',length(caserec));
             hw = waitbar(0,msg);
-%             caserec = sort(caserec,'descend');
+            caserec = sort(caserec,'descend');
             nrec = length(caserec);
             for i=1:nrec
                 %delete each instance of class
@@ -65,53 +65,74 @@ classdef muiCatalogue < dscatalogue
             close(hw)
         end    
 %%
-        function reloadCase(obj,type,caserec)  
+        function reloadCase(obj,mobj,type,caserec)  
             %reload model input variables as the current settings
-            if nargin<3  %if case to reload has not been specified
-                [caserec,ok] = selectCase(obj,'PromptText','Select case to reload:',...
-                                      'CaseType',type,'ListSize',[250,200]);
+            if nargin<4  %if case to reload has not been specified
+                [caserec,ok] = selectCase(obj,'Select case to reload:',...
+                                                            'single',type); 
                 if ok<1, return; end  
-            end            
-            
-            
+            end  
+            cobj = getCase(obj,caserec);      %selected case
+            minp = fieldnames(cobj.RunProps); %saved input class instances
+            for i=1:length(minp)
+                mobj.Inputs.(minp{i}) = cobj.RunProps.(minp{i});
+            end          
         end
 %% 
         function viewCaseSettings(obj,type,caserec)
             %view the saved input data for a selected Case
-            if nargin<3  %if case to reload has not been specified
-                [~,ok] = selectCase(obj,'PromptText','Select case to view:',...
-                                      'CaseType',type,'ListSize',[250,200]);
+            if nargin<3  %if case to view has not been specified
+                [caserec,ok] = selectCase(obj,'Select case to view:',...
+                                                            'single',type); 
                 if ok<1, return; end  
             end
+            [cobj,~,catrec] = getCase(obj,caserec);
             
-            
-        end        
-%%        
-        function editCaseData(obj)  %if runprops does not hold case description this function is not needed
-            %extension of dscatalogue.editRecord to also update exsitig
-            %metadata in class properties
-            [caserec,newdesc] = editRecord(obj);
-%             obj.CaseModel{caserec}.scen = newdesc{1}; %%DEPENDS on how this is stored
-%               
-        end
-        
+            casedesc = catrec.CaseDescription;
+            inputs = fieldnames(cobj.RunProps);
+            if isempty(cobj.RunProps)
+                warndlg('The case selected has no input data');
+                return;
+            else
+                propdata = {}; proplabels = {};
+                for k=1:length(inputs)
+                    localObj = cobj.RunProps.(inputs{k});
+                    propdata = vertcat(propdata,getProperties(localObj));
+                    proplabels = vertcat(proplabels,getPropertyNames(localObj));
+                end
+                idx = find(~(cellfun(@isscalar,propdata)));
+                for i=1:length(idx)
+                    propdata{idx(i)} = num2str(propdata{idx(i)});
+                end
+                propdata = [proplabels,propdata];
+                figtitle = sprintf('Settings used for %s',casedesc);
+                varnames = {'Variable','Values'};                                
+                tablefigure('Scenario settings',figtitle,{},varnames,propdata);
+            end            
+        end              
 %% 
         function [cobj,classrec,catrec] = getCase(obj,caserec)
             %retrieve the class instance, class record and catalogue record
             catrec = getRecord(obj,caserec); 
             lobj = obj.DataSets.(catrec.CaseClass);  
-            classrec = [lobj.ClassIndex]==catrec.CaseID;            
+            classrec = [lobj.CaseIndex]==catrec.CaseID;            
             cobj = lobj(classrec);
         end
     end
-    
+%%
     methods (Access=private)
+        function [caserec,ok] = selectCase(obj,promptxt,mode,type)
+            if nargin<4  || strcmpi(type,'All')
+                type = [];
+            end
+            [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
+                'SelectionMode',mode,'CaseType',type,'ListSize',[250,200]);
+        end
+%%       
         function delete_dataset(obj,caserec)
             %delete selected record and data set 
-            catrec = getRecord(obj,caserec);
-            classname = catrec.CaseClass;
-            %class index for the classid instance
-            classrec = getClassIndex(obj.DataSets.(classname),caseid); %in dscollection?   
+            [~,classrec,catrec] = getCase(obj,caserec);
+            classname = catrec.CaseClass; 
             %clear instance of data set class
             obj.DataSets.(classname)(classrec) = [];
         end          

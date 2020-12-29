@@ -44,9 +44,9 @@ classdef muiConstants < muiPropertyUI
 %             obj = ConstantData;
 %         end
 %%
-%         function editConstants(obj)
+%         function obj = editConstants(obj)
 %             %use PropertyInterface function to generate GUI
-%             obj = editProperties(mobj.Constants);
+%             obj = editProperties(obj);
 %         end
         
     end
