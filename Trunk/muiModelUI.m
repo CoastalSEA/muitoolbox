@@ -29,8 +29,7 @@ classdef muiModelUI < handle
  
         TabProps         %structure to hold PropertyTab and position for each data input
         ModelInputs      %classes required by model used in isValidModel check 
-        DataUItabs       %structure to define number of muiDataUI tabs for each use 
-%         SaveDataString   %uses ModelInputs if not defined  
+        DataUItabs       %structure to define muiDataUI tabs for each use 
     end
     
     properties 
@@ -49,10 +48,11 @@ classdef muiModelUI < handle
 
     methods (Abstract, Access = protected)    
         %methods that all subclasses must define
-        setMenus(obj)      %application specific menus
-        setTabs(obj);      %initialise tabs that are specific to the model
+        setMenus(obj)         %application specific menus
+        setTabs(obj)          %initialise tabs that are specific to the model
         setTabAction(obj)     %define how selected data is to be used
-        setTabProperties(obj);%get locations for data input display  
+        setTabProperties(obj) %get locations for data input display  
+        runMenuOptions(obj)
     end    
 %%    
     methods (Access = protected)  %methods common to all uses
@@ -63,6 +63,7 @@ classdef muiModelUI < handle
             setAppMenus(obj);    %initialise menus                         
             setAppTabs(obj);     %initialise tabs
             TabProperties(obj);  %set locations for data input display
+            obj.mUI.Figure.Visible = 'on';
         end        
 %%   
 %--------------------------------------------------------------------------
@@ -107,7 +108,7 @@ classdef muiModelUI < handle
                 'Units','normalized', ...
                 'CloseRequestFcn',@obj.exitprogram, ...
                 'Resize','on','HandleVisibility','on', ...
-                'Tag','MainFig');
+                'Visible','off','Tag','MainFig');
             axes('Parent',obj.mUI.Figure, ...
                 'Color',[0.94,0.94,0.94], ...
                 'Position',[0 0.002 1 1], ...
@@ -578,69 +579,40 @@ classdef muiModelUI < handle
             end
         end
  %%
-        function tabRunModel(gobj)
+        function tabRunModel(obj)
             %run the model (assumes the default model call is used in UI)
             src.Text = 'Run Model';
-            runMenuOptions(gobj,src,[]);
+            runMenuOptions(obj,src,[]);
         end 
-
-
 %%  Need to see if this is needed
-%         function getTabData(obj,src,~,varargin)
-%             %get data required for a tab action (eg plot or tabulation)
-%             %user selected data are held in the structure 'inp' including:
-%             %caseid, handle, idh, dprop, id_rec, casedesc.
-%             refresh;
-%             if isempty(obj.Cases.Catalogue)                            
-%                 %there are no model results saved so run model
-%                 tabRunModel(obj);
-%                 %check whether model returned a result
-%                 if isempty(obj.Cases.Catalogue)
-%                     ht = findobj(src,'Type','axes');
-%                     delete(ht);
-%                     return;
-%                 end
-%             end
-%             %get the model type or class to used for selection
-%             if ~isempty(varargin), varargin = varargin{1}; end
-%             %prompt to select a case and then retrieve data pointers
-%             %see Results.getCaseRecord for details of output
-%             if height(obj.Cases.Catalogue)>1
-%                 [inp.useCase,~,~,ok] = ScenarioList(obj.Data,varargin,...
-%                                                     'ListSize',[200,140]);
-%                 if ok<1, return; end
-%             else
-%                 inp.useCase = 1;
-%             end
-%             
-%             cobj = obj.Cases.Catalogue;
-%             inp.caseid = cobj.CaseID(inp.useCase); 
-%             if ~isempty(varargin)  && ~contains(cobj.CaseType(inp.useCase),varargin)
-%                 return;
-%             end
-%             
-%             [inp.handle,inp.idh,inp.dprop,inp.id_rec,...
-%                 inp.aprop] = getCaseRecord(cobj,obj,inp.caseid);
-%             if isempty(inp.handle), return; end
-%             obj = obj.(inp.handle)(inp.idh);
-%             dataset = obj.(inp.dprop{1}){inp.id_rec};
-%             if isa(dataset,'tscollection')
-%                 tsnames = gettimeseriesnames(dataset);
-%                 metatxt = dataset.(tsnames{1}).Name;
-%             else
-%                 metatxt = dataset.Properties.VariableDescriptions{1};
-%             end
-%             cdesc = obj.Cases.Catalogue.CaseDescription{inp.useCase}; 
-%             if isempty(metatxt)
-%                 inp.casedesc = cdesc;
-%             else
-%                 inp.casedesc = sprintf('%s - %s',cdesc,metatxt);  
-%             end
-%             %pass the input data used for the model case
-%             inp.casemodel = obj.Cases.Catalogue.CaseModel{inp.useCase};
-%             setTabAction(obj,src,obj,inp);
-%         end
+        function getTabData(obj,src,~)
+            %get data required for a tab action (eg plot or tabulation)
+            %user selected data are held in the structure 'inp' including:
+            %caseid, handle, idh, dprop, id_rec, casedesc.
+            refresh;
+            muicat = obj.Cases.Catalogue;
+            if isempty(muicat)                            
+                %there are no model results saved so run model
+                tabRunModel(obj);
+                %check whether model returned a result
+                if isempty(muicat)
+                    ht = findobj(src,'Type','axes');
+                    delete(ht);
+                    return;
+                end
+            end
 
+            if height(muicat)>1
+                [caserec,ok] = selectRecord(obj.Cases,'PromptText','Select case to plot',...
+                                           'ListSize',[200,140]);
+                if ok<1, return; end
+            else
+                caserec = 1;
+            end
+            
+            cobj = getCase(obj.Cases,caserec);
+            setTabAction(obj,src,cobj);
+        end
 %%        
         function InputTabSummary(obj,src,~)
             %display table(s) of Property values on tab defined by src
@@ -673,28 +645,42 @@ classdef muiModelUI < handle
             selrow = evt.Indices(1);
             idx = find(tabSubset(obj,src.Parent.Tag));       
             caserec = idx(selrow);
+            %get class DataSet for selected record
+            classname = obj.Cases.Catalogue.CaseClass;
+            cds = obj.Cases.DataSets.(classname{caserec})(caserec);
+            
+            dstables = cds.Data;   %extract data tables (can be more than one)
+            ntables = length(dstables);
+            tabnames = {'Data'};
+            if ntables>1 
+                tabnames = cds.MetaData;
+            end
+            
+            %generate tables to be displayed
+            tables = cell(ntables,1);
+            tabtxts = cell(ntables,1);
+            for i=1:ntables
+                dst = dstables(i);
+                source = dst.Source;
+                lastmod = datestr(dst.LastModified);
+                meta = dst.MetaData;
 
-            classnames = obj.Cases.Catalogue.CaseClass;
-            dsc = obj.Cases.DataSets.(classnames{caserec})(caserec);
-            
-            dst = dsc.Data;
-            source = dst.Source;
-            lastmod = datestr(dst.LastModified);
-            meta = dst.MetaData;
-            
-            name = dst.VariableNames;
-            desc = dst.VariableDescriptions;
-            unit = dst.VariableUnits;            
-            cbtable = table(name,desc,unit);
-            %output summary to tablefigure
-            tabletxt = sprintf('Metadata for %s dated: %s\n%s',...
-                                                    source,lastmod,meta);
-            tc = tablefigure('Case Metadata',tabletxt,cbtable); 
-            %adjust position on screen
-            screendata = get(0,'ScreenSize');
-            tc.Position(2)=  screendata(4)-tc.Position(2)-tc.Position(4);             
-       end
-        
+                name = dst.VariableNames;
+                desc = dst.VariableDescriptions;
+                unit = dst.VariableUnits;            
+                tables{i,1} = table(name,desc,unit);
+                %output summary to tablefigure
+                tabtxts{i,1} = sprintf('Metadata for %s dated: %s\n%s',...
+                                                     source,lastmod,meta);
+            end
+
+            h_fig = tabtablefigure('Case Metadata',tabnames,tabtxts,tables);
+            %adjust position on screen            
+            h_fig.Position(1)=  h_fig.Position(3)*3/2; 
+%             screendata = get(0,'ScreenSize');
+%             h_fig.Position(2)=  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
+            h_fig.Visible = 'on';
+        end
 %%
         function isvalidhandle = isValidHandle(obj,inphandles)
             %check whether classes needed to run model have been instantiated
@@ -819,7 +805,6 @@ classdef muiModelUI < handle
             end
         end     
 %%  
-%%possibly move this function??????????????????????????????
         function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs
             %first input variable is the ModelUI handle (unused)
@@ -843,47 +828,9 @@ classdef muiModelUI < handle
                         end
                     end
                     deleteFigObj(obj,figObj,objtype);
-%                         if ~isempty(localObj)
-%                             %check whether user wants to delete plots
-%                             %generated by this GUI
-%                             answer = questdlg('Delete existing plots?',...
-%                                                  'Plots','Yes','No','No');
-%                             if strcmp(answer,'Yes')
-%                                 %delete each plot and then clear GUI handle
-%                                 for i=1:length(localObj)
-%                                     hf = findobj('tag','PlotFig',...
-%                                                     'Number',localObj(i));
-%                                     delete(hf);
-%                                 end
-%                                 clear hf
-%                                 delete(obj.mUI.Plots)
-%                                 obj.mUI.Plots = [];
-%                             end
-%                         end
-%                     else
-%                         delete(obj.mUI.Plots)
-%                         obj.mUI.Plots = [];
-%                     end
                 case 'DataStats'
                     figObj = findobj('Tag','StatFig','-or','Tag','StatTable');                   
                     deleteFigObj(obj,figObj,objtype);
-%                     if ~isempty(figObj)
-%                         answer = questdlg('Delete existing plots and tables?',...
-%                                                  'Stats Figures','Yes','No','No');
-%                         if strcmp(answer,'Yes')
-%                             %delete each plot and then clear GUI handle
-%                             for i=1:length(figObj)
-%                                 hf = figObj(i);
-%                                 delete(hf);
-%                             end
-%                             clear hf
-%                             delete(obj.mUI.Stats)
-%                             obj.mUI.Stats = [];
-%                         end
-%                     else
-%                         delete(obj.mUI.Stats)
-%                         obj.mUI.Stats = [];
-%                     end
                 case 'DataEdit'
                     delete(obj.mUI.Edit)
                     obj.mUI.Edit = [];

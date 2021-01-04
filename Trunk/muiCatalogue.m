@@ -118,6 +118,42 @@ classdef muiCatalogue < dscatalogue
             classrec = [lobj.CaseIndex]==catrec.CaseID;            
             cobj = lobj(classrec);
         end
+%%
+        function [dst,caserec,idset] = getDataset(obj,caserec,idset)
+            %use the caserec id to get a case and return selected dataset
+            %also returns caserec and idset as numeric index values
+            % caserec - 
+            % idset - numeric index or a name defined dataset MetaData property
+            %function called by getProperty and muiDataUI.XYZselection
+            if ~isnumeric(caserec)               
+                caserec = find(strcmp(obj.Catalogue.CaseDescription,caserec));
+            end
+            cobj = getCase(obj,caserec);  %matches caseid to find record in class
+            %
+            if ~isnumeric(idset) 
+                idset =  find(strcmp(cobj.MetaData,idset));
+                if isempty(idset)
+                    idset = 1;    %no datasets defined so must only be one
+                end
+            end
+            dst = cobj.Data{idset};  %selected dataset
+        end
+%%
+        function prop = getProperty(obj,UIsel)
+            %re
+            dst = getDataset(obj,UIsel.caserec,UIsel.dataset);
+            if any(strcmp(dst.VariableDescriptions,UIsel.property))
+                %return selected dimensions of varaiable
+                
+            elseif any(strcmp(dst.RowDescription,UIsel.property))
+                %return selected row values 
+                prop = dst.RowNames; %returns values in sourse data type
+            elseif any(strcmp(dst.DimensionDescriptions,UIsel.property))
+                
+            else
+                errordlg('Incorrect property selection in getProperty') 
+            end
+        end
     end
 %%
     methods (Access=private)
