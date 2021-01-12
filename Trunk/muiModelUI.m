@@ -488,7 +488,7 @@ classdef muiModelUI < handle
                     editRecord(muicat);
                     obj.DrawMap; 
                 case 'Edit Data Set'
-                    obj.mUI.Edit = DataEdit.getEditGui(muicat);    
+                    obj.mUI.Edit = muiEditUI.getEditUI(obj);    
                 case 'Save'
                     saveCase(muicat);
                 case 'Delete'
@@ -660,7 +660,7 @@ classdef muiModelUI < handle
             tables = cell(ntables,1);
             tabtxts = cell(ntables,1);
             for i=1:ntables
-                dst = dstables(i);
+                dst = dstables{i};
                 source = dst.Source;
                 lastmod = datestr(dst.LastModified);
                 meta = dst.MetaData;
@@ -816,10 +816,10 @@ classdef muiModelUI < handle
             end
             switch name
                 %define case for each plot/data GUI
-                case 'ModelPlots'
+                case 'muiPlotsUI'
                     figObj = [];
                     if ~isempty(obj.mUI.Plots.GuiChild)
-                        localObj = obj.mUI.Plots.GuiChild.PlotFigureNum;
+                        localObj = obj.mUI.Plots.GuiChild.Plot.FigNum;
                         nfig = length(localObj);
                         figObj = gobjects(1,nfig);
                         for i=1:nfig
@@ -827,14 +827,14 @@ classdef muiModelUI < handle
                                                 'Number',localObj(i));
                         end
                     end
-                    deleteFigObj(obj,figObj,objtype);
-                case 'DataStats'
+                    deleteFigObj(obj,figObj,'Plots');
+                case 'muiStatsUI'
                     figObj = findobj('Tag','StatFig','-or','Tag','StatTable');                   
-                    deleteFigObj(obj,figObj,objtype);
-                case 'DataEdit'
+                    deleteFigObj(obj,figObj,'Stats');
+                case 'muiEditUI'
                     delete(obj.mUI.Edit)
                     obj.mUI.Edit = [];
-                case 'DataManip'
+                case 'muiManipUI'
                     delete(obj.mUI.Manip)
                     obj.mUI.Manip = [];
             end

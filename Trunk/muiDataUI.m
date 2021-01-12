@@ -23,6 +23,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         TabContent = muiDataUI.defaultTabContent
         UIsettings            %struct of UI settings
         UIselection           %struct array UI selections (1:n)
+        issetXYZ = false      %flag to indicate whether data has been selected
     end
 
     properties (Abstract)  %properties that all subclasses must include
@@ -43,8 +44,6 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             if isempty(obj)
                 error('No input')
             end
-%             obj.UIsettings = muiDataUI.uisel;  %initialise struct for settings
-%             obj.UIselection = muiDataUI.uisel; %initialise struct array for selections
             %initialise UI figure
             obj.dataUI.Figure = figure('Name',GuiTitle, ...
                 'NumberTitle','off', ...
@@ -53,7 +52,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 'CloseRequestFcn',@(src,evt)exitDataUI(obj,src,evt,mobj),...
                 'Resize','on','HandleVisibility','on', ...
                 'Visible','off','Tag','DataUI');
-            obj.dataUI.Figure.Position(1:2)=[0.16 0.3]; 
+            obj.dataUI.Figure.Position(1:2) = [0.16 0.3]; 
             axes('Parent',obj.dataUI.Figure, ...
                 'Color',[0.94,0.94,0.94], ...
                 'Position',[0 0.002 1 1], ...
@@ -107,11 +106,14 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             itab = strcmp(obj.Tabs2Use,src.Tag);  
             vartitle = obj.TabContent(itab).Titles;
             varorder = obj.TabContent(itab).Order;
+            headoffset = 1-obj.TabContent(itab).HeadPos(1);
             nvar = length(vartitle);
-            intheight = obj.TabContent(itab).Window/(nvar+1);
-            header = obj.TabContent(itab).Header;
+            xyzpanel = obj.TabContent(itab).XYZpanel;
+            window = 1-xyzpanel(2)-xyzpanel(4)-headoffset;
+            intheight = window/nvar;
+            
             for i=1:nvar
-                height = 1-i*intheight-header;
+                height = 1-i*intheight+intheight/2-headoffset-0.01;
                 uicontrol('Parent',hf, 'Style','text',...
                     'String',vartitle{i},...
                     'HorizontalAlignment', 'left',...
@@ -124,7 +126,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                     'Position',[0.26 height 0.58 0.04], ...
                     'String','Not yet set', ...
                     'ListboxTop',1, ...
-                    'Callback',@(src,evt)updateSelection(obj,src,evt,mobj), ...
+                    'Callback',@(src,evt)updateCaseList(obj,src,evt,mobj), ...
                     'Tag',varorder{i}, ...
                     'Value',int16(1)); %max list length is 32767
                 if strcmp(obj.TabContent(itab).Style{i},'slider')
@@ -139,8 +141,8 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         function setTabControlButtons(obj,src,mobj)   
             % GUI control buttons - user defined lables + close
             idx = strcmp(obj.TabOptions,src.Tag);
-            butpos = obj.TabContent(idx).TabButPositions;
-            butlabel = obj.TabContent(idx).TabButtons;
+            butpos = obj.TabContent(idx).TabButPos;
+            butlabel = obj.TabContent(idx).TabButText;
             nbut = length(butlabel);
             for i=1:nbut
                 uicontrol('Parent',src,'Tag','UserButton',...
@@ -162,37 +164,12 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             %set the header text on the selected tab
             itab = strcmp(obj.Tabs2Use,src.Tag);
             boxtxt = obj.TabContent(itab).HeadText;
-            header = obj.TabContent(itab).Header;
-            pos = [0.02, 1-header-0.03, 0.96, header];
+            vertpos = obj.TabContent(itab).HeadPos(1);
+            header = obj.TabContent(itab).HeadPos(2);            
+            pos = [0.04, vertpos, 0.92, header];
             uicontrol('Parent',src,'Style','text','String', boxtxt,...
-            'BackgroundColor',[0.94,0.94,0.94],'HorizontalAlignment', 'center',...        
+            'BackgroundColor',[0.94,0.94,0.94],'HorizontalAlignment', 'left',...        
             'Units','normalized','Position', pos,'Tag','HeaderText');
-        end
-%%
-%--------------------------------------------------------------------------
-% initialise data selection and settings
-%--------------------------------------------------------------------------
-        function initialiseUIselection(obj,src)
-            %initialise the struct used to hold variable selections
-            obj.UIselection = [];
-            itab = strcmp(obj.Tabs2Use,src.Tag);
-            nvar = obj.TabContent(itab).XYZnvar;
-            names = obj.TabContent(itab).XYZlabels; 
-            for i=1:nvar
-                obj.UIselection.(names{i}) = muiDataUI.uisel;
-            end
-        end
-%%
-        function initialiseUIsettings(obj,src)
-            %initialise the struct used to hold button settings
-            obj.UIsettings = [];
-            itab = strcmp(obj.Tabs2Use,src.Tag);  
-            names = obj.TabContent(itab).ActButNames; 
-            nbut = length(names);            
-            obj.UIsettings = struct('Type','','Scale',1,'Equation','');
-            for i=1:nbut    
-                obj.UIsettings.(names{i}) = false;
-            end
         end
 %%
 %--------------------------------------------------------------------------
@@ -201,33 +178,58 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         function setAdditionalButtons(obj,src,mobj) 
             %additional action control buttons
             %NB mobj may be used in the callback
-            idx = strcmp(obj.Tabs2Use,src.Tag);
-            butnames = obj.TabContent(idx).ActButtons;
-            butpos = obj.TabContent(idx).ActButPos;
-            butcall = obj.TabContent(idx).ActButCall;
-            buttip = obj.TabContent(idx).ActButTip; 
-            varorder = obj.TabContent(idx).Titles;
-            nvar = length(varorder);
+            itab = strcmp(obj.Tabs2Use,src.Tag);
+            butnames = obj.TabContent(itab).ActButNames;
+            buttext = obj.TabContent(itab).ActButText;
+            butpos = obj.TabContent(itab).ActButPos;
+            butcall = obj.TabContent(itab).ActButCall;
+            buttip = obj.TabContent(itab).ActButTip; 
+        %------------------------------------------------------------------
+        %     varorder = obj.TabContent(itab).Order;
+        %     nvar = length(varorder);
         %     if strcmp(src.Parent.Parent.Name,'Derive output')
-        %         nvar = nvar-1; %no idea why this is needed!!! 
-        %                        %works without this for all other UIs
+        %         nvar = nvar-1;     %no idea why this is needed!!! 
+        %                            %works without this for all other UIs
         %     end
-            height = obj.TabContent(idx).Window/(nvar+1);
-            head = obj.TabContent(idx).Header;
+        %------------------------------------------------------------------
             for i=1:length(butnames)
                 if butpos(i,2)<0
-                    butdef.tag = varorder{-butpos(i,2)};  
-                    butpos(i,2) = 1+butpos(i,2)*height-0.012-head;                
-                else
-                    butdef.tag = sprintf('Button%d',i);
+                    hprop = obj.TabContent(itab).Selections{-butpos(i,2)};                   
+                    butpos(i,2) = hprop.Position(2)-0.01;                
                 end
                 butdef.call = butcall{i};
-                butdef.txt = butnames{i};
+                butdef.txt = buttext{i};
                 butdef.tip = buttip{i};
-                butdef.metadata = 'ActionButton';
+                butdef.metadata = 0;
                 butdef.pos = [butpos(i,1),butpos(i,2),0.04,0.055];
+                butdef.tag = butnames{i};
                 captureButton(obj,src,mobj,butdef);
             end
+        end
+%%
+%--------------------------------------------------------------------------
+% initialise a text box for an equation or other such use
+%--------------------------------------------------------------------------
+        function setEquationBox(~,src)
+            helptxt = sprintf('Matlab script to create new variable using t=time and x,y,z (not case sensitive):');
+            txt1 = 'Write equation or Call function using the selection buttons above';
+            txt2 = 'and time (t) if defined for variable(s) used';            
+            tiptxt = sprintf('%s\n%s',txt1,txt2);
+            uicontrol('Parent',src,...
+                'Style','text',...
+                'String', helptxt,...
+                'HorizontalAlignment', 'left',...
+                'Units','normalized', ...
+                'Position', [0.08 0.25 0.7 0.04],...                
+                'Tag','EqnText');
+            uicontrol('Parent',src,...
+                'Style','edit',...
+                'HorizontalAlignment', 'left',...
+                'Units','normalized', ...
+                'Position', [0.08 0.15 0.82 0.1],...
+                'TooltipString',tiptxt,...
+                'ButtonDownFcn',@(src,evt)pasteText(src,evt),...
+                'Tag','UserEqn');
         end
 %%
 %--------------------------------------------------------------------------
@@ -236,9 +238,9 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         function h_pan = setXYZpanel(obj,src,mobj) 
             %add a panel with buttons to capture selected variable and dimensions
             %with a summary of each selection in a text window
-            idx = strcmp(obj.Tabs2Use,src.Tag);
-            panpos = obj.TabContent(idx).XYZpanel;
-            nbut = obj.TabContent(idx).XYZnvar;
+            itab = strcmp(obj.Tabs2Use,src.Tag);
+            panpos = obj.TabContent(itab).XYZpanel;
+            nbut = length(obj.TabContent(itab).XYZlabels);
             if isempty(panpos)
                 return; %no panel specified
             end
@@ -248,35 +250,31 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                          txt);
             boxtxt = 'Make selection';            
             butdef.call = '@(src,evt)XYZselection(obj,src,evt,mobj)';
-            vartxt = obj.TabContent(idx).XYZlabels;
+            vartxt = obj.TabContent(itab).XYZlabels;
             txtlen = cellfun(@length,vartxt);
             %caters for button text of varying length up to 9 characters
             butwidth = 0.05+(max(txtlen)-1)*0.01;
             offset = 0.05-(max(txtlen)-1)*0.005;
-
-            if nbut==2
-                butdef.pos = [offset,0,butwidth,0.22];
-                postxt = [0.15,0,0.78,0.4];
-                posbut2 = [0.66,0.16];
-                postxt2 = [0.55,0.05];
-            elseif nbut==3  
-                butdef.pos = [offset,0,butwidth,0.15];
-                postxt = [0.15,0,0.78,0.3];
-                posbut2 = [0.745,0.425,0.105];
-                postxt2 = [0.67,0.35,0.03];
-            end
+            
+            butheight = 0.48/nbut;
+            txtheight = 0.8/nbut;
+            butdef.pos = [offset,0,butwidth,butheight];
+            postxt = [0.15,0,0.78,txtheight];
+            intheight = 1/nbut;
 
             for i=1:nbut
                 %add XYZ selection button
+                posbut2 = 1-intheight*i+intheight/2-butheight/2;
+                postxt2 = 1-intheight*i+intheight/2-txtheight/2;
                 butdef.txt = vartxt{i};
                 butdef.tip = helptxt(vartxt{i});
                 butdef.metadata = 'xyzButton';
-                butdef.pos(2) = posbut2(i);
+                butdef.pos(2) = posbut2;
                 butdef.tag = sprintf('%s-button',vartxt{i});
                 captureButton(obj,h_pan,mobj,butdef);
                 %add XYZ text box for selection string
                 tagtxt = sprintf('%stext',vartxt{i});
-                postxt(2) = postxt2(i);
+                postxt(2) = postxt2;
                 uicontrol('Parent',h_pan,'Style','text','String', boxtxt,...                
                           'BackgroundColor',[0.9 0.9 0.9],...
                           'HorizontalAlignment', 'left',...
@@ -284,6 +282,56 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                           'Tag',tagtxt);
             end           
         end 
+%%
+%--------------------------------------------------------------------------
+% initialise properties for UI data selection and UI settings
+%--------------------------------------------------------------------------
+        function initialiseUIselection(obj,src)
+            %initialise the struct used to hold variable selections
+            obj.UIselection = muiDataUI.uisel;
+            itab = strcmp(obj.Tabs2Use,src.Tag);
+            names = obj.TabContent(itab).XYZlabels; 
+            for i=1:length(names)
+                obj.UIselection(i) = muiDataUI.uisel;
+            end
+        end
+%%
+        function initialiseUIsettings(obj,src)
+            %initialise the struct used to hold button settings
+            obj.UIsettings = []; %clear any existing struct
+            %initialise the default settings fields
+            obj.UIsettings = struct('Type','','Other',1,'Equation','');
+            %initialise the addtional settings defined by buttons
+            itab = strcmp(obj.Tabs2Use,src.Tag);  
+            names = obj.TabContent(itab).ActButNames; 
+            nbut = length(names);                    
+            for i=1:nbut    
+                obj.UIsettings.(names{i}) = 0;  %default button setting
+            end
+        end
+%%
+%--------------------------------------------------------------------------
+% initialise an inputUI for selection and sub-sampling
+%--------------------------------------------------------------------------
+        function selection = setInputUI(obj,inp,xyz)
+            %setup call to inputUI and await response
+            uis = obj.UIselection(xyz);
+            selvar = [uis.caserec,uis.dataset,uis.variable];
+            h_inp = inputUI('FigureTitle', inp.title,...
+                            'PromptText',inp.prompt,...
+                            'InputFields',inp.fields,...
+                            'Style',inp.style,...
+                            'ControlButtons',inp.controls,...                            
+                            'DefaultInputs',inp.default,...
+                            'UserData',inp.userdata,...
+                            'DataObject',inp.dataobj,...
+                            'SelectedVar',selvar,...
+                            'ActionButtons',inp.actions);  
+
+            waitfor(h_inp,'Action')
+            selection = h_inp.UIselection;
+            delete(h_inp.UIfig)
+        end
 %%
 %--------------------------------------------------------------------------
 % additional callback functions
@@ -329,18 +377,28 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             end
         end
 %%
-        function updateSelection(obj,src,~,mobj)
+        function updateCaseList(obj,src,~,mobj)
             %callback function from uicontrols keeps track of currrent selection
             ht = src.Parent;
             setVariableLists(obj,ht,mobj)
         end
+
+        
+        
+        
+        
         
 %%
+%--------------------------------------------------------------------------
+% functions to capture a selection
+%--------------------------------------------------------------------------
         function XYZselection(obj,src,~,mobj)
             %call inputUI to select a variable to assign to XYZ field
-            xyz = src.String;       %XYZ button identifier
-            itab = strcmp(obj.Tabs2Use,src.Parent.Parent.Tag);
+            xyztxt = src.String;                %XYZ button identifier
+            tabobj = src.Parent.Parent;      %parent Tab
+            itab = strcmp(obj.Tabs2Use,tabobj.Tag);
             selected = obj.TabContent(itab).Selections;
+            
             order = obj.TabContent(itab).Order;
             for i=1:length(order)
                 idx = selected{i}.Value;
@@ -356,162 +414,263 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             %get variable, row and dimension descriptions
             idvar = find(strcmp(dst.VariableDescriptions,desc.Variable));           
             [dstnames,dstdesc] = getVarAttributes(dst,idvar);
+            
+            %assign variable selection
+            xyz = strcmp(obj.TabContent(itab).XYZlabels,xyztxt);
+%             obj.UIselection(xyz).tab = itab;
+            obj.UIselection(xyz).xyz = xyz;
+            obj.UIselection(xyz).caserec = caserec;
+            obj.UIselection(xyz).dataset = idset;
+            obj.UIselection(xyz).variable = idvar;
+            
             %set up call to inputUI
-            figtitle = 'Select variable';
-            inputxt = {'Select:','Range:'};
             varRange = dst.VariableRange.(dstnames{1});
             rangetext = var2range(varRange);
-            defaultinput = {dstdesc,rangetext};
-            promptxt = sprintf('Select the property to use and any limits to be applied to the data range of the selected property');  
-            %call inputUI
-            %% need to add scaling options
+            scalelist = obj.TabContent(itab).Scaling;
+                
+            %single variable or dimnsion selection
+            inp.title    = 'Select variable';
+            inp.prompt   = 'Select the property to use and any limits to be applied to the data range of the selected property';  
+            %inputs for fields,style,controls,default and userdata have one value per
+            %control even if empty (not required)
+            if isempty(obj.TabContent(itab).Scaling)
+                inp.fields   = {'Select:','Range:'};
+                inp.style    = {'linkedpopup','edit'};
+                inp.controls = {'','Ed'};
+                inp.default  = {dstdesc,rangetext};
+                inp.userdata = {[],varRange};                
+            else
+                inp.fields   = {'Select:','Range:','Scaling:'};
+                inp.style    = {'linkedpopup','edit','popupmenu'};
+                inp.controls = {'','Ed',''};
+                inp.default  = {dstdesc,rangetext,scalelist};
+                inp.userdata = {[],varRange,[]};
+            end
+            %pass a data object if used (eg for linkedpopup menus)
+            inp.dataobj  = dst;
+            inp.actions  = {'Select','Close'};            
+            selection = setInputUI(obj,inp,xyz);
             
-            h_inp = inputUI('FigureTitle', figtitle,...
-                                    'InputFields',inputxt,...
-                                    'Style',{'linkedpopup','edit'},...
-                                    'ControlButtons',{'','Ed'},...
-                                    'ActionButtons',{'Select','Close'},...
-                                    'DefaultInputs',defaultinput,...
-                                    'UserData',{[],varRange},...
-                                    'PromptText',promptxt,...
-                                    'DataObject',dst);           
-            waitfor(h_inp,'Action')
-            selection = h_inp.UIselection;
-            delete(h_inp.GUIfig)  
-    
-            %use selection        
-            %define case,dataset,variable,ivar,range 
+            %define selection by setting case,dataset,variable,property,
+            %range,scale. Sub-sampling dims not defined by this selection.      
             if ~isempty(selection)
-                obj.UIselection(itab).(xyz).caserec = caserec;
-                obj.UIselection(itab).(xyz).dataset = idset;
-                obj.UIselection(itab).(xyz).variable = idvar;
-                obj.UIselection(itab).(xyz).property = selection{1};
-                obj.UIselection(itab).(xyz).range = selection{2};                               
-                boxtext = sprintf('%s: %s',dstdesc{selection{1}},...
-                                                        selection{2});   
+                obj.UIselection(xyz).property = selection{1};
+                obj.UIselection(xyz).range = selection{2};
+                if length(selection)>2
+                    obj.UIselection(xyz).scale = selection{3};
+                    boxtext = sprintf('%s: %s, scale: %s',dstdesc{selection{1}},...
+                                    selection{2},scalelist{selection{3}});
+                else
+                    boxtext = sprintf('%s: %s',dstdesc{selection{1}},...
+                                                            selection{2});
+                end
+                obj.UIselection(xyz).desc = boxtext;
+
+                %if variable is to be used on its own or with specified
+                %dimensions and needs to be constrained, get sub-sample
+                pdim = getVariableDimensions(dst,idvar);
+                if pdim>obj.TabContent(itab).XYZmxvar(xyz) && ...
+                                        selection{1}==1
+                    mdim = obj.TabContent(itab).XYZmxvar(xyz); %no. range properties
+                    ndim = pdim-mdim;                          %no. index properties
+                    subVarSelection(obj,dst,1,xyz,mdim,ndim);
+                end
                 vartxt = sprintf('%stext',src.String); 
                 h_box = findobj(src.Parent,'Tag',vartxt);
-                h_box.String = boxtext;     
+                h_box.String = obj.UIselection(xyz).desc;  
             end
-            %alternative code below clears the text if user cancels
-%             else
-                %user cancelled - clear selection and update text
-%                 obj.UIselection(itab).(xyz) = muiDataUI.uisel;
-%                 boxtext = 'Make selection';
-%             end  
-%             vartxt = sprintf('%stext',src.String); 
-%             h_box = findobj(src.Parent,'Tag',vartxt);
-%             h_box.String = boxtext;
+        %------------------------------------------------------------------
+        %     %alternative code below clears the text if user cancels
+        %     else
+        %         user cancelled - clear selection and update text
+        %         obj.UIselection(itab).(xyz) = muiDataUI.uisel;
+        %         boxtext = 'Make selection';
+        %     end  
+        %     vartxt = sprintf('%stext',src.String); 
+        %     h_box = findobj(src.Parent,'Tag',vartxt);
+        %     h_box.String = boxtext;
+        %------------------------------------------------------------------
         end        
 %%
         function setSelection(obj,src,~,mobj)
             %set the selection and pass to the instantiating class method
+            checkXYZset(obj,src);
             if strcmp(src.String,'Clear')%clear variable selection in the UI                
                 initialiseUIselection(obj,src.Parent);
                 initialiseUIsettings(obj,src.Parent);  
-                resetVariableSelectioin(obj,src);
+                resetVariableSelection(obj,src.Parent);
                 clearXYZselection(obj,src.Parent);
+                clearEqnBox(obj,src.Parent);
+            elseif strcmp(src.String,'Function')
+                UseSelection(obj,src,mobj);    %do something with selection
+            elseif obj.issetXYZ
+                ok = assignSelection(obj,src,mobj);  %selections in UI
+                if ok<1, return; end
+                assignSettings(obj,src);  %settings in UI                
+                UseSelection(obj,src,mobj);    %do something with selection
             else
-                itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
-                assignSelection(obj,mobj,itab);  %selections in UI
-                assignSettings(obj,itab);        %settings in UI
-                UseSelection(obj,src,mobj);      %do something with selection
+                warndlg('Check that variables have been defined')
             end      
         end         
 %%
-        function assignSelection(obj,mobj,itab)
+%--------------------------------------------------------------------------
+% functions to assign variable selection and settings
+%--------------------------------------------------------------------------
+        function ok = assignSelection(obj,src,mobj)
             %update the UIselection to the current values
             %check that assignments have dimensions that match-up
-            nvar = obj.TabContent(itab).XYZnvar;
-            names = obj.TabContent(itab).XYZlabels;
-            uisel = obj.UIselection(itab);
-            %selected variable dimensions
-            dimdiff = zeros(1,nvar); propsused = dimdiff;
-            for i=1:nvar %for each variable that has been selected
-                usi = uisel.(names{i});
-                propsused(i) = usi.property;
-                if usi.property>1
+            ok = 1;
+            itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
+            xyznames = obj.TabContent(itab).XYZlabels;
+            nxyz = length(xyznames);
+            uisel = obj.UIselection;
+            %check dimensions of selectd variables
+            for i=1:nxyz %for each variable assignment to xyz button
+                usi = uisel(i);
+                if usi.property<1
+                    continue;
+                elseif usi.property>1
                     pdim = 1;
                 else
-                    dst(i) = getDataset(mobj.Cases,usi.caserec,usi.dataset);
-                    pdim = getVariableDimensions(dst(i),usi.variable);
+                    dst = getDataset(mobj.Cases,usi.caserec,usi.dataset);
+                    vdim = getVariableDimensions(dst,usi.variable); 
+                    setdims = cellfun(@ischar,{usi.dims(:).value});
+                    pdim = vdim-sum(1-setdims);
                 end
-                %if pdim>=nvar then there are more dimensions than needed
-                dimdiff(i) = pdim-nvar+1;
+
+                %if variable is to be used on its own or with specified
+                %dimensions and needs to be constrained, get sub-sample
+                if pdim>obj.TabContent(itab).XYZmxvar(i) && ...
+                                        usi.property==1
+                    mdim = obj.TabContent(itab).XYZmxvar(i); %no. range properties
+                    ndim = pdim-mdim;                     %no. index properties
+                    ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
+                end                
             end
-            %
-            if any(dimdiff>0) %some variables need subselection
-                subVarSelection(obj,uisel,dst,names,propsused,dimdiff);
-            end
-            
-            %STILL NEED TO CHECK THAT DIMENSIONS MATCH CORRECTLY
-            %Handle selection of two multi-dimensional arrays
         end
 %%
-        function subVarSelection(obj,uisel,dst,names,propsused,dimdiff)
+        function ok = subVarSelection(obj,dst,propsused,xyz,mdim,ndim)
             %use inputUI to make a subselection for variables with more
             %dimensions than required by calling function
-            idx = find(dimdiff>0);
-            for j=1:sum(dimdiff>0)
-                idvar = uisel.(names{idx(j)}).variable;
-                [~,dstdesc] = getVarAttributes(dst(idx(j)),idvar);
-                %find attributes that have not yet been defined
-                inputxt = dstdesc(~ismember(dstdesc,dstdesc(propsused)));
-                ndim = length(inputxt);
-                range = cell(ndim,1); rangetext = range;
-                for k=1:ndim
-                    range{k} = getVarAttRange(dst(idx(j)),dstdesc,inputxt{k});
-                    rangetext{k} = var2range(range{k});
-                end
-                promptxt = sprintf('Select the value(s) to be used for the remaining dimensions');
-                style = repmat({'slider'},1,ndim);
-                buttons = repmat({'Ed'},1,ndim);
-                %call inputUI
-                h_inp = inputUI('FigureTitle', 'Select Value',...
-                                'InputFields',inputxt,...
-                                'Style',style,...
-                                'ControlButtons',buttons,...
-                                'ActionButtons',{'Select','Close'},...
-                                'DefaultInputs',rangetext(:),...
-                                'UserData',range(:),...
-                                'PromptText',promptxt,...
-                                'DataObject',dst(idx(j)));
-                waitfor(h_inp,'Action')
-                selection = h_inp.UIselection;
-                delete(h_inp.GUIfig)
-                for i=1:length(selection)
-                    obj.UIselection(itab).(names{idx(j)}).dims(i).name = inputxt{i};
-                    obj.UIselection(itab).(names{idx(j)}).dims(i).value = selection{i};
-                end
-            end        
+            ok = 1;
+            idvar = obj.UIselection(xyz).variable;
+            [dstnames,dstdesc] = getVarAttributes(dst,idvar);
+            %find attributes that have not yet been defined
+            inputxt = dstdesc(~ismember(dstdesc,dstdesc(propsused)));
+            nprop = length(inputxt);
+            range = struct('val',{},'txt',{});
+            for k=1:nprop
+                range(k).val = getVarAttRange(dst,dstdesc,inputxt{k});
+                range(k).txt = var2range(range(k).val);
+            end
+
+            uinput = getUIinput(obj,mdim,ndim,dst,dstdesc,range);
+            selection = setInputUI(obj,uinput,xyz);
+            if isempty(selection), ok = 0; return; end
+            boxtxt = obj.UIselection(xyz).desc;
+            
+            for j=1:mdim
+                idx = strcmp(dstdesc,inputxt{selection{2*j-1}});
+                obj.UIselection(xyz).dims(j).name = dstnames{idx};
+                obj.UIselection(xyz).dims(j).value = selection{2*j};
+                boxtxt = sprintf('%s, %s: %s',boxtxt,dstdesc{idx},selection{2*j});
+            end
+            %
+            for i=1:ndim
+                slidervals = selection{2*mdim+i};
+                dimname = dstnames{strcmp(dstdesc,slidervals{1})};
+                obj.UIselection(xyz).dims(mdim+i).name = dimname;
+                obj.UIselection(xyz).dims(mdim+i).value = slidervals{2};
+                txtval =  var2str(slidervals{2});
+                boxtxt = sprintf('%s, %s: %s',boxtxt,slidervals{1},txtval{1});
+            end
+            
+            %update boxtext description
+            obj.UIselection(xyz).desc = boxtxt;
         end
 %%
-        function assignSettings(obj,itab)
+        function uinput = getUIinput(~,mdim,ndim,dst,dstdesc,range)
+            %multi-dimension selection for a known variable
+            %mdim - number of dimensions with ranges, 
+            %ndim - number of dimensions with index
+            uinput.title    = 'Select dimension';
+            uinput.prompt   = 'Select the property to use and any limits to be applied to the range of the selected property';  
+            %inputs for fields,style,controls,default and userdata have one value per
+            %control even if empty (not required)
+            seltext = repmat({'Select:','Range:'},1,mdim);
+            uinput.fields   = [seltext(:);dstdesc(mdim+2:end)'];
+            style1 = repmat({'linkedpopup','edit'},1,mdim);
+            style2 = repmat({'linkedslider'},1,ndim);
+            uinput.style    = [style1(:);style2(:)];
+            mcontrol = repmat({'';'Ed'},1,mdim);
+            ncontrol = repmat({'Ed'},1,ndim);
+            uinput.controls = [mcontrol(:);ncontrol(:)];
+            for j=1:2:2*mdim
+                uinput.default{j} = dstdesc(2:end)';
+                uinput.userdata{j} = {};
+                uinput.default{j+1} = range(j).txt;
+                uinput.userdata{j+1} = range(j).val;
+            end
+            %
+            for k=1:ndim
+                uinput.default{2*mdim+k} = range(mdim+k).txt;
+                uinput.userdata{2*mdim+k} = range(mdim+k).val;
+            end
+            uinput.dataobj  = dst;
+            uinput.actions  = {'Select','Cancel'};
+        end
+%%
+        function assignSettings(obj,src)
             %update the UIsettings to the current values
-            uiset = obj.UIsettings;
-            uisfields = fieldnames(uiset);
-            h_but = findobj(obj.DataGuiTabs.SelectedTab,'UserData','ActionButton');
             
+            %get the current button value settings
+%             h_but = findobj(obj.dataUI.Tabs.SelectedTab,'UserData','ActionButton');
+            itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
             butnames = obj.TabContent(itab).ActButNames; 
             nbut = length(butnames);
             for i=1:nbut
-                value = h_but(i).Value;
-                obj.UIsettings.(butnames{i}) = value;
+                h_but = findobj(obj.dataUI.Tabs.SelectedTab,'Tag',butnames{i});
+                obj.UIsettings.(butnames{i}) = logical(h_but.UserData);
             end
             
+            %get any order setting used such as Type or Other
             order = obj.TabContent(itab).Order;
-            setoptions = {'Type','Scale','Equation'};
-            typeset = ismember(setoptions,order);
-            if any(typeset)
-                for i=1:sum(typeset)
-                    S = obj.TabContent(itab).Selections;
-                    value = 1;
-                    obj.UIsettings.(setoptions{i}) = value;
+            setoptions = {'Type','Other'};            
+            for i=1:length(setoptions)
+                idx = strcmp(order,setoptions{i});
+                if any(idx)
+                    S = obj.TabContent(itab).Selections{idx};
+                    obj.UIsettings.(setoptions{i}).Value = S.Value;
+                    obj.UIsettings.(setoptions{i}).String = S.String{S.Value};
                 end
-            end 
+            end
+            
+            %check whether an equation has been defined
+            heqbox = findobj(src.Parent,'Tag','UserEqn');  
+            if ~isempty(heqbox)
+                obj.UIsettings.(setoptions{i}) = heqbox.String;
+            end
+            
+            %get the name of the tab and button used to call setSelection
+            obj.UIsettings.callTab = src.Parent.Tag;
+            obj.UIsettings.callButton = src.String; 
         end
 %%
-        function resetVariableSelectioin(obj,src)
+        function checkXYZset(obj,src)
+            %check that the correct number of variables have been set
+            %the TabContent property XYZnset defines minimum requirement
+            itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
+            nset = obj.TabContent(itab).XYZnset;
+            xyzset = [obj.UIselection(:).property];
+            if sum(xyzset>0)>=nset
+                obj.issetXYZ = true;
+            end            
+        end
+%%
+%--------------------------------------------------------------------------
+% funtions to reset and exit
+%--------------------------------------------------------------------------
+        function resetVariableSelection(obj,src)
             %return variable selections to initial settings
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab).Selections;
@@ -520,13 +679,22 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             end
         end
 %%
-        function clearXYZselection(~,src)
+        function clearXYZselection(obj,src)
             %clear the text in the XYZ panel
             h_pan = findobj(src.Children,'Tag','XYZpanel');
             h_text = findobj(h_pan.Children,'Style','text');
             nvar = length(h_text);            
             for j=1:nvar
                 h_text(j).String =  'Make selection';
+            end
+            obj.issetXYZ = false;
+        end
+%%
+        function clearEqnBox(~,src)
+            %clear the equation box, src is the parent of the text uic
+            h_eqnbox = findobj(src,'Tag','UserEqn');
+            if ~isempty(h_eqnbox)
+                h_eqnbox.String = '';
             end
         end
 %%
@@ -538,6 +706,9 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         end            
     end    
 %%
+%--------------------------------------------------------------------------
+% functions to initialise UIselection and TabContent structs
+%--------------------------------------------------------------------------
     methods (Static, Access = protected)
         function selection = uisel()
             %return a default struct for UI selection definition
@@ -547,10 +718,13 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             % variable - id to selected Variable in table 
             % property - name of what to use: variable,row or a dimension description  
             % range - limits set for property
+            % scale - any scaling function to be applied to the variable
             % dims - struct to hold dimension 'name' and 'value' when
             %        subselecting from a multi-dimensional array
-            selection = struct('caserec',0,'dataset',0,'variable',0,...
-                               'property',0,'range',[],'dims',[]);
+            % desc - text string display in xyz selection text box
+            selection = struct('xyz',0,'caserec',0,'dataset',0,...
+                               'variable',0,'property',0,'range',[],...
+                               'scale',0,'dims',[],'desc','');
             %dims is a struct array used for variables that are n-d arrays              
             selection.dims = struct('name','','value',[]);
         end 
@@ -558,37 +732,40 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         function S = defaultTabContent()
             %default structure for tab contents used to define TabContent
             %selection options - do not use tab names in main menu
-            S.Window = 0.75;                       %size of option list window
-            S.Header = 0.00;                       %height of header if required
-            S.HeadText = {''};                     %header text to include
+            
+            %Header size and text
+            S.HeadPos = [1.0, 0.0];    %header vertical position and height
+            S.HeadText = {''};         %header text to include
+            
             %Specification of uicontrol for each selection variable  
             S.Titles = {'Case','Dataset','Variable','Type'};                                                           
             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'}; 
             S.Order = {'Case','Dataset','Variable','Type'};  %default list of key words
             S.Scaling = {'Linear','Log','Relative: V-V(x=0)','Scaled: V/V(x=0)',...
                 'Normalised','Normalised (-ve)'};  %options for ScaleVariable
-            %Tab settings options
-            S.Type = {'Line','Bar','Scatter','Stem','Stairs',...
-                'Horizontal bar'}; %used for type of plot or stats
+            S.Type = {'line','bar','scatter','stem','stairs','barh','User'};          
+            
             %Tab control button options
-            S.TabButtons = {'New','Add','Delete','Clear'}; %labels for tab button definition
-            S.TabButPositions = [0.05,0.14;0.25,0.14;0.45,0.14;0.65,0.14]; %default positions
+            S.TabButText = {'Select','Clear'}; %labels for tab button definition
+            S.TabButPos = [0.1,0.03;0.3,0.03]; %default positions
+            
             %XYZ panel definition (if required)
-            S.XYZnvar = 3;                         %default uses X,Y and Z
-            S.XYZpanel = [0.05,0.25,0.9,0.3];      %position for XYZ button panel
-            S.XYZlabels = {'X','Y','Z'};           %default button labels
+            S.XYZnset = 3;                      %minimum number of buttons to use
+            S.XYZmxvar = [3,3,3];               %maximum number of dimensions per selection
+            S.XYZpanel = [0.05,0.2,0.9,0.3];    %position for XYZ button panel
+            S.XYZlabels = {'X','Y','Z'};        %default button labels
+            
             %Action button specifications
-            S.ActButNames = {'Refresh','Edit'};    %names assigned selection struct
-            S.ActButtons = {char(174),'Et'};       %labels for additional action buttons
+            S.ActButNames = {'Refresh'};         %names assigned selection struct
+            S.ActButText = {char(174)};          %labels for additional action buttons
             % Negative values in ActButPos indicate that a
             % button is alligned with a selection option numbered in the 
             % order given by S.Titles
-            S.ActButPos = [0.86,-1;0.86,-4];    
+            S.ActButPos = [0.86,-1];    
             %action button callback function names
-            S.ActButCall = {'@(src,evt)refreshDataList(obj,src,evt,mobj)',...
-                            '@(src,evt)editRange(obj,src,evt)'};
+            S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)'};
             %tool tips for buttons             
-            S.ActButTip = {'Refresh data list','Edit range'};   
+            S.ActButTip = {'Refresh data list'};   
             %Handle to uicontrol for each selection option
             S.Selections = {};
         end

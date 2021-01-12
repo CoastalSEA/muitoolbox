@@ -122,7 +122,7 @@ classdef muiCatalogue < dscatalogue
         function [dst,caserec,idset] = getDataset(obj,caserec,idset)
             %use the caserec id to get a case and return selected dataset
             %also returns caserec and idset as numeric index values
-            % caserec - 
+            % caserec - record id in mui Catalogue
             % idset - numeric index or a name defined dataset MetaData property
             %function called by getProperty and muiDataUI.XYZselection
             if ~isnumeric(caserec)               
@@ -139,19 +139,132 @@ classdef muiCatalogue < dscatalogue
             dst = cobj.Data{idset};  %selected dataset
         end
 %%
-        function prop = getProperty(obj,UIsel)
-            %re
+        function props = getProperty(obj,UIsel,type)
+            %extract the data based on the selection made using a UI that
+            %inherits muiDataUI and provides the UIselection struct
+            % UIsel - UIselection struct that defines the dataset and
+            %         dimensions/indices required
+            % type - options to return the data as an array, table, dstable
+            %        or a table where the 2nd dimension has been split into
+            %        variables (see muiEditUI for example of usage)
+            % props - returns a struct containing data, description of 
+            %         property being used and the associated label 
+            if nargin<3, type = 'array'; end
+            istable = false;
             dst = getDataset(obj,UIsel.caserec,UIsel.dataset);
-            if any(strcmp(dst.VariableDescriptions,UIsel.property))
-                %return selected dimensions of varaiable
-                
-            elseif any(strcmp(dst.RowDescription,UIsel.property))
+            [varatt,vardesc] = getVarAttributes(dst,UIsel.variable);
+            useprop = varatt{UIsel.property};
+            usedesc = vardesc{UIsel.property};
+            
+            if any(strcmp(dst.VariableNames,useprop))                
+                %return selected dimensions of variable
+                %NB: any range defined for the Variable is NOT applied
+                %returns all values within dimension range specified
+                [id,dnames] = getSelectedIndices(obj,UIsel,dst,varatt);
+                varlabels = getLabels(dst,'Variable');
+                label = varlabels{UIsel.property};
+                switch type
+                    case 'array'
+                        %extracts array for selected variable
+                        data = getData(dst,id.row,id.var,id.dim); 
+                        data = squeeze(data{1}); %getData returns a cell array
+                    case 'table'
+                        data = getDataTable(dst,id.row,id.var,id.dim);
+                    case 'dstable'
+                        data = getDSTable(dst,id.row,id.var,id.dim);
+                    case 'splittable'
+                        %split array variable into multiple variables
+                        array = getData(dst,id.row,id.var,id.dim);
+                        array = squeeze(array{1});
+                        %get dimension name and indices
+                        dimnames = setDimNames(obj,array,dnames,varatt);                        
+                        data = array2table(array,'RowNames',dimnames{1},...
+                                            'VariableNames',dimnames{2});
+                end
+                istable = true;
+            elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
                 %return selected row values 
-                prop = dst.RowNames; %returns values in sourse data type
-            elseif any(strcmp(dst.DimensionDescriptions,UIsel.property))
-                
+                idrow = getIndices(obj,dst.RowNames,UIsel.range);
+                data = dst.RowNames(idrow); %returns values in source data type
+                useprop = dst.TableRowName;
+                rowlabel = getLabels(dst,'Row');
+                label = rowlabel{1};
+            elseif any(strcmp(dst.DimensionNames,useprop))
+                %return selected dimension              
+                iddim = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
+                data = dst.Dimensions.(useprop)(iddim);
+                dimlabels = getLabels(dst,'Dimension');
+                label = dimlabels{UIsel.property-2}; %subtract variable and row
             else
                 errordlg('Incorrect property selection in getProperty') 
+            end
+            %
+            if ~istable && any(strcmp({'dstable','table'},type))
+                switch type                    
+                    case 'dstable'
+                        data = dstable(data,'VariableNames',{useprop});
+                    case 'table'
+                        data = table(data,'VariableNames',{useprop});
+                end
+            end
+            props.desc = usedesc;
+            props.label = label;
+            props.data = data;                    
+        end
+%%
+        function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,names)
+            %find the indices for the selected variable, and the row and 
+            %dimension ranges or values.
+            idx.var = UIsel.variable;
+            uidims = UIsel.dims;
+            ndim = length(uidims);
+            idx.dim = cell(1,ndim-1);
+            for i=1:ndim
+                %assign to dimension or row                    
+                if strcmp(names{2},uidims(i).name) %this is a row
+                    var = dst.RowNames;
+                    idx.row = getIndices(obj,var,uidims(i).value);
+                    dimnames.row = var(idx.row);
+                else                               %must be a dimension
+                    var = dst.Dimensions.(uidims(i).name);
+                    idd = strcmp(names(3:end),uidims(i).name);
+                    idx.dim{idd} = getIndices(obj,var,uidims(i).value);
+                    dimnames.dim{idd} = var(idx.dim{idd});
+                end  
+            end
+        end
+%%
+        function indices = getIndices(~,var,value)
+            %get the index or vector of indices based on selection
+            % var is the variable to select from and value is a single
+            % value to select the nearest index or a text dtring defining
+            % the range of values required
+            if ischar(value)
+                indices = getVarIndices(var,value);
+            else
+                indices = interp1(var,1:length(var),value,'nearest');                                   
+            end
+        end
+%%
+        function seldim = setDimNames(~,array,dnames,varatt)
+            %match the selected dimensions to the data array and convert to
+            %text RowNames and valid variable names
+            sz = size(array);
+            ndim = length(dnames.dim);
+            dimnames{1} = dnames.row;
+            dimnames(2:ndim+1) = dnames.dim;
+            dimatt = varatt(2:end);
+            sdim = length(sz);
+            seldim = cell(1,sdim); seldimname = seldim;
+            for i=1:sdim
+                idx = cellfun(@length,dimnames)==sz(i);
+                seldim{i} = var2str(dimnames{idx});
+                seldimname{i} = dimatt{idx};
+            end
+            %
+            for j=2:sdim
+                myfun = @(x) sprintf('%s_%s',seldimname{j},x);
+                seldim{j} = cellfun(myfun,seldim{j},'UniformOutput',false);
             end
         end
     end
