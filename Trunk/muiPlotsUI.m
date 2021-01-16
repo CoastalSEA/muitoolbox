@@ -16,11 +16,10 @@ classdef muiPlotsUI < muiDataUI
     properties (Transient)
         %Abstract variables for DataGUIinterface---------------------------        
         %names of tabs providing different data accces options
-        TabOptions = {'2D','3D','4D','Animate'};       
+        TabOptions = {'2D','3D','4D','2DT','3DT','4DT'};       
         %Additional variables for application------------------------------
         GuiChild         %handle for muiPlot to track figures generated
-        Tabs2Use         %number of tabs to include  (set in getPlotGui)
-        ModelMovie       
+        Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  
 %%  
     methods (Access=protected)
@@ -48,11 +47,11 @@ classdef muiPlotsUI < muiDataUI
                     setDataUIfigure(obj,mobj,guititle);    
                     setDataUItabs(obj,mobj); %add tabs 
                 else
-                    getDialog('Plot UI is open');
+                    getdialog('Plot UI is open');
                 end
             else
                 obj = muiPlotsUI(mobj);
-                if any(~ismember(obj.TabOptions,mobj.DataUItabs.Plot))
+                if any(~ismember(mobj.DataUItabs.Plot,obj.TabOptions))
                     warndlg('Unknown plot type defined in main UI for DataUItabs.Plot')
                     obj = [];
                     return
@@ -82,8 +81,12 @@ classdef muiPlotsUI < muiDataUI
                     set3D_tab(obj,src);
                 case '4D'
                     set4D_tab(obj,src);
-                case 'Animate'
-                    setAnimate_tab(obj,src);
+                case '2DT'
+                    set2DT_tab(obj,src);
+                case '3DT'
+                    set3DT_tab(obj,src); 
+                case '4DT'
+                    set4DT_tab(obj,src);   
             end             
         end                
 %%
@@ -113,7 +116,7 @@ classdef muiPlotsUI < muiDataUI
             obj.TabContent(itab).Selections = sel_uic;
         end
 %%       
-        function setTabActions(obj,src,~,mobj) 
+        function setTabActions(obj,src,~,~) 
             %actions needed when activating a tab
             %Abstract function required by DataGUIinterface
             initialiseUIselection(obj,src);
@@ -121,37 +124,39 @@ classdef muiPlotsUI < muiDataUI
             resetVariableSelection(obj,src);
             clearXYZselection(obj,src);
             switch src.Tag
-                case '2D'
-
-                case '3D'
- 
-                case '4D'
-
-                case 'Animate'
-
+                case {'2D','3D','4D'}
+                case {'2DT','3DT','4DT'}
             end
-        end         
+        end 
+%%
+%         function usevardim = getUseTypeDim(obj)
+%             %get the dimensions required for the selected plot type
+%             ptype = obj.UIsettings.Type.String;
+%             switch ptype
+%                 case 'line'
+%                     usevardim = 2;
+%                 case {'surf','contour','contourf','contour3','mesh'}   
+%                     usevardim = 3;
+%                 otherwise
+%                     usevardim = 4;
+%             end
+%         end
 %%        
         function UseSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
             %Abstract function required by DataGUIinterface
             if strcmp(src.String,'Save')   %save animation to file
                 saveAnimation(obj,src,mobj);
-            elseif strcmp(src.Parent.Tag,'Animate')
-                checkTypeAndDims(obj)
-                muiPlots.getPlot(obj,mobj);
             else
                 muiPlots.getPlot(obj,mobj);
             end
-            
-            if strcmp(src.String, 'Run')   %run animation graphic
-                obj.ModelMovie = pobj.ModelMovie;  
-            end 
         end   
 %%
-        function saveAnimation(obj,~,~)
-            %save an animation plot created by PlotFig.newAnimation            
-            if isempty(obj.ModelMovie)
+        function saveAnimation(~,~,mobj)
+            %save an animation plot created by PlotFig.newAnimation    
+            
+            ModelMovie = mobj.mUI.Plots.GuiChild.ModelMovie;
+            if isempty(ModelMovie)
                 warndlg('No movie has been created. Create movie first');
                 return;
             end
@@ -159,7 +164,7 @@ classdef muiPlotsUI < muiDataUI
             if file==0, return; end
             v = VideoWriter([path,file],'MPEG-4');
             open(v);
-            writeVideo(v,obj.ModelMovie);
+            writeVideo(v,ModelMovie);
             close(v);
         end    
     end
@@ -168,33 +173,18 @@ classdef muiPlotsUI < muiDataUI
 % Additional methods used to define tab content
 %--------------------------------------------------------------------------
     methods (Access=private)
-        function checkTypeAndDims(obj)
-            %check that the plot type for animation matches the number of
-            %dimensions set and the selected dimensions of the variable
-            
-            %probably need code that uses something like the
-            %subVarSelection code in muiDataUI
-%             if pdim>obj.TabContent(itab).XYZmxvar(i) && ...
-%                                     usi.property==1
-%                 mdim = obj.TabContent(itab).XYZmxvar(i); %no. range properties
-%                 ndim = pdim-mdim;                     %no. index properties
-%                 ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
-%             end                   
-            
-        end
-%%
         function set2D_tab(obj,src)
-            %customise the layout of the XY tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %customise the layout of the 2D tab
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             S.HeadPos = [0.9,0.06];    %header vertical position and height
             S.HeadText = {'For a 1D plot (line, bar, etc) select variable and property to use for X and Y axes'};
             
             %Specification of uicontrol for each selection variable  
-            S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-            S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-            S.Order = {'Case','Dataset','Variable','Type'};
+%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
+%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
+%             S.Order = {'Case','Dataset','Variable','Type'};
             %Use default Scaling list
             %Use default Type list
             
@@ -226,8 +216,8 @@ classdef muiPlotsUI < muiDataUI
         end
 %%
         function set3D_tab(obj,src)
-            %customise the layout of the XY tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %customise the layout of the 3D tab
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -236,9 +226,9 @@ classdef muiPlotsUI < muiDataUI
             S.HeadText = {'For a contour or surface plot, select variable with 2 or more dimensions and properties to use for the X-Y axes'};
             
             %Specification of uicontrol for each selection variable  
-            S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-            S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-            S.Order = {'Case','Dataset','Variable','Type'};
+%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
+%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
+%             S.Order = {'Case','Dataset','Variable','Type'};
             %Use default Scaling list
             S.Type = {'surf','contour','contourf','contour3','mesh','User'}; 
             
@@ -270,8 +260,8 @@ classdef muiPlotsUI < muiDataUI
 %%
 
         function set4D_tab(obj,src)
-            %customise the layout of the XY tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %customise the layout of the 4D tab
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -280,9 +270,9 @@ classdef muiPlotsUI < muiDataUI
             S.HeadText = {'For a scalar or vector volume plot'};
             
             %Specification of uicontrol for each selection variable  
-            S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-            S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-            S.Order = {'Case','Dataset','Variable','Type'};
+%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
+%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
+%             S.Order = {'Case','Dataset','Variable','Type'};
             %Use default Scaling list
             %Tab settings options
             S.Type = {'slice','contourslice','isosurface','streamlines','User'};
@@ -297,7 +287,7 @@ classdef muiPlotsUI < muiDataUI
             S.XYZpanel = [0.04,0.14,0.91,0.4];     %position for XYZ button panel
             S.XYZlabels = {'Var','X','Y','Z'};     %button labels
             
-            %Action button specifications
+            %Action button specifications - use default
 %             S.ActButNames = {'Refresh'};         %names assigned selection struct
 %             S.ActButText = {char(174)};          %labels for additional action buttons
 %             % Negative values in ActButPos indicate that a
@@ -307,13 +297,14 @@ classdef muiPlotsUI < muiDataUI
 %             %action button callback function names
 %             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)'};
 %             %tool tips for buttons             
-%             S.ActButTip = {'Refresh data list'};         
+%             S.ActButTip = {'Refresh data list'};      
+
             obj.TabContent(itab) = S;              %update object
         end
 %%
-        function setAnimate_tab(obj,src)
-            %customise the layout of the XY tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+        function set2DT_tab(obj,src)
+            %customise the layout of the 2DT tab
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -322,11 +313,11 @@ classdef muiPlotsUI < muiDataUI
             S.HeadText = {'For an animation of a line, surface or volume'};
             
             %Specification of uicontrol for each selection variable  
-            S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-            S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-            S.Order = {'Case','Dataset','Variable','Type'};
+%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
+%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
+%             S.Order = {'Case','Dataset','Variable','Type'};
             %Use default Scaling list
-            S.Type = {'line','surf','contour','contourf','contour3','mesh','User'}; 
+            %Use default Type list
             
             %Tab control button options
             S.TabButText = {'Run','Save','Clear'};  %labels for tab button definition
@@ -334,9 +325,9 @@ classdef muiPlotsUI < muiDataUI
             
             %XYZ panel definition (if required)
             S.XYZnset = 3;                          %minimum number of buttons to use
-            S.XYZmxvar = [3,1,1,1,1];               %maximum number of dimensions per selection
-            S.XYZpanel = [0.04,0.14,0.91,0.48];     %position for XYZ button panel
-            S.XYZlabels = {'Var','Time','X','Y','Z'}; %button labels
+            S.XYZmxvar = [2,1,1];                   %maximum number of dimensions per selection
+            S.XYZpanel = [0.04,0.14,0.91,0.30];     %position for XYZ button panel
+            S.XYZlabels = {'Var','Time','X'}; %button labels
             
             %Action button specifications
 %             S.ActButNames = {'Refresh'};          %names assigned selection struct
@@ -350,6 +341,72 @@ classdef muiPlotsUI < muiDataUI
 %             %tool tips for buttons             
 %             S.ActButTip = {'Refresh data list'};         
             obj.TabContent(itab) = S;               %update object
+        end   
+%%
+        function set3DT_tab(obj,src)
+            %customise the layout of the 2DT tab
+            %overload defaults defined in muiDataUI.defaultTabContent
+            itab = strcmp(obj.Tabs2Use,src.Tag);
+            S = obj.TabContent(itab);
+            
+            %Header size and text
+            S.HeadPos = [0.9,0.06];    %header vertical position and height
+            S.HeadText = {'For an animation of a line, surface or volume'};
+            
+            %Specification of uicontrol for each selection variable  
+%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
+%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
+%             S.Order = {'Case','Dataset','Variable','Type'};
+            %Use default Scaling list
+            %Use default Type list
+            S.Type = {'surf','contour','contourf','contour3','mesh','User'}; 
+            
+            %Tab control button options
+            S.TabButText = {'Run','Save','Clear'};  %labels for tab button definition
+            S.TabButPos = [0.1,0.03;0.3,0.03;0.5,0.03]; %default positions
+            
+            %XYZ panel definition (if required)
+            S.XYZnset = 3;                          %minimum number of buttons to use
+            S.XYZmxvar = [3,1,1,1];                 %maximum number of dimensions per selection
+            S.XYZpanel = [0.04,0.14,0.91,0.40];     %position for XYZ button panel
+            S.XYZlabels = {'Var','Time','X','Y'}; %button labels
+            
+            %Action button specifications - use default
+    
+            obj.TabContent(itab) = S;               %update object            
+        end
+%%
+        function set4DT_tab(obj,src)
+            %customise the layout of the 2DT tab
+            %overload defaults defined in muiDataUI.defaultTabContent
+            itab = strcmp(obj.Tabs2Use,src.Tag);
+            S = obj.TabContent(itab);
+            
+            %Header size and text
+            S.HeadPos = [0.9,0.06];    %header vertical position and height
+            S.HeadText = {'For an animation of a volume'};
+            
+            %Specification of uicontrol for each selection variable  
+%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
+%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
+%             S.Order = {'Case','Dataset','Variable','Type'};
+            %Use default Scaling list
+            %Use default Type list
+            S.Type = {'slice','contourslice','isosurface','streamlines','User'}; 
+            
+            %Tab control button options
+            S.TabButText = {'Run','Save','Clear'};  %labels for tab button definition
+            S.TabButPos = [0.1,0.03;0.3,0.03;0.5,0.03]; %default positions
+            
+            %XYZ panel definition (if required)
+            S.XYZnset = 5;                          %minimum number of buttons to use
+            S.XYZmxvar = [4,1,1,1,1];               %maximum number of dimensions per selection
+            S.XYZpanel = [0.04,0.14,0.91,0.48];     %position for XYZ button panel
+            S.XYZlabels = {'Var','Time','X','Y','Z'}; %button labels
+            
+            %Action button specifications - use default
+    
+            obj.TabContent(itab) = S;               %update object            
         end        
     end
 end

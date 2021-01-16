@@ -21,7 +21,7 @@ classdef muiDataSet < handle
         Data        %cell array of datasets. These can be multiple dstables, 
                     %or a mix of tables and other data types. The data are 
                     %indexed using the MetaData property.
-        RunProps     %instance of runproperties class with details of data used
+        RunParam    %instance of run parameter classes defining settings used
         MetaData    %cell array of names for the datasets held in data. 
                     %Implementing classes need to define a name for each
                     %type of output data.                     
@@ -108,10 +108,10 @@ classdef muiDataSet < handle
 %%
     methods
         
-%         function set.RunProps(obj,runprops)
+%         function set.RunParam(obj,runprops)
 %         end
 %         
-%         function runprops = get.RunProps(obj)
+%         function runprops = get.RunParam(obj)
 %         end
         
 %         function set.ClassIndex(obj,caseid)
@@ -146,13 +146,13 @@ classdef muiDataSet < handle
 % end
 
 %%
-        function setRunProps(obj,mobj)
-            %assign the run properties needed for a model or the file name for
+        function setRunParam(obj,mobj)
+            %assign the run prarameters needed for a model or the file name for
             %imported data sets
             classname = metaclass(obj).Name;
             minp = mobj.ModelInputs.(classname);
             for i=1:length(minp)
-                obj.RunProps.(minp{i}) = mobj.Inputs.(minp{i});
+                obj.RunParam.(minp{i}) = copy(mobj.Inputs.(minp{i}));
             end
         end
 %%
@@ -389,7 +389,7 @@ classdef muiDataSet < handle
 %             setDataSet(localObj,mobj,h_data,id_class,id_rec,mtxt);
         end
 % %%
-%         function [fname,path,nfiles] = getFiles(mflag,filetype)
+%         function [fname,path,nfiles] = getfiles(mflag,filetype)
 %             %ask for filename(s)- multiple selection allowed if mflag='on'
 %             %function is static so that it can be called without obj
 %             userprompt = 'Select data file(s)>';
@@ -419,7 +419,7 @@ classdef muiDataSet < handle
 
             formatxt = sprintf('Files %s',obj.FileFormats);
             filetype = {obj.FileFormats,formatxt};
-            [fname,path,nfiles] = DataSet.getFiles('on',filetype);
+            [fname,path,nfiles] = getfiles('on',filetype);
             if nfiles==0, return; end
 
             hw = waitbar(0, 'Loading data. Please wait');

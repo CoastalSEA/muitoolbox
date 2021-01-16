@@ -28,6 +28,7 @@ classdef muiPlots < handle
         TickLabels      %struct for XYZ tick labels
         AxisLabels      %struct for XYZ axis labels
         Legend          %Legend text
+        MetaData        %text summary of primary variable selection
         Title           %Title text
         Order           %order of variables for selected plot type
         idxfig          %figure number of the current figure
@@ -54,7 +55,12 @@ classdef muiPlots < handle
             obj.UIset = gobj.UIsettings;
             
             %set the variable order for selected plot type
-            obj.Order = obj.Plot.Order.(obj.UIset.callTab);
+%             if strcmp(obj.UIset.callTab,'Animate')
+%                 obj.Order = getAnimationType(obj);
+%             else
+                obj.Order = obj.Plot.Order.(obj.UIset.callTab);
+%             end
+            
             %get the data to be used in the plot
             [obj,ok] = getPlotData(obj,mobj);
             if ok<1, return; end %data not found
@@ -88,12 +94,21 @@ classdef muiPlots < handle
                 xyz = fliplr(xyz); %only applies to 2D
             end
             %
+            mtxt = 'Selection used:';
             for i=1:length(xyz)
                 %assign the data to the correct axis
-                obj.Data.(xyz{i}) = props(i).data;
-                obj.AxisLabels.(xyz{i}) = props(i).label;                
+                data2use = props(i).data;
+                if obj.UIsel(i).scale>1 %apply selected scaling to variable
+                    usescale = obj.UIset.scaleList{obj.UIsel(i).scale};
+                    dim = 1; %dimension to apply scaling function if matrix
+                    data2use = scalevariable(data2use,usescale,dim);
+                end
+                obj.Data.(xyz{i}) = data2use;
+                obj.AxisLabels.(xyz{i}) = props(i).label;
+                mtxt = sprintf('%s\n%s: %s',mtxt,xyz{i},obj.UIsel(i).desc);
             end
             obj.Legend = props(1).desc;
+            obj.MetaData = mtxt;
             %description of selection (may need sub-selection if more than
             %one case/variable used in plot)
             dimtxt = {props(:).desc};
@@ -158,7 +173,7 @@ classdef muiPlots < handle
                 case '4D'
                     warndlg('Under development')
                     return;
-                case 'Animate'
+                case {'2DT','3DT','4DT'}
                     newAnimation(obj);
                 otherwise
                     warndlg('Could not find plot option in getPlot');
@@ -172,7 +187,7 @@ classdef muiPlots < handle
             %information required to create, add or delete XY plot
             x = obj.Data.X;
             y = obj.Data.Y;
-            idx = obj.Plot.FigNum==obj.Plot.CurrentFig;
+            idx = obj.Plot.FigNum==obj.Plot.CurrentFig.Number;
             hf = findobj('Number',obj.Plot.FigNum(idx));
             fnum = num2str(hf.Number); 
             %set up symbol
@@ -182,8 +197,10 @@ classdef muiPlots < handle
         function [plotfunc,symb] = get2DPlotFunc(obj)
             %setup function call for plot using obj.UIsel.PlotType
             markers = '''LineStyle'',s1,''Marker'',s2';
+            %display summary text in legend
             display = '''DisplayName'',leg,''Tag'',t1';  
-            namedisp = '''ButtonDownFcn'',@nameDisplay';
+            %display metadata for selection in a temporary popup dialogue
+            namedisp = '''ButtonDownFcn'',@godisplay';  
             plot_type = obj.UIset.Type.String;
             switch plot_type
                 case 'line'
@@ -227,6 +244,7 @@ classdef muiPlots < handle
             end
             %hptype uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hp = hptype(figax,x,y,symb{1},symb{2},obj.Legend,'1');
+            hp.UserData = obj.MetaData;
             if strcmp(obj.UIset.Type.String,'barh')
                 xlabel(obj.AxisLabels.Y)
                 ylabel(obj.AxisLabels.X)
@@ -459,11 +477,74 @@ classdef muiPlots < handle
         end
 %%
 %--------------------------------------------------------------------------
+% Functions for 4D plots
+%--------------------------------------------------------------------------
+
+%%
+%--------------------------------------------------------------------------
+% Functions for animations
+%--------------------------------------------------------------------------
+        function newAnimation(obj)
+            %generate an animation for user selection.
+            hfig = obj.Plot.CurrentFig;
+            hfig.Visible = 'on';
+            switch obj.UIset.callTab
+                case '2DT'
+                    var = obj.Data.Y;
+                    obj.Data.Y = var(1,:);   %first time step
+                    newXYplot(obj)
+                    figax = gca;
+                    hp = figax.Children;
+                    vari = obj.Data.Y;
+                    hp.YDataSource = 'vari';
+                    figax.YLimMode = 'manual';                    
+                case '3DT'
+                    var = obj.Data.Z;
+                    obj.Data.Z = var(1,:,:);  %first time step
+                    newXYZplot(obj)
+                    figax = gca;
+                    hp = figax.Children;
+                    vari = obj.Data.Z;
+                    hp.ZDataSource = 'vari';
+                    figax.ZLimMode = 'manual';
+                case '4DT'
+                    warndlg('Not ready yet')
+                    return;
+            end
+            t = obj.Data.T;
+            % checkAxisTicks(obj,figax);
+            title(sprintf('%s \nTime = %s',obj.Title,string(t(1))))
+            Mframes(1) = getframe(gcf); %NB print function allows more control of 
+            hold(figax,'on')
+            for i=2:length(t)
+                zi = var(i,:,:); %#ok<NASGU>
+                refreshdata(hp,'caller')
+                title(sprintf('%s \nTime = %s',obj.Title,string(t(i))))
+                drawnow;                 
+                Mframes(i) = getframe(gcf); 
+                %NB print function allows more control of resolution 
+            end
+            hold(figax,'off')
+            obj.ModelMovie = Mframes;                         
+        end
+
+%%
+        function checkAxisTicks(obj,figax)
+            %allow axis tick labels to be set       TICKLABELS NOT SET
+            labnames = fieldnames(obj.TickLabels);
+            labels = struct2cell(obj.TickLabels);
+            for i=1:2:length(labels)
+                figax.(labnames{i}) = labels{i};
+                figax.(labnames{i+1}) = labels{i+1};
+            end
+        end
+%%
+%--------------------------------------------------------------------------
 % Get and Set figure and utility functions
 %--------------------------------------------------------------------------
         function getFigure(obj)
             %get existing figure or generate a new one as required
-            if any(strcmp(obj.UIset.callButton,{'New','Select'}))
+            if any(strcmp(obj.UIset.callButton,{'New','Select','Run'}))
                 setFigure(obj);      %create new figure
             else
                 if length(obj.Plot.FigNum)>1
@@ -471,7 +552,7 @@ classdef muiPlots < handle
                     obj.idxfig = cfig.Number;
                     while ~any(obj.Plot.FigNum==obj.idxfig)
                         prmptxt = 'Select figure to Add/Delete plots';
-                        hd = setDialog(prmptxt); 
+                        hd = setdialog(prmptxt); 
                         waitfor(obj,'idxfig')
                         delete(hd);
                     end                    
@@ -496,7 +577,7 @@ classdef muiPlots < handle
                 'CloseRequestFcn',@obj.closeFigure, ...
                 'WindowButtonDownFcn',@obj.getCurrentFigure, ...
                 'Resize','on','HandleVisibility','on', ...
-                'Visible','on','Tag','PlotFig');
+                'Visible','off','Tag','PlotFig');
             %move figure to top right
             hf.Position(1) = 1-hf.Position(3)-0.01;
             hf.Position(2) = 1-hf.Position(4)-0.12;
@@ -513,8 +594,13 @@ classdef muiPlots < handle
             data = struct2cell(obj.Data);
             vecdim = cellfun(@isvector,data);
             dimlen = cellfun(@length,data(vecdim));
-            varsz = size(data{~vecdim});
-            isvalid = all(ismember(varsz(varsz>1),dimlen));
+            if all(vecdim) %all data are vectors
+                isvalid = true;
+            else
+                varsz = size(data{~vecdim});
+                isvalid = all(ismember(varsz(varsz>1),dimlen));
+            end
+            %
             if ~isvalid
                 warndlg('Dimensions of selected variables do not match')
             end
@@ -545,9 +631,9 @@ classdef muiPlots < handle
             d3 = {'Z','X','Y'};
             d4 = {'V','X','Y','Z'};
             %types of animaton in 2,3 and 4D        
-            t2 = {'Y','X','T'};
-            t3 = {'Z','X','Y','T'};
-            t4 = {'V','X','Y','Z','T'};
+            t2 = {'Y','T','X'};
+            t3 = {'Z','T','X','Y'};
+            t4 = {'V','T','X','Y','Z'};
             varorder = table(d2,d3,d4,t2,t3,t4,'VariableNames',varnames);
         end
     end

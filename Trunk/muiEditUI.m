@@ -43,7 +43,7 @@ classdef muiEditUI < muiDataUI
                     obj = obj.setDataUIfigure(mobj);    %initialise figure 
                     setDataUItabs(obj,mobj); %add tabs 
                 else
-                    getDialog('Edit UI is open');
+                    getdialog('Edit UI is open');
                 end
             else
                 obj = muiEditUI(mobj);
@@ -114,7 +114,7 @@ classdef muiEditUI < muiDataUI
             
             %if vector remove rows outside the specified variable range
             if width(subtable)==1
-                idxrow = getVarIndices(subtable{:,:},uisel.range);
+                idxrow = getvarindices(subtable{:,:},uisel.range);
                 subtable = subtable(idxrow,:);
             end
             %create tablefigure for editing data
@@ -189,7 +189,7 @@ classdef muiEditUI < muiDataUI
     methods (Access=private)
         function setEditTab(obj,src)
             %customise the layout of the Edit tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             

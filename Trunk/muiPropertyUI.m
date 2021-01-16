@@ -1,4 +1,4 @@
-classdef muiPropertyUI  < handle
+classdef muiPropertyUI  < matlab.mixin.Copyable
 %
 %-------abstract class help------------------------------------------------
 % NAME
@@ -20,6 +20,7 @@ classdef muiPropertyUI  < handle
         %define data properties required for object
         %properties used to implement tab assignment of properties 
         PropertyLabels   %definition of labels to be used for tabular display
+
         TabDisplay       %structure defines how the property table is displayed 
         %   TabDisplay.Tab           %defines which tab to use
         %   TabDisplay.Position      %defines position of table on tab [top,right] *******should be [left,bottom] to be consistent with Matlab convention             
@@ -28,7 +29,14 @@ classdef muiPropertyUI  < handle
         % some typical TabPosition definitions:
         %   top left   = [0.95,0.48];  top right   = [0.95,0.95];
         %   lower left = [0.45,0.48];  lower right = [0.45,0.95];
-	end
+    end
+    
+    properties (Hidden)
+        PropertyType     %defintion of data type for each property
+                         %can be empty if only using numeric values or if
+                         %all non-numeic values are pre-assigned when
+                         %defining the properties        
+    end
 %%
     methods 
         function obj = muiPropertyUI
@@ -41,7 +49,7 @@ classdef muiPropertyUI  < handle
                 nrec = 12; %default number variables for input UI 
             end
             prompt = obj.PropertyLabels;
-            defaultvalues = getCharProperties(obj);            
+            [defaultvalues,vtype,vformat] = getCharProperties(obj);            
             numlines = 1;
             title = 'Define property values';
             %use updated properties to call inpudlg and return new values
@@ -50,13 +58,16 @@ classdef muiPropertyUI  < handle
             if length(defaultvalues)>12
                 useInp=multiInputdlg(obj,prompt,title,numlines,...
                                                     defaultvalues,nrec);
-                if isempty(useInp.NumVals), return; end
+                if isempty(useInp), return; end
             else
-                useInp=NumInputdlg(prompt,title,numlines,defaultvalues);
-                if isempty(useInp.NumVals), return; end
+                useInp=inputdlg(prompt,title,numlines,defaultvalues);
+                if isempty(useInp), return; end
             end
             %now save the updated values
-            obj = setProperties(obj,useInp.ArrayVals);
+            if ~isempty(obj.PropertyType)
+                vtype = obj.PropertyType;
+            end
+            obj = setProperties(obj,useInp,vtype,vformat);
         end
 %%
 		function displayProperties(obj,src)
@@ -67,30 +78,28 @@ classdef muiPropertyUI  < handle
             userdata = cell(length(propnames),1);
             idx= 1;
 			for k=1:length(propnames)
+                userdata{idx,1} = obj.PropertyLabels{k};
                 propvalue = obj.(propnames{k});
                 if isdatetime(propvalue)
-                    %datetime value (convert to string for display)
-                    userdata{idx,1} = obj.PropertyLabels{k};
+                    %datetime value (convert to string for display)                    
                     userdata{idx,2} = char(propvalue);
-                    idx = idx+1;
                 elseif iscell(propvalue)
-                    %multiple cell strings (eg for InputFile)
+                    %multiple cell strings (concatenate to single string)
                     for j=1:length(propvalue)
                         userdata{idx,1} = obj.PropertyLabels{k};
                         userdata{idx,2} = propvalue{j}; 
                         idx = idx+1;
                     end
-                elseif isscalar(propvalue) || ischar(propvalue)
-                    %scalar or text values
-                    userdata{idx,1} = obj.PropertyLabels{k};
+                    idx = idx-1;   %compensate for main loop addition               
+                elseif isnumeric(propvalue) || ...
+                       ischar(propvalue) || islogical(propvalue)
+                    %numeric, logical, or char                  
                     userdata{idx,2} = propvalue;
-                    idx = idx+1;
                 else
-                    %numerical vector (convert to string for display)
-                    userdata{idx,1} = obj.PropertyLabels{k};
-                    userdata{idx,2} = num2str(propvalue);
-                    idx = idx+1;
+                    %numerical vector (convert to string for display)                   
+                    userdata{idx,2} = num2str(propvalue);                    
                 end
+                idx = idx+1;
 			end
 			Table = uitable('Parent',src, ...
                 'ColumnName', colnames, ...
@@ -140,13 +149,14 @@ classdef muiPropertyUI  < handle
             %entries and this becomes too long to fit on screen
             defaults1 = defaultvalues(1:nrec);
             prompt1 = prompt(1:nrec);
-            useInp1 = NumInputdlg(prompt1,title,numlines,defaults1);
+            useInp1 = inputdlg(prompt1,title,numlines,defaults1);
             %
             defaults2 = defaultvalues(nrec+1:end);
             prompt2 = prompt(nrec+1:end);
-            useInp2 = NumInputdlg(prompt2,title,numlines,defaults2);
+            useInp2 = inputdlg(prompt2,title,numlines,defaults2);
             %
-            useInp = plus(useInp1,useInp2);            
+%             useInp = plus(useInp1,useInp2);    %this was for when NumInputdlg was used
+            useInp = [useInp1,useInp2]; %MAY NEED TO BE ; SEPARATED
         end
 %%
 		function propnames = getPropertyNames(obj)
@@ -186,12 +196,20 @@ classdef muiPropertyUI  < handle
             end
         end
 %%
-		function obj = setProperties(obj,vals)
+		function obj = setProperties(obj,vals,vtype,vformat)
 			%for class obj update property values that are not Transient 
             %or Hidden using vals cell array
             propnames = getPropertyNames(obj);
             for k=1:length(propnames)
-                obj.(propnames{k}) = vals{k};
+                if isempty(vals{k})
+                    obj.(propnames{k}) = [];
+                elseif length(split(vals{k}))>1 && all(~isletter(vals{k})) 
+                    %catch arrays of numeric values
+                    obj.(propnames{k}) = str2num(vals{k}); %#ok<ST2NM>%NB str2double does NOT work here
+                else
+                    %all other datatypes restored based on vtype and vformat
+                    obj.(propnames{k}) = str2var(vals{k},vtype{k},vformat{k});
+                end
             end
         end
 %%
@@ -222,17 +240,14 @@ classdef muiPropertyUI  < handle
             end
         end
 %%        
-        function charvals = getCharProperties(obj)
+        function [charvals,vtype,vformat] = getCharProperties(obj)
             %get the property values in character vector format for use in
             %table dialogues
             vals = getProperties(obj);
-            charvals = cell(size(vals));
+            charvals = cell(size(vals)); vtype = charvals; vformat = vtype;
             for k=1:length(vals)
-                if isnumeric(vals{k})
-                    charvals{k} = num2str(vals{k});
-                else
-                    charvals{k} = vals{k};
-                end
+                [cval,vtype{k},vformat{k}] = var2str(vals{k});
+                charvals{k} = cval{:}; %needs checking for numerical array
             end                     
         end
 %%

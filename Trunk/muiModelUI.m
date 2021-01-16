@@ -26,7 +26,6 @@ classdef muiModelUI < handle
             % mUI.Edit          %handle for editing
             % mUI.Manip         %handle for data manipulation  
             % mUI.Stats         %handle for statistics GUI
- 
         TabProps         %structure to hold PropertyTab and position for each data input
         ModelInputs      %classes required by model used in isValidModel check 
         DataUItabs       %structure to define muiDataUI tabs for each use 
@@ -34,8 +33,8 @@ classdef muiModelUI < handle
     
     properties 
         Constants = muiConstants.Evoke  %constants used by applications
-        Info = muiProject               %project information
-        Cases = muiCatalogue            %handle to DataSets and Catalogue
+        Info                            %project information
+        Cases                           %handle to DataSets and Catalogue
         Inputs                          %handle to data input classes
     end
 
@@ -43,7 +42,7 @@ classdef muiModelUI < handle
         %properties that all subclasses must include
         vNumber          %version number of model
         vDate            %date of current version
-        modelName        %name for model/user interface
+        modelName        %name for model/user interface        
     end
 
     methods (Abstract, Access = protected)    
@@ -63,6 +62,8 @@ classdef muiModelUI < handle
             setAppMenus(obj);    %initialise menus                         
             setAppTabs(obj);     %initialise tabs
             TabProperties(obj);  %set locations for data input display
+            obj.Info = muiProject;    %initialise project information
+            obj.Cases = muiCatalogue; %initialise Catalogue
             obj.mUI.Figure.Visible = 'on';
         end        
 %%   
@@ -76,12 +77,11 @@ classdef muiModelUI < handle
             end
             vtxt = sprintf('%s  Version: %s;  Copyright: %s',...
                                      obj.modelName,obj.vNumber,obj.vDate);
-            figure('Units','normalized','MenuBar','none',...
+            hf = figure('Units','normalized','MenuBar','none',...
                 'Name',vtxt,'NumberTitle','off',...
                 'ToolBar','none',...
                 'Position',[0.35 0.55 0.3 0.4],'Resize','off',...
-                'CloseRequestFcn','',...
-                'Visible','on','Tag','fig0');
+                'Visible','off','Tag','fig0');
             logo = imread(modelLogo);
             a2 = axes('units', 'normalized', 'position', [0 0 1 1], ...
                 'color',[0.8 0.8 0.8], 'Tag','a4');
@@ -89,6 +89,7 @@ classdef muiModelUI < handle
             axis equal
             axis off
             set(a2,'XTickLabel','','YTickLabel','')
+            hf.Visible = 'on';
             pause(2);
             fig0  = findobj('Tag', 'fig0');
             delete(fig0);
@@ -106,7 +107,7 @@ classdef muiModelUI < handle
                 'NumberTitle','off', ...
                 'MenuBar','none', ...
                 'Units','normalized', ...
-                'CloseRequestFcn',@obj.exitprogram, ...
+                'CloseRequestFcn',@obj.closeMainFig, ...
                 'Resize','on','HandleVisibility','on', ...
                 'Visible','off','Tag','MainFig');
             axes('Parent',obj.mUI.Figure, ...
@@ -332,8 +333,12 @@ classdef muiModelUI < handle
             pname = obj.Info.PathName;
             ispath = false;
             if ~isempty(pname)   %check if already using a path
-                cpath = cd(pname);
-                ispath = true;
+                try
+                    cpath = cd(pname);
+                    ispath = true;
+                catch
+                    getdialog('Path not found')
+                end
             end
                 
             [sfile,spath] = uiputfile({'*.mat','MAT-files (*.mat)'}, ...
@@ -396,7 +401,13 @@ classdef muiModelUI < handle
             end
             %
             clear sobj
-        end     
+        end    
+%%
+        function closeMainFig(obj,~,~)
+            %callback function for CloseResponseFcn button
+            delete(obj.mUI.Figure);
+            delete(obj);    %delete the class object
+        end
 %%
         function saveModel(obj)
             %save model setup and results to a mat file as sobj
@@ -665,9 +676,9 @@ classdef muiModelUI < handle
                 lastmod = datestr(dst.LastModified);
                 meta = dst.MetaData;
 
-                name = dst.VariableNames;
-                desc = dst.VariableDescriptions;
-                unit = dst.VariableUnits;            
+                name = dst.VariableNames';
+                desc = dst.VariableDescriptions';
+                unit = dst.VariableUnits';            
                 tables{i,1} = table(name,desc,unit);
                 %output summary to tablefigure
                 tabtxts{i,1} = sprintf('Metadata for %s dated: %s\n%s',...
@@ -675,11 +686,29 @@ classdef muiModelUI < handle
             end
 
             h_fig = tabtablefigure('Case Metadata',tabnames,tabtxts,tables);
+            
+            %add button to access DSproperties of each table displayed
+            h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
+            h_but = findobj(h_fig.Children,'Tag','uicopy');
+            position = h_but.Position;
+            position(1) = 10;
+            for j=1:ntables
+                itab = h_tab.Children(j);  %NEEDS TO CHECK THIS WORKS WITH MUTLIPLE DATASETS
+                setactionbutton(itab,'DSproperties',position,...
+                    @(src,evt)getDSProps(obj,src,evt),...
+                   'getDSP','View the dstables DSproperties',dstables{i});
+            end
             %adjust position on screen            
             h_fig.Position(1)=  h_fig.Position(3)*3/2; 
 %             screendata = get(0,'ScreenSize');
 %             h_fig.Position(2)=  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
             h_fig.Visible = 'on';
+        end
+%%
+        function getDSProps(~,src,~)
+            if istable(src.UserData.DataTable)
+                displayDSproperties(src.UserData.DSproperties);
+            end
         end
 %%
         function isvalidhandle = isValidHandle(obj,inphandles)
@@ -803,7 +832,13 @@ classdef muiModelUI < handle
                 end
                 isvalidmodel = all(isvalidmodel);
             end
-        end     
+        end 
+%%
+%         function minp = getModelInputs(obj,classname)
+%             %property ModelInputs is protected. return values for specific
+%             %class. Used in muiDataSet
+%             minp = obj.ModelInputs.(classname);
+%         end
 %%  
         function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs

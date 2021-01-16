@@ -140,9 +140,9 @@ classdef muiDataUI < handle %replaces DataGUIinterface
 %--------------------------------------------------------------------------
         function setTabControlButtons(obj,src,mobj)   
             % GUI control buttons - user defined lables + close
-            idx = strcmp(obj.TabOptions,src.Tag);
-            butpos = obj.TabContent(idx).TabButPos;
-            butlabel = obj.TabContent(idx).TabButText;
+            itab = strcmp(obj.Tabs2Use,src.Tag);  
+            butpos = obj.TabContent(itab).TabButPos;
+            butlabel = obj.TabContent(itab).TabButText;
             nbut = length(butlabel);
             for i=1:nbut
                 uicontrol('Parent',src,'Tag','UserButton',...
@@ -381,13 +381,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             %callback function from uicontrols keeps track of currrent selection
             ht = src.Parent;
             setVariableLists(obj,ht,mobj)
-        end
-
-        
-        
-        
-        
-        
+        end      
 %%
 %--------------------------------------------------------------------------
 % functions to capture a selection
@@ -466,15 +460,28 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 end
                 obj.UIselection(xyz).desc = boxtext;
 
-                %if variable is to be used on its own or with specified
-                %dimensions and needs to be constrained, get sub-sample
-                pdim = getVariableDimensions(dst,idvar);
-                if pdim>obj.TabContent(itab).XYZmxvar(xyz) && ...
-                                        selection{1}==1
-                    mdim = obj.TabContent(itab).XYZmxvar(xyz); %no. range properties
-                    ndim = pdim-mdim;                          %no. index properties
+%                 %if variable is to be used on its own or with specified
+%                 %dimensions and needs to be constrained, get sub-sample
+
+                pdim = getvariabledimensions(dst,idvar);
+%                 if obj.TabContent(itab).XYZmxvar(xyz)==0
+%                     %dimension depends on Type selection
+%                     setOrderOptionSettings(obj,itab)
+%                     mdim = getUseTypeDim(obj);
+%                 else
+%                     mdim = obj.TabContent(itab).XYZmxvar(xyz);
+%                 end
+                %
+                mdim = obj.TabContent(itab).XYZmxvar(xyz);%no. of range properties
+                if selection{1}==1   
+                    if pdim>mdim
+                        ndim = pdim-mdim;                     %no. of index properties              
+                    else
+                        ndim = 0;
+                    end
                     subVarSelection(obj,dst,1,xyz,mdim,ndim);
                 end
+
                 vartxt = sprintf('%stext',src.String); 
                 h_box = findobj(src.Parent,'Tag',vartxt);
                 h_box.String = obj.UIselection(xyz).desc;  
@@ -533,19 +540,43 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                     pdim = 1;
                 else
                     dst = getDataset(mobj.Cases,usi.caserec,usi.dataset);
-                    vdim = getVariableDimensions(dst,usi.variable); 
+                    vdim = getvariabledimensions(dst,usi.variable); 
                     setdims = cellfun(@ischar,{usi.dims(:).value});
                     pdim = vdim-sum(1-setdims);
                 end
+                
+%                 if obj.TabContent(itab).XYZmxvar(i)==0
+%                     %dimension depends on Type selection
+%                     setOrderOptionSettings(obj,itab)
+%                     usevardim = getUseTypeDim(obj);
+%                 else
+%                     usevardim = obj.TabContent(itab).XYZmxvar(i);
+%                 end
+%                 %
+%                 if pdim>usevardim && usi.property==1                                       
+%                     mdim = usevardim;    %no. range properties
+%                     ndim = pdim-mdim;    %no. index properties
 
                 %if variable is to be used on its own or with specified
                 %dimensions and needs to be constrained, get sub-sample
-                if pdim>obj.TabContent(itab).XYZmxvar(i) && ...
-                                        usi.property==1
-                    mdim = obj.TabContent(itab).XYZmxvar(i); %no. range properties
-                    ndim = pdim-mdim;                     %no. index properties
+                mdim = obj.TabContent(itab).XYZmxvar(i); %no. of range properties    
+                if usi.property==1 && isempty(usi.dims.name)
+                    if pdim>mdim
+                        ndim = pdim-mdim;                     %no. of index properties              
+                    else
+                        ndim = 0;
+                    end
                     ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
-                end                
+                end
+                
+                
+                
+                
+%                 if pdim>mdim && usi.property==1                                        
+% %                     mdim = obj.TabContent(itab).XYZmxvar(i); %no. range properties
+%                     ndim = pdim-mdim;                     %no. of index properties
+%                     ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
+%                 end                
             end
         end
 %%
@@ -564,11 +595,13 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 range(k).txt = var2range(range(k).val);
             end
 
-            uinput = getUIinput(obj,mdim,ndim,dst,dstdesc,range);
-            selection = setInputUI(obj,uinput,xyz);
-            if isempty(selection), ok = 0; return; end
             boxtxt = obj.UIselection(xyz).desc;
             
+            %sub-sampling of variable based on range and values required
+            uinput = getUIinput(obj,mdim,ndim,dst,dstdesc,range);
+            selection = setInputUI(obj,uinput,xyz);
+            if isempty(selection), ok = 0; return; end            
+
             for j=1:mdim
                 idx = strcmp(dstdesc,inputxt{selection{2*j-1}});
                 obj.UIselection(xyz).dims(j).name = dstnames{idx};
@@ -584,7 +617,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 txtval =  var2str(slidervals{2});
                 boxtxt = sprintf('%s, %s: %s',boxtxt,slidervals{1},txtval{1});
             end
-            
+
             %update boxtext description
             obj.UIselection(xyz).desc = boxtxt;
         end
@@ -624,7 +657,6 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             %update the UIsettings to the current values
             
             %get the current button value settings
-%             h_but = findobj(obj.dataUI.Tabs.SelectedTab,'UserData','ActionButton');
             itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
             butnames = obj.TabContent(itab).ActButNames; 
             nbut = length(butnames);
@@ -634,9 +666,24 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             end
             
             %get any order setting used such as Type or Other
+            setOrderOptionSettings(obj,itab)
+            
+            %check whether an equation has been defined
+            heqbox = findobj(src.Parent,'Tag','UserEqn');  
+            if ~isempty(heqbox)
+                obj.UIsettings.Equation = heqbox.String;
+            end
+            
+            %get the name of the tab and button used to call setSelection
+            obj.UIsettings.callTab = src.Parent.Tag;
+            obj.UIsettings.callButton = src.String; 
+            obj.UIsettings.scaleList = obj.TabContent(itab).Scaling;
+        end
+%%
+        function setOrderOptionSettings(obj,itab)
             order = obj.TabContent(itab).Order;
-            setoptions = {'Type','Other'};            
-            for i=1:length(setoptions)
+            setoptions = fieldnames(obj.UIsettings);         
+            for i=1:2    %just check first two: Type and Other
                 idx = strcmp(order,setoptions{i});
                 if any(idx)
                     S = obj.TabContent(itab).Selections{idx};
@@ -644,16 +691,6 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                     obj.UIsettings.(setoptions{i}).String = S.String{S.Value};
                 end
             end
-            
-            %check whether an equation has been defined
-            heqbox = findobj(src.Parent,'Tag','UserEqn');  
-            if ~isempty(heqbox)
-                obj.UIsettings.(setoptions{i}) = heqbox.String;
-            end
-            
-            %get the name of the tab and button used to call setSelection
-            obj.UIsettings.callTab = src.Parent.Tag;
-            obj.UIsettings.callButton = src.String; 
         end
 %%
         function checkXYZset(obj,src)

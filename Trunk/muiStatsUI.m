@@ -39,18 +39,22 @@ classdef muiStatsUI < muiDataUI
                 warndlg('No data available to analyse');
                 obj = [];
                 return;
-            elseif isa(mobj.mUI.Stats,'muiManipUI')
+            elseif isa(mobj.mUI.Stats,'muiStatsUI')
                 obj = mobj.mUI.Stats;
                 if isempty(obj.dataUI.Figure)
-                    obj = obj.setDataUIfigure(mobj);    %initialise figure 
+                    %initialise figure
+                    setDataUIfigure(obj,mobj,guititle);    
                     setDataUItabs(obj,mobj); %add tabs 
                 else
-                    getDialog('Stats UI is open');
+                    getdialog('Stats UI is open');
                 end
             else
                 obj = muiStatsUI(mobj);
-%                 obj.Tabs2Use = mobj.DataUItabs.Stats;
-                obj.Tabs2Use = {'General','Timeseries','Taylor','Intervals'};
+                if any(~ismember(mobj.DataUItabs.Stats,obj.TabOptions))
+                    warndlg('Unknown stats type defined in main UI for DataUItabs.Plot')
+                    obj = [];
+                    return
+                end
                 setDataUItabs(obj,mobj); %add tabs                
             end                
         end
@@ -138,7 +142,7 @@ classdef muiStatsUI < muiDataUI
     methods (Access=private)    
         function setGenTab(obj,src)
             %customise the layout of the General Statistics tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -167,23 +171,13 @@ classdef muiStatsUI < muiDataUI
             
             %Action button specifications
             setActionButtonSpec(obj);
-%             S.ActButNames = {'Refresh','IncNaN'}; %names assigned selection struct
-%             S.ActButText = {char(174),'+N'};      %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
-%             S.ActButPos = [0.86,-1;0.86,-4];      %positions for action buttons   
-%             % action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-%                             '@(src,evt)setIncNaN(src,evt)'};            
-%             S.ActButTip = {'Refresh data list',...%tool tips for buttons
-%                            'Include NaNs in output'};         
+        
             obj.TabContent(itab) = S;               %update object          
         end 
 %%
         function setTimeTab(obj,src)
             %customise the layout of the Timeseries Statistics tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -213,23 +207,13 @@ classdef muiStatsUI < muiDataUI
             
             %Action button specifications
             setActionButtonSpec(obj);
-%             S.ActButNames = {'Refresh','IncNaN'}; %names assigned selection struct
-%             S.ActButText = {char(174),'+N'};      %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
-%             S.ActButPos = [0.86,-1;0.86,-4];      %positions for action buttons   
-%             % action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-%                             '@(src,evt)setIncNaN(src,evt)'};       
-%             S.ActButTip = {'Refresh data list',...%tool tips for buttons
-%                            'Include NaNs in output'};         
+        
             obj.TabContent(itab) = S;               %update object;
         end 
 %%
         function setTaylorTab(obj,src)
             %customise the layout of the Taylor Diagram Statistics tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -257,23 +241,13 @@ classdef muiStatsUI < muiDataUI
            
             %Action button specifications
             setActionButtonSpec(obj);
-%             S.ActButNames = {'Refresh','IncNaN'}; %names assigned selection struct
-%             S.ActButText = {char(174),'+N'};      %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
-%             S.ActButPos = [0.86,-1;0.86,-4];      %positions for action buttons   
-%             % action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-%                             '@(src,evt)setIncNaN(src,evt)'};           
-%             S.ActButTip = {'Refresh data list',...%tool tips for buttons
-%                            'Include NaNs in output'};         
+            
             obj.TabContent(itab) = S;               %update object;
         end    
  %%
         function setIntervalsTab(obj,src)
             %customise the layout of the Intervals Statistics tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             
@@ -301,17 +275,8 @@ classdef muiStatsUI < muiDataUI
             
             %Action button specifications
             setActionButtonSpec(obj);
-%             S.ActButNames = {'Refresh','IncNaN'}; %names assigned selection struct
-%             S.ActButText = {char(174),'+N'};      %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
             S.ActButPos = [0.86,-1;0.895,0.27];     %positions for action buttons   
-%             % action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-%                             '@(src,evt)setIncNaN(src,evt)'};            
-%             S.ActButTip = {'Refresh data list',...%tool tips for buttons
-%                            'Include NaNs in output'};         
+       
             obj.TabContent(itab) = S;               %update object;
         end 
 %%

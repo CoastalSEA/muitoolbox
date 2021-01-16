@@ -45,7 +45,7 @@ classdef muiManipUI < muiDataUI
                     obj = obj.setDataUIfigure(mobj);    %initialise figure 
                     setDataUItabs(obj,mobj); %add tabs 
                 else
-                    getDialog('Derive Output UI is open');
+                    getdialog('Derive Output UI is open');
                 end
             else
                 obj = muiManipUI(mobj);
@@ -159,7 +159,7 @@ classdef muiManipUI < muiDataUI
 %--------------------------------------------------------------------------
         function setCalcTab(obj,src)
             %customise the layout of the Calc tab
-            %overload defaults defined in DataGUIinterface.defaultTabContent
+            %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             

@@ -73,30 +73,35 @@ classdef muiCatalogue < dscatalogue
                 if ok<1, return; end  
             end  
             cobj = getCase(obj,caserec);      %selected case
-            minp = fieldnames(cobj.RunProps); %saved input class instances
+            minp = fieldnames(cobj.RunParam); %saved input class instances
             for i=1:length(minp)
-                mobj.Inputs.(minp{i}) = cobj.RunProps.(minp{i});
+                mobj.Inputs.(minp{i}) = cobj.RunParam.(minp{i});
             end          
         end
 %% 
         function viewCaseSettings(obj,type,caserec)
             %view the saved input data for a selected Case
-            if nargin<3  %if case to view has not been specified
+            nrec = height(obj.Catalogue);
+            if nrec==1
+                caserec = 1; %overrides caserec input if only one record
+            elseif nargin<3
+                %if case to view has not been specified or only one case
                 [caserec,ok] = selectCase(obj,'Select case to view:',...
                                                             'single',type); 
                 if ok<1, return; end  
+                
             end
             [cobj,~,catrec] = getCase(obj,caserec);
             
             casedesc = catrec.CaseDescription;
-            inputs = fieldnames(cobj.RunProps);
-            if isempty(cobj.RunProps)
+            inputs = fieldnames(cobj.RunParam);
+            if isempty(cobj.RunParam)
                 warndlg('The case selected has no input data');
                 return;
             else
                 propdata = {}; proplabels = {};
                 for k=1:length(inputs)
-                    localObj = cobj.RunProps.(inputs{k});
+                    localObj = cobj.RunParam.(inputs{k});
                     propdata = vertcat(propdata,getProperties(localObj));
                     proplabels = vertcat(proplabels,getPropertyNames(localObj));
                 end
@@ -107,7 +112,9 @@ classdef muiCatalogue < dscatalogue
                 propdata = [proplabels,propdata];
                 figtitle = sprintf('Settings used for %s',casedesc);
                 varnames = {'Variable','Values'};                                
-                tablefigure('Scenario settings',figtitle,{},varnames,propdata);
+                h_fig = tablefigure('Scenario settings',figtitle,{},varnames,propdata);
+                %adjust position on screen            
+            
             end            
         end              
 %% 
@@ -162,7 +169,7 @@ classdef muiCatalogue < dscatalogue
                 %returns all values within dimension range specified
                 [id,dnames] = getSelectedIndices(obj,UIsel,dst,varatt);
                 varlabels = getLabels(dst,'Variable');
-                label = varlabels{UIsel.property};
+                label = varlabels{id.var};
                 switch type
                     case 'array'
                         %extracts array for selected variable
@@ -237,12 +244,14 @@ classdef muiCatalogue < dscatalogue
         function indices = getIndices(~,var,value)
             %get the index or vector of indices based on selection
             % var is the variable to select from and value is a single
-            % value to select the nearest index or a text dtring defining
+            % value to select the nearest index or a text string defining
             % the range of values required
             if ischar(value)
-                indices = getVarIndices(var,value);
+                indices = getvarindices(var,value);
+            elseif length(var)>1
+                indices = interp1(var,1:length(var),value,'nearest'); 
             else
-                indices = interp1(var,1:length(var),value,'nearest');                                   
+                indices = 1;
             end
         end
 %%
