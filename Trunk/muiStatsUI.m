@@ -14,11 +14,11 @@ classdef muiStatsUI < muiDataUI
 %--------------------------------------------------------------------------
 % 
     properties (Transient)
-        %Abstract variables for DataGUIinterface---------------------------        
+        %Abstract variables for muiDataUI---------------------------        
         %names of tabs providing different data accces options
         TabOptions = {'General','Timeseries','Taylor','Intervals'};       
         %Additional variables for application------------------------------
-        GuiChild         %handle for muiStats to track output generated 
+%         GuiChild         %handle for muiStats to track output generated 
         Tabs2Use         %number of tabs to include  (set in getPlotGui)
     end  
 %%  
@@ -39,10 +39,11 @@ classdef muiStatsUI < muiDataUI
                 warndlg('No data available to analyse');
                 obj = [];
                 return;
-            elseif isa(mobj.mUI.Stats,'muiStatsUI')
-                obj = mobj.mUI.Stats;
+            elseif isa(mobj.mUI.StatsUI,'muiStatsUI')
+                obj = mobj.mUI.StatsUI;
                 if isempty(obj.dataUI.Figure)
                     %initialise figure
+                    guititle = 'Statistical Analysis';
                     setDataUIfigure(obj,mobj,guititle);    
                     setDataUItabs(obj,mobj); %add tabs 
                 else
@@ -55,6 +56,7 @@ classdef muiStatsUI < muiDataUI
                     obj = [];
                     return
                 end
+                obj.Tabs2Use = mobj.DataUItabs.Stats;
                 setDataUItabs(obj,mobj); %add tabs                
             end                
         end
@@ -66,7 +68,7 @@ classdef muiStatsUI < muiDataUI
     methods (Access=protected) 
         function setTabContent(obj,src)
             %setup default layout options for individual tabs
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             itab = find(strcmp(obj.Tabs2Use,src.Tag));
             obj.TabContent(itab) = muiDataUI.defaultTabContent;
             
@@ -85,7 +87,8 @@ classdef muiStatsUI < muiDataUI
         end                
 %%
         function setVariableLists(obj,src,mobj)
-            %Abstract function required by DataGUIinterface
+            %initialise the variable lists or values
+            %Abstract function required by muiDataUI
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
@@ -110,9 +113,9 @@ classdef muiStatsUI < muiDataUI
             obj.TabContent(itab).Selections = sel_uic;
         end
 %%       
-        function setTabActions(obj,src,~,mobj) 
+        function setTabActions(obj,src,~,~) 
             %actions needed when activating a tab
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             initialiseUIselection(obj,src);
             initialiseUIsettings(obj,src);
             resetVariableSelection(obj,src);
@@ -123,7 +126,10 @@ classdef muiStatsUI < muiDataUI
                 case 'Timeseries'
                     
                 case 'Taylor'
-                    
+                    %reset the radial limit value
+                    itab = strcmp(obj.Tabs2Use,src.Tag);
+                    S = obj.TabContent(itab);  
+                    obj.TabContent(itab).Selections{4}.String  = S.Other{1};
                 case 'Intervals'
                     
             end
@@ -131,7 +137,7 @@ classdef muiStatsUI < muiDataUI
 %%        
         function UseSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             muiStats.getStats(obj,src,mobj);
         end   
     end 
@@ -149,7 +155,7 @@ classdef muiStatsUI < muiDataUI
             %Header size and text
             S.HeadPos = [0.8,0.14]; %vertical position and height of header
             txt1 = 'For Descriptive stats of a vector variable, only X needs to be defined';
-            txt2 = 'If variable is a matrix, also select a dimension to sample along as X or Y';
+            txt2 = 'If variable is a matrix, subsample array when assiging to X button';
             txt3 = 'For Regression and X-correlation: X is independent, Y is dependent variable';
             S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
@@ -183,9 +189,9 @@ classdef muiStatsUI < muiDataUI
             
             %Header size and text
             S.HeadPos = [0.8,0.14]; %vertical position and height of header
-            txt1 = 'Select the variables to be used and assign to buttons.';
-            txt2 = '?';
-            txt3 = '';
+            txt1 = 'Select the variables to be used and assign to Var button.';
+            txt2 = 'Define time subsample range when assigning to Var button';
+            txt3 = 'Choose Statistic to be used and press Select';
             S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  
@@ -203,7 +209,7 @@ classdef muiStatsUI < muiDataUI
             S.XYZnset = 2;                          %minimum number of buttons to use
             S.XYZmxvar = [1,1];                     %maximum number of dimensions per selection
             S.XYZpanel = [0.05,0.20,0.9,0.1];       %position for XYZ button panel
-            S.XYZlabels = {'Var','T'};              %default button labels
+            S.XYZlabels = {'Var'};                  %default button labels
             
             %Action button specifications
             setActionButtonSpec(obj);
@@ -218,26 +224,27 @@ classdef muiStatsUI < muiDataUI
             S = obj.TabContent(itab);
             
             %Header size and text
-            S.HeadPos = [0.8,0.14]; %vertical position and height of header
-            txt1 = 'Select the variables to be used and assign to X Y Z buttons.';
-            txt2 = '?';
-            txt3 = 'You may be prompted to sub-sample the data if multi-dimensional.';
+            S.HeadPos = [0.8,0.14]; %vertical position and height of header            
+            txt1 = 'Select the Reference variable to compare with and assign to Ref button';
+            txt2 = 'Select the Test variable to be tested and assign to Test button';
+            txt3 = 'Define the Radial limit to used in the plot (default is 1)';
             S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  
             S.Titles = {'Case','Datset','Variable','Radial limit'};            
             S.Style = {'popupmenu','popupmenu','popupmenu','edit'};
             S.Order = {'Case','Dataset','Variable','Other'};
+            S.Other = {'2'};
             
             %Tab control button options
-%             S.TabButText = {'Select','Clear'};    %labels for tab button definition
-%             S.TabButPos = [0.1,0.03;0.3,0.03];    %default positions
+            S.TabButText = {'New','Add','Delete','Clear'}; %labels for tab button definition
+            S.TabButPos = [0.1,0.14;0.3,0.14;0.5,0.14;0.7,0.14]; %default positions
             
             %XYZ panel definition (if required)
             S.XYZnset = 1;                          %minimum number of buttons to use
-            S.XYZmxvar = [3,3,3];                   %maximum number of dimensions per selection
-            S.XYZpanel = [0.05,0.20,0.9,0.1];       %position for XYZ button panel
-            S.XYZlabels = {'Var'};                  %default button labels
+            S.XYZmxvar = [2,2];                     %maximum number of dimensions per selection
+            S.XYZpanel = [0.04,0.25,0.91,0.2];      %position for XYZ button panel
+            S.XYZlabels = {'Ref','Test'};           %default button labels
            
             %Action button specifications
             setActionButtonSpec(obj);

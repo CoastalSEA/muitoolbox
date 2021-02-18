@@ -4,7 +4,7 @@ classdef muiPlotsUI < muiDataUI
 % NAME
 %   muiPlotsUI.m
 % PURPOSE
-%   Class implements the DataGUIinterface to access data for use in
+%   Class implements the muiDataUI to access data for use in
 %   plotting
 % SEE ALSO
 %   muiDataUI.m, PlotFig.m
@@ -14,11 +14,11 @@ classdef muiPlotsUI < muiDataUI
 %--------------------------------------------------------------------------
 % 
     properties (Transient)
-        %Abstract variables for DataGUIinterface---------------------------        
+        %Abstract variables for muiDataUI---------------------------        
         %names of tabs providing different data accces options
         TabOptions = {'2D','3D','4D','2DT','3DT','4DT'};       
         %Additional variables for application------------------------------
-        GuiChild         %handle for muiPlot to track figures generated
+%         GuiChild         %handle for muiPlot to track figures generated
         Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  
 %%  
@@ -39,8 +39,8 @@ classdef muiPlotsUI < muiDataUI
                 warndlg('No data available to plot');
                 obj = [];
                 return;
-            elseif isa(mobj.mUI.Plots,'muiPlotsUI')
-                obj = mobj.mUI.Plots;
+            elseif isa(mobj.mUI.PlotsUI,'muiPlotsUI')
+                obj = mobj.mUI.PlotsUI;
                 if isempty(obj.dataUI.Figure)
                     %initialise figure 
                     guititle = 'Select Data for Plotting';
@@ -68,7 +68,7 @@ classdef muiPlotsUI < muiDataUI
     methods (Access=protected) 
         function setTabContent(obj,src)
             %setup default layout options for individual tabs
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             itab = find(strcmp(obj.Tabs2Use,src.Tag));
             obj.TabContent(itab) = muiDataUI.defaultTabContent;
             
@@ -91,7 +91,8 @@ classdef muiPlotsUI < muiDataUI
         end                
 %%
         function setVariableLists(obj,src,mobj)
-            %Abstract function required by DataGUIinterface
+            %initialise the variable lists or values
+            %Abstract function required by muiDataUI
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
@@ -111,6 +112,8 @@ classdef muiPlotsUI < muiDataUI
                         sel_uic{i}.String = cobj.Data{1}.VariableDescriptions;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
+                    case 'Other'
+                        sel_uic{i}.String = 'Not set';
                 end
             end        
             obj.TabContent(itab).Selections = sel_uic;
@@ -118,7 +121,7 @@ classdef muiPlotsUI < muiDataUI
 %%       
         function setTabActions(obj,src,~,~) 
             %actions needed when activating a tab
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             initialiseUIselection(obj,src);
             initialiseUIsettings(obj,src);
             resetVariableSelection(obj,src);
@@ -144,7 +147,7 @@ classdef muiPlotsUI < muiDataUI
 %%        
         function UseSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             if strcmp(src.String,'Save')   %save animation to file
                 saveAnimation(obj,src,mobj);
             else

@@ -473,7 +473,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
 %                 end
                 %
                 mdim = obj.TabContent(itab).XYZmxvar(xyz);%no. of range properties
-                if selection{1}==1   
+                if selection{1}==1   %variable selected not dimension
                     if pdim>mdim
                         ndim = pdim-mdim;                     %no. of index properties              
                     else
@@ -560,7 +560,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 %if variable is to be used on its own or with specified
                 %dimensions and needs to be constrained, get sub-sample
                 mdim = obj.TabContent(itab).XYZmxvar(i); %no. of range properties    
-                if usi.property==1 && isempty(usi.dims.name)
+                if usi.property==1 && isempty(usi.dims(1).name)
                     if pdim>mdim
                         ndim = pdim-mdim;                     %no. of index properties              
                     else
@@ -641,8 +641,8 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             for j=1:2:2*mdim
                 uinput.default{j} = dstdesc(2:end)';
                 uinput.userdata{j} = {};
-                uinput.default{j+1} = range(j).txt;
-                uinput.userdata{j+1} = range(j).val;
+                uinput.default{j+1} = range((j+1)/2).txt;
+                uinput.userdata{j+1} = range((j+1)/2).val;
             end
             %
             for k=1:ndim
@@ -681,14 +681,21 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         end
 %%
         function setOrderOptionSettings(obj,itab)
+            %
             order = obj.TabContent(itab).Order;
             setoptions = fieldnames(obj.UIsettings);         
             for i=1:2    %just check first two: Type and Other
                 idx = strcmp(order,setoptions{i});
                 if any(idx)
                     S = obj.TabContent(itab).Selections{idx};
-                    obj.UIsettings.(setoptions{i}).Value = S.Value;
-                    obj.UIsettings.(setoptions{i}).String = S.String{S.Value};
+                    if strcmp(S.Style,'edit')
+                        obj.UIsettings.(setoptions{i}) = str2double(S.String);
+                    elseif strcmp(S.Style,'popupmenu')
+                        obj.UIsettings.(setoptions{i}).Value = S.Value;
+                        obj.UIsettings.(setoptions{i}).String = S.String{S.Value};
+                    else
+                        warndlg('Option not defined in setOrderOptionsSettings')
+                    end
                 end
             end
         end
@@ -780,7 +787,8 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             S.Order = {'Case','Dataset','Variable','Type'};  %default list of key words
             S.Scaling = {'Linear','Log','Relative: V-V(x=0)','Scaled: V/V(x=0)',...
                 'Normalised','Normalised (-ve)'};  %options for ScaleVariable
-            S.Type = {'line','bar','scatter','stem','stairs','barh','User'};          
+            S.Type = {'line','bar','scatter','stem','stairs','barh','User'};
+            S.Other = {'1'};
             
             %Tab control button options
             S.TabButText = {'Select','Clear'}; %labels for tab button definition

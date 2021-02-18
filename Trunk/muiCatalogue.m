@@ -151,9 +151,10 @@ classdef muiCatalogue < dscatalogue
             %inherits muiDataUI and provides the UIselection struct
             % UIsel - UIselection struct that defines the dataset and
             %         dimensions/indices required
-            % type - options to return the data as an array, table, dstable
-            %        or a table where the 2nd dimension has been split into
-            %        variables (see muiEditUI for example of usage)
+            % type - options to return the data as an array, table, dstable,
+            %        a splittable where the 2nd dimension has been split into
+            %        variables (see muiEditUI for example of usage), or a
+            %        timeseries data set (assumes rows are datetime)
             % props - returns a struct containing data, description of 
             %         property being used and the associated label 
             if nargin<3, type = 'array'; end
@@ -187,6 +188,8 @@ classdef muiCatalogue < dscatalogue
                         dimnames = setDimNames(obj,array,dnames,varatt);                        
                         data = array2table(array,'RowNames',dimnames{1},...
                                             'VariableNames',dimnames{2});
+                    case 'timeseries'
+                        
                 end
                 istable = true;
             elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
@@ -201,7 +204,9 @@ classdef muiCatalogue < dscatalogue
                 iddim = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
                 data = dst.Dimensions.(useprop)(iddim);
                 dimlabels = getLabels(dst,'Dimension');
-                label = dimlabels{UIsel.property-2}; %subtract variable and row
+                %subtract variable and row (if used)
+                if height(dst.DataTable)>1, nr=2; else, nr=1; end                  
+                label = dimlabels{UIsel.property-nr}; 
             else
                 errordlg('Incorrect property selection in getProperty') 
             end
@@ -225,16 +230,21 @@ classdef muiCatalogue < dscatalogue
             idx.var = UIsel.variable;
             uidims = UIsel.dims;
             ndim = length(uidims);
+            idx.row = 1; dimnames.row = dst.RowNames;
             idx.dim = cell(1,ndim-1);
             for i=1:ndim
                 %assign to dimension or row                    
-                if strcmp(names{2},uidims(i).name) %this is a row
+                if strcmp(uidims(i).name,'RowNames') %this is a row                    
                     var = dst.RowNames;
                     idx.row = getIndices(obj,var,uidims(i).value);
                     dimnames.row = var(idx.row);
-                else                               %must be a dimension
+                else                                 %must be a dimension
                     var = dst.Dimensions.(uidims(i).name);
-                    idd = strcmp(names(3:end),uidims(i).name);
+                    if height(dst.DataTable)>1   %ensure offset is correct
+                        idd = strcmp(names(3:end),uidims(i).name);
+                    else  
+                        idd = strcmp(names(2:end),uidims(i).name);
+                    end
                     idx.dim{idd} = getIndices(obj,var,uidims(i).value);
                     dimnames.dim{idd} = var(idx.dim{idd});
                 end  

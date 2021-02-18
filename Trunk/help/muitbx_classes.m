@@ -7,5 +7,10 @@
 %
 % <matlab:doc('muiDataUI') muiDataUI>,  
 %
-% <matlab:doc('dscollection') dscollection>, 
+% <matlab:doc('muiDataSet') muiDataSet>, 
 %
+%
+% <matlab:doc('muiCatalogue') muiCatalogue>, 
+%
+
+% include *muiProject* and *muiConstants* in muiPropertyUI documentation

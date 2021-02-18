@@ -17,15 +17,18 @@ classdef muiModelUI < handle
 %       
     properties (Hidden, Transient)
         %struct to handles for UI
-        mUI = struct('Figure',[],'Menus',[],'Tabs',[],'Plots',[],...
-                          'Edit',[],'Manip',[],'Stats',[])        
-            % mUI.Figure        %handle for main GUI figure
-            % mUI.Menus         %handle for drop down menus in GUI
-            % mUI.Tabs          %handle for the Tabs in the main GUI
-            % mUI.Plots         %handle for plotting
-            % mUI.Edit          %handle for editing
-            % mUI.Manip         %handle for data manipulation  
-            % mUI.Stats         %handle for statistics GUI
+        mUI = struct('Figure',[],'Menus',[],'Tabs',[],'PlotsUI',[],...
+                             'EditUI',[],'ManipUI',[],'StatsUI',[],...
+                                                'Plots',[],'Stats',[])        
+            % mUI.Figure        %handle for main UI figure
+            % mUI.Menus         %handle for drop down menus in main UI
+            % mUI.Tabs          %handle for the Tabs in the main main UI
+            % mUI.PlotsUI       %handle for plotting UI
+            % mUI.EditUI        %handle for editing UI
+            % mUI.ManipUI       %handle for data manipulation UI
+            % mUI.StatsUI       %handle for statistics UI
+            % mUI.Plots         %handle to muiPlots object
+            % mUI.Stats         %handle to muiStats object
         TabProps         %structure to hold PropertyTab and position for each data input
         ModelInputs      %classes required by model used in isValidModel check 
         DataUItabs       %structure to define muiDataUI tabs for each use 
@@ -126,12 +129,13 @@ classdef muiModelUI < handle
             %initiale user defined menus and submenus
             menustruct = setMenus(obj);
             menulabels = fieldnames(menustruct);
-            for i = 1:length(menulabels)   
+            nmenus = length(menulabels);
+            for i = 1:nmenus
                 %initialise top level menu
                 MenuDef = menustruct.(menulabels{i});
-                obj.mUI.Menus(i) = setUIMenus(obj,MenuDef(1));
+                obj.mUI.Menus.(menulabels{i}) = setUIMenus(obj,MenuDef(1));
                 %check for submenus and initialise if defined
-                addSubMenus(obj,obj.mUI.Menus(i),MenuDef,1);
+                addSubMenus(obj,obj.mUI.Menus.(menulabels{i}),MenuDef,1);
             end
         end
         %%       
@@ -182,6 +186,17 @@ classdef muiModelUI < handle
             end
         end
 %%
+        function addAppMenus(obj,menuitems)
+            %add a menu items to an existing menu 
+            menulabels = fieldnames(menuitems);
+            nmenus = length(menulabels);
+            for i=1:nmenus
+                MenuDef = menuitems.(menulabels{i});
+                obj.mUI.Menus.(menulabels{i}) = setUIMenus(obj,MenuDef);
+                addSubMenus(obj,obj.mUI.Menus.(menulabels{i}),MenuDef,1);
+            end
+        end
+%%
         function mt = menuStruct(~,menulabels)
             %set up empty struct for menu definition
             MenuParts = {'Label','List','Callback','Separator','SubMenu'};
@@ -194,13 +209,15 @@ classdef muiModelUI < handle
                 mt.(menuoption).Label = menulabels{i};
             end
         end
-        
 %% functions to initialise tabs -------------------------------------------
-        function setAppTabs(obj)
+        function setAppTabs(obj,tabs,subtabs)
             %initialise the user defined tabs and subtabs
-            [tabs,subtabs] = setTabs(obj);
+            if nargin<2
+                [tabs,subtabs] = setTabs(obj);
+            end
+            
             tabtags = fieldnames(tabs);
-            if nargin<4 || isempty(subtabs)
+            if isempty(subtabs)
                 subtags = [];
             else
                 subtags = fieldnames(subtabs);
@@ -225,7 +242,7 @@ classdef muiModelUI < handle
                 uitab(subtabgrp,'Title',subvals{1}','Tag',['sub',tabtag],...
                     'ButtonDownFcn',subvals{2});
             end
-        end       
+        end   
 %%
         function obj = TabProperties(obj)
             %set the tab and position to display class data tables
@@ -499,19 +516,19 @@ classdef muiModelUI < handle
                     editRecord(muicat);
                     obj.DrawMap; 
                 case 'Edit Data Set'
-                    obj.mUI.Edit = muiEditUI.getEditUI(obj);    
-                case 'Save'
+                    obj.mUI.EditUI = muiEditUI.getEditUI(obj);    
+                case 'Save Data Set'
                     saveCase(muicat);
-                case 'Delete'
+                case 'Delete Case'
                     deleteCases(muicat,getCaseType(obj));
                     obj.DrawMap;
-                case 'Reload'
+                case 'Reload Case'
                     reloadCase(muicat,obj,getCaseType(obj));      
-                case 'View settings'
+                case 'View Case Settings'
                     viewCaseSettings(muicat,getCaseType(obj));
-                 case 'Export'
+                case 'Export Case'
 %                     DataSet.exportDataSet(obj);
-                case 'Import'
+                case 'Import Case'
 %                     DataSet.importDataSet(obj); 
             end   
         end   
@@ -602,7 +619,9 @@ classdef muiModelUI < handle
             %caseid, handle, idh, dprop, id_rec, casedesc.
             refresh;
             muicat = obj.Cases.Catalogue;
-            if isempty(muicat)                            
+            if isempty(muicat) && isempty(obj.Inputs) %no runs & no data
+                return;
+            elseif isempty(muicat)
                 %there are no model results saved so run model
                 tabRunModel(obj);
                 %check whether model returned a result
@@ -714,6 +733,10 @@ classdef muiModelUI < handle
         function isvalidhandle = isValidHandle(obj,inphandles)
             %check whether classes needed to run model have been instantiated
             % called by IsValidModel
+            
+            % first ccheck that Input classes exist            
+            if isempty(obj.Inputs), isvalidhandle = false; return; end
+            
             nhandles = length(inphandles);
             definedinput = fieldnames(obj.Inputs);
             isvalidhandle = false(nhandles,1);
@@ -809,7 +832,7 @@ classdef muiModelUI < handle
             %have valid data. This function uses getCharProperties in
             %PropertyInterface and so the input handles checked need to
             %inherit this interface for this function to work.
-            inphandles = obj.ModelInputs.(modelname);
+            inphandles = obj.ModelInputs.(modelname);            
             ishandle = isValidHandle(obj,inphandles);    
             if any(~ishandle)  
                 %at least one of the input classes isempty
@@ -834,6 +857,16 @@ classdef muiModelUI < handle
             end
         end 
 %%
+        function callStaticFunction(~,fname,inp1)
+            %call a class function to load data or run a model
+            heq = str2func(['@(inp1) ',[fname,'(inp1)']]); 
+            try
+               heq(inp1); 
+            catch
+               warndlg(sprintf('Unable to run function %s',fname));                       
+            end
+        end
+%%
 %         function minp = getModelInputs(obj,classname)
 %             %property ModelInputs is protected. return values for specific
 %             %class. Used in muiDataSet
@@ -853,8 +886,8 @@ classdef muiModelUI < handle
                 %define case for each plot/data GUI
                 case 'muiPlotsUI'
                     figObj = [];
-                    if ~isempty(obj.mUI.Plots.GuiChild)
-                        localObj = obj.mUI.Plots.GuiChild.Plot.FigNum;
+                    if ~isempty(obj.mUI.Plots)
+                        localObj = obj.mUI.Plots.Plot.FigNum;
                         nfig = length(localObj);
                         figObj = gobjects(1,nfig);
                         for i=1:nfig
@@ -866,13 +899,17 @@ classdef muiModelUI < handle
                 case 'muiStatsUI'
                     figObj = findobj('Tag','StatFig','-or','Tag','StatTable');                   
                     deleteFigObj(obj,figObj,'Stats');
-                case 'muiEditUI'
-                    delete(obj.mUI.Edit)
-                    obj.mUI.Edit = [];
-                case 'muiManipUI'
-                    delete(obj.mUI.Manip)
-                    obj.mUI.Manip = [];
+                    
+%                 case 'muiEditUI'
+%                     delete(obj.mUI.EditUI)
+%                     obj.mUI.EditUI = [];
+%                 case 'muiManipUI'
+%                     delete(obj.mUI.ManipUI)
+%                     obj.mUI.ManipUI = [];
             end
+            guiobjtxt = name(4:end);
+            delete(obj.mUI.(guiobjtxt))
+            obj.mUI.(guiobjtxt) = [];
         end
     end
 end

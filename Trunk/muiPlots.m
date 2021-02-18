@@ -46,8 +46,9 @@ classdef muiPlots < handle
     methods (Static)
         function getPlot(gobj,mobj)
             %get existing instance or create new class instance
-            if isa(mobj.mUI.Plots.GuiChild,'muiPlots')
-                obj = mobj.mUI.Plots.GuiChild;    %get existing instance          
+            if isa(mobj.mUI.Plots,'muiPlots')
+                obj = mobj.mUI.Plots;    %get existing instance          
+                clearPreviousPlotData(obj);
             else
                 obj = muiPlots;                   %create new instance
             end
@@ -55,14 +56,10 @@ classdef muiPlots < handle
             obj.UIset = gobj.UIsettings;
             
             %set the variable order for selected plot type
-%             if strcmp(obj.UIset.callTab,'Animate')
-%                 obj.Order = getAnimationType(obj);
-%             else
-                obj.Order = obj.Plot.Order.(obj.UIset.callTab);
-%             end
+            obj.Order = obj.Plot.Order.(obj.UIset.callTab);
             
             %get the data to be used in the plot
-            [obj,ok] = getPlotData(obj,mobj);
+            ok = getPlotData(obj,mobj);
             if ok<1, return; end %data not found
             isvalid = checkdimensions(obj);
             if ~isvalid, return; end
@@ -77,11 +74,12 @@ classdef muiPlots < handle
     end
 %%   
     methods (Access=protected)
-        function [obj,ok] = getPlotData(obj,mobj)
+        function ok = getPlotData(obj,mobj)
             %get the data to be used in the plot
             ok = 1;
             muicat = mobj.Cases;
             nvar = length(obj.UIsel);
+            
             props(nvar) = struct('desc',[],'label',[],'data',[]);
             for i=1:nvar
                 %get the data and labels for each variable
@@ -127,7 +125,7 @@ classdef muiPlots < handle
             %call the specific plot type requested
             callPlotType(obj);
             %assign PlotFig instance to handle
-            mobj.mUI.Plots.GuiChild = obj;
+            mobj.mUI.Plots = obj;
             obj.Plot.CurrentFig.Visible = 'on';
         end
 %%
@@ -405,7 +403,7 @@ classdef muiPlots < handle
             delete(hp)
             [hptype,symb] = getPlotFunc(obj); %function handle for plot type
             %call uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
-            hp = hptype(figax,x,y,symb{1},symb{2},...
+            hptype(figax,x,y,symb{1},symb{2},...
                                             obj.Legend,num2str(size(y,2)));                        
             hl = legend(figax,legtxt,'Location','best');
             hl.Tag = fnum;
@@ -438,7 +436,7 @@ classdef muiPlots < handle
             end
 
             %
-            if obj.UIset.Polar
+            if isfield(obj.UIset,'Polar') && obj.UIset.Polar
                 muiPlots.rtSurface(x,y,z,24,yint,obj.AxisLabels.Y,...
                                                obj.Legend,obj.Title);
             else
@@ -491,20 +489,21 @@ classdef muiPlots < handle
             switch obj.UIset.callTab
                 case '2DT'
                     var = obj.Data.Y;
-                    obj.Data.Y = var(1,:);   %first time step
+                    vari = setTimeDependentVariable(obj,var,1);
+                    obj.Data.Y = vari;   %first time step
                     newXYplot(obj)
                     figax = gca;
                     hp = figax.Children;
-                    vari = obj.Data.Y;
+%                     vari = setTimeDependentVariable(obj,var,1); %#ok<NASGU>
                     hp.YDataSource = 'vari';
                     figax.YLimMode = 'manual';                    
                 case '3DT'
                     var = obj.Data.Z;
-                    obj.Data.Z = var(1,:,:);  %first time step
+                    vari = setTimeDependentVariable(obj,var,1); 
+                    obj.Data.Z = vari;  %first time step
                     newXYZplot(obj)
                     figax = gca;
                     hp = figax.Children;
-                    vari = obj.Data.Z;
                     hp.ZDataSource = 'vari';
                     figax.ZLimMode = 'manual';
                 case '4DT'
@@ -517,7 +516,7 @@ classdef muiPlots < handle
             Mframes(1) = getframe(gcf); %NB print function allows more control of 
             hold(figax,'on')
             for i=2:length(t)
-                zi = var(i,:,:); %#ok<NASGU>
+                vari = setTimeDependentVariable(obj,var,i); %#ok<NASGU>
                 refreshdata(hp,'caller')
                 title(sprintf('%s \nTime = %s',obj.Title,string(t(i))))
                 drawnow;                 
@@ -527,7 +526,22 @@ classdef muiPlots < handle
             hold(figax,'off')
             obj.ModelMovie = Mframes;                         
         end
-
+%%
+        function vari = setTimeDependentVariable(obj,var,idx)
+            %adjust shape of dynamic variable depending on no. of dimensions
+            switch obj.UIset.callTab
+                case '2DT'
+                    vari = var(idx,:);
+                case '3DT' 
+                    vari = squeeze(var(idx,:,:));
+                    zsize = size(vari,1);
+                    if zsize==length(obj.Data.X)
+                        vari = vari';
+                    end
+                case '4DT'    
+                    vari = squeeze(var(idx,:,:,:));
+            end
+        end
 %%
         function checkAxisTicks(obj,figax)
             %allow axis tick labels to be set       TICKLABELS NOT SET
@@ -539,6 +553,23 @@ classdef muiPlots < handle
             end
         end
 %%
+        function isvalid = checkdimensions(obj)
+            %check that the dimensions of the selected data match
+            data = struct2cell(obj.Data);
+            vecdim = cellfun(@isvector,data);
+            dimlen = cellfun(@length,data(vecdim));
+            if all(vecdim) %all data are vectors
+                isvalid = true;
+            else
+                varsz = size(data{~vecdim});
+                isvalid = all(ismember(varsz(varsz>1),dimlen));
+            end
+            %
+            if ~isvalid
+                warndlg('Dimensions of selected variables do not match')
+            end
+        end
+%%    
 %--------------------------------------------------------------------------
 % Get and Set figure and utility functions
 %--------------------------------------------------------------------------
@@ -577,7 +608,7 @@ classdef muiPlots < handle
                 'CloseRequestFcn',@obj.closeFigure, ...
                 'WindowButtonDownFcn',@obj.getCurrentFigure, ...
                 'Resize','on','HandleVisibility','on', ...
-                'Visible','off','Tag','PlotFig');
+                'Visible','on','Tag','PlotFig');
             %move figure to top right
             hf.Position(1) = 1-hf.Position(3)-0.01;
             hf.Position(2) = 1-hf.Position(4)-0.12;
@@ -589,27 +620,21 @@ classdef muiPlots < handle
             obj.Plot.CurrentFig = hf;
         end 
 %%
-        function isvalid = checkdimensions(obj)
-            %check that the dimensions of the selected data match
-            data = struct2cell(obj.Data);
-            vecdim = cellfun(@isvector,data);
-            dimlen = cellfun(@length,data(vecdim));
-            if all(vecdim) %all data are vectors
-                isvalid = true;
-            else
-                varsz = size(data{~vecdim});
-                isvalid = all(ismember(varsz(varsz>1),dimlen));
-            end
-            %
-            if ~isvalid
-                warndlg('Dimensions of selected variables do not match')
-            end
-        end
-%%    
         function getCurrentFigure(obj,src,~)
             %find index for figure to use to add or delete a component
             obj.idxfig = src.Number;
-        end     
+        end    
+%%
+        function clearPreviousPlotData(obj)
+            %reset the property values used to create a plot
+            obj.Data = [];            %data to use in plot (x,y,z)
+            obj.TickLabels = [];      %struct for XYZ tick labels
+            obj.AxisLabels = [];      %struct for XYZ axis labels
+            obj.Legend = [];          %Legend text
+            obj.MetaData = [];        %text summary of primary variable selection
+            obj.Title = [];           %Title text
+            obj.Order = [];           %order of variables for selected plot type
+        end
 %%        
         function closeFigure(obj,src,~)
             %clear a selected figure and update figure number index
