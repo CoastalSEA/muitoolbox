@@ -494,8 +494,7 @@ classdef muiModelUI < handle
 %%        
         function clearCases(obj,~,~)
             %delete selected cases from Case list and delete case            
-            type = getCaseType(obj);
-            deleteCases(obj.Cases,type,'All');
+            deleteCases(obj.Cases);
             obj.DrawMap;
         end
 %%
@@ -520,37 +519,18 @@ classdef muiModelUI < handle
                 case 'Save Data Set'
                     saveCase(muicat);
                 case 'Delete Case'
-                    deleteCases(muicat,getCaseType(obj));
+                    deleteCases(muicat);
                     obj.DrawMap;
                 case 'Reload Case'
-                    reloadCase(muicat,obj,getCaseType(obj));      
+                    reloadCase(muicat,obj);      
                 case 'View Case Settings'
-                    viewCaseSettings(muicat,getCaseType(obj));
+                    viewCaseSettings(muicat);
                 case 'Export Case'
 %                     DataSet.exportDataSet(obj);
                 case 'Import Case'
 %                     DataSet.importDataSet(obj); 
             end   
-        end   
-%%
-        function type = getCaseType(obj)
-            %option to select type of data to use in project option
-            casetypes = unique(obj.Cases.Catalogue.CaseType);
-
-            if length(casetypes)>1
-                %add All option and use button or list to get user to choose
-                casetypes = [casetypes,'All'];
-                if length(casetypes)<4
-                    type = questdlg('Clear which data type?','Clear cases',...
-                        casetypes,'All');
-                else
-                    selection = listdlg('ListString',casetypes);
-                    type = casetypes{selection};
-                end
-            else
-                type = 'All';
-            end
-        end
+        end           
 %%
 %-------------------------------------------------------------------------
 % HELP menu function

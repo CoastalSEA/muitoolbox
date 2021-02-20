@@ -28,7 +28,7 @@ classdef muiCatalogue < dscatalogue
 %%
         function saveCase(obj)  
             %write the results for a selected case to an excel file            
-            [caserec,ok] = selectCase(obj,'Select case to save:','single');
+            [caserec,ok] = selectCase(obj,'Select case to save:','single',2);
             if ok<1, return; end 
             
             
@@ -36,19 +36,13 @@ classdef muiCatalogue < dscatalogue
             
         end         
 %%
-        function deleteCases(obj,type,caserec)
+        function deleteCases(obj,caserec)
             %select one or more records and delete records from catalogue 
             %and class instances
-            if nargin<3  %if case to delete has not been specified
+            if nargin<2  %if case to delete has not been specified
                 [caserec,ok] = selectCase(obj,'Select cases to delete:',...
-                                                         'multiple',type);                                      
-                if ok<1, return; end  
-            elseif contains(caserec,'All')
-                if isempty(type) || strcmp(type,'All')
-                    caserec = 1:height(obj.Catalogue);
-                else
-                    caserec = strcmp(obj.Catalogue.CaseType,type);
-                end
+                                                       'multiple',2);                                      
+                if ok<1 || isempty(caserec), return; end  
             end 
             
             %sort in reverse order so that record ids do not change as
@@ -65,21 +59,23 @@ classdef muiCatalogue < dscatalogue
             close(hw)
         end    
 %%
-        function reloadCase(obj,mobj,type,caserec)  
+        function reloadCase(obj,mobj,caserec)  
             %reload model input variables as the current settings
-            if nargin<4  %if case to reload has not been specified
+            if nargin<3  %if case to reload has not been specified
                 [caserec,ok] = selectCase(obj,'Select case to reload:',...
-                                                            'single',type); 
+                                                            'single',2); 
                 if ok<1, return; end  
             end  
             cobj = getCase(obj,caserec);      %selected case
             minp = fieldnames(cobj.RunParam); %saved input class instances
             for i=1:length(minp)
                 mobj.Inputs.(minp{i}) = cobj.RunParam.(minp{i});
-            end          
+            end   
+            casedesc = obj.Catalogue.CaseDescription(caserec);
+            getdialog(sprintf('Reloaded: %s',casedesc));
         end
 %% 
-        function viewCaseSettings(obj,type,caserec)
+        function viewCaseSettings(obj,caserec)
             %view the saved input data for a selected Case
             nrec = height(obj.Catalogue);
             if nrec==1
@@ -87,7 +83,7 @@ classdef muiCatalogue < dscatalogue
             elseif nargin<3
                 %if case to view has not been specified or only one case
                 [caserec,ok] = selectCase(obj,'Select case to view:',...
-                                                            'single',type); 
+                                                            'single',2); 
                 if ok<1, return; end  
                 
             end
@@ -168,7 +164,7 @@ classdef muiCatalogue < dscatalogue
                 %return selected dimensions of variable
                 %NB: any range defined for the Variable is NOT applied
                 %returns all values within dimension range specified
-                [id,dnames] = getSelectedIndices(obj,UIsel,dst,varatt);
+                [id,dvals] = getSelectedIndices(obj,UIsel,dst,varatt);
                 varlabels = getLabels(dst,'Variable');
                 label = varlabels{id.var};
                 switch type
@@ -185,7 +181,7 @@ classdef muiCatalogue < dscatalogue
                         array = getData(dst,id.row,id.var,id.dim);
                         array = squeeze(array{1});
                         %get dimension name and indices
-                        dimnames = setDimNames(obj,array,dnames,varatt);                        
+                        dimnames = setDimNames(obj,array,dvals,varatt);                        
                         data = array2table(array,'RowNames',dimnames{1},...
                                             'VariableNames',dimnames{2});
                     case 'timeseries'
@@ -226,7 +222,7 @@ classdef muiCatalogue < dscatalogue
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,names)
             %find the indices for the selected variable, and the row and 
-            %dimension ranges or values.
+            %dimension values.
             idx.var = UIsel.variable;
             uidims = UIsel.dims;
             ndim = length(uidims);
@@ -265,19 +261,30 @@ classdef muiCatalogue < dscatalogue
             end
         end
 %%
-        function seldim = setDimNames(~,array,dnames,varatt)
+        function seldim = setDimNames(~,array,dimvalues,varatt)
             %match the selected dimensions to the data array and convert to
             %text RowNames and valid variable names
+            % array - sqeezed array sampled from first cell (note this is
+            %         still (1xn) if vector data in a single row)
+            % dimvalues - dimension values
+            % varatt - variable attributes (variable,row,dimension names)
             sz = size(array);
-            ndim = length(dnames.dim);
-            dimnames{1} = dnames.row;
-            dimnames(2:ndim+1) = dnames.dim;
+            ndim = length(dimvalues.dim);
             dimatt = varatt(2:end);
+            dimnames{1} = dimvalues.row;
+            if sz(1)==1                    %single row
+                dimnames{1} = 1;
+                dimatt = ['Row1',dimatt];
+            elseif isempty(dimnames{1})    %no RowNames assigned (not tested)
+                dimnames{1} = 1:sz(1);
+            end
+            dimnames(2:ndim+1) = dimvalues.dim;
+
             sdim = length(sz);
             seldim = cell(1,sdim); seldimname = seldim;
             for i=1:sdim
                 idx = cellfun(@length,dimnames)==sz(i);
-                seldim{i} = var2str(dimnames{idx});
+                seldim{i} = strip(var2str(dimnames{idx}));
                 seldimname{i} = dimatt{idx};
             end
             %
@@ -286,17 +293,36 @@ classdef muiCatalogue < dscatalogue
                 seldim{j} = cellfun(myfun,seldim{j},'UniformOutput',false);
             end
         end
+%%
+        function [caserec,ok] = selectCase(obj,mode,promptxt,selopt)
+            %select a case to use for something with options to subselect
+            %the selection list based on class or type
+            % mode - single or multiple selection mode
+            % promtxt - text to use to prompt user
+            % selopt - selection options:
+            %          0 = no subselection, 
+            %          1 = subselect using class, 
+            %          2 = subselect using type, 
+            %          3 = subselect using both
+            classops = unique(obj.Catalogue.CaseClass);
+            typeops  = unique(obj.Catalogue.CaseType);
+            classel = []; typesel = [];
+            if selopt==1
+                classel  = selectRecordOptions(obj,classops,'Select classes:');
+            elseif selopt==2
+                typesel  = selectRecordOptions(obj,typeops,'Select types:');
+            elseif selopt==3
+                classel  = selectRecordOptions(obj,classops,'Select classes:');
+                typesel  = selectRecordOptions(obj,typeops,'Select types:'); 
+            end
+
+            [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
+                                'CaseType',typesel,'CaseClass',classel,...
+                                'SelectionMode',mode,'ListSize',[250,200]);
+        end
     end
 %%
-    methods (Access=private)
-        function [caserec,ok] = selectCase(obj,promptxt,mode,type)
-            if nargin<4  || strcmpi(type,'All')
-                type = [];
-            end
-            [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
-                'SelectionMode',mode,'CaseType',type,'ListSize',[250,200]);
-        end
-%%       
+    methods (Access=private)      
         function delete_dataset(obj,caserec)
             %delete selected record and data set 
             [~,classrec,catrec] = getCase(obj,caserec);

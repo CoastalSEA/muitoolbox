@@ -32,28 +32,28 @@ classdef muiDataSet < handle
     end
     
     properties (Hidden, SetAccess=private)
-        CaseIndex   %case index assigned when class instance is loaded
+        CaseIndex       %case index assigned when class instance is loaded
+    end
+    
+    properties (Transient, Access=protected) 
+        sdsc            %Transient dataset from individual files 
+                        %that are combined to form master ts collection
+        DataFormats     %cell array of data formats available 
+        idFormat        %class instance file format               
     end
     
     methods (Abstract)    
         %methods that all subclasses must define
-        tabPlot(obj)     %define how data should be displayed on tab
-                         %when called by UI Plot tab
+        tabPlot(obj)    %define how data should be displayed on tab
+                        %when called by UI Plot tab
     end 
 %%
-
-
-
-
-
-
 %--------------------------------------------------------------------------
-%   Methods to set and get a DataSet
+%   Methods to set a DataSet and RunParam
 %--------------------------------------------------------------------------     
     methods (Access=protected)
         function setRunParam(obj,mobj)
-            %assign the run prarameters needed for a model, or the file 
-            %name for imported data sets
+            %assign the run parameters needed for a model
             classname = metaclass(obj).Name;
             minp = mobj.ModelInputs.(classname);
             for i=1:length(minp)
@@ -61,8 +61,8 @@ classdef muiDataSet < handle
             end
         end
 %%
-        function setDataRecord(obj,muicat,dataset,datatype)
-            %assign data to class Data property and update catalogue
+        function setDataSetRecord(obj,muicat,dataset,datatype)
+            %assign dataset to class Data property and update catalogue
             classname = metaclass(obj).Name;
             if iscell(dataset)
                 obj.Data = dataset;   %can be cell arry of multiple tables
@@ -70,7 +70,7 @@ classdef muiDataSet < handle
                 obj.Data = {dataset};  
             end
 
-            %add the run to the catalogue and update mui.Cases.DataSets
+            %add record to the catalogue and update mui.Cases.DataSets
             caserec = addRecord(muicat,classname,datatype);
             casedef = getRecord(muicat,caserec);
             obj.CaseIndex = casedef.CaseID;
@@ -125,9 +125,71 @@ classdef muiDataSet < handle
 %--------------------------------------------------------------------------
     methods (Static)
         function loadData(mobj)
+            %load user data set from one or more files
+            muicat = mobj.Cases;
+%             classname = 'UserData';
+%             if ~isempty(mobj.ImportClasses)
+%                 dataclasses = [mobj.ImportClasses,'Generic'];
+%                 promptxt = 'Select which Data Class to use:';
+%                 [sel,ok] = listdlg('PromptString',promptxt,'ListSize',[300,100],...
+%                             'SelectionMode','single','ListString',dataclasses);                    
+%                 if ok<1, return; end    %user cancelled       
+%                 classname = dataclasses{sel};
+%             end
+            
+                
+            setDataSetRecord(obj,muicat,dataset,'data')
+            DrawMap(mobj);
+        end
+%%
+        function addData(mobj)
+            %add additional data to an existing user dataset
+            
+            [lobj,classrec,~]  = selectCase2Use(mobj,'single');
+            if isempty(lobj), return; end
             
             
+            updateSelectedCase(lobj,mobj,classrec);
+        end        
+%%
+        function deleteData(mobj)
+            %delete variable or rows from a dataset
             
+            [lobj,classrec,~]  = selectCase2Use(mobj,'single');
+            if isempty(lobj), return; end
+            
+            updateSelectedCase(lobj,mobj,classrec);
+        end
+%%
+        function qcData(mobj)
+            %apply quality control to a dataset
+            [lobj,classrec,~]  = selectCase2Use(mobj,'single');
+            if isempty(lobj), return; end
+            
+            updateSelectedCase(lobj,mobj,classrec);
+        end
+%%
+        function [cobj,classrec,catrec]  = selectCase2Use(mobj,mode)
+            %select which existing data set to use
+            cobj = []; classrec = []; catrec = [];
+            muicat = mobj.Cases;      
+            promptxt = 'Select Case to use:';
+            [caserec,ok] = selectRecord(muicat,'PromptText',promptxt,...
+                'SelectionMode',mode,'CaseType','data','ListSize',[250,200]);
+            if ok<1, return; end  
+            [cobj,classrec,catrec] = getCase(muicat,caserec);
+        end
+    end
+    
+    methods
+        function updateSelectedCase(obj,mobj,classrec)
+            %update the save record with the amended version of instance
+            classname = metaclass(obj).Name;
+            mobj.Cases.DataSets.(classname)(classrec) = obj;
+            DrawMap(mobj);
+        end
+%%
+        function old
             %load user data set from one or more files
             % classname - name of class to be loaded
             % classhandle - handle to existing class object (may be empty)
@@ -254,15 +316,15 @@ classdef muiDataSet < handle
             end                      
         end
 %%
-        function selection = setImportFormat(classobj,id_class,isnew)
+        function selection = setImportFormat(obj,id_class,isnew)
             %prompt user to select a file format for importing data
-            % classobj - class object 
+            % obj - class object 
             % id_class - id of new instance
             % isnew - true indicates that a new instance is to be created
             % selection - user file format selection id
-            newobj = classobj(id_class);
+            newobj = obj(id_class);
             nformats = size(newobj(1).DataFormats,1);
-            if (isnew || size(classobj,2)>1) && nformats>1 
+            if (isnew || size(obj,2)>1) && nformats>1 
                 %no selection or multiple definitions already used
                 [selection,ok] = listdlg('PromptString','Select a file format',...
                     'SelectionMode','single',...
@@ -275,7 +337,7 @@ classdef muiDataSet < handle
             elseif nformats==1 %only one selection available
                 selection = 1;
             else  %use existing definition when only one defined
-                selection = classobj.idFormat;
+                selection = obj.idFormat;
             end
         end        
         

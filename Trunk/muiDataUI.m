@@ -473,11 +473,14 @@ classdef muiDataUI < handle %replaces DataGUIinterface
 %                 end
                 %
                 mdim = obj.TabContent(itab).XYZmxvar(xyz);%no. of range properties
-                if selection{1}==1   %variable selected not dimension
+                if selection{1}==1         %variable selected not dimension
                     if pdim>mdim
-                        ndim = pdim-mdim;                     %no. of index properties              
+                        ndim = pdim-mdim;  %no. of index properties  
+%                         subVarSelection(obj,dst,1,xyz,mdim,ndim);  %
+%                     end                                            %
                     else
                         ndim = 0;
+                        mdim = pdim;
                     end
                     subVarSelection(obj,dst,1,xyz,mdim,ndim);
                 end
@@ -565,6 +568,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                         ndim = pdim-mdim;                     %no. of index properties              
                     else
                         ndim = 0;
+                        mdim = pdim;
                     end
                     ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
                 end

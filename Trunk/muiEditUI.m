@@ -37,8 +37,8 @@ classdef muiEditUI < muiDataUI
                 warndlg('No data available to edit');
                 obj = [];
                 return;
-            elseif isa(mobj.mUI.Edit,'muiEditUI')
-                obj = mobj.mUI.Edit;
+            elseif isa(mobj.mUI.EditUI,'muiEditUI')
+                obj = mobj.mUI.EditUI;
                 if isempty(obj.dataUI.Figure)
                     obj = obj.setDataUIfigure(mobj);    %initialise figure 
                     setDataUItabs(obj,mobj); %add tabs 
