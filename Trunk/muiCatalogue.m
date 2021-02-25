@@ -26,14 +26,58 @@ classdef muiCatalogue < dscatalogue
             %constructor to initialise object
         end
 %%
-        function saveCase(obj)  
-            %write the results for a selected case to an excel file            
-            [caserec,ok] = selectCase(obj,'Select case to save:','single',2);
-            if ok<1, return; end 
+        function saveCase(obj,caserec)  
+            %write the results for a selected case to an excel file   
+            if nargin<2  %if case to save has not been specified
+                [caserec,ok] = selectCase(obj,'Select case to save:','single',2);
+                if ok<1, return; end 
+            end
             
+            [cobj,~,catrec] = getCase(obj,caserec);
             
+            %if class has more than one dataset per record prompt for selection
+            dataset = 1;
+            if ~isempty(cobj.MetaData) && length(cobj.MetaData)>1
+                promptxt = {'Select dataset'};
+                title = 'Save dataset';
+                [dataset,ok] = listdlg('PromptString',promptxt,...
+                           'SelectionMode','single','Name',title,...
+                           'ListSize',[300,100],'ListString',cobj.MetaData);
+                if ok<1, return; end       
+            end
+            dst = cobj.Data{dataset};
             
+            %determine save options based on dimensions of first cell
+            if numel(dst.DataTable{1,1})>1
+            	saveas = questdlg('Save data as','Save dataset',...
+                                           'dstable','table','dstable');
+            else
+                saveas = questdlg('Save data as','Save dataset',...
+                                     'Excel','dstable','table','Excel');
+            end
             
+            %use description as suggested file name and prompt user
+            casedesc = catrec.CaseDescription;
+            casedesc = char(matlab.lang.makeValidName(casedesc));            
+            %prompt user for file name to use
+            prompt = {'File name'};
+            title = 'Save case';
+            filename = inputdlg(prompt,title,1,{casedesc});
+            if isempty(filename), return; end
+            
+            %write selection to file
+            atable = dst.DataTable;
+            if strcmp(saveas,'Excel') 
+                rn = false;
+                if ~isempty(dst.RowNames), rn = true; end   
+                writetable(atable,[pwd,'/',filename{1},'.xlsx'],...
+                           'WriteRowNames',rn,'FileType','spreadsheet');
+            elseif strcmp(saveas,'dstable')                 
+                save([pwd,'/',filename{1},'.mat'],'dst') %save as dstable
+            else                
+                save([pwd,'/',filename{1},'.mat'],'atable') %save as table
+            end 
+            getdialog(sprintf('Data saved as ''%s'' to: %s',saveas,filename{1}));
         end         
 %%
         function deleteCases(obj,caserec)
@@ -42,7 +86,7 @@ classdef muiCatalogue < dscatalogue
             if nargin<2  %if case to delete has not been specified
                 [caserec,ok] = selectCase(obj,'Select cases to delete:',...
                                                        'multiple',2);                                      
-                if ok<1 || isempty(caserec), return; end  
+                if ok<1, return; end  
             end 
             
             %sort in reverse order so that record ids do not change as
@@ -95,11 +139,12 @@ classdef muiCatalogue < dscatalogue
                 warndlg('The case selected has no input data');
                 return;
             else
+                ninp = length(inputs);
                 propdata = {}; proplabels = {};
-                for k=1:length(inputs)
+                for k=1:ninp
                     localObj = cobj.RunParam.(inputs{k});
-                    propdata = vertcat(propdata,getProperties(localObj));
-                    proplabels = vertcat(proplabels,getPropertyNames(localObj));
+                    propdata = vertcat(propdata,getProperties(localObj)); %#ok<AGROW>
+                    proplabels = vertcat(proplabels,getPropertyNames(localObj)); %#ok<AGROW>
                 end
                 idx = find(~(cellfun(@isscalar,propdata)));
                 for i=1:length(idx)
@@ -112,7 +157,57 @@ classdef muiCatalogue < dscatalogue
                 %adjust position on screen            
             
             end            
-        end              
+        end   
+%%
+        function importCase(obj)
+            %import a case from a mat file that was saved using exportCase
+            %prompt user to select file to import
+            [fname,path] = getfiles('PromptText','Select case file to import',...
+                                                     'FileType','*.mat');
+            if fname==0, return; end
+            load([path,fname],'cobj','-mat');    
+            %function only accepts data exported as muiDataSet derived class
+            if isprop(cobj,'ClassIndex') %check 'cobj'is a muiDataSet class
+                msgbox('File does not contain a valid case to import');
+                return;
+            end 
+            
+            prompt = {'Data type:'};
+            title = 'Import case';
+            datatype = inputdlg(prompt,title,1,{'data'});
+            if isempty(datatype), return; end
+            
+            addCaseRecord(cobj,obj,datatype);
+        end
+%%
+        function exportCase(obj,caserec)
+            %save selected case to a mat file
+            if nargin<2  %if case to delete has not been specified
+                [caserec,ok] = selectCase(obj,'Select cases to delete:',...
+                                                       'multiple',2);                                      
+                if ok<1, return; end  
+            end 
+            [cobj,~,catrec] = getCase(obj,caserec);
+            
+            %use description as suggested file name and prompt user
+            casedesc = catrec.CaseDescription;
+            casedesc = char(matlab.lang.makeValidName(casedesc));            
+            %prompt user for file name to use
+            prompt = {'File name'};
+            title = 'Export case';
+            filename = inputdlg(prompt,title,1,{casedesc});
+            if isempty(filename), return; end
+            
+            save([pwd,'/',filename{1},'.mat'],'cobj') %save as cobj
+            getdialog(sprintf('Case exported to: %s',filename{1}));
+        end
+%%
+        function updateCase(obj,cobj,classrec)
+            %update the saved record with an amended version of instance
+            classname = metaclass(cobj).Name;
+            obj.DataSets.(classname)(classrec) = cobj;
+            getdialog(sprintf('Updated case for %s',classname));
+        end         
 %% 
         function [cobj,classrec,catrec] = getCase(obj,caserec)
             %retrieve the class instance, class record and catalogue record
@@ -122,7 +217,7 @@ classdef muiCatalogue < dscatalogue
             cobj = lobj(classrec);
         end
 %%
-        function [dst,caserec,idset] = getDataset(obj,caserec,idset)
+        function [dst,caserec,idset,dstxt] = getDataset(obj,caserec,idset)
             %use the caserec id to get a case and return selected dataset
             %also returns caserec and idset as numeric index values
             % caserec - record id in mui Catalogue
@@ -134,10 +229,15 @@ classdef muiCatalogue < dscatalogue
             cobj = getCase(obj,caserec);  %matches caseid to find record in class
             %
             if ~isnumeric(idset) 
-                idset =  find(strcmp(cobj.MetaData,idset));
+                dstxt = idset;
+                idset =  find(strcmp(cobj.MetaData,dstxt));
                 if isempty(idset)
                     idset = 1;    %no datasets defined so must only be one
                 end
+            elseif isempty(cobj.MetaData)
+                dstxt = 'Dataset';
+            else
+                dstxt = cobj.MetaData{idset};
             end
             dst = cobj.Data{idset};  %selected dataset
         end
@@ -153,9 +253,10 @@ classdef muiCatalogue < dscatalogue
             %        timeseries data set (assumes rows are datetime)
             % props - returns a struct containing data, description of 
             %         property being used and the associated label 
+            props = setPropsStruct(obj);
             if nargin<3, type = 'array'; end
             istable = false;
-            dst = getDataset(obj,UIsel.caserec,UIsel.dataset);
+            [dst,~,~,dstxt] = getDataset(obj,UIsel.caserec,UIsel.dataset);
             [varatt,vardesc] = getVarAttributes(dst,UIsel.variable);
             useprop = varatt{UIsel.property};
             usedesc = vardesc{UIsel.property};
@@ -215,90 +316,18 @@ classdef muiCatalogue < dscatalogue
                         data = table(data,'VariableNames',{useprop});
                 end
             end
+            props.case = dst.Description;
+            props.dset = dstxt;
             props.desc = usedesc;
             props.label = label;
             props.data = data;                    
         end
 %%
-        function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,names)
-            %find the indices for the selected variable, and the row and 
-            %dimension values.
-            idx.var = UIsel.variable;
-            uidims = UIsel.dims;
-            ndim = length(uidims);
-            idx.row = 1; dimnames.row = dst.RowNames;
-            idx.dim = cell(1,ndim-1);
-            for i=1:ndim
-                %assign to dimension or row                    
-                if strcmp(uidims(i).name,'RowNames') %this is a row                    
-                    var = dst.RowNames;
-                    idx.row = getIndices(obj,var,uidims(i).value);
-                    dimnames.row = var(idx.row);
-                else                                 %must be a dimension
-                    var = dst.Dimensions.(uidims(i).name);
-                    if height(dst.DataTable)>1   %ensure offset is correct
-                        idd = strcmp(names(3:end),uidims(i).name);
-                    else  
-                        idd = strcmp(names(2:end),uidims(i).name);
-                    end
-                    idx.dim{idd} = getIndices(obj,var,uidims(i).value);
-                    dimnames.dim{idd} = var(idx.dim{idd});
-                end  
-            end
-        end
-%%
-        function indices = getIndices(~,var,value)
-            %get the index or vector of indices based on selection
-            % var is the variable to select from and value is a single
-            % value to select the nearest index or a text string defining
-            % the range of values required
-            if ischar(value)
-                indices = getvarindices(var,value);
-            elseif length(var)>1
-                indices = interp1(var,1:length(var),value,'nearest'); 
-            else
-                indices = 1;
-            end
-        end
-%%
-        function seldim = setDimNames(~,array,dimvalues,varatt)
-            %match the selected dimensions to the data array and convert to
-            %text RowNames and valid variable names
-            % array - sqeezed array sampled from first cell (note this is
-            %         still (1xn) if vector data in a single row)
-            % dimvalues - dimension values
-            % varatt - variable attributes (variable,row,dimension names)
-            sz = size(array);
-            ndim = length(dimvalues.dim);
-            dimatt = varatt(2:end);
-            dimnames{1} = dimvalues.row;
-            if sz(1)==1                    %single row
-                dimnames{1} = 1;
-                dimatt = ['Row1',dimatt];
-            elseif isempty(dimnames{1})    %no RowNames assigned (not tested)
-                dimnames{1} = 1:sz(1);
-            end
-            dimnames(2:ndim+1) = dimvalues.dim;
-
-            sdim = length(sz);
-            seldim = cell(1,sdim); seldimname = seldim;
-            for i=1:sdim
-                idx = cellfun(@length,dimnames)==sz(i);
-                seldim{i} = strip(var2str(dimnames{idx}));
-                seldimname{i} = dimatt{idx};
-            end
-            %
-            for j=2:sdim
-                myfun = @(x) sprintf('%s_%s',seldimname{j},x);
-                seldim{j} = cellfun(myfun,seldim{j},'UniformOutput',false);
-            end
-        end
-%%
-        function [caserec,ok] = selectCase(obj,mode,promptxt,selopt)
+        function [caserec,ok] = selectCase(obj,promptxt,mode,selopt)
             %select a case to use for something with options to subselect
             %the selection list based on class or type
-            % mode - single or multiple selection mode
             % promtxt - text to use to prompt user
+            % mode - single or multiple selection mode            
             % selopt - selection options:
             %          0 = no subselection, 
             %          1 = subselect using class, 
@@ -320,15 +349,124 @@ classdef muiCatalogue < dscatalogue
                                 'CaseType',typesel,'CaseClass',classel,...
                                 'SelectionMode',mode,'ListSize',[250,200]);
         end
+%%
+        function useCase(obj,mode,classname,action)
+            %select which existing data set to use and pass to action method
+            % mode - single or multiple selection mode  
+            % classname - name of class to select cases for
+            % action - method of class to pass class object to (eg addData 
+            %          in muiDataSet)               
+            promptxt = 'Select Case to use:';
+            [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
+                'SelectionMode',mode,'CaseClass',classname,'ListSize',[250,200]);
+            if ok<1, return; end  
+            [cobj,classrec,catrec] = getCase(obj,caserec);
+
+            heq = str2func(['@(cobj,classrec,catrec,muicat) ',...
+                                [action,'(cobj,classrec,catrec,muicat)']]); 
+            heq(cobj,classrec,catrec,obj);  %instance of class object
+        end       
     end
 %%
     methods (Access=private)      
         function delete_dataset(obj,caserec)
-            %delete selected record and data set 
+            %delete selected record from Catalogue and DataSet
             [~,classrec,catrec] = getCase(obj,caserec);
             classname = catrec.CaseClass; 
             %clear instance of data set class
             obj.DataSets.(classname)(classrec) = [];
-        end          
+        end  
+%%
+        function props = setPropsStruct(~)
+            %initialise struct used in muiCatalogue.getProperty
+            props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[]);
+        end 
+%%
+        function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
+            %find the indices for the selected variable, and the row and 
+            %dimension values. 
+            % UIsel - struct defined by UIs derived from muiDataUI
+            % dst - dstable to extract indices from
+            % attnames - field names of attributes {variable,row,dimensions}
+            idx.var = UIsel.variable;
+            uidims = UIsel.dims;
+            ndim = length(uidims);
+            idx.row = 1; dimnames.row = dst.RowNames;
+            idx.dim = cell(1,ndim-1);
+            for i=1:ndim
+                %assign to dimension or row                    
+                if strcmp(uidims(i).name,'RowNames') %this is a row                    
+                    var = dst.RowNames;
+                    idx.row = getIndices(obj,var,uidims(i).value);
+                    dimnames.row = var(idx.row);
+                else                                 %must be a dimension
+                    var = dst.Dimensions.(uidims(i).name);
+                    if height(dst.DataTable)>1   %ensure offset is correct
+                        idd = strcmp(attnames(3:end),uidims(i).name);
+                    else  
+                        idd = strcmp(attnames(2:end),uidims(i).name);
+                    end
+                    idx.dim{idd} = getIndices(obj,var,uidims(i).value);
+                    dimnames.dim{idd} = var(idx.dim{idd});
+                end  
+            end
+        end        
+%%
+        function indices = getIndices(~,var,value)
+            %get the index or vector of indices based on selection
+            % var is the variable to select from and value is a single
+            % value to select the nearest index or a text string defining
+            % the range of values required
+            if ischar(value)
+                indices = getvarindices(var,value);
+            elseif length(var)>1
+                indices = interp1(var,1:length(var),value,'nearest'); 
+            else
+                indices = 1;
+            end
+        end  
+%%
+        function seldim = setDimNames(~,array,dimvalues,varatt)
+            %match the selected dimensions to the data array and convert to
+            %text RowNames and valid VariableNames for use in splittable
+            % array - sqeezed array sampled from first cell (note this is
+            %         still (1xn) if vector data in a single row)
+            % dimvalues - dimension values
+            % varatt - variable attributes (variable,row,dimension names)
+            % seldim - {1}=RowNames and {2}=valid VariableNames
+            sz = size(array);            
+            dimatt = varatt(2:end);        %attributes excluding variable
+            
+            %handle single row and empty RowNames
+            dimnames{1} = dimvalues.row;
+            if sz(1)==1                    %single row
+                dimnames{1} = 1;
+                dimatt = ['Row1',dimatt];
+            elseif isempty(dimnames{1})    %no RowNames assigned (not tested)
+                dimnames{1} = 1:sz(1);
+            end
+            
+            %handle dimensions if used
+            if isfield(dimvalues,'dim')
+                ndim = length(dimvalues.dim);
+                dimnames(2:ndim+1) = dimvalues.dim;              
+            else
+                dimnames{2} = 1;
+                dimatt(2) = varatt(1);
+            end
+            
+            sdim = length(sz);
+            seldim = cell(1,sdim); seldimname = seldim;
+            for i=1:sdim
+                idx = cellfun(@length,dimnames)==sz(i);
+                seldim{i} = strip(var2str(dimnames{idx}));
+                seldimname{i} = dimatt{idx};
+            end
+            %
+            for j=2:sdim
+                myfun = @(x) sprintf('%s_%s',seldimname{j},x);
+                seldim{j} = cellfun(myfun,seldim{j},'UniformOutput',false);
+            end
+        end
     end
 end

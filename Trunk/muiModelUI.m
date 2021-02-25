@@ -526,9 +526,9 @@ classdef muiModelUI < handle
                 case 'View Case Settings'
                     viewCaseSettings(muicat);
                 case 'Export Case'
-%                     DataSet.exportDataSet(obj);
+                    exportCase(muicat);
                 case 'Import Case'
-%                     DataSet.importDataSet(obj); 
+                    importCase(muicat); 
             end   
         end           
 %%
@@ -837,11 +837,15 @@ classdef muiModelUI < handle
             end
         end 
 %%
-        function callStaticFunction(~,fname,inp1)
+        function callStaticFunction(~,fname,inp1,inp2)
             %call a class function to load data or run a model
-            heq = str2func(['@(inp1) ',[fname,'(inp1)']]); 
+            if nargin<4
+                inp2 = [];
+            end
+            
+            heq = str2func(['@(inp1,inp2) ',[fname,'(inp1,inp2)']]); 
             try
-               heq(inp1); 
+               heq(inp1,inp2); 
             catch
                warndlg(sprintf('Unable to run function %s',fname));                       
             end

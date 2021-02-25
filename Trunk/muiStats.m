@@ -108,7 +108,8 @@ classdef muiStats < handle
             ok = 1;
             muicat = mobj.Cases;
             nvar = length(obj.UIsel);
-            props(nvar) = struct('desc',[],'label',[],'data',[]);
+            %initialise struct used in muiCatalogue.getProperty
+            props(nvar) = setPropsStruct(muicat);
             for i=1:nvar
                 %get the data and labels for each variable
                 if obj.UIsel(i).caserec==0

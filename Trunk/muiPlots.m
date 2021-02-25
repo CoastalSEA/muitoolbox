@@ -79,8 +79,8 @@ classdef muiPlots < handle
             ok = 1;
             muicat = mobj.Cases;
             nvar = length(obj.UIsel);
-            
-            props(nvar) = struct('desc',[],'label',[],'data',[]);
+            %initialise struct used in muiCatalogue.getProperty
+            props(nvar) = setPropsStruct(muicat);
             for i=1:nvar
                 %get the data and labels for each variable
                 props(i) = getProperty(muicat,obj.UIsel(i),'array');
@@ -105,7 +105,7 @@ classdef muiPlots < handle
                 obj.AxisLabels.(xyz{i}) = props(i).label;
                 mtxt = sprintf('%s\n%s: %s',mtxt,xyz{i},obj.UIsel(i).desc);
             end
-            obj.Legend = props(1).desc;
+            obj.Legend = sprintf('%s (%s)',props(1).case,props(1).dset);
             obj.MetaData = mtxt;
             %description of selection (may need sub-selection if more than
             %one case/variable used in plot)
@@ -134,34 +134,34 @@ classdef muiPlots < handle
             switch obj.UIset.callTab        %call function based on Tab
                 case '2D'                    
                     switch obj.UIset.callButton %and Tab Button used
-                        case 'New'              %create new XY plot
+                        case 'New'              %create new 2D plot
                             %check whether cartesian or polar plot
                             if obj.UIset.Polar
                                 newPolarplot(obj);                              
                             else
-                                newXYplot(obj);  
+                                new2Dplot(obj);  
                             end
-                        case 'Add'              %add variable to XY plot
+                        case 'Add'              %add variable to 2D plot
                             if strcmp(obj.UIset.Type,'bar')
                                 addBarplot(obj);
                             else
-                                addXYplot(obj);
+                                add2Dplot(obj);
                             end
-                        case 'Delete'           %delete variable from XY plot
-                            delXYplot(obj);
+                        case 'Delete'           %delete variable from 2D plot
+                            del2Dplot(obj);
                     end
                 case '3D'
-                    newXYZplot(obj);
+                    new3Dplot(obj);
 %                     switch obj.UIset.callButton       %and Tab Button used
-%                         case 'New'          %create new XY plot
-%                             newXYZplot(obj);
+%                         case 'New'          %create new 3D plot
+%                             new3DZplot(obj);
 %                         otherwise
 %                             if isempty(obj.Data.z) && ~strcmp(hf.Name,'Rose plot')
 %                                 switch obj.UIsel.srcVal
 %                                     case 'Add'
-%                                         addXYplot(obj);
+%                                         add3Dplot(obj);
 %                                     case 'Delete'
-%                                         delXYplot(obj);
+%                                         del3Dplot(obj);
 %                                 end
 %                             else
 %                                 warndlg('Cannot Add or Delete for Rose or 3D plots');
@@ -169,6 +169,7 @@ classdef muiPlots < handle
 %                             end
 %                     end
                 case '4D'
+                    new4Dplot(obj);
                     warndlg('Under development')
                     return;
                 case {'2DT','3DT','4DT'}
@@ -182,7 +183,7 @@ classdef muiPlots < handle
 % Functions for 2d plots
 %--------------------------------------------------------------------------
         function [x,y,hf,fnum,symb] = plot2Ddata(obj)
-            %information required to create, add or delete XY plot
+            %information required to create, add or delete 2D plot
             x = obj.Data.X;
             y = obj.Data.Y;
             idx = obj.Plot.FigNum==obj.Plot.CurrentFig.Number;
@@ -228,8 +229,8 @@ classdef muiPlots < handle
             plotfunc = str2func(['@(parent,x,y,s1,s2,leg,t1) ',plotxt]);                                       
         end        
 %%
-        function newXYplot(obj)
-            %generate new XY plot in figure
+        function new2Dplot(obj)
+            %generate new 2D plot in figure
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
             figax = axes('Parent',hfig,'Tag','PlotFigAxes'); 
             hold(figax,'on')
@@ -264,8 +265,8 @@ classdef muiPlots < handle
             hold(figax,'off')
         end
 %%
-        function addXYplot(obj)
-            %add data set to existing XY plot
+        function add2Dplot(obj)
+            %add data set to existing 2D plot
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
             figax = hfig.CurrentAxes; 
             hold(figax,'on');                    
@@ -294,8 +295,8 @@ classdef muiPlots < handle
             hold(figax,'off')
         end
 %%
-        function delXYplot(obj)
-            %delete data set from existing XY plot
+        function del2Dplot(obj)
+            %delete data set from existing 2D plot
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
             figax = hfig.CurrentAxes; 
             hold(figax,'on');
@@ -413,8 +414,8 @@ classdef muiPlots < handle
 %--------------------------------------------------------------------------
 % Functions for 3D plots
 %--------------------------------------------------------------------------
-        function newXYZplot(obj)
-            %control and definition of plots that are either XY or XYZ
+        function new3Dplot(obj)
+            %control and definition of plots that are 3D
             convertTime(obj);
             x = obj.Data.X;
             y = obj.Data.Y;
@@ -491,7 +492,7 @@ classdef muiPlots < handle
                     var = obj.Data.Y;
                     vari = setTimeDependentVariable(obj,var,1);
                     obj.Data.Y = vari;   %first time step
-                    newXYplot(obj)
+                    new2Dplot(obj)
                     figax = gca;
                     hp = figax.Children;
 %                     vari = setTimeDependentVariable(obj,var,1); %#ok<NASGU>
@@ -501,7 +502,7 @@ classdef muiPlots < handle
                     var = obj.Data.Z;
                     vari = setTimeDependentVariable(obj,var,1); 
                     obj.Data.Z = vari;  %first time step
-                    newXYZplot(obj)
+                    new3Dplot(obj)
                     figax = gca;
                     hp = figax.Children;
                     hp.ZDataSource = 'vari';

@@ -12,10 +12,6 @@ classdef muiProject < handle
 % CoastalSEA(c) Aug 2020
 %--------------------------------------------------------------------------
 %  
-%     properties (Constant)
-%         Evoke = muiProject            %instance of the defining class 
-%     end
-    
     properties
         PathName                     %path for user selected file
         FileName                     %user selected file

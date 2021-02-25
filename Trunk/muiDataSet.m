@@ -36,10 +36,11 @@ classdef muiDataSet < handle
     end
     
     properties (Transient, Access=protected) 
-        sdsc            %Transient dataset from individual files 
-                        %that are combined to form master ts collection
+        sdst            %Transient dataset from individual files 
+                        %that are combined to form master dstable
         DataFormats     %cell array of data formats available 
-        idFormat        %class instance file format               
+        idFormat        %class instance file format    
+        FileSpec        %file loading spec {MultiSelect(on/off),FileType}
     end
     
     methods (Abstract)    
@@ -49,7 +50,203 @@ classdef muiDataSet < handle
     end 
 %%
 %--------------------------------------------------------------------------
-%   Methods to set a DataSet and RunParam
+%   Methods for subclasses to load and add data
+%--------------------------------------------------------------------------
+    methods (Static)
+        function loadData(muicat,classname)
+            %load user data set from one or more files
+            
+            heq = str2func(classname);
+            obj = heq();  %instance of class object
+            if isempty(obj.DataFormats), return; end  %user cancelled
+            
+            if ~isa(obj,'UserData')  
+                %get file format from class definition (note: UserData
+                %FileFormat defined in class constructor)
+                ok = setFileFormatID(obj);
+                if ok<1, return; end
+            end
+            
+            %set metadata
+            funcname = 'setDSproperties';
+            [dsp,ok] = callFileFormatFcn(obj,funcname);
+            if ok<1, return; end
+
+            [fname,path,nfiles] = getfiles('MultiSelect',obj.FileSpec{1},...
+                'FileType',obj.FileSpec{2},'PromptText','Select file(s):');
+            if iscell(fname)
+                filename = [path fname{1}]; %multiselect returns cell array
+            else
+                filename = [path fname];    %single select returns char
+            end
+            
+            %get data
+            funcname = 'getData';
+            [dst,ok] = callFileFormatFcn(obj,funcname,filename,dsp);
+            if ok<1 || isempty(dst), return; end
+            %assign metadata about data
+            dst.Source{1} = filename;
+            
+            hw = waitbar(0, 'Loading data. Please wait');
+            %now load any other files of the same format
+            if nfiles>1
+                for jf = 2:nfiles
+                    jf_file = fname{jf};
+                    filename = [path jf_file];
+                    adn_dst = callFileFormatFcn(obj,funcname,filename,dsp);
+                    if ~isempty(adn_dst)
+                        dst = vertcat(dst,adn_dst); %#ok<AGROW>
+                    end
+                    dst.Source{jf} = filename;
+                    waitbar(jf/nfiles)
+                end                
+            end
+            close(hw);
+            
+            setDataSetRecord(obj,muicat,dst,'data');
+            getdialog(sprintf('Data loaded in class: %s',classname));
+        end
+    end
+%%    
+    methods
+        function addData(obj,classrec,catrec,muicat) 
+            %add additional data to an existing user dataset
+            dataset = getDataSetID(obj);
+            dst = obj.Data{dataset};   
+            
+            
+            [fname,path] = getfiles('MultiSelect','off',...
+                'FileType',obj.FileSpec{2},'PromptText','Select file:');
+            filename = [path fname];
+            %get data
+            funcname = 'getData';
+            dsp = dst.DSproperties;
+            [adn_dst,ok] = callFileFormatFcn(obj,funcname,filename,dsp);
+            if ok<1 || isempty(adn_dst), return; end
+            
+            if strcmp(dst.RowType,'datetime')  %insert data in existing record
+                dst = mergerows(dst,adn_dst);                
+            else                               %concatenate in order to end
+                dst = vertcat(dst,adn_dst);
+            end
+            if isempty(dst), return; end
+            
+            %assign metadata about data
+            nfile = length(dst.Source);
+            dst.Source{nfile+1} = filename;
+            
+            obj.Data{dataset} = dst;  
+            updateCase(obj,muicat,classrec);
+            getdialog(sprintf('Data added to: %s',catrec.CaseDescription));
+        end        
+%%
+        function deleteData(obj,classrec,catrec,muicat)
+            %delete variable or rows from a dataset
+            dataset = getDataSetID(obj);
+            dst = obj.Data{dataset};
+            
+            %option to delete a variable (column) or dimension rows (rows of
+            %array - not just table rows)
+            title = 'Delete data';
+            selopt = questdlg('Delete selected:',title',...
+                                      'variable','dimension','variable');
+            if strcmp(selopt,'variable')
+                delist = dst.VariableNames;
+            else
+                names = getVarAttributes(dst,1);
+                delist = names(2:end);
+            end
+            %select variable or dimension to use
+            promptxt = {sprintf('Select %s',selopt)}; 
+            att2use = 1;
+            if length(delist)>1
+                [att2use,ok] = listdlg('PromptString',promptxt,...
+                                 'Name',title,'SelectionMode','single',...
+                                 'ListSize',[250,100],'ListString',delist);
+                if ok<1, return; end  
+            end
+            
+            if strcmp(selopt,'variable')
+                dst.(delist{att2use}) = [];  %delete selected variable
+            else
+                %use access via DataTable so that values are returned as
+                %cell array fo character vectors
+                dimprops = dst.DataTable.Properties;
+                %get list of row or dimension values
+                if strcmp(delist{att2use},'RowNames')
+                    dimlist = dimprops.RowNames;
+                    isrow = true;
+                else
+                    dimlist = dimprops.CustomProperties.Dimensions.(delist{att2use});
+                    isrow = false;
+                end                
+                [row2use,ok] = listdlg('PromptString',promptxt,...
+                                 'Name',title,'SelectionMode','multiple',...
+                                 'ListSize',[120,300],'ListString',dimlist);
+                if ok<1, return; end  
+                %delete selected values for row or dimension                
+                idx = setdiff((1:length(dimlist)),row2use); %rows to be kept
+                if isrow     
+                    dst.DataTable(row2use,:) = [];    %delete rows
+                    updateRange(dst,'Row',1)
+                    % dst = getDSTable(dst,idx);      %resample dstable
+                else
+                    dimcall = sprintf('Dimensions.%s',delist{att2use});                    
+                    dimlist = dst.Dimensions.(delist{att2use})(idx);
+                    dst = getDSTable(dst,dimcall,dimlist);  %resample dstable
+                end
+            end
+            
+            obj.Data{dataset} = dst;            
+            updateCase(obj,muicat,classrec);
+            getdialog(sprintf('Data deleted from: %s',catrec.CaseDescription));
+        end
+%%
+        function qcData(obj,classrec,catrec,muicat)
+            %apply quality control to a dataset
+            funcname = 'dataQC';
+            ok = callFunction(obj,funcname,obj);
+            if ok<1, return; end
+            
+            updateCase(obj,muicat,classrec);
+            getdialog(sprintf('Quality control applied to: %s',catrec.CaseDescription));
+        end
+%%
+        function dataset = getDataSetID(obj)
+            %check whether there is more than one dstable and select
+            dataset = 1;
+            if ~isempty(obj.MetaData) && length(obj.MetaData)>1
+                promptxt = {'Select dataset'};
+                title = 'Save dataset';
+                [dataset,ok] = listdlg('PromptString',promptxt,...
+                           'SelectionMode','single','Name',title,...
+                           'ListSize',[300,100],'ListString',obj.MetaData);
+                if ok<1, return; end       
+            end            
+        end
+
+%%        
+        function addCaseRecord(obj,muicat,datatype)
+            %add a case to the Catalogue and assign to DataSets
+            classname = metaclass(obj).Name;            
+            %add record to the catalogue and update mui.Cases.DataSets
+            caserec = addRecord(muicat,classname,datatype);
+            casedef = getRecord(muicat,caserec);
+            obj.CaseIndex = casedef.CaseID;
+            obj.Data{end}.Description = casedef.CaseDescription;
+            if isempty(muicat.DataSets) || ~isfield(muicat.DataSets,classname) ||...
+                    isempty(muicat.DataSets.(classname))
+                idrec = 1;
+            else
+                idrec = length(muicat.DataSets.(classname))+1;
+            end
+            muicat.DataSets.(classname)(idrec) = obj;
+        end         
+        
+    end
+%%
+%--------------------------------------------------------------------------
+%   Methods to set DataSet, RunParam, FileFormat and FileFormatID
 %--------------------------------------------------------------------------     
     methods (Access=protected)
         function setRunParam(obj,mobj)
@@ -63,335 +260,282 @@ classdef muiDataSet < handle
 %%
         function setDataSetRecord(obj,muicat,dataset,datatype)
             %assign dataset to class Data property and update catalogue
-            classname = metaclass(obj).Name;
             if iscell(dataset)
-                obj.Data = dataset;   %can be cell arry of multiple tables
+                obj.Data = dataset;   %can be cell array of multiple tables
             else
                 obj.Data = {dataset};  
             end
-
-            %add record to the catalogue and update mui.Cases.DataSets
-            caserec = addRecord(muicat,classname,datatype);
-            casedef = getRecord(muicat,caserec);
-            obj.CaseIndex = casedef.CaseID;
-            obj.Data{end}.Description = casedef.CaseDescription;
-            if isempty(muicat.DataSets) || ~isfield(muicat.DataSets,classname) ||...
-                    isempty(muicat.DataSets.(classname))
-                idrec = 1;
+            addCaseRecord(obj,muicat,datatype)
+        end                    
+%%
+        function formatfile = setFileFormat(~)
+            %prompt user to select a FileFormat m file
+            [fname,~,~] = getfiles('PromptText','Format code file','FileType','*.m');
+            if fname==0, formatfile = []; return; end  %user cancelled
+            %check that can find file on path
+            isfile = exist(fname,'file');
+            if isfile==2
+                formatfile = fname(1:end-2); %function name to call format file
             else
-                idrec = length(muicat.DataSets.(classname))+1;
+                warndlg('File not found. Check that folder is on Matlab path')
+                formatfile = [];
             end
-            muicat.DataSets.(classname)(idrec) = obj;
-        end
-    end
-%%        
-        
-        
-%         function classrec = getClassIndex(obj,caseid)
-%             %find the record id of an instance in a class array using the
-%             %CaseIindex
-%             classname = metaclass(obj).Name;
-%             
-%         end
-
-%         function set.ClassIndex(obj,caseid)
-%             %set the class index for a new instance
-%             %obj is handle to class instance  
-%             obj.ClassIndex = caseid;
-%             fprintf('set class index %d',caseid)
-%             %check if besoke code is actually needed
-%             %obj.ClassIndex = caseid;
-%         end
-%%        
-%         function classrec = get.ClassIndex(obj)
-%             %set the class index for a new instance
-%             %obj is handle to class instance
-%             classrec = obj.ClassIndex;
-%             fprintf('get class index %d',classrec)
-%             %see what this does without bespoke code. If does not work for
-%             %multiple instances of obj then use code below
-% %             nclass = length(obj);
-% %             classid = zeros(1,nclass);
-% %             for i=1:nclass
-% %                 classid(i) = obj(i).ClassIndex;
-% %             end
-% %             classrec = find(classid==caseid);
-%         end
-
-
-%%  NEED TO DETERMINE WHAT OF THE FUNCTIONS BELOW ARE REALLY NEEDED
-%--------------------------------------------------------------------------
-%   Methods for subclasses to load and add data
-%--------------------------------------------------------------------------
-    methods (Static)
-        function loadData(mobj)
-            %load user data set from one or more files
-            muicat = mobj.Cases;
-%             classname = 'UserData';
-%             if ~isempty(mobj.ImportClasses)
-%                 dataclasses = [mobj.ImportClasses,'Generic'];
-%                 promptxt = 'Select which Data Class to use:';
-%                 [sel,ok] = listdlg('PromptString',promptxt,'ListSize',[300,100],...
-%                             'SelectionMode','single','ListString',dataclasses);                    
-%                 if ok<1, return; end    %user cancelled       
-%                 classname = dataclasses{sel};
-%             end
-            
-                
-            setDataSetRecord(obj,muicat,dataset,'data')
-            DrawMap(mobj);
         end
 %%
-        function addData(mobj)
-            %add additional data to an existing user dataset
-            
-            [lobj,classrec,~]  = selectCase2Use(mobj,'single');
-            if isempty(lobj), return; end
-            
-            
-            updateSelectedCase(lobj,mobj,classrec);
-        end        
-%%
-        function deleteData(mobj)
-            %delete variable or rows from a dataset
-            
-            [lobj,classrec,~]  = selectCase2Use(mobj,'single');
-            if isempty(lobj), return; end
-            
-            updateSelectedCase(lobj,mobj,classrec);
-        end
-%%
-        function qcData(mobj)
-            %apply quality control to a dataset
-            [lobj,classrec,~]  = selectCase2Use(mobj,'single');
-            if isempty(lobj), return; end
-            
-            updateSelectedCase(lobj,mobj,classrec);
-        end
-%%
-        function [cobj,classrec,catrec]  = selectCase2Use(mobj,mode)
-            %select which existing data set to use
-            cobj = []; classrec = []; catrec = [];
-            muicat = mobj.Cases;      
-            promptxt = 'Select Case to use:';
-            [caserec,ok] = selectRecord(muicat,'PromptText',promptxt,...
-                'SelectionMode',mode,'CaseType','data','ListSize',[250,200]);
-            if ok<1, return; end  
-            [cobj,classrec,catrec] = getCase(muicat,caserec);
-        end
-    end
-    
-    methods
-        function updateSelectedCase(obj,mobj,classrec)
-            %update the save record with the amended version of instance
-            classname = metaclass(obj).Name;
-            mobj.Cases.DataSets.(classname)(classrec) = obj;
-            DrawMap(mobj);
-        end
-%%
-        function old
-            %load user data set from one or more files
-            % classname - name of class to be loaded
-            % classhandle - handle to existing class object (may be empty)
-            if nargin<2
-                classhandle = [];
-            end
-            
-            isnew = true;
-            if ~isempty(classhandle)
-                newflg = questdlg('Create a new data definition?','Load data',...
-                                                        'Yes','No','No');
-                if strcmp(newflg,'No'), isnew = false; end                                    
-            end
-
-            heq = str2func(['@ ',classname]);
-            newobj = heq();  %instance of class object
-
-            [classobj,id_class] = setDataClassID(newobj,classhandle);  
-
-            localObj = classobj(id_class);  %instance to be used for new data
-            %check whether ResDef is defined and if not load definition
-            
-            if isempty(localObj.DSproperties.var.Names)                
-                %models define DSproperties when run so already defined
-                %imported data calls function getDSproperties in format file
-                localObj.idFormat = setImportFormat(classobj,id_class,isnew);
-                if isempty(localObj.idFormat), return; end
-                %
-                localObj = callFileFunction(localObj,'getDSproperties');
-                if isempty(localObj), return; end
-                
-                %possibly call loadTSDataSet here for multiple timeseries
-                %files
-            else
-                %load the model data
-                %possibly use loadDSDataSet for models and non-timeseries
-                
-            end
-            
-            id_rec = 1;  %first data in new data set
-            localObj = loadDSDataSet(localObj,id_rec);
-            if isempty(localObj), return; end
-            
-            %save data set
-            classobj(id_class) = localObj;
-            classhandle = classobj;
-%             mtxt = 'Data successfully loaded';
-%             setDataSet(localObj,mobj,h_data,id_class,id_rec,mtxt);
-        end
- 
-    end
-%%
-    methods
-        function obj = loadDSDataSet(obj,irec)
-            %load first time series (or set of variables with common time)
-            %obj - instance of a DataSet class object
-            %irec - id of record in class object
-            ismodel=false;
-
-            formatxt = sprintf('Files %s',obj.FileFormats);
-            filetype = {obj.FileFormats,formatxt};
-            [fname,path,nfiles] = getfiles('on',filetype);
-            if nfiles==0, return; end
-
-            hw = waitbar(0, 'Loading data. Please wait');
-            %load first file and create master collection
-            obj.filename = [path fname{1}];
-            
-            %if imported else model
-            if ismodel
-                
-            else
-                obj = callFileFunction(obj,'getDSdata');
-                if isempty(obj), return; end
-            end    
-            
-            if isempty(obj.sdsc)
-                close(hw);
-                return;
-            else
-                obj.DataSets{irec} = obj.sdsc;  
-            end
-            %now load any other files (they need to be in time order)
-            if nfiles>1
-                for jf = 2:nfiles
-                    jf_file = fname{jf};
-                    obj.filename = [path,jf_file];
-                    obj = callFileFunction(obj,'getDSdata');
-                    if ~isempty(obj.stsc)
-                        obj.DataSet{irec} = vertcat(obj.DataSet{irec},obj.stsc);
-                    end
-                    waitbar(jf/nfiles)
-                end
-            end
-            close(hw);
-        end         
-%%        
-        function obj = callFileFunction(obj,funcall)
-            %call external function used to load data fo defined format
-            %funcall - function in data format function
-            %compile handle to anonymous function
-            dataformat = obj.DataFormats{obj.idFormat,2};
-            heq = str2func(['@(obj,funcall) ',[dataformat,'(obj,funcall)']]);                  
-            try
-                obj = heq(obj,funcall);
-            catch
-                warndlg(sprintf('Unable to run %s using %s',funcall,dataformat));
-                obj = [];
-                return;
-            end            
-        end
-%%        
-        function [classobj,id_class] = setDataClassID(newobj,classobj)
-            %assign the class instance and record ids and add new instance
-            %to class handle. 
-            % obj - new instance of class, 
-            % classobj class handle
-            if isempty(classobj)
-                id_class = 1;
-                classobj = newobj;                
-            else
-                id_class = length(classobj)+1;
-                classobj(id_class) = newobj;      %assign new class object
-            end                      
-        end
-%%
-        function selection = setImportFormat(obj,id_class,isnew)
-            %prompt user to select a file format for importing data
-            % obj - class object 
-            % id_class - id of new instance
-            % isnew - true indicates that a new instance is to be created
-            % selection - user file format selection id
-            newobj = obj(id_class);
-            nformats = size(newobj(1).DataFormats,1);
-            if (isnew || size(obj,2)>1) && nformats>1 
-                %no selection or multiple definitions already used
+        function ok = setFileFormatID(obj)
+            %prompt user to select a file format 
+            if length(obj.DataFormats(:,1))>1
                 [selection,ok] = listdlg('PromptString','Select a file format',...
-                    'SelectionMode','single',...
-                    'ListSize',[300,100],...
-                    'ListString',newobj(1).DataFormats(:,1));
-                if ok<1
-                    selection = [];
-                    return; 
-                end
-            elseif nformats==1 %only one selection available
-                selection = 1;
-            else  %use existing definition when only one defined
-                selection = obj.idFormat;
+                        'SelectionMode','single','ListSize',[300,100],...
+                        'ListString',obj.DataFormats(:,1));
+            obj.idFormat = selection;  
+            else
+                obj.idFormat = 1;
             end
-        end        
-        
+        end
 %%
-%         function [header,data] = readInputFile(obj,nhead,dataSpec)
-%             %generic function to read data from a file
-%             %obj - an instance of a data class (i.e. classobj(id_class))
-%             %nhead - number of header lines
-%             %dataSpec - defines read format (not required if defined in header)
-%             header = ''; data = [];
-% 
-%             if nhead==0 && (nargin<3 || isempty(dataSpec))
-%                 warndlg('Define read format in call to readInputFile using dataSpec');
-%                 return
-%             end
-%             %
-%             if nargin<3
-%                 dataSpec = [];
-%             end
-%             
-%             %open file
-%             fid = fopen(obj.filename, 'r');
-%             if fid<0
-%                 errordlg('Could not open file for reading','File write error','modal')
-%                 return;
-%             end
-%             
-%             %read header and data as required
-%             if nhead>0
-%                 for i=1:nhead
-%                     header{i} = fgets(fid); 
-%                 end
-%             end
-%             
-%             if isempty(dataSpec)
-%                 dataSpec = header{1}; %format spec MUST be on first line
-%             end
-%             %read numeric data            
-%             data = textscan(fid,dataSpec);
-%             if isempty(data)
-%                 warndlg('No data. Check file format selected')
-%             end
-%             fclose(fid);
-%         end  
+        function [out1,ok] = callFileFormatFcn(obj,funcname,inp1,inp2)
+            %call a function in the data format file 
+            % funcname - name of the functions ('getDSproperties','getData','dataQC')
+            % 
+            % outvar - variable returned by function (if any)
+            % ok - error flag; 0-if catch called
+            if nargin<3
+                inp1 = [];  inp2 = [];
+            elseif nargin<4
+                inp2 = [];
+            end
+            
+            formatfile = obj.DataFormats{obj.idFormat,2};
+            
+            ok = 1;
+            msgtxt = @(x,y) sprintf('Unable to evaluate call to %s function %s',...
+                                                                     x,y);
+            try
+                heq = str2func(['@(funcname,inp1,inp2) ',[formatfile,'(funcname,inp1,inp2)']]); 
+                out1 = heq(funcname,inp1,inp2);
+            catch
+                warndlg(msgtxt(formatfile,funcname));
+                ok = 0;
+            end            
+        end 
+%%
 %--------------------------------------------------------------------------
-% Other functions
-%--------------------------------------------------------------------------  
-%         function answer = isunique(~,usevals)
-%             %check that all values in usevals are unique
-%             if isdatetime(usevals) || isduration(usevals)
-%                 usevals = cellstr(usevals);
-%             end
-%             [~,idx,idy] = unique(usevals,'stable');
-%             answer = numel(idx)==numel(idy);
-%         end
+%   Default tab plot
+%--------------------------------------------------------------------------    
+        function tabDefaultPlot(obj,src)
+            %default plotting function for Q-Plot tab
+
+            %get data for variable
+            dst = obj.Data{1};
+            [varname,varidx] = selectAttribute(dst,1);    %1=select variable
+            [~,cdim,vsze] = getvariabledimensions(dst,varname);
+            [attnames,~,attlabels] = getVarAttributes(dst,varidx);
+
+            %get main variable
+            pdat.V = dst.(varname);
+            labs.V = attlabels{1};
+            
+            %find if there are rows and if they are monotonic            
+            if vsze(1)>1 
+                nr = 3;           %dimension offset if rows
+                rdim = 'X';
+                istime = false;
+                t = dst.RowNames;                
+                if isdatetime(t) || isduration(t) || isnumeric(t)
+                    istime = true;  rdim = 'T';
+                elseif isnumeric(rows) && issorted(t,'monotonic')
+                    istime = true;  rdim = 'T';
+                end
+                pdat.(rdim) = t;
+                labs.(rdim) = dst.RowDescription;
+            else
+                nr = 2;           %dimension offset if no rows 
+                istime = true;    %ensures correct dimension assignment
+            end
+            
+            %get the dimension names and unpack if used   
+            dimnames = attnames(nr:end);
+            dimlab = attlabels(nr:end);
+            D = {'X','Y','Z'};
+            for i=1:cdim    %unpack the dimensions if used
+                if istime, j=i; else, j=i+1; end  %offset if rows are not time
+                pdat.(D{j}) = dst.Dimensions.(dimnames{i});
+                labs.(D{j}) = dimlab{i};
+            end
+
+            %generate plot for display on Q-Plot tab
+            dst = obj.Data{1};
+            ht = findobj(src,'Type','axes');
+            delete(ht);
+            ax = axes('Parent',src,'Tag','Qplot');
+            
+            
+            if vsze(1)==1            %no rowa
+                if cdim==1           %line plot
+                    DSplot(obj,ax,pdat,labs);  
+                elseif cdim==2       %surface plot
+                    DSsurface(obj,ax,pdat,labs);
+%                     title(dst.Description);
+                    DSrotatebutton(obj,ax,src);
+                elseif cdim==3       %volume plot
+                    DSvolume(obj,ax,pdat,labs);
+%                     title(dst.Description);
+                    DSrotatebutton(obj,ax,src);
+                end
+            elseif istime            %rows that are time or ordered
+                if cdim==0    
+                    DSplot(obj,ax,pdat,labs);     
+                elseif cdim==1
+                    DSsurface(obj,ax,pdat,labs);
+%                     title(dst.Description);
+                    DSrotatebutton(obj,ax,src);
+                elseif cdim<4
+                    DSanimation(obj,ax,pdat,labs,dst.Description,cdim);
+                end    
+            else                    %rows that are char,string,categorical,ordinal
+                if cdim==0    
+                        DSbar(obj,ax,pdat,labs); 
+                elseif cdim==1
+                    DSsurface(obj,ax,pdat,labs);
+%                     title(dst.Description);
+                    DSrotatebutton(obj,ax,src);
+                elseif cdim==2
+                    DSvolume(obj,ax,pdat,labs);
+%                     title(dst.Description);
+                    DSrotatebutton(obj,ax,src);
+                end                  
+            end
+            title (dst.Description);
+            ax.Color = [0.96,0.96,0.96];  %needs to be set after plot          
+        end
+%%
+        function h = DSplot(~,ax,data,labels)
+            %line plot for 1D variable
+            if iscell(data.V) && ischar(data.V{1})                   
+                v = categorical(data.V,'Ordinal',true);    
+                cats = categories(v);
+                data.V = double(v); %convert categorical data to numerical
+            else
+                cats = [];
+            end
+            
+            h = plot(ax,data.X,data.V);
+            
+            if ~isempty(cats)
+                yticks(1:length(cats));
+                yticklabels(cats);
+            end
+            xlabel(labels.X); 
+            ylabel(labels.V);  
+        end
+%%
+        function h = DSbar(~,ax,data,labels)
+            %line plot for 1D variable
+            if ~iscategorical(data.X)
+                data.X = categorical(data.X,data.X);
+            end
+            %
+            if iscell(data.V) && ischar(data.V{1})                   
+                y = categorical(data.V,'Ordinal',true);    
+                cats = categories(y);
+                data.V = double(y); %convert categorical data to numerical
+            else
+                cats = [];
+            end
+            
+            h = bar(ax,data.X,data.V);
+            
+            if ~isempty(cats)
+                yticks(1:length(cats));
+                yticklabels(cats);
+            end
+            xlabel(labels.X); 
+            ylabel(labels.V);  
+        end
+%%
+        function h = DSsurface(~,ax,data,labels)
+            %surface plot for 2D variable            
+            h = surf(ax,data.X,data.Y,data.V','EdgeColor','none');
+            shading interp
+            h.ZDataSource = 'vi';
+            xlabel(labels.X); 
+            ylabel(labels.Y);  
+            zlabel(labels.V)  
+            view(3);
+            cb = colorbar;
+            cb.Label.String = labels.V;
+        end   
+%%
+        function h = DSvolume(~,ax,data,labels)
+            %volume plot for 3D variable
+            isovalue = mean(data.V,'all');
+            h = patch(ax,isosurface(data.Y,data.X,data.Z,data.V,isovalue));
+            isonormals(data.Y,data.X,data.Z,data.V,h);            
+            h.FaceColor = 'blue';
+            h.EdgeColor = 'red';
+            view(3); 
+            camlight 
+            lighting gouraud
+            xlabel(labels.Y); 
+            ylabel(labels.X);
+            zlabel(labels.Z);
+        end
+%%
+        function DSanimation(obj,ax,data,labels,titletxt,cdim)
+            %aninmate surface for time+2D data
+            
+            data1 = data;
+            if cdim==2
+                data1.V = squeeze(data.V(1,:,:));
+                h = DSsurface(obj,ax,data1,labels);
+                ax.XLim = [min(data.X),max(data.X)];
+                ax.YLim = [min(data.Y),max(data.Y)];
+                ax.ZLim = [min(data.V,[],'all'),max(data.V,[],'all')];
+                hold(ax,'on')
+                ax.ZLimMode = 'manual';
+                for i=2:length(data.T)
+                    vi = squeeze(data.V(i,:,:))'; %#ok<NASGU>
+                    refreshdata(h,'caller')
+                    txt1 = sprintf('Time = %s', string(data.T(i)));
+                    title(sprintf('%s\n%s',titletxt,txt1))
+                    drawnow; 
+                end
+            else
+                data1.V = squeeze(data.V(1,:,:,:));
+                h = DSvolume(obj,ax,data1,labels);
+                ax.XLim = [min(data.Y),max(data.Y)];
+                ax.YLim = [min(data.X),max(data.X)];
+                ax.ZLim = [min(data.Z),max(data.Z)];
+                grid on
+                hold(ax,'on')
+                for i=2:length(data.T)
+                    vi = squeeze(data.V(i,:,:,:));
+                    isovalue = mean(vi,'all');
+                    delete(h)
+                    h = patch(isosurface(data.Y,data.X,data.Z,vi,isovalue));
+                    isonormals(data.Y,data.X,data.Z,vi,h)
+                    h.FaceColor = 'blue';
+                    h.EdgeColor = 'red';
+                    txt1 = sprintf('Time = %s', string(data.T(i)));
+                    title(sprintf('%s\n%s',titletxt,txt1))
+                    drawnow; 
+                end
+            end 
+            hold(ax,'off')
+        end         
+%%
+        function DSrotatebutton(~,ax,src)
+            %button to rotate surface plot
+            hb = findobj(src,'Style','pushbutton','Tag','RotateButton');
+            delete(hb) %delete button so that new axes is assigned to callback
+            uicontrol('Parent',src,'Tag','RotateButton',...  %callback button
+                'Style','pushbutton',...
+                'String', 'Rotate off',...
+                'Units','normalized', ...
+                'Position', [0.02,0.92,0.1,0.05],...
+                'TooltipString','Turn OFF when fiinished, otherwise tabs do not work',...
+                'Callback',@(src,evtdat)rotatebutton(ax,src,evtdat));
+        end
     end
 end

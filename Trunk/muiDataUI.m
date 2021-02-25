@@ -450,13 +450,14 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             if ~isempty(selection)
                 obj.UIselection(xyz).property = selection{1};
                 obj.UIselection(xyz).range = selection{2};
+                varname = dstdesc{selection{1}};
+                seldesc = sprintf('%s (%s) %s',desc.Case,desc.Dataset,varname);
                 if length(selection)>2
                     obj.UIselection(xyz).scale = selection{3};
-                    boxtext = sprintf('%s: %s, scale: %s',dstdesc{selection{1}},...
+                    boxtext = sprintf('%s: %s, scale: %s',seldesc,...
                                     selection{2},scalelist{selection{3}});
                 else
-                    boxtext = sprintf('%s: %s',dstdesc{selection{1}},...
-                                                            selection{2});
+                    boxtext = sprintf('%s: %s',seldesc,selection{2});                                                            
                 end
                 obj.UIselection(xyz).desc = boxtext;
 
@@ -773,7 +774,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             selection = struct('xyz',0,'caserec',0,'dataset',0,...
                                'variable',0,'property',0,'range',[],...
                                'scale',0,'dims',[],'desc','');
-            %dims is a struct array used for variables that are n-d arrays              
+            %dims is a struct array used for variables that are n-dim arrays              
             selection.dims = struct('name','','value',[]);
         end 
 %%         
