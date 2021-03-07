@@ -155,8 +155,7 @@ classdef muiPropertyUI  < matlab.mixin.Copyable
             prompt2 = prompt(nrec+1:end);
             useInp2 = inputdlg(prompt2,title,numlines,defaults2);
             %
-%             useInp = plus(useInp1,useInp2);    %this was for when NumInputdlg was used
-            useInp = [useInp1,useInp2]; %MAY NEED TO BE ; SEPARATED
+            useInp = [useInp1;useInp2];
         end
 %%
 		function propnames = getPropertyNames(obj)

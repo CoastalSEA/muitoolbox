@@ -29,13 +29,14 @@ classdef muiDataSet < handle
         %      Variables with different dimensions should be stored in 
         %      seperate dstables. Variables with time-varying dimensions 
         %      should store the dimensions as variables.
+        
     end
     
     properties (Hidden, SetAccess=private)
         CaseIndex       %case index assigned when class instance is loaded
     end
     
-    properties (Transient, Access=protected) 
+    properties (Transient) 
         sdst            %Transient dataset from individual files 
                         %that are combined to form master dstable
         DataFormats     %cell array of data formats available 
@@ -66,11 +67,6 @@ classdef muiDataSet < handle
                 ok = setFileFormatID(obj);
                 if ok<1, return; end
             end
-            
-            %set metadata
-            funcname = 'setDSproperties';
-            [dsp,ok] = callFileFormatFcn(obj,funcname);
-            if ok<1, return; end
 
             [fname,path,nfiles] = getfiles('MultiSelect',obj.FileSpec{1},...
                 'FileType',obj.FileSpec{2},'PromptText','Select file(s):');
@@ -82,7 +78,7 @@ classdef muiDataSet < handle
             
             %get data
             funcname = 'getData';
-            [dst,ok] = callFileFormatFcn(obj,funcname,filename,dsp);
+            [dst,ok] = callFileFormatFcn(obj,funcname,obj,filename);
             if ok<1 || isempty(dst), return; end
             %assign metadata about data
             dst.Source{1} = filename;
@@ -93,7 +89,7 @@ classdef muiDataSet < handle
                 for jf = 2:nfiles
                     jf_file = fname{jf};
                     filename = [path jf_file];
-                    adn_dst = callFileFormatFcn(obj,funcname,filename,dsp);
+                    adn_dst = callFileFormatFcn(obj,funcname,obj,filename);
                     if ~isempty(adn_dst)
                         dst = vertcat(dst,adn_dst); %#ok<AGROW>
                     end
@@ -120,12 +116,15 @@ classdef muiDataSet < handle
             filename = [path fname];
             %get data
             funcname = 'getData';
-            dsp = dst.DSproperties;
-            [adn_dst,ok] = callFileFormatFcn(obj,funcname,filename,dsp);
+            [adn_dst,ok] = callFileFormatFcn(obj,funcname,obj,filename);
             if ok<1 || isempty(adn_dst), return; end
             
+            [~,~,ndim] = getvariabledimensions(dst,1);
             if strcmp(dst.RowType,'datetime')  %insert data in existing record
-                dst = mergerows(dst,adn_dst);                
+                dst = mergerows(dst,adn_dst);  
+            elseif ndim(1)==1 && ndim(2)>1
+                warndlg('Vertical concatenation of X-arrays not possible')
+                return
             else                               %concatenate in order to end
                 dst = vertcat(dst,adn_dst);
             end
@@ -136,7 +135,7 @@ classdef muiDataSet < handle
             dst.Source{nfile+1} = filename;
             
             obj.Data{dataset} = dst;  
-            updateCase(obj,muicat,classrec);
+            updateCase(muicat,obj,classrec);
             getdialog(sprintf('Data added to: %s',catrec.CaseDescription));
         end        
 %%
@@ -198,17 +197,20 @@ classdef muiDataSet < handle
             end
             
             obj.Data{dataset} = dst;            
-            updateCase(obj,muicat,classrec);
+            updateCase(muicat,obj,classrec);
             getdialog(sprintf('Data deleted from: %s',catrec.CaseDescription));
         end
 %%
         function qcData(obj,classrec,catrec,muicat)
             %apply quality control to a dataset
-            funcname = 'dataQC';
-            ok = callFunction(obj,funcname,obj);
-            if ok<1, return; end
             
-            updateCase(obj,muicat,classrec);
+            funcname = 'dataQC';
+            [output,ok] = callFileFormatFcn(obj,funcname,obj);
+            if ok<1 || isempty(output), return; end
+            
+            %update dataset record
+            obj.Data{output{2}} = output{1};             
+            updateCase(muicat,obj,classrec);
             getdialog(sprintf('Quality control applied to: %s',catrec.CaseDescription));
         end
 %%
@@ -226,23 +228,40 @@ classdef muiDataSet < handle
         end
 
 %%        
-        function addCaseRecord(obj,muicat,datatype)
+        function addCaseRecord(obj,muicat,varargin)
             %add a case to the Catalogue and assign to DataSets
             classname = metaclass(obj).Name;            
             %add record to the catalogue and update mui.Cases.DataSets
-            caserec = addRecord(muicat,classname,datatype);
+            caserec = addRecord(muicat,classname,varargin{:});
             casedef = getRecord(muicat,caserec);
             obj.CaseIndex = casedef.CaseID;
             obj.Data{end}.Description = casedef.CaseDescription;
-            if isempty(muicat.DataSets) || ~isfield(muicat.DataSets,classname) ||...
-                    isempty(muicat.DataSets.(classname))
-                idrec = 1;
-            else
-                idrec = length(muicat.DataSets.(classname))+1;
-            end
-            muicat.DataSets.(classname)(idrec) = obj;
+            %assign dataset to class record
+            id_class = setDataClassID(muicat,classname);              
+            muicat.DataSets.(classname)(id_class) = obj;
         end         
-        
+%%
+        function data = readTSinputFile(~,filename)
+            %use Matlab detectImportOptions to decipher the header and read the
+            %data into a table where the columns use the variable names in file (if
+            %defined). Check that no times are duplicated and standardise the data
+            %so that missing times are removed and missing data are set to NaN
+            %Time MUST be first column in table to use this function
+            opts = detectImportOptions(filename,'FileType','text');  %v2016b
+            data = readtable(filename,opts); 
+            if isempty(data)
+                data = [];
+                return; 
+            end
+
+            %check for duplicate records - time is first column in table!!!
+            [~,iu] = unique(data.(1));
+            data = data(iu,:);
+            %check for missing data
+            data = standardizeMissing(data,[99,99.9,99.99,999,9999]);
+            %check for incorrect date-time (NAT)
+            data= rmmissing(data,'DataVariables',1);
+        end        
     end
 %%
 %--------------------------------------------------------------------------
@@ -258,14 +277,19 @@ classdef muiDataSet < handle
             end
         end
 %%
-        function setDataSetRecord(obj,muicat,dataset,datatype)
+        function setDataSetRecord(obj,muicat,dataset,varargin)
             %assign dataset to class Data property and update catalogue
+            % muicat - muiCatalogue object
+            % dataset - the dataset or cell array of data sets to be added
+            % varargin - input to dscatalogue.addRecord. minimum is
+            %            datatype but can also include a cell with the case 
+            %            description and logical flag to supress user prompt
             if iscell(dataset)
                 obj.Data = dataset;   %can be cell array of multiple tables
             else
                 obj.Data = {dataset};  
             end
-            addCaseRecord(obj,muicat,datatype)
+            addCaseRecord(obj,muicat,varargin{:})
         end                    
 %%
         function formatfile = setFileFormat(~)
@@ -291,32 +315,48 @@ classdef muiDataSet < handle
             obj.idFormat = selection;  
             else
                 obj.idFormat = 1;
+                ok = 1;
             end
         end
 %%
-        function [out1,ok] = callFileFormatFcn(obj,funcname,inp1,inp2)
+        function idf = getFileFormatID(obj,muicat)
+            %extract all the file formats from a set of objects
+            classname = metaclass(obj).Name; 
+            idf = [];
+            idx = find(strcmp(muicat.Catalogue.CaseClass,classname));
+            for i=1:length(idx)
+                cobj = getCase(muicat,idx(i));
+                idf(i) = cobj.idFormat;
+            end
+            idf = unique(idf);
+        end
+%%
+        function [out1,ok] = callFileFormatFcn(obj,funcname,varargin)
             %call a function in the data format file 
             % funcname - name of the functions ('getDSproperties','getData','dataQC')
             % 
             % outvar - variable returned by function (if any)
-            % ok - error flag; 0-if catch called
-            if nargin<3
-                inp1 = [];  inp2 = [];
-            elseif nargin<4
-                inp2 = [];
+            % ok - error flag; 1-if executions successful           
+            formatfile = obj.DataFormats{obj.idFormat,2};    
+            
+            %unpack varargin to define call function
+            nvar = length(varargin);
+            varlist = ['(funcname,var1'];
+            for i=2:nvar
+                varlist = sprintf('%s,var%d',varlist,i);
             end
+            varlist = sprintf('%s)',varlist);
+            funcall = sprintf('@%s ',varlist);
             
-            formatfile = obj.DataFormats{obj.idFormat,2};
-            
-            ok = 1;
-            msgtxt = @(x,y) sprintf('Unable to evaluate call to %s function %s',...
-                                                                     x,y);
             try
-                heq = str2func(['@(funcname,inp1,inp2) ',[formatfile,'(funcname,inp1,inp2)']]); 
-                out1 = heq(funcname,inp1,inp2);
-            catch
-                warndlg(msgtxt(formatfile,funcname));
-                ok = 0;
+                heq = str2func([funcall,[formatfile,varlist]]);  
+                out1 = heq(funcname,varargin{:});
+                ok = 1;
+            catch ME
+                msgtxt = sprintf('Unable to evaluate call to %s function %s\nID: ',...
+                                              formatfile,funcname);
+                disp([msgtxt, ME.identifier])
+                rethrow(ME)  
             end            
         end 
 %%
@@ -327,7 +367,8 @@ classdef muiDataSet < handle
             %default plotting function for Q-Plot tab
 
             %get data for variable
-            dst = obj.Data{1};
+            dataset = getDataSetID(obj);
+            dst = obj.Data{dataset};
             [varname,varidx] = selectAttribute(dst,1);    %1=select variable
             [~,cdim,vsze] = getvariabledimensions(dst,varname);
             [attnames,~,attlabels] = getVarAttributes(dst,varidx);
@@ -363,6 +404,12 @@ classdef muiDataSet < handle
                 pdat.(D{j}) = dst.Dimensions.(dimnames{i});
                 labs.(D{j}) = dimlab{i};
             end
+            
+            %merge row and dimension selection
+            if istime && cdim<1    %row and no dimensions
+                pdat.X = pdat.T; 
+                labs.X = labs.T;
+            end
 
             %generate plot for display on Q-Plot tab
             dst = obj.Data{1};
@@ -384,7 +431,7 @@ classdef muiDataSet < handle
                     DSrotatebutton(obj,ax,src);
                 end
             elseif istime            %rows that are time or ordered
-                if cdim==0    
+                if cdim==0  
                     DSplot(obj,ax,pdat,labs);     
                 elseif cdim==1
                     DSsurface(obj,ax,pdat,labs);

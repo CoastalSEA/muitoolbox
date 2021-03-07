@@ -202,11 +202,16 @@ classdef muiCatalogue < dscatalogue
             getdialog(sprintf('Case exported to: %s',filename{1}));
         end
 %%
-        function updateCase(obj,cobj,classrec)
+        function updateCase(obj,cobj,classrec,ismsg)
             %update the saved record with an amended version of instance
+            if nargin<4
+                ismsg = true;
+            end
             classname = metaclass(cobj).Name;
             obj.DataSets.(classname)(classrec) = cobj;
-            getdialog(sprintf('Updated case for %s',classname));
+            if ismsg
+                getdialog(sprintf('Updated case for %s',classname));
+            end
         end         
 %% 
         function [cobj,classrec,catrec] = getCase(obj,caserec)
@@ -257,17 +262,17 @@ classdef muiCatalogue < dscatalogue
             if nargin<3, type = 'array'; end
             istable = false;
             [dst,~,~,dstxt] = getDataset(obj,UIsel.caserec,UIsel.dataset);
-            [varatt,vardesc] = getVarAttributes(dst,UIsel.variable);
-            useprop = varatt{UIsel.property};
-            usedesc = vardesc{UIsel.property};
+            [attribnames,attribdesc,attriblabel] = getVarAttributes(dst,UIsel.variable);
+            useprop = attribnames{UIsel.property};
+            usedesc = attribdesc{UIsel.property};
             
             if any(strcmp(dst.VariableNames,useprop))                
                 %return selected dimensions of variable
                 %NB: any range defined for the Variable is NOT applied
                 %returns all values within dimension range specified
-                [id,dvals] = getSelectedIndices(obj,UIsel,dst,varatt);
-                varlabels = getLabels(dst,'Variable');
-                label = varlabels{id.var};
+                [id,dvals] = getSelectedIndices(obj,UIsel,dst,attribnames);
+%                 varlabels = getLabels(dst,'Variable');
+                label = attriblabel{1};
                 switch type
                     case 'array'
                         %extracts array for selected variable
@@ -282,7 +287,7 @@ classdef muiCatalogue < dscatalogue
                         array = getData(dst,id.row,id.var,id.dim);
                         array = squeeze(array{1});
                         %get dimension name and indices
-                        dimnames = setDimNames(obj,array,dvals,varatt);                        
+                        dimnames = setDimNames(obj,array,dvals,attribnames);                        
                         data = array2table(array,'RowNames',dimnames{1},...
                                             'VariableNames',dimnames{2});
                     case 'timeseries'
@@ -294,16 +299,16 @@ classdef muiCatalogue < dscatalogue
                 idrow = getIndices(obj,dst.RowNames,UIsel.range);
                 data = dst.RowNames(idrow); %returns values in source data type
                 useprop = dst.TableRowName;
-                rowlabel = getLabels(dst,'Row');
-                label = rowlabel{1};
+%                 rowlabel = getLabels(dst,'Row');
+                label = attriblabel{2};
             elseif any(strcmp(dst.DimensionNames,useprop))
                 %return selected dimension              
                 iddim = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
                 data = dst.Dimensions.(useprop)(iddim);
-                dimlabels = getLabels(dst,'Dimension');
+%                 dimlabels = getLabels(dst,'Dimension');
                 %subtract variable and row (if used)
                 if height(dst.DataTable)>1, nr=2; else, nr=1; end                  
-                label = dimlabels{UIsel.property-nr}; 
+                label = attriblabel{UIsel.property}; 
             else
                 errordlg('Incorrect property selection in getProperty') 
             end
@@ -352,20 +357,43 @@ classdef muiCatalogue < dscatalogue
 %%
         function useCase(obj,mode,classname,action)
             %select which existing data set to use and pass to action method
-            % mode - single or multiple selection mode  
+            % mode - none, single or multiple selection mode  
             % classname - name of class to select cases for
             % action - method of class to pass class object to (eg addData 
-            %          in muiDataSet)               
-            promptxt = 'Select Case to use:';
-            [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
-                'SelectionMode',mode,'CaseClass',classname,'ListSize',[250,200]);
-            if ok<1, return; end  
-            [cobj,classrec,catrec] = getCase(obj,caserec);
+            %          in muiDataSet) 
+            if strcmp(mode,'none')
+                heq = str2func(['@(muicat,classname) ',...
+                            [classname,'.',action,'(muicat,classname)']]); 
+                heq(obj,classname);  %instance of class object   
+            else
+                promptxt = 'Select Case to use:';
+                [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
+                    'SelectionMode',mode,'CaseClass',classname,'ListSize',[250,200]);
+                if ok<1, return; end  
+                [cobj,classrec,catrec] = getCase(obj,caserec);
 
-            heq = str2func(['@(cobj,classrec,catrec,muicat) ',...
-                                [action,'(cobj,classrec,catrec,muicat)']]); 
-            heq(cobj,classrec,catrec,obj);  %instance of class object
-        end       
+                heq = str2func(['@(cobj,classrec,catrec,muicat) ',...
+                                    [action,'(cobj,classrec,catrec,muicat)']]); 
+                heq(cobj,classrec,catrec,obj);  %instance of class object
+            end
+        end    
+%%
+        function id_class = setDataClassID(obj,classname)                                                          
+            %assign the class instance and record ids and add new instance
+            %to class handle. obj - new instance of class, 
+            %handle - class handle, mobj - UI handle. 
+            if isfield(obj.DataSets,classname) && ...
+                                    ~isempty(obj.DataSets.(classname))
+                id_class = length(obj.DataSets.(classname))+1;
+            else
+                id_class = 1;
+            end 
+        end
+%%
+        function props = setPropsStruct(~)
+            %initialise struct used in muiCatalogue.getProperty
+            props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[]);
+        end 
     end
 %%
     methods (Access=private)      
@@ -376,11 +404,7 @@ classdef muiCatalogue < dscatalogue
             %clear instance of data set class
             obj.DataSets.(classname)(classrec) = [];
         end  
-%%
-        function props = setPropsStruct(~)
-            %initialise struct used in muiCatalogue.getProperty
-            props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[]);
-        end 
+
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
             %find the indices for the selected variable, and the row and 

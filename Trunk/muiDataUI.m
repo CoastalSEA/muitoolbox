@@ -591,6 +591,23 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             ok = 1;
             idvar = obj.UIselection(xyz).variable;
             [dstnames,dstdesc] = getVarAttributes(dst,idvar);
+            
+            %check that dimensions match variable
+            [vdim,~,vsze] = getvariabledimensions(dst,idvar);
+            setdims = length(dstnames)-1;
+            missingdims = vdim-setdims; 
+            if missingdims>0
+%                 firstdim = 1;
+%                 if strcmp(dstnames{2},'RowNames')
+                for i=1:missingdims
+                    dimvalues = 1:vsze(setdims+i);
+                    dimname = sprintf('Index%d',i);
+                    dst.Dimensions.(dimname) = dimvalues;
+                    dst.DimensionDescriptions{i} = sprintf('Index %d',i);
+                end
+                [dstnames,dstdesc] = getVarAttributes(dst,idvar);
+            end
+            
             %find attributes that have not yet been defined
             inputxt = dstdesc(~ismember(dstdesc,dstdesc(propsused)));
             nprop = length(inputxt);
@@ -627,7 +644,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             obj.UIselection(xyz).desc = boxtxt;
         end
 %%
-        function uinput = getUIinput(~,mdim,ndim,dst,dstdesc,range)
+        function uinput = getUIinput(~,mdim,ndim,dst,dstdesc,selrange)
             %multi-dimension selection for a known variable
             %mdim - number of dimensions with ranges, 
             %ndim - number of dimensions with index
@@ -644,10 +661,10 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             ncontrol = repmat({'Ed'},1,ndim);
             uinput.controls = [mcontrol(:);ncontrol(:)];
             for j=1:2:2*mdim
-                uinput.default{j} = dstdesc(2:end)';
+                uinput.default{j} = dstdesc(2:end)';  %should this be default(j)?
                 uinput.userdata{j} = {};
-                uinput.default{j+1} = range((j+1)/2).txt;
-                uinput.userdata{j+1} = range((j+1)/2).val;
+                uinput.default{j+1} = selrange((j+1)/2).txt;
+                uinput.userdata{j+1} = selrange((j+1)/2).val;
             end
             %
             for k=1:ndim

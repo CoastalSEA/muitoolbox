@@ -54,7 +54,7 @@ classdef muiModelUI < handle
         setTabs(obj)          %initialise tabs that are specific to the model
         setTabAction(obj)     %define how selected data is to be used
         setTabProperties(obj) %get locations for data input display  
-        runMenuOptions(obj)
+%         runMenuOptions(obj)
     end    
 %%    
     methods (Access = protected)  %methods common to all uses
@@ -158,7 +158,7 @@ classdef muiModelUI < handle
             %define the submenu parent and call setSubMenu to initialise the submenu
             subParent = findobj(TopMenu,'Label',subMenuDef.Label{1});
             if isempty(subParent)
-                warndlg(sprintf('Submenu for %s has not been defined',subMenuDef.Label));
+                warndlg(sprintf('Submenu for %s has not been defined',subMenuDef.Label{1}));
                 return;
             end
             setSubMenu(obj,subParent,subMenuDef);
@@ -175,10 +175,10 @@ classdef muiModelUI < handle
             setSubMenu(obj,hMenu,MenuDef);
         end
         %%
-        function setSubMenu(~,Parent,MenuDef)
+        function setSubMenu(~,parent,MenuDef)
             %create a sub-menu item in the UI figure
             for i = 1:length(MenuDef.List)
-                hm = uimenu('Parent',Parent,'Text',MenuDef.List{i},...                    
+                hm = uimenu('Parent',parent,'Text',MenuDef.List{i},...                    
                                     'MenuSelectedFcn',MenuDef.Callback{i});
                 if ~isempty(MenuDef.Separator)
                     hm.Separator = MenuDef.Separator{i};
@@ -188,12 +188,30 @@ classdef muiModelUI < handle
 %%
         function addAppMenus(obj,menuitems)
             %add a menu items to an existing menu 
+            %option to reorder the full top level menus
             menulabels = fieldnames(menuitems);
             nmenus = length(menulabels);
             for i=1:nmenus
                 MenuDef = menuitems.(menulabels{i});
                 obj.mUI.Menus.(menulabels{i}) = setUIMenus(obj,MenuDef);
                 addSubMenus(obj,obj.mUI.Menus.(menulabels{i}),MenuDef,1);
+            end
+        end
+%%
+        function modifySubMenus(obj,menuitem,MenuDef)
+            %modify sub-menu items that have already been defined
+            hMenu = obj.mUI.Menus.(menuitem);            %top level menu object
+            delete(hMenu.Children)                       %delete all submenus
+            setSubMenu(obj,hMenu,MenuDef.(menuitem)(1)); %create top level submenu
+            addSubMenus(obj,hMenu,MenuDef.(menuitem),1); %add additional submenus
+        end
+%%
+        function muimenu = findSubMenu(obj,menuitem,varargin)
+            %find a submenu belonging to menuitem, ie: menuitem>submenu1>submenu2
+            % varargin - Text labels for sub menu string, eg {'submenu1','submenu2'}
+            hMenu = obj.mUI.Menus.(menuitem);
+            for i=1:length(varargin)
+                muimenu = findobj(hMenu,'Text',varargin{i});
             end
         end
 %%
@@ -239,10 +257,22 @@ classdef muiModelUI < handle
             subtabgrp = uitabgroup(tabhandle,'Tag',['sub',tabtag]);
             for j=1:size(subtabs.(tabtag),1)
                 subvals = subtabs.(tabtag)(j,:);
-                uitab(subtabgrp,'Title',subvals{1}','Tag',['sub',tabtag],...
+                uitab(subtabgrp,'Title',subvals{1}','Tag',strip(subvals{1}),...
                     'ButtonDownFcn',subvals{2});
             end
         end   
+%%        
+        function [muitab,muitabgrp] = findSubTab(obj,parent,subtab)
+            %find the subtab that belongs to parent and return the uitab
+            %object and the uitabgroup it belongs to
+            muitab = findobj(obj.mUI.Tabs,'Tag',parent);
+            muitabgrp = findobj(muitab,'Type','uitabgroup');
+            if ~isempty(muitabgrp)
+                muitab = findobj(muitabgrp,'Tag',subtab);
+            else
+                muitab = [];
+            end
+        end
 %%
         function obj = TabProperties(obj)
             %set the tab and position to display class data tables
@@ -656,8 +686,9 @@ classdef muiModelUI < handle
             idx = find(tabSubset(obj,src.Parent.Tag));       
             caserec = idx(selrow);
             %get class DataSet for selected record
-            classname = obj.Cases.Catalogue.CaseClass;
-            cds = obj.Cases.DataSets.(classname{caserec})(caserec);
+            classname = obj.Cases.Catalogue.CaseClass{caserec};
+            casedesc = obj.Cases.Catalogue.CaseDescription{caserec}; 
+            cds = obj.Cases.DataSets.(classname)(caserec);
             
             dstables = cds.Data;   %extract data tables (can be more than one)
             ntables = length(dstables);
@@ -681,7 +712,7 @@ classdef muiModelUI < handle
                 tables{i,1} = table(name,desc,unit);
                 %output summary to tablefigure
                 tabtxts{i,1} = sprintf('Metadata for %s dated: %s\n%s',...
-                                                     source,lastmod,meta);
+                                                casedesc,lastmod,meta);
             end
 
             h_fig = tabtablefigure('Case Metadata',tabnames,tabtxts,tables);
@@ -690,12 +721,16 @@ classdef muiModelUI < handle
             h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
             h_but = findobj(h_fig.Children,'Tag','uicopy');
             position = h_but.Position;
-            position(1) = 10;
+            position(1) = 10;            
+            sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-25, 60, 20];
             for j=1:ntables
                 itab = h_tab.Children(j);  %NEEDS TO CHECK THIS WORKS WITH MUTLIPLE DATASETS
                 setactionbutton(itab,'DSproperties',position,...
                     @(src,evt)getDSProps(obj,src,evt),...
                    'getDSP','View the dstables DSproperties',dstables{i});
+                setactionbutton(h_fig,'Source',sourcepos,...
+                   @(src,evt)getSource(obj,src,evt),'getSource',...
+                   'View data source details',dstables{i}.Source);
             end
             %adjust position on screen            
             h_fig.Position(1)=  h_fig.Position(3)*3/2; 
@@ -707,6 +742,18 @@ classdef muiModelUI < handle
         function getDSProps(~,src,~)
             if istable(src.UserData.DataTable)
                 displayDSproperties(src.UserData.DSproperties);
+            end
+        end
+%%
+        function getSource(~,src,~)
+            if~isempty(src.UserData)
+                if length(src.UserData)>1
+                    stable = cell2table(src.UserData,'VariableNames',{'Sources'});
+                    headtext = 'The following sources were used for the selected data set';
+                    tablefigure('Sources',headtext,stable);
+                else
+                    getdialog(sprintf('Source: %s',src.UserData{1}));
+                end
             end
         end
 %%
@@ -837,17 +884,17 @@ classdef muiModelUI < handle
             end
         end 
 %%
-        function callStaticFunction(~,fname,inp1,inp2)
+        function callStaticFunction(obj,classname,fncname)
             %call a class function to load data or run a model
-            if nargin<4
-                inp2 = [];
-            end
+            muicat = obj.Cases;
             
-            heq = str2func(['@(inp1,inp2) ',[fname,'(inp1,inp2)']]); 
+            heq = str2func(['@(mcat,cname) ',[fncname,'(mcat,cname)']]); 
             try
-               heq(inp1,inp2); 
-            catch
-               warndlg(sprintf('Unable to run function %s',fname));                       
+               heq(muicat,classname); 
+            catch ME
+                msg = sprintf('Unable to run function %s\nID: ',fncname);
+                disp([msg, ME.identifier])
+                rethrow(ME)                     
             end
         end
 %%
@@ -870,7 +917,9 @@ classdef muiModelUI < handle
                 %define case for each plot/data GUI
                 case 'muiPlotsUI'
                     figObj = [];
-                    if ~isempty(obj.mUI.Plots)
+                    if ~isempty(obj.mUI.Plots) && ...
+                            isfield(obj.mUI.Plots.Plot,'FigNum') && ...
+                                ~isempty(obj.mUI.Plots.Plot.FigNum)
                         localObj = obj.mUI.Plots.Plot.FigNum;
                         nfig = length(localObj);
                         figObj = gobjects(1,nfig);

@@ -51,8 +51,13 @@ classdef muiStatsUI < muiDataUI
                 end
             else
                 obj = muiStatsUI(mobj);
-                if any(~ismember(mobj.DataUItabs.Stats,obj.TabOptions))
-                    warndlg('Unknown stats type defined in main UI for DataUItabs.Plot')
+                idx = find(~ismember(mobj.DataUItabs.Stats,obj.TabOptions));
+                if ~isempty(idx)
+                    txt1 = 'Unknown stats type defined in main UI for DataUItabs.Stats';
+                    for j=1:length(idx)
+                        txt1 = sprintf('%s\n"%s" not defined',txt1,mobj.DataUItabs.Stats{idx(j)});
+                    end
+                    warndlg(txt1)
                     obj = [];
                     return
                 end

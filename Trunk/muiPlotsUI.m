@@ -51,8 +51,13 @@ classdef muiPlotsUI < muiDataUI
                 end
             else
                 obj = muiPlotsUI(mobj);
-                if any(~ismember(mobj.DataUItabs.Plot,obj.TabOptions))
-                    warndlg('Unknown plot type defined in main UI for DataUItabs.Plot')
+                idx = find(~ismember(mobj.DataUItabs.Plot,obj.TabOptions));
+                if ~isempty(idx)
+                    txt1 = 'Unknown plot type defined in main UI for DataUItabs.Plot';
+                    for j=1:length(idx)
+                        txt1 = sprintf('%s\n"%s" not defined',txt1,mobj.DataUItabs.Plot{idx(j)});
+                    end
+                    warndlg(txt1)
                     obj = [];
                     return
                 end
