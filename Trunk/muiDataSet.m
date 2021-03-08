@@ -18,13 +18,11 @@ classdef muiDataSet < handle
 %--------------------------------------------------------------------------
 %       
     properties  
-        Data        %cell array of datasets. These can be multiple dstables, 
+        Data        %struct of datasets. These can be multiple dstables, 
                     %or a mix of tables and other data types. The data are 
-                    %indexed using the MetaData property.
+                    %indexed using the fieldnames of the struct
         RunParam    %instance of run parameter classes defining settings used
-        MetaData    %cell array of names for the datasets held in data. 
-                    %Implementing classes need to define a name for each
-                    %type of output data.                     
+        MetaData    %property for user defined input                   
         %Note: dstables have constant dimensions for all variables in table.
         %      Variables with different dimensions should be stored in 
         %      seperate dstables. Variables with time-varying dimensions 
@@ -107,10 +105,9 @@ classdef muiDataSet < handle
     methods
         function addData(obj,classrec,catrec,muicat) 
             %add additional data to an existing user dataset
-            dataset = getDataSetID(obj);
-            dst = obj.Data{dataset};   
-            
-            
+            datasetname = getDataSetName(obj);
+            dst = obj.Data.(datasetname);
+
             [fname,path] = getfiles('MultiSelect','off',...
                 'FileType',obj.FileSpec{2},'PromptText','Select file:');
             filename = [path fname];
@@ -134,15 +131,15 @@ classdef muiDataSet < handle
             nfile = length(dst.Source);
             dst.Source{nfile+1} = filename;
             
-            obj.Data{dataset} = dst;  
+            obj.Data.(datasetname) = dst;  
             updateCase(muicat,obj,classrec);
             getdialog(sprintf('Data added to: %s',catrec.CaseDescription));
         end        
 %%
         function deleteData(obj,classrec,catrec,muicat)
             %delete variable or rows from a dataset
-            dataset = getDataSetID(obj);
-            dst = obj.Data{dataset};
+            datasetname = getDataSetName(obj);
+            dst = obj.Data.(datasetname);
             
             %option to delete a variable (column) or dimension rows (rows of
             %array - not just table rows)
@@ -196,7 +193,7 @@ classdef muiDataSet < handle
                 end
             end
             
-            obj.Data{dataset} = dst;            
+            obj.Data.(datasetname) = dst;            
             updateCase(muicat,obj,classrec);
             getdialog(sprintf('Data deleted from: %s',catrec.CaseDescription));
         end
@@ -208,25 +205,26 @@ classdef muiDataSet < handle
             [output,ok] = callFileFormatFcn(obj,funcname,obj);
             if ok<1 || isempty(output), return; end
             
-            %update dataset record
-            obj.Data{output{2}} = output{1};             
+            %update dataset record - output contains {dst,datasetname}
+            obj.Data.(output{2}) = output{1};             
             updateCase(muicat,obj,classrec);
             getdialog(sprintf('Quality control applied to: %s',catrec.CaseDescription));
         end
 %%
-        function dataset = getDataSetID(obj)
+        function datasetname = getDataSetName(obj)
             %check whether there is more than one dstable and select
             dataset = 1;
-            if ~isempty(obj.MetaData) && length(obj.MetaData)>1
+            datasetnames = fieldnames(obj.Data);
+            if length(datasetnames)>1
                 promptxt = {'Select dataset'};
                 title = 'Save dataset';
                 [dataset,ok] = listdlg('PromptString',promptxt,...
                            'SelectionMode','single','Name',title,...
-                           'ListSize',[300,100],'ListString',obj.MetaData);
+                           'ListSize',[300,100],'ListString',datasetnames);
                 if ok<1, return; end       
-            end            
+            end
+            datasetname = datasetnames{dataset};
         end
-
 %%        
         function addCaseRecord(obj,muicat,varargin)
             %add a case to the Catalogue and assign to DataSets
@@ -235,7 +233,12 @@ classdef muiDataSet < handle
             caserec = addRecord(muicat,classname,varargin{:});
             casedef = getRecord(muicat,caserec);
             obj.CaseIndex = casedef.CaseID;
-            obj.Data{end}.Description = casedef.CaseDescription;
+            datasets = fieldnames(obj.Data);
+            for i=1:length(datasets)
+                if isa(obj.Data.(datasets{i}),'dstable')
+                    obj.Data.(datasets{i}).Description = casedef.CaseDescription;
+                end
+            end
             %assign dataset to class record
             id_class = setDataClassID(muicat,classname);              
             muicat.DataSets.(classname)(id_class) = obj;
@@ -284,10 +287,10 @@ classdef muiDataSet < handle
             % varargin - input to dscatalogue.addRecord. minimum is
             %            datatype but can also include a cell with the case 
             %            description and logical flag to supress user prompt
-            if iscell(dataset)
-                obj.Data = dataset;   %can be cell array of multiple tables
+            if isstruct(dataset)
+                obj.Data = dataset;   %can be struct of multiple tables
             else
-                obj.Data = {dataset};  
+                obj.Data.Dataset = dataset;  
             end
             addCaseRecord(obj,muicat,varargin{:})
         end                    
@@ -367,8 +370,8 @@ classdef muiDataSet < handle
             %default plotting function for Q-Plot tab
 
             %get data for variable
-            dataset = getDataSetID(obj);
-            dst = obj.Data{dataset};
+            datasetname = getDataSetName(obj);
+            dst = obj.Data.(datasetname);
             [varname,varidx] = selectAttribute(dst,1);    %1=select variable
             [~,cdim,vsze] = getvariabledimensions(dst,varname);
             [attnames,~,attlabels] = getVarAttributes(dst,varidx);

@@ -80,13 +80,10 @@ classdef muiEditUI < muiDataUI
                         muicat = mobj.Cases.Catalogue;
                         sel_uic{i}.String = muicat.CaseDescription;
                     case 'Dataset'
-                        if isempty(cobj.MetaData)
-                            sel_uic{i}.String = {'Dataset'};
-                        else
-                            sel_uic{i}.String = cobj.MetaData;
-                        end
+                        sel_uic{i}.String = fieldnames(cobj.Data);
                     case 'Variable'     
-                        sel_uic{i}.String = cobj.Data{1}.VariableDescriptions;
+                        ds = fieldnames(cobj.Data);
+                        sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
                 end
@@ -148,8 +145,9 @@ classdef muiEditUI < muiDataUI
             UIsel = obj.UIselection; 
 
             %selected case object and data table
-            [cobj,~,~] = getCase(muicat,UIsel.caserec);            
-            dst = cobj.Data{UIsel.dataset};  %selected dataset
+            [cobj,~,~] = getCase(muicat,UIsel.caserec);   
+            ds = fieldnames(cobj.Data);
+            dst = cobj.Data.(ds{UIsel.dataset});  %selected dataset
             
             %get the sub-sampling indices
             varatt = getVarAttributes(dst,UIsel.variable);
@@ -157,7 +155,7 @@ classdef muiEditUI < muiDataUI
             
             %assign subsampled data to the selected case object
             dst.DataTable.(id.var)(id.row,id.dim{:}) = newtable{:,:};
-            cobj.Data{UIsel.dataset} = dst;
+            cobj.Data.(ds{UIsel.dataset}) = dst;
         end
 %%
         function h_tab = setTable(~,prop,prompt,vartable)

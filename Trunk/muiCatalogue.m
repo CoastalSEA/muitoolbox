@@ -37,15 +37,16 @@ classdef muiCatalogue < dscatalogue
             
             %if class has more than one dataset per record prompt for selection
             dataset = 1;
-            if ~isempty(cobj.MetaData) && length(cobj.MetaData)>1
+            datasetnames = fieldnames(cobj.Data);
+            if length(datasetnames)>1
                 promptxt = {'Select dataset'};
                 title = 'Save dataset';
                 [dataset,ok] = listdlg('PromptString',promptxt,...
                            'SelectionMode','single','Name',title,...
-                           'ListSize',[300,100],'ListString',cobj.MetaData);
+                           'ListSize',[300,100],'ListString',datasetnames);
                 if ok<1, return; end       
             end
-            dst = cobj.Data{dataset};
+            dst = cobj.Data.(datasetnames{dataset});
             
             %determine save options based on dimensions of first cell
             if numel(dst.DataTable{1,1})>1
@@ -233,18 +234,26 @@ classdef muiCatalogue < dscatalogue
             end
             cobj = getCase(obj,caserec);  %matches caseid to find record in class
             %
+            datasetnames = fieldnames(cobj.Data);
             if ~isnumeric(idset) 
-                dstxt = idset;
-                idset =  find(strcmp(cobj.MetaData,dstxt));
-                if isempty(idset)
-                    idset = 1;    %no datasets defined so must only be one
-                end
-            elseif isempty(cobj.MetaData)
-                dstxt = 'Dataset';
+                dstxt = idset; 
+                idset =  find(strcmp(datasetnames,dstxt));
             else
-                dstxt = cobj.MetaData{idset};
+                dstxt = datasetnames(idset);
             end
-            dst = cobj.Data{idset};  %selected dataset
+            dst = cobj.Data.(datasetnames{idset});  %selected dataset
+%             if ~isnumeric(idset) 
+%                 dstxt = idset;
+%                 idset =  find(strcmp(cobj.MetaData,dstxt));
+%                 if isempty(idset)
+%                     idset = 1;    %no datasets defined so must only be one
+%                 end
+%             elseif isempty(cobj.MetaData)
+%                 dstxt = 'Dataset';
+%             else
+%                 dstxt = cobj.MetaData{idset};
+%             end
+%             dst = cobj.Data{idset};  %selected dataset
         end
 %%
         function props = getProperty(obj,UIsel,type)
@@ -408,10 +417,12 @@ classdef muiCatalogue < dscatalogue
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
             %find the indices for the selected variable, and the row and 
-            %dimension values. 
+            %dimension values. If dimension exists but is not defined, a
+            %set of index values is created
             % UIsel - struct defined by UIs derived from muiDataUI
             % dst - dstable to extract indices from
             % attnames - field names of attributes {variable,row,dimensions}
+            
             idx.var = UIsel.variable;
             uidims = UIsel.dims;
             ndim = length(uidims);
@@ -424,7 +435,13 @@ classdef muiCatalogue < dscatalogue
                     idx.row = getIndices(obj,var,uidims(i).value);
                     dimnames.row = var(idx.row);
                 else                                 %must be a dimension
-                    var = dst.Dimensions.(uidims(i).name);
+                    if isfield(dst.Dimensions,uidims(i).name)
+                        var = dst.Dimensions.(uidims(i).name);
+                    else                             %dimension not defined
+                        rvals = range2var(UIsel.dims(i).value);
+                        var = int16(rvals{1}):int16(rvals{2});
+                    end
+                    %
                     if height(dst.DataTable)>1   %ensure offset is correct
                         idd = strcmp(attnames(3:end),uidims(i).name);
                     else  
@@ -483,7 +500,7 @@ classdef muiCatalogue < dscatalogue
             seldim = cell(1,sdim); seldimname = seldim;
             for i=1:sdim
                 idx = cellfun(@length,dimnames)==sz(i);
-                seldim{i} = strip(var2str(dimnames{idx}));
+                seldim{i} = strip(var2str(dimnames{idx}'));
                 seldimname{i} = dimatt{idx};
             end
             %

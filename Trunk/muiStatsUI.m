@@ -104,13 +104,10 @@ classdef muiStatsUI < muiDataUI
                         muicat = mobj.Cases.Catalogue;
                         sel_uic{i}.String = muicat.CaseDescription;
                     case 'Dataset'
-                        if isempty(cobj.MetaData)
-                            sel_uic{i}.String = {'Dataset'};
-                        else
-                            sel_uic{i}.String = cobj.MetaData;
-                        end
+                        sel_uic{i}.String = fieldnames(cobj.Data);
                     case 'Variable'     
-                        sel_uic{i}.String = cobj.Data{1}.VariableDescriptions;
+                        ds = fieldnames(cobj.Data);
+                        sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
                 end

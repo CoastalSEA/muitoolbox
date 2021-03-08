@@ -591,23 +591,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             ok = 1;
             idvar = obj.UIselection(xyz).variable;
             [dstnames,dstdesc] = getVarAttributes(dst,idvar);
-            
-            %check that dimensions match variable
-            [vdim,~,vsze] = getvariabledimensions(dst,idvar);
-            setdims = length(dstnames)-1;
-            missingdims = vdim-setdims; 
-            if missingdims>0
-%                 firstdim = 1;
-%                 if strcmp(dstnames{2},'RowNames')
-                for i=1:missingdims
-                    dimvalues = 1:vsze(setdims+i);
-                    dimname = sprintf('Index%d',i);
-                    dst.Dimensions.(dimname) = dimvalues;
-                    dst.DimensionDescriptions{i} = sprintf('Index %d',i);
-                end
-                [dstnames,dstdesc] = getVarAttributes(dst,idvar);
-            end
-            
+
             %find attributes that have not yet been defined
             inputxt = dstdesc(~ismember(dstdesc,dstdesc(propsused)));
             nprop = length(inputxt);
@@ -668,8 +652,8 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             end
             %
             for k=1:ndim
-                uinput.default{2*mdim+k} = range(mdim+k).txt;
-                uinput.userdata{2*mdim+k} = range(mdim+k).val;
+                uinput.default{2*mdim+k} = selrange(mdim+k).txt;
+                uinput.userdata{2*mdim+k} = selrange(mdim+k).val;
             end
             uinput.dataobj  = dst;
             uinput.actions  = {'Select','Cancel'};
@@ -780,7 +764,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             %return a default struct for UI selection definition
             %caseid or caserec?? Defaullt includes:
             % caserec - caserec in listid of selected case
-            % dataset - id to key word in MetaData to select specific dstable
+            % dataset - id to field name in Data struct to select specific dstable
             % variable - id to selected Variable in table 
             % property - name of what to use: variable,row or a dimension description  
             % range - limits set for property
