@@ -271,13 +271,30 @@ classdef muiDataSet < handle
 %   Methods to set DataSet, RunParam, FileFormat and FileFormatID
 %--------------------------------------------------------------------------     
     methods (Access=protected)
-        function setRunParam(obj,mobj)
+        function setRunParam(obj,mobj,varargin)
             %assign the run parameters needed for a model
             classname = metaclass(obj).Name;
             minp = mobj.ModelInputs.(classname);
-            for i=1:length(minp)
-                obj.RunParam.(minp{i}) = copy(mobj.Inputs.(minp{i}));
+
+            if ~isempty(mobj.Inputs)
+                %classes that define runtime parameters
+                definedinput = fieldnames(mobj.Inputs);
+                isinp = find(ismember(minp,definedinput));
+                for i=1:length(isinp)
+                    obj.RunParam.(minp{isinp(i)}) = copy(mobj.Inputs.(minp{isinp(i)}));
+                end
             end
+            
+            muicat = mobj.Cases;
+            if ~isempty(muicat.DataSets)
+                %classes that define model input datasets (save caseID)
+                definedsets = fieldnames(muicat.DataSets);
+                isdata = find(ismember(minp,definedsets));
+                for i=1:length(isdata)
+                    lobj = getCase(muicat,varargin{i});
+                    obj.RunParam.(minp{isdata(i)}) = lobj.CaseIndex;
+                end
+            end            
         end
 %%
         function setDataSetRecord(obj,muicat,dataset,varargin)
@@ -325,13 +342,12 @@ classdef muiDataSet < handle
         function idf = getFileFormatID(obj,muicat)
             %extract all the file formats from a set of objects
             classname = metaclass(obj).Name; 
-            idf = [];
-            idx = find(strcmp(muicat.Catalogue.CaseClass,classname));
-            for i=1:length(idx)
-                cobj = getCase(muicat,idx(i));
-                idf(i) = cobj.idFormat;
-            end
-            idf = unique(idf);
+            idf = []; 
+            caserec = find(strcmp(muicat.Catalogue.CaseClass,classname));
+            if isempty(caserec), return; end
+            cobj = getCases(muicat,caserec);
+            if isempty(cobj), return; end
+            idf = unique([cobj.idFormat]);
         end
 %%
         function [out1,ok] = callFileFormatFcn(obj,funcname,varargin)
@@ -344,7 +360,8 @@ classdef muiDataSet < handle
             
             %unpack varargin to define call function
             nvar = length(varargin);
-            varlist = ['(funcname,var1'];
+%             varlist = ['(funcname,var1'];
+            varlist = '(funcname,var1';
             for i=2:nvar
                 varlist = sprintf('%s,var%d',varlist,i);
             end
@@ -415,12 +432,10 @@ classdef muiDataSet < handle
             end
 
             %generate plot for display on Q-Plot tab
-            dst = obj.Data{1};
             ht = findobj(src,'Type','axes');
             delete(ht);
             ax = axes('Parent',src,'Tag','Qplot');
-            
-            
+
             if vsze(1)==1            %no rowa
                 if cdim==1           %line plot
                     DSplot(obj,ax,pdat,labs);  

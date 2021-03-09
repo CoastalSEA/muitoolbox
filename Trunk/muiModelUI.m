@@ -680,29 +680,26 @@ classdef muiModelUI < handle
         function caseCallback(obj,src,evt)
             %called from tabs listing cases by clicking on a tab row
             %check that there are some cases
-            if isempty(obj.Cases.Catalogue.CaseID), return; end 
+%             if isempty(obj.Cases.Catalogue.CaseID), return; end 
             %get selected case            
             selrow = evt.Indices(1);
-            idx = find(tabSubset(obj,src.Parent.Tag));       
+            idx = find(tabSubset(obj,src.Parent.Tag)); 
+            if isempty(idx), return; end
             caserec = idx(selrow);
             %get class DataSet for selected record
-            classname = obj.Cases.Catalogue.CaseClass{caserec};
-            casedesc = obj.Cases.Catalogue.CaseDescription{caserec}; 
-            cds = obj.Cases.DataSets.(classname)(caserec);
+            muicat = obj.Cases;
+            casedesc = muicat.Catalogue.CaseDescription{caserec}; 
+            cobj = getCase(muicat,caserec);
             
-            dstables = cds.Data;   %extract data tables (can be more than one)
-            ntables = length(dstables);
-            tabnames = {'Data'};
-            if ntables>1 
-                tabnames = cds.MetaData;
-            end
+            dstables = cobj.Data;   %extract data tables (can be more than one)
+            dstnames = fieldnames(dstables);
+            ntables = length(dstnames);
             
             %generate tables to be displayed
             tables = cell(ntables,1);
             tabtxts = cell(ntables,1);
             for i=1:ntables
-                dst = dstables{i};
-                source = dst.Source;
+                dst = dstables.(dstnames{i});
                 lastmod = datestr(dst.LastModified);
                 meta = dst.MetaData;
 
@@ -715,7 +712,7 @@ classdef muiModelUI < handle
                                                 casedesc,lastmod,meta);
             end
 
-            h_fig = tabtablefigure('Case Metadata',tabnames,tabtxts,tables);
+            h_fig = tabtablefigure('Case Metadata',dstnames,tabtxts,tables);
             
             %add button to access DSproperties of each table displayed
             h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
@@ -725,12 +722,13 @@ classdef muiModelUI < handle
             sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-25, 60, 20];
             for j=1:ntables
                 itab = h_tab.Children(j);  %NEEDS TO CHECK THIS WORKS WITH MUTLIPLE DATASETS
+                dst = dstables.(dstnames{i});
                 setactionbutton(itab,'DSproperties',position,...
                     @(src,evt)getDSProps(obj,src,evt),...
-                   'getDSP','View the dstables DSproperties',dstables{i});
+                   'getDSP','View the dstables DSproperties',dst);
                 setactionbutton(h_fig,'Source',sourcepos,...
                    @(src,evt)getSource(obj,src,evt),'getSource',...
-                   'View data source details',dstables{i}.Source);
+                   'View data source details',dst.Source);
             end
             %adjust position on screen            
             h_fig.Position(1)=  h_fig.Position(3)*3/2; 
@@ -755,30 +753,6 @@ classdef muiModelUI < handle
                     getdialog(sprintf('Source: %s',src.UserData{1}));
                 end
             end
-        end
-%%
-        function isvalidhandle = isValidHandle(obj,inphandles)
-            %check whether classes needed to run model have been instantiated
-            % called by IsValidModel
-            
-            % first ccheck that Input classes exist            
-            if isempty(obj.Inputs), isvalidhandle = false; return; end
-            
-            nhandles = length(inphandles);
-            definedinput = fieldnames(obj.Inputs);
-            isvalidhandle = false(nhandles,1);
-            for i=1:nhandles
-                if any(strcmp(definedinput,inphandles{i}))
-                    localObj = obj.Inputs.(inphandles{i});
-                    if ~isempty(localObj) && isvalid(localObj(end))
-                        %checks that handle is not empty and that it is a valid
-                        %handle variable (ie is a subclass of handle class)
-                        isvalidhandle(i) = true; 
-                    end
-                else
-                    warndlg(sprintf('Input handle %s is not in ModelHandles list',inphandles{i}));
-                end
-            end    
         end
 %%
         function deleteFigObj(obj,figObj,objtype)
@@ -857,31 +831,38 @@ classdef muiModelUI < handle
         function isvalidmodel = isValidModel(obj,modelname)
             %check whether the minimum set of classes needed to run model
             %have valid data. This function uses getCharProperties in
-            %PropertyInterface and so the input handles checked need to
+            %PropertyInterface and so the classes checked need to
             %inherit this interface for this function to work.
-            inphandles = obj.ModelInputs.(modelname);            
-            ishandle = isValidHandle(obj,inphandles);    
-            if any(~ishandle)  
-                %at least one of the input classes isempty
+            
+            % first check that Input & DataSet classes exist  
+            if isempty(obj.Inputs) && isempty(obj.Cases.DataSets)
                 isvalidmodel = false;
-            else
-                %all the input handles are valid handles
-                nhandles = length(inphandles);
-                isvalidmodel = false(nhandles,1);
-                for i=1:nhandles
-                    localObj = obj.Inputs.(inphandles{i});                         
-                    if isprop(localObj(end),'Data') && ...
-                            ~isempty(localObj(end).Data.DataTable) &&...
-                            ~isempty(localObj(end).Data.DataTable{:,1})
-                        %an input timeseries or table has been loaded
-                        isvalidmodel(i) = true;    
-                    else
-                        %input data is loaded using PropertyInterface
-                        isvalidmodel(i) = isValidInstance(localObj);
-                    end
-                end
-                isvalidmodel = all(isvalidmodel);
+                return; 
             end
+            
+            inphandles = obj.ModelInputs.(modelname);  
+            isvalidmodel = false(length(inphandles),1);
+
+            if ~isempty(obj.Inputs)
+                definedinput = fieldnames(obj.Inputs);
+                isinp = find(ismember(inphandles,definedinput));
+                for i=1:length(isinp)
+                    localObj = obj.Inputs.(inphandles{isinp(i)}); 
+                    %input data is loaded using PropertyInterface
+                    isvalidmodel(isinp(i)) = isValidInstance(localObj);
+                end
+                
+            end
+            
+            if ~isempty(obj.Cases.DataSets)
+                definedsets = fieldnames(obj.Cases.DataSets);
+                isdata = find(ismember(inphandles,definedsets));
+                for i=1:length(isdata)
+                    localObj = obj.Cases.DataSets.(inphandles{isdata(i)});
+                    isvalidmodel(isdata(i)) = isa(localObj,inphandles{isdata(i)});
+                end
+            end
+            isvalidmodel = all(isvalidmodel);  
         end 
 %%
         function callStaticFunction(obj,classname,fncname)

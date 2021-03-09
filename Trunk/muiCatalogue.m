@@ -113,6 +113,7 @@ classdef muiCatalogue < dscatalogue
             end  
             cobj = getCase(obj,caserec);      %selected case
             minp = fieldnames(cobj.RunParam); %saved input class instances
+            
             for i=1:length(minp)
                 mobj.Inputs.(minp{i}) = cobj.RunParam.(minp{i});
             end   
@@ -129,8 +130,7 @@ classdef muiCatalogue < dscatalogue
                 %if case to view has not been specified or only one case
                 [caserec,ok] = selectCase(obj,'Select case to view:',...
                                                             'single',2); 
-                if ok<1, return; end  
-                
+                if ok<1, return; end                  
             end
             [cobj,~,catrec] = getCase(obj,caserec);
             
@@ -213,7 +213,23 @@ classdef muiCatalogue < dscatalogue
             if ismsg
                 getdialog(sprintf('Updated case for %s',classname));
             end
-        end         
+        end  
+%%
+        function cobj = getCases(obj,caserecs)
+            %retrieve an array of objects held as DataSets based on caserecs
+            selclass = obj.Catalogue.CaseClass(caserecs);
+            if length(unique(selclass))>1
+                warndlg('Selected records must be from the same class to use getCases')
+                cobj = [];
+                return
+            end
+            %may need to check that caserecs are all from the same class
+            nrec = length(caserecs);
+            cobj(nrec) = getCase(obj,caserecs(nrec));
+            for i=1:nrec-1
+                cobj(i) = getCase(obj,caserecs(i));
+            end            
+        end
 %% 
         function [cobj,classrec,catrec] = getCase(obj,caserec)
             %retrieve the class instance, class record and catalogue record
@@ -280,7 +296,6 @@ classdef muiCatalogue < dscatalogue
                 %NB: any range defined for the Variable is NOT applied
                 %returns all values within dimension range specified
                 [id,dvals] = getSelectedIndices(obj,UIsel,dst,attribnames);
-%                 varlabels = getLabels(dst,'Variable');
                 label = attriblabel{1};
                 switch type
                     case 'array'
