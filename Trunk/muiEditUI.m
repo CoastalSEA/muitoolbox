@@ -118,19 +118,11 @@ classdef muiEditUI < muiDataUI
             casedesc = muicat.Catalogue.CaseDescription(uisel.caserec);
             title = sprintf('Edit %s',casedesc); 
             txt1 = 'To edit select a cell, amend value and press return, or select another cell';
-            header = sprintf('\n%s\n%s',txt1,uisel.desc);    
-            
-            %Figure control button options
-            but.Text = {'Save','Cancel'}; %labels for tab button definition
+            header = sprintf('%s\n%s',txt1,uisel.desc);    
+            but.Text = {'Save','Cancel'}; %Figure control button options
             subtable = tablefigureUI(title,header,subtable,true,but);
             if isempty(subtable), return; end  %user cancelled
             idx = true(1,size(subtable,2));
-            
-            %alternative using Tabledlg class
-            % htab = setTable(obj,title,header,vartable);
-            % if htab.ok==0, delete(htab); return; end  
-            % idx = true(1,size(htab.UserData,2));
-            % subtable{:,:} = htab.UserData;
             
             %recompile edited data into a single variable            
             varname = split(subtable.Properties.VariableNames{1},'_');
@@ -156,28 +148,6 @@ classdef muiEditUI < muiDataUI
             %assign subsampled data to the selected case object
             dst.DataTable.(id.var)(id.row,id.dim{:}) = newtable{:,:};
             cobj.Data.(ds{UIsel.dataset}) = dst;
-        end
-%%
-        function h_tab = setTable(~,prop,prompt,vartable)
-            %define table layout and content for editing
-            colname = vartable.Properties.VariableNames;
-            rownames = vartable.Properties.RowNames;
-            coledit = true;
-            coltype = {};
-            colwidth = {100};
-            figwidth = 0.2;
-            figheight = 0.6;
-
-            h_tab = Tabledlg('RowNames',rownames, ...
-                'ColNames',colname, ...
-                'Title',prop, ...
-                'Prompt',prompt, ...
-                'FigWidth',figwidth, ...
-                'ColEdit',coledit, ...
-                'ColType',coltype, ...
-                'ColWidth',colwidth, ...
-                'FigHeight',figheight, ...
-                'UserData',vartable{:,:});
         end
     end
 %%

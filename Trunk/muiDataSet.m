@@ -68,7 +68,9 @@ classdef muiDataSet < handle
 
             [fname,path,nfiles] = getfiles('MultiSelect',obj.FileSpec{1},...
                 'FileType',obj.FileSpec{2},'PromptText','Select file(s):');
-            if iscell(fname)
+            if nfiles==0
+                return;
+            elseif iscell(fname)
                 filename = [path fname{1}]; %multiselect returns cell array
             else
                 filename = [path fname];    %single select returns char
@@ -284,15 +286,14 @@ classdef muiDataSet < handle
                     obj.RunParam.(minp{isinp(i)}) = copy(mobj.Inputs.(minp{isinp(i)}));
                 end
             end
-            
+            %
             muicat = mobj.Cases;
             if ~isempty(muicat.DataSets)
                 %classes that define model input datasets (save caseID)
-                definedsets = fieldnames(muicat.DataSets);
-                isdata = find(ismember(minp,definedsets));
-                for i=1:length(isdata)
+                for i=1:length(varargin)
                     lobj = getCase(muicat,varargin{i});
-                    obj.RunParam.(minp{isdata(i)}) = lobj.CaseIndex;
+                    cname = metaclass(lobj).Name;
+                    obj.RunParam.(cname) = lobj.CaseIndex;
                 end
             end            
         end

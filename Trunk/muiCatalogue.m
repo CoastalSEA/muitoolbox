@@ -115,7 +115,10 @@ classdef muiCatalogue < dscatalogue
             minp = fieldnames(cobj.RunParam); %saved input class instances
             
             for i=1:length(minp)
-                mobj.Inputs.(minp{i}) = cobj.RunParam.(minp{i});
+                if ~isnumeric(cobj.RunParam.(minp{i}))
+                    %trap datasets used as inputs which are saved as caseID
+                    mobj.Inputs.(minp{i}) = cobj.RunParam.(minp{i});
+                end
             end   
             casedesc = obj.Catalogue.CaseDescription(caserec);
             getdialog(sprintf('Reloaded: %s',casedesc));
@@ -258,18 +261,10 @@ classdef muiCatalogue < dscatalogue
                 dstxt = datasetnames(idset);
             end
             dst = cobj.Data.(datasetnames{idset});  %selected dataset
-%             if ~isnumeric(idset) 
-%                 dstxt = idset;
-%                 idset =  find(strcmp(cobj.MetaData,dstxt));
-%                 if isempty(idset)
-%                     idset = 1;    %no datasets defined so must only be one
-%                 end
-%             elseif isempty(cobj.MetaData)
-%                 dstxt = 'Dataset';
-%             else
-%                 dstxt = cobj.MetaData{idset};
-%             end
-%             dst = cobj.Data{idset};  %selected dataset
+            varnames = dst.VariableNames;
+            if ~isprop(dst,varnames{1})         %dynamic properties not set
+                dst = activatedynamicprops(dst);
+            end
         end
 %%
         function props = getProperty(obj,UIsel,type)
