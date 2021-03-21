@@ -22,7 +22,7 @@ classdef muiModelUI < handle
                                                 'Plots',[],'Stats',[])        
             % mUI.Figure        %handle for main UI figure
             % mUI.Menus         %handle for drop down menus in main UI
-            % mUI.Tabs          %handle for the Tabs in the main main UI
+            % mUI.Tabs          %handle for the Tab Group in the main main UI
             % mUI.PlotsUI       %handle for plotting UI
             % mUI.EditUI        %handle for editing UI
             % mUI.ManipUI       %handle for data manipulation UI
@@ -745,12 +745,14 @@ classdef muiModelUI < handle
 %%
         function getSource(~,src,~)
             if~isempty(src.UserData)
-                if length(src.UserData)>1
+                if iscell(src.UserData) && length(src.UserData)>1
                     stable = cell2table(src.UserData,'VariableNames',{'Sources'});
                     headtext = 'The following sources were used for the selected data set';
                     tablefigure('Sources',headtext,stable);
+                elseif iscell(src.UserData)
+                    msgbox(sprintf('Source: %s',src.UserData{1}));
                 else
-                    getdialog(sprintf('Source: %s',src.UserData{1}));
+                    msgbox(sprintf('Source: %s',src.UserData));
                 end
             end
         end

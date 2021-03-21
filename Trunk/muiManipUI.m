@@ -5,21 +5,20 @@ classdef muiManipUI < muiDataUI
 %   muiManipUI.m
 % PURPOSE
 %   Class implements the muiDataUI class to access data and derive new
-%   variables
+%   variables by calling muiUserModel
 % SEE ALSO
-%   muiDataUI.m
+%   muiDataUI.m and muiUserModel.m
 %
 % Author: Ian Townend
 % CoastalSEA (c) Jan 2021
 %--------------------------------------------------------------------------
 % 
     properties (Transient)
-        %Abstract variables for DataGUIinterface---------------------------        
+        %Abstract variables for muiDataUI----------------------------------        
         %names of tabs providing different data accces options
         TabOptions = {'Calc'};       
         %Additional variables for application------------------------------
-        GuiChild         %handle for muiManip to track output generated 
-        Tabs2Use         %number of tabs to include  (set in getPlotGui)
+        Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  
 %%  
     methods (Access=protected)
@@ -32,15 +31,15 @@ classdef muiManipUI < muiDataUI
 %%    
     methods (Static)
         function obj = getManipUI(mobj)
-            %this is the function call to initialise the Plot GUI.
-            %the input is a handle to the data to be plotted  
-            %the options for plot selection are defined in setTabContent
+            %this is the function call to initialise the UI and assigning
+            %to a handle of the main model UI (mobj.mUI.ManipUI) 
+            %options for selection on each tab are defined in setTabContent
             if isempty(mobj.Cases.Catalogue.CaseID)
                 warndlg('No data available to manipulate');
                 obj = [];
                 return;
-            elseif isa(mobj.mUI.Manip,'muiManipUI')
-                obj = mobj.mUI.Manip;
+            elseif isa(mobj.mUI.ManipUI,'muiManipUI')
+                obj = mobj.mUI.ManipUI;
                 if isempty(obj.dataUI.Figure)
                     obj = obj.setDataUIfigure(mobj);    %initialise figure 
                     setDataUItabs(obj,mobj); %add tabs 
@@ -61,7 +60,7 @@ classdef muiManipUI < muiDataUI
     methods (Access=protected) 
         function setTabContent(obj,src)
             %setup default layout options for individual tabs
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             itab = find(strcmp(obj.Tabs2Use,src.Tag));
             obj.TabContent(itab) = muiDataUI.defaultTabContent;
             
@@ -70,55 +69,46 @@ classdef muiManipUI < muiDataUI
             setCalcTab(obj,src)            
         end                
 %%
-        function setVariableLists(obj,src,mobj)
-            %Abstract function required by DataGUIinterface
+        function setVariableLists(obj,src,mobj,caserec)
+            %initialise the variable lists or values
+            %Abstract function required by muiDataUI
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
-            cobj = getCase(mobj.Cases,1);
+            cobj = getCase(mobj.Cases,caserec);
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag
                     case 'Case'
                         muicat = mobj.Cases.Catalogue;
                         sel_uic{i}.String = muicat.CaseDescription;
+                        sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
-                        if isempty(cobj.MetaData)
-                            sel_uic{i}.String = {'Dataset'};
-                        else
-                            sel_uic{i}.String = cobj.MetaData;
-                        end
+                        sel_uic{i}.String = fieldnames(cobj.Data);
+                        sel_uic{i}.Value = 1; 
                     case 'Variable'     
-                        sel_uic{i}.String = cobj.Data{1}.VariableDescriptions;
-                    case 'Type'
-                        sel_uic{i}.String = S.Type;
+                        ds = fieldnames(cobj.Data);
+                        sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
+                        sel_uic{i}.Value = 1;
                 end
             end        
             obj.TabContent(itab).Selections = sel_uic;
-        end
-%%       
-        function setTabActions(obj,src,~,~) 
-            %actions needed when activating a tab
-            %Abstract function required by DataGUIinterface
-            initialiseUIselection(obj,src);
-            initialiseUIsettings(obj,src);
-            resetVariableSelection(obj,src);
-            clearXYZselection(obj,src);
-        end         
+        end    
 %%        
-        function UseSelection(obj,src,mobj)  
+        function useSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
-            %Abstract function required by DataGUIinterface
+            %Abstract function required by muiDataUI
             switch src.String
                 case 'Calculate'    %calculate result
-                    createVar(obj,src,mobj);
+                    cobj = muiUserModel;                    
+                    createVar(cobj,obj,mobj);
                  case 'Function'
-                    selectFunction(obj,mobj);   
+                    selectFunction(obj,mobj);    
             end 
         end           
     end
 %%
 %--------------------------------------------------------------------------
-% Additional methods used to select functions for use in UI
+% Additional methods used to control selection and functionality of UI
 %--------------------------------------------------------------------------
     methods (Access=private)
         function selectFunction(obj,mobj)
@@ -198,132 +188,9 @@ classdef muiManipUI < muiDataUI
                             '@(src,evt)setIncNaN(src,evt)'};
             % tool tips for buttons             
             S.ActButTip = {'Refresh data list',...%tool tips for buttons
-                           'Include NaNs in output'};         
+                           'Switch to exclude NaNs in output'};         
             obj.TabContent(itab) = S;             %update object
             setEquationBox(obj,src);
         end    
-%%
-%--------------------------------------------------------------------------
-% Additional methods create new variable
-%--------------------------------------------------------------------------        
-        function createVar(obj,src,mobj)
-            %for selected data evaluate user equation/function 
-            %convention is use T,X,Y,Z to represent input variables and 
-            %use t,x,y,z to represent the input to the equation after
-            %bounds and scaling has been applied
-            textobj = findobj(src.Parent,'Tag','UserEqn'); 
-            usereqn = textobj.String;
-            if isempty(usereqn)
-                warndlg('No equation defined in Data Manipulation UI')
-                return;
-            end
-            hw = waitbar(0, 'Loading data. Please wait');
-            utext = [];
-            idstring = regexpi(usereqn,'''');
-            if ~isempty(idstring)
-                utext = usereqn(idstring(1):idstring(2));
-                usereqn = replace(usereqn,utext,'utext');
-                idstring = regexpi(utext,'''');
-                if ~isempty(idstring)
-                    utext = utext(idstring(1)+1:idstring(2)-1);
-                end
-            end
-            TXTeqn = upper(usereqn);
-            %strip out input variables: x,y,z,t.
-            usertxt = sprintf('(%s)',TXTeqn);
-            %need to find x,y,z that are variables and not part of a function name
-            %txyz with non-alphanumeric values behind
-            posnvars1 = regexpi(usertxt,'[txyz](?=\W)'); 
-            %txyz with non-alphanumeric values in front
-            posnvars2 = regexpi(usertxt,'(?<=\W)[txyz]');
-            %values that belong to both
-            varsused = intersect(posnvars1,posnvars2);
-            %variable can be used more than once in equation
-            numvars = unique(usertxt(varsused)); 
-            
-            %use upper case for input variables T,X,Y,Z but lower case for
-            %equations so all Matlab functions can be called.
-            inp.eqn = lower(textobj.String);
-            
-            %handle comment strings that give supplementary instructions
-            posncom = regexp(inp.eqn,'%', 'once');
-            if ~isempty(posncom)
-                comtxt = inp.eqn(posncom+1:end);
-                switch comtxt
-                    case 'time'
-                        istimevar = true;
-                end                
-                inp.eqn = inp.eqn(1:posncom-1);
-            else
-                istimevar = false;
-            end
-
-            if isempty(inp.eqn)
-                %check that equation has been defined
-                warndlg('No equation defined to manipulate data');
-                return;
-            end
-            %find whether user is passing 'mobj' to the function
-            idm = ~isempty(regexpi(usertxt,'mobj','once'));
-            
-            XYZTxt = {'X','Y','Z','T'};
-            inp.isXYZT = false(1,4);
-            for i=1:3  
-                %inp.isXYZT is true if an XYZT variable is used in the inp.eqn
-                inp.isXYZT(i) = ~isempty(regexpi(usertxt(varsused),XYZTxt{i}));
-                if inp.isXYZT(i) && strcmp(obj.DataSelection.(XYZTxt{i}){2,1},'None') 
-                    %check that variable in eqn has also been selected
-                    warndlg(sprintf('%s variable is not defined',XYZTxt{i}));
-                    return;
-                end
-            end
-            %checkif time is used in inp.eqn
-            inp.isXYZT(4) = ~isempty(regexpi(usertxt(varsused),XYZTxt{4}));
-            
-            if all(~inp.isXYZT) || sum(inp.isXYZT)~=length(numvars) 
-                %valid equation variables have not been defined
-                if all(~inp.isXYZT) && ~isempty(idm)
-                    %exclude case when no xyzt but is mobj being passed
-                else
-                    warndlg('Equation can only use t, x, y and/or z as variables');
-                    return;
-                end
-            end     
-            waitbar(0.2)
-            [XYZT,xyzt,metatxt] = getData(obj,mobj,inp);
-            if isempty(xyzt) && isempty(idm), return; end 
-            waitbar(0.8)
-            %use t,x,y,z variables to evaluate user equation
-            %NB: any Scaling selected will have been applied in getVatiable 
-            %called by getData (getVariable is in DataGuiInterface).
-            t = XYZT{4};
-            x = XYZT{1};
-            y = XYZT{2};
-            z = XYZT{3};
-            try
-                heq = str2func(['@(t,x,y,z,utext,mobj) ',inp.eqn]); %handle to anonymous function
-                if istimevar                
-                    [var,t] = heq(t,x,y,z,utext,mobj);
-                else
-                    var = heq(t,x,y,z,utext,mobj);
-                end
-            catch ME
-                errormsg = sprintf('Invalid expression\n%s',ME.message);
-                warndlg(errormsg);
-                close(hw)
-                return;
-            end
-            waitbar(1)    
-            
-            if istimevar && length(t)~=length(xyzt{4})
-                %user specified that length of timeseries can change
-                xyzt{4} = t;
-            end
-            %
-            %var is matrix with datenum(time) in first column and variable in column 2
-            setEqnData(obj,mobj,xyzt,var,metatxt)
-            close(hw)
-        end        
-        
     end
 end

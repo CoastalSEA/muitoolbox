@@ -18,7 +18,6 @@ classdef muiPlotsUI < muiDataUI
         %names of tabs providing different data accces options
         TabOptions = {'2D','3D','4D','2DT','3DT','4DT'};       
         %Additional variables for application------------------------------
-%         GuiChild         %handle for muiPlot to track figures generated
         Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  
 %%  
@@ -32,9 +31,9 @@ classdef muiPlotsUI < muiDataUI
 %%    
     methods (Static)
         function obj = getPlotsUI(mobj)
-            %this is the function call to initialise the Plot GUI.
-            %the input is a handle to the data to be plotted  
-            %the options for plot selection are defined in setTabContent
+            %this is the function call to initialise the UI and assigning
+            %to a handle of the main model UI (mobj.mUI.PlotsUI) 
+            %options for selection on each tab are defined in setTabContent
             if isempty(mobj.Cases.Catalogue.CaseID)
                 warndlg('No data available to plot');
                 obj = [];
@@ -95,23 +94,28 @@ classdef muiPlotsUI < muiDataUI
             end             
         end                
 %%
-        function setVariableLists(obj,src,mobj)
+        function setVariableLists(obj,src,mobj,caserec)
             %initialise the variable lists or values
             %Abstract function required by muiDataUI
+            %called during initialisation by muiDataUI.setDataUItabs and 
+            %whenever muiDataUI.updateCaseList is called
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
-            cobj = getCase(mobj.Cases,1);
+            cobj = getCase(mobj.Cases,caserec);
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag
                     case 'Case'
                         muicat = mobj.Cases.Catalogue;
                         sel_uic{i}.String = muicat.CaseDescription;
+                        sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
                         sel_uic{i}.String = fieldnames(cobj.Data);
+                        sel_uic{i}.Value = 1;
                     case 'Variable' 
                         ds = fieldnames(cobj.Data);
                         sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
+                        sel_uic{i}.Value = 1;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
                     case 'Other'
@@ -120,34 +124,8 @@ classdef muiPlotsUI < muiDataUI
             end        
             obj.TabContent(itab).Selections = sel_uic;
         end
-%%       
-        function setTabActions(obj,src,~,~) 
-            %actions needed when activating a tab
-            %Abstract function required by muiDataUI
-            initialiseUIselection(obj,src);
-            initialiseUIsettings(obj,src);
-            resetVariableSelection(obj,src);
-            clearXYZselection(obj,src);
-            switch src.Tag
-                case {'2D','3D','4D'}
-                case {'2DT','3DT','4DT'}
-            end
-        end 
-%%
-%         function usevardim = getUseTypeDim(obj)
-%             %get the dimensions required for the selected plot type
-%             ptype = obj.UIsettings.Type.String;
-%             switch ptype
-%                 case 'line'
-%                     usevardim = 2;
-%                 case {'surf','contour','contourf','contour3','mesh'}   
-%                     usevardim = 3;
-%                 otherwise
-%                     usevardim = 4;
-%             end
-%         end
 %%        
-        function UseSelection(obj,src,mobj)  
+        function useSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
             %Abstract function required by muiDataUI
             if strcmp(src.String,'Save')   %save animation to file

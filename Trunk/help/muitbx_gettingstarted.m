@@ -11,11 +11,12 @@
 % # Give names to each component, e.g.: <br>
 %   ModelUI, demoData, demoProps, demoModel
 % # Copy the class templates for the components from here to your working folder
-% # Create classes for each component by editing the templates as set out for each template below.
+% # Create classes for each component by editing the templates as illustrated
+%   for each template below.
 %
 
 %%
-% Templates for the four main components are provided in the ModelUI/utils
+% Templates for the four main components are provided in the muiTemplates 
 % folder. The templates provide the code for each component and the comments
 % highlight where the files need to be edited to adapt the templates to 
 % a different application.
@@ -31,7 +32,7 @@
 % the calls to input classes and to run the model need to be edited to the 
 % class and method names to be used .
 %
-% <include>../utils/UseModelUI_template.m</include>
+% <include>../muiTemplates/UseModelUI_template.m</include>
 %
 %%
 % For bespoke implementations of the muiModelUI interface use the
@@ -65,7 +66,7 @@
 % (used in the input UI) for each parameter as a cell array of strings in 
 % the PropertyLabels property.
 %
-% <include>../utils/ParamInput_template.m</include>
+% <include>../muiTemplates/ParamInput_template.m</include>
 %
 %% Models
 % For each _model_ to be included, define a classname and edit the
@@ -75,7 +76,7 @@
 % of the model output. This can use the default format or be customised in 
 % the tabPlot function.
 %
-% <include>../utils/Model_template</include>
+% <include>../muiTemplates/Model_template</include>
 %
 %%
 % At the bottom of the template is the dataDSproperties function. This must

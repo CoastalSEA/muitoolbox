@@ -14,11 +14,10 @@ classdef muiStatsUI < muiDataUI
 %--------------------------------------------------------------------------
 % 
     properties (Transient)
-        %Abstract variables for muiDataUI---------------------------        
+        %Abstract variables for muiDataUI----------------------------------        
         %names of tabs providing different data accces options
         TabOptions = {'General','Timeseries','Taylor','Intervals'};       
         %Additional variables for application------------------------------
-%         GuiChild         %handle for muiStats to track output generated 
         Tabs2Use         %number of tabs to include  (set in getPlotGui)
     end  
 %%  
@@ -32,9 +31,9 @@ classdef muiStatsUI < muiDataUI
 %%    
     methods (Static)
         function obj = getStatsUI(mobj)
-            %this is the function call to initialise the Plot GUI.
-            %the input is a handle to the data to be plotted  
-            %the options for plot selection are defined in setTabContent
+            %this is the function call to initialise the UI and assigning
+            %to a handle of the main model UI (mobj.mUI.StatsUI) 
+            %options for selection on each tab are defined in setTabContent
             if isempty(mobj.Cases.Catalogue.CaseID)
                 warndlg('No data available to analyse');
                 obj = [];
@@ -91,23 +90,28 @@ classdef muiStatsUI < muiDataUI
             end             
         end                
 %%
-        function setVariableLists(obj,src,mobj)
+        function setVariableLists(obj,src,mobj,caserec)
             %initialise the variable lists or values
             %Abstract function required by muiDataUI
+            %called during initialisation by muiDataUI.setDataUItabs and 
+            %whenever muiDataUI.updateCaseList is called
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
-            cobj = getCase(mobj.Cases,1);
+            cobj = getCase(mobj.Cases,caserec);
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag
                     case 'Case'
                         muicat = mobj.Cases.Catalogue;
                         sel_uic{i}.String = muicat.CaseDescription;
+                        sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
                         sel_uic{i}.String = fieldnames(cobj.Data);
+                        sel_uic{i}.Value = 1;
                     case 'Variable'     
                         ds = fieldnames(cobj.Data);
                         sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
+                        sel_uic{i}.Value = 1;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
                 end
@@ -115,29 +119,26 @@ classdef muiStatsUI < muiDataUI
             obj.TabContent(itab).Selections = sel_uic;
         end
 %%       
-        function setTabActions(obj,src,~,~) 
+        function setTabActions(obj,src,evt,mobj) 
             %actions needed when activating a tab
-            %Abstract function required by muiDataUI
+            %Overload default function in muiDataUI to add controls
             initialiseUIselection(obj,src);
             initialiseUIsettings(obj,src);
-            resetVariableSelection(obj,src);
+            updateCaseList(obj,src,evt,mobj);
             clearXYZselection(obj,src);
             switch src.Tag
-                case 'General'
-                    
-                case 'Timeseries'
-                    
+                case 'General'                    
+                case 'Timeseries'                    
                 case 'Taylor'
                     %reset the radial limit value
                     itab = strcmp(obj.Tabs2Use,src.Tag);
                     S = obj.TabContent(itab);  
                     obj.TabContent(itab).Selections{4}.String  = S.Other{1};
-                case 'Intervals'
-                    
+                case 'Intervals'                    
             end
         end         
 %%        
-        function UseSelection(obj,src,mobj)  
+        function useSelection(obj,src,mobj)  
             %make use of the selection made to create a plot of selected type
             %Abstract function required by muiDataUI
             muiStats.getStats(obj,src,mobj);

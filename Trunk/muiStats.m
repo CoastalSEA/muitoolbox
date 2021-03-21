@@ -50,7 +50,7 @@ classdef muiStats < handle
             obj.UIset = gobj.UIsettings;
 
             %get the data to be used in the plot
-            ok = getStatsData(obj,mobj);
+            ok = getStatsData(obj,mobj.Cases);
             if ok<1, return; end %data not found
 
             if strcmp(obj.UIset.Type,'User')
@@ -102,27 +102,28 @@ classdef muiStats < handle
     end  
  %%  
     methods (Access=protected)  
-         function ok = getStatsData(obj,mobj)
+         function ok = getStatsData(obj,muicat)
             %get the data set and add metadata to metatxt
-            %obj - DataStats UI object, mobj - Main UI object
+            %obj - DataStats UI object, muicat - instance of muiCatatalogue
             ok = 1;
-            muicat = mobj.Cases;
             nvar = length(obj.UIsel);
             %initialise struct used in muiCatalogue.getProperty
             props(nvar) = setPropsStruct(muicat);
+            xyzset = [gobj.UIselection(:).caserec]==0;
             for i=1:nvar
                 %get the data and labels for each variable
-                if obj.UIsel(i).caserec==0
-                    props(i) = [];
-                else
+                if obj.UIsel(i).caserec>0
                     props(i) = getProperty(muicat,obj.UIsel(i),'array');
                     if isempty(props(i).data), ok = ok-1; end
                 end
-            end            
+            end  
+            props(xyzset) = [];  %remove unused selections
             %
             xyz = {'X','Y','Z'};
             for i=1:length(props)
                 %assign the data to the correct axis
+                %NB this assigns data in order assigned on tab. If Y and Z
+                %defined on tab this is assigned as X and Y          
                 data2use = props(i).data;
                 if obj.UIsel(i).scale>1 %apply selected scaling to variable
                     usescale = obj.UIset.scaleList{obj.UIsel(i).scale};

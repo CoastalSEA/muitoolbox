@@ -59,7 +59,7 @@ classdef muiPlots < handle
             obj.Order = obj.Plot.Order.(obj.UIset.callTab);
             
             %get the data to be used in the plot
-            ok = getPlotData(obj,mobj);
+            ok = getPlotData(obj,mobj.Cases);
             if ok<1, return; end %data not found
             isvalid = checkdimensions(obj);
             if ~isvalid, return; end
@@ -74,10 +74,9 @@ classdef muiPlots < handle
     end
 %%   
     methods (Access=protected)
-        function ok = getPlotData(obj,mobj)
+        function ok = getPlotData(obj,muicat)
             %get the data to be used in the plot
             ok = 1;
-            muicat = mobj.Cases;
             nvar = length(obj.UIsel);
             %initialise struct used in muiCatalogue.getProperty
             props(nvar) = setPropsStruct(muicat);
@@ -94,7 +93,7 @@ classdef muiPlots < handle
             %
             mtxt = 'Selection used:';
             for i=1:length(xyz)
-                %assign the data to the correct axis
+                %assign the data to the correct axis  
                 data2use = props(i).data;
                 if obj.UIsel(i).scale>1 %apply selected scaling to variable
                     usescale = obj.UIset.scaleList{obj.UIsel(i).scale};

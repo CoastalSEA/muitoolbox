@@ -32,9 +32,8 @@ classdef muiDataUI < handle %replaces DataGUIinterface
 
     methods (Abstract,Access=protected) %methods that all subclasses must define
         setTabContent(obj,src)          %layout options for individual tabs 
-        setVariableLists(obj,src,mobj)  %initialise selection variables
-        setTabActions(obj,src,mobj)     %callback to control tab updating
-        UseSelection(obj,src,evt,mobj)  %function to do something with selected data
+        setVariableLists(obj,src,mobj,crec)  %initialise selection variables
+        useSelection(obj,src,evt,mobj)  %function to do something with selected data
     end
 %--------------------------------------------------------------------------
 % initialise figure and tabs
@@ -81,19 +80,18 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 uipanel('Parent',ht,'Units','normalized',...
                     'Position',[.005 .005 0.99 0.99],'Tag',[tabname,'Panel']);
                 %now add controls to tab
-                setTabContent(obj,ht);             %defines what controls to use                
-                setDataOptionControls(obj,ht,mobj);%selection controls
-                setVariableLists(obj,ht,mobj);     %assign values to variables
-                setXYZpanel(obj,ht,mobj); %XYZ button panel
-                setAdditionalButtons(obj,ht,mobj); %addtional action buttons
-                setTabControlButtons(obj,ht,mobj); %tab control buttons 
-                setHeaderText(obj,ht)              %add any text defined for header
+                setTabContent(obj,ht);              %defines what controls to use                
+                setDataOptionControls(obj,ht,mobj); %selection controls
+                setVariableLists(obj,ht,mobj,1);    %assign values to variables
+                setXYZpanel(obj,ht,mobj);           %XYZ button panel
+                setAdditionalButtons(obj,ht,mobj);  %addtional action buttons
+                setTabControlButtons(obj,ht,mobj);  %tab control buttons 
+                setHeaderText(obj,ht)               %add any text defined for header
             end
             ht = findobj(obj.dataUI.Tabs,'Tag',obj.Tabs2Use{1});
-            initialiseUIselection(obj,ht);      %initialise date selection
-            initialiseUIsettings(obj,ht);       %initialise button settings
+            initialiseUIselection(obj,ht);          %initialise date selection
+            initialiseUIsettings(obj,ht);           %initialise button settings
             obj.dataUI.Tabs.SelectedTab = ht;
-%             setTabActions(obj,ht,[],mobj);    %tab specific actions
             obj.dataUI.Figure.Visible = 'on';
         end  
 %%
@@ -376,12 +374,34 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 end
             end
         end
-%%
+%%    
         function updateCaseList(obj,src,~,mobj)
-            %callback function from uicontrols keeps track of currrent selection
-            ht = src.Parent;
-            setVariableLists(obj,ht,mobj)
+            %callback function from uicontrols keeps track of currrent selection            
+            if isa(src,'matlab.ui.container.Tab') 
+                %new tab or clear button selected
+                itab = strcmp(obj.Tabs2Use,src.Tag);
+                obj.TabContent(itab).Selections{1}.Value = 1;
+                setVariableLists(obj,src,mobj,1)
+            elseif isa(src,'matlab.ui.control.UIControl') && ...
+                                                    strcmp(src.Tag,'Case')
+                %case selection has changed                                
+                ht = src.Parent;
+                if src.UserData~=src.Value     
+                    setVariableLists(obj,ht,mobj,src.Value)
+                end
+            else          %dataset or variable selected has changed
+                %no need to update lists unless Case or Tab changes
+            end
         end      
+%%       
+        function setTabActions(obj,src,evt,mobj) 
+            %actions needed when activating a tab
+            %Abstract function required by muiDataUI
+            initialiseUIselection(obj,src);
+            initialiseUIsettings(obj,src);
+            updateCaseList(obj,src,evt,mobj);
+            clearXYZselection(obj,src);
+        end     
 %%
 %--------------------------------------------------------------------------
 % functions to capture a selection
@@ -509,16 +529,16 @@ classdef muiDataUI < handle %replaces DataGUIinterface
             if strcmp(src.String,'Clear')%clear variable selection in the UI                
                 initialiseUIselection(obj,src.Parent);
                 initialiseUIsettings(obj,src.Parent);  
-                resetVariableSelection(obj,src.Parent);
+                updateCaseList(obj,src.Parent,[],mobj);
                 clearXYZselection(obj,src.Parent);
                 clearEqnBox(obj,src.Parent);
             elseif strcmp(src.String,'Function')
-                UseSelection(obj,src,mobj);    %do something with selection
+                useSelection(obj,src,mobj);    %do something with selection
             elseif obj.issetXYZ
                 ok = assignSelection(obj,src,mobj);  %selections in UI
                 if ok<1, return; end
                 assignSettings(obj,src);  %settings in UI                
-                UseSelection(obj,src,mobj);    %do something with selection
+                useSelection(obj,src,mobj);    %do something with selection
             else
                 warndlg('Check that variables have been defined')
             end      
@@ -720,15 +740,6 @@ classdef muiDataUI < handle %replaces DataGUIinterface
 %--------------------------------------------------------------------------
 % funtions to reset and exit
 %--------------------------------------------------------------------------
-        function resetVariableSelection(obj,src)
-            %return variable selections to initial settings
-            itab = strcmp(obj.Tabs2Use,src.Tag);
-            S = obj.TabContent(itab).Selections;
-            for i=1:length(S)
-                S{i}.Value = 1;
-            end
-        end
-%%
         function clearXYZselection(obj,src)
             %clear the text in the XYZ panel
             h_pan = findobj(src.Children,'Tag','XYZpanel');

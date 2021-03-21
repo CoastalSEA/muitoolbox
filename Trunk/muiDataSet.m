@@ -81,7 +81,7 @@ classdef muiDataSet < handle
             [dst,ok] = callFileFormatFcn(obj,funcname,obj,filename);
             if ok<1 || isempty(dst), return; end
             %assign metadata about data
-            dst.Source{1} = filename;
+            dst.Source{1,1} = filename;
             
             hw = waitbar(0, 'Loading data. Please wait');
             %now load any other files of the same format
@@ -93,7 +93,7 @@ classdef muiDataSet < handle
                     if ~isempty(adn_dst)
                         dst = vertcat(dst,adn_dst); %#ok<AGROW>
                     end
-                    dst.Source{jf} = filename;
+                    dst.Source{jf,1} = filename;
                     waitbar(jf/nfiles)
                 end                
             end
@@ -478,12 +478,15 @@ classdef muiDataSet < handle
 %%
         function h = DSplot(~,ax,data,labels)
             %line plot for 1D variable
+            cats = [];
             if iscell(data.V) && ischar(data.V{1})                   
                 v = categorical(data.V,'Ordinal',true);    
                 cats = categories(v);
                 data.V = double(v); %convert categorical data to numerical
-            else
-                cats = [];
+            end
+            %
+            if isempty(data.X)
+                data.X = (1:length(data.V))';                
             end
             
             h = plot(ax,data.X,data.V);
@@ -502,12 +505,15 @@ classdef muiDataSet < handle
                 data.X = categorical(data.X,data.X);
             end
             %
+            cats = [];
             if iscell(data.V) && ischar(data.V{1})                   
                 y = categorical(data.V,'Ordinal',true);    
                 cats = categories(y);
                 data.V = double(y); %convert categorical data to numerical
-            else
-                cats = [];
+            end
+            %
+            if isempty(data.X)
+                data.X = (1:length(data.V))';                
             end
             
             h = bar(ax,data.X,data.V);

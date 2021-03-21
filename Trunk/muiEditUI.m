@@ -13,11 +13,11 @@ classdef muiEditUI < muiDataUI
 %--------------------------------------------------------------------------
 % 
     properties (Transient)
-        %Abstract variables for DataGUIinterface---------------------------        
+        %Abstract variables for muiDataUI----------------------------------       
         %names of tabs providing different data accces options
         TabOptions = {'Edit'};       
         %Additional variables for application------------------------------
-        Tabs2Use         %number of tabs to include  (set in getPlotGui)
+        Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  
 %%  
     methods (Access=protected)
@@ -30,9 +30,9 @@ classdef muiEditUI < muiDataUI
 %%    
     methods (Static)
         function obj = getEditUI(mobj)
-            %this is the function call to initialise the Plot GUI.
-            %the input is a handle to the data to be plotted  
-            %the options for plot selection are defined in setTabContent
+            %this is the function call to initialise the UI and assigning
+            %to a handle of the main model UI (mobj.mUI.EditUI) 
+            %options for selection on each tab are defined in setTabContent
             if isempty(mobj.Cases.Catalogue.CaseID)
                 warndlg('No data available to edit');
                 obj = [];
@@ -68,39 +68,33 @@ classdef muiEditUI < muiDataUI
             setEditTab(obj,src)            
         end                
 %%
-        function setVariableLists(obj,src,mobj)
+        function setVariableLists(obj,src,mobj,caserec)
             %Abstract function required by DataGUIinterface
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
-            cobj = getCase(mobj.Cases,1);
+            cobj = getCase(mobj.Cases,caserec);
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag
                     case 'Case'
                         muicat = mobj.Cases.Catalogue;
                         sel_uic{i}.String = muicat.CaseDescription;
+                        sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
                         sel_uic{i}.String = fieldnames(cobj.Data);
+                        sel_uic{i}.Value = 1;
                     case 'Variable'     
                         ds = fieldnames(cobj.Data);
                         sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
+                        sel_uic{i}.Value = 1;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
                 end
             end        
             obj.TabContent(itab).Selections = sel_uic;
-        end
-%%       
-        function setTabActions(obj,src,~,~) 
-            %actions needed when activating a tab
-            %Abstract function required by DataGUIinterface
-            initialiseUIselection(obj,src);
-            initialiseUIsettings(obj,src);
-            resetVariableSelection(obj,src);
-            clearXYZselection(obj,src);
-        end         
+        end        
 %%        
-        function UseSelection(obj,~,mobj)  
+        function useSelection(obj,~,mobj)  
             %make use of the selection made to create a plot of selected type
             %Abstract function required by DataGUIinterface
             muicat = mobj.Cases;
@@ -185,17 +179,8 @@ classdef muiEditUI < muiDataUI
             S.XYZpanel = [0.04,0.2,0.91,0.15]; %position for XYZ button panel
             S.XYZlabels = {'Var'};             %default button labels
             
-            %Action button specifications
-%             S.ActButNames = {'Refresh'};           %names assigned selection struct
-%             S.ActButText = {char(174)};            %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
-%             S.ActButPos = [0.86,-1];%positions for action buttons   
-%             % action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)'};
-%             % tool tips for buttons             
-%             S.ActButTip = {'Refresh data list'};         
+            %Action button specifications - use default
+            
             obj.TabContent(itab) = S;         %update object
         end    
     end
