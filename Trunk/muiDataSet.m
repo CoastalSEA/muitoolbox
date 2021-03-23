@@ -27,7 +27,9 @@ classdef muiDataSet < handle
         %      Variables with different dimensions should be stored in 
         %      seperate dstables. Variables with time-varying dimensions 
         %      should store the dimensions as variables.
-        
+        DataFormats     %cell array of data formats available 
+        idFormat        %class instance file format    
+        FileSpec        %file loading spec {MultiSelect(on/off),FileType}       
     end
     
     properties (Hidden, SetAccess=private)
@@ -35,11 +37,9 @@ classdef muiDataSet < handle
     end
     
     properties (Transient) 
-        sdst            %Transient dataset from individual files 
-                        %that are combined to form master dstable
-        DataFormats     %cell array of data formats available 
-        idFormat        %class instance file format    
-        FileSpec        %file loading spec {MultiSelect(on/off),FileType}
+%         sdst            %Transient dataset from individual files 
+%                         %that are combined to form master dstable
+
     end
     
     methods (Abstract)    
@@ -230,6 +230,12 @@ classdef muiDataSet < handle
 %%        
         function addCaseRecord(obj,muicat,varargin)
             %add a case to the Catalogue and assign to DataSets
+            % varargin are as defined for dscatalogue.addRecord with
+            % classname derived from obj, viz:            
+            % casetype  - type of data set (e.g. keywords: model, data)
+            % casedesc  - description of case (optional)
+            % SupressPrompts - logical flag to use casedesc as record 
+            %                  description without prompting user (optional)
             classname = metaclass(obj).Name;            
             %add record to the catalogue and update mui.Cases.DataSets
             caserec = addRecord(muicat,classname,varargin{:});

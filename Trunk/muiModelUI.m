@@ -475,12 +475,12 @@ classdef muiModelUI < handle
         function toolsMenuOptions(obj,src,~)
             %callback function for Tools menu options
             switch src.Text
-                case 'Model'
+                case 'Project'
                     obj.clearModel;
                 case 'Figures'
                     obj.clearFigures;
-                case 'Cases'
-                    obj.clearCases;
+                case {'Cases','Data','Models'}
+                    clearCases(obj,src.Text);
             end
         end
 %%
@@ -522,10 +522,17 @@ classdef muiModelUI < handle
             end     
         end      
 %%        
-        function clearCases(obj,~,~)
-            %delete selected cases from Case list and delete case            
-            deleteCases(obj.Cases);
-            obj.DrawMap;
+        function clearCases(obj,type)
+            %delete selected cases from Case list and delete case 
+            muicat = obj.Cases;
+            if strcmp(type,'Cases')
+                deleteCases(muicat);
+            else
+                caserec = find(tabSubset(obj,type));
+                deleteCases(muicat,caserec);
+            end
+            ht = findobj(obj.mUI.Tabs.Children,'Tag',type);
+            DrawMap(obj,ht);
         end
 %%
 %-------------------------------------------------------------------------
@@ -623,6 +630,7 @@ classdef muiModelUI < handle
             runMenuOptions(obj,src,[]);
         end 
 %%  Need to see if this is needed
+%%  ModelUI calls this for Q-Plot and Stats********************************
         function getTabData(obj,src,~)
             %get data required for a tab action (eg plot or tabulation)
             %user selected data are held in the structure 'inp' including:

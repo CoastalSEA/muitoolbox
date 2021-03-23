@@ -3,7 +3,7 @@
 <toc version="2.0">
 <!-- First tocitem specifies top level in Help browser Contents pane -->
 <!-- This can be a roadmap page, as shown below, or a content page -->
-    <tocitem target="muioolbox.html">muitoolbox
+    <tocitem target="muitoolbox.html">muitoolbox
         <!-- Nest tocitems to create hierarchical entries in  Contents-->
         <!-- To include icons, use the following syntax for tocitems: -->
         <!-- <tocitem target="foo.html" image="HelpIcon.NAME"> -->
@@ -21,11 +21,11 @@
 
         <!-- User Guide comes next -->
         <tocitem target="muitbx_classes.html" 
-            image="HelpIcon.USER_GUIDE">MUItoolbox Classes
+            image="HelpIcon.USER_GUIDE">muitoolbox Classes
             <tocitem target="muiModelUI.html">muiModelUI</tocitem>
             <tocitem target="muiPropertyUI.html">muiPropertyUI</tocitem>
             <tocitem target="muiDataUI.html">muiDataUI</tocitem> 
-            <tocitem target="dscollection.html">dscollection</tocitem>     
+            <tocitem target="muiDataSet.html">muiDataSet</tocitem>     
         </tocitem>
         <!-- Function reference next -->
         <!-- First item is page describing function categories, if any -->
@@ -36,7 +36,7 @@
         </tocitem>        
         <!-- Optional List of Examples, with hyperlinks to examples in other files -->
         <tocitem target="muitbx_examples.html" 
-                 image="HelpIcon.EXAMPLES">MUItoolbox Examples
+                 image="HelpIcon.EXAMPLES">muitoolbox Examples
         </tocitem>
         <!-- Optional link or links to your or other Web sites -->
         <tocitem target="dstoolbox.html">dstoolbox

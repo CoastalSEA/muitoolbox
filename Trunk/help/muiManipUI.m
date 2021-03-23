@@ -24,13 +24,13 @@
 
 %% 
 
-%% User equation or function
+%% User Equation or Function
 % The text box is used to define a Matlab(TM) algebraic script , call a
 % Matlab(TM) function, or call an external function. The main constraint
 % when using this utility is that the number of variables is limited to 3
 % (X, Y, and Z) in addition T can be used in the call to make use of the
 % dataset RowNames (eg time). The variables can be written in upper or
-% lower case. For each variable define in the call, a variable must be
+% lower case. For each variable defined in the call, a variable must be
 % assigned to one or more of the XYZ buttons. In addition text inputs
 % required by the call and the model object (mobj) can also be passed. 
 % Comments can be used to pass additional instructions, such as the
@@ -46,13 +46,13 @@
 % in the first cell and data to be used to define RowNames in the second
 % cell. If the %time or %rows instruction is included in the call, row data
 % are added providing that the length of the input dataset matches the output
-% dataset. If there is no ouput to be passed back the function should
+% dataset. If there is no output to be passed back the function should
 % return a cell array containing the string 'no output' to suppress the
 % message box which is used for single value outputs.
 %%
 % An alternative when calling external functions is to pass the selected
 % variables as dstables, thereby also passing all the associated metadata
-% and RowNames for each dataset selected. For this option upto 3 variables
+% and RowNames for each dataset selected. For this option up to 3 variables
 % can be selected but they are defined in the call using dst, for example:
 %   mufunction3(dst,'usertext',mobj)
 % This passes the selected variables as a struct array of dstables to the
@@ -60,7 +60,7 @@
 % Using this syntax the function can return a dstable or struct of
 % dstables, or a cell array containing one or more data sets
 
-%% Function list
+%% Function library
 % To simplify accessing and using a range of functions that are commonly
 % used in an application, the function syntax can be predefined in the file
 % functionlibrarylist.m which can be found in the utils folder of the

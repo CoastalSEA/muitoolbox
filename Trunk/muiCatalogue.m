@@ -465,8 +465,8 @@ classdef muiCatalogue < dscatalogue
 %%
         function indices = getIndices(~,var,value)
             %get the index or vector of indices based on selection
-            % var is the variable to select from and value is a single
-            % value to select the nearest index or a text string defining
+            % var is the variable to select from and value is a numeric
+            % value to select the nearest index, or a text string defining
             % the range of values required
             if ischar(value)
                 indices = getvarindices(var,value);

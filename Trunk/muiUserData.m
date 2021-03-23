@@ -17,6 +17,8 @@ classdef muiUserData < muiDataSet
 % 
     properties  
         %inherits Data, RunParam, MetaData and CaseIndex from muiDataSet
+        % importing data requires muiDataSet propertiesm DataFormats and
+        % FileSpec to be defined in class constructor.
         %Additional properties:        
     end
 
