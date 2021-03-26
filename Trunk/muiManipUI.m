@@ -66,7 +66,7 @@ classdef muiManipUI < muiDataUI
             
             %customise the layout of each tab. Overload the default
             %template with a function for the tab specific definition
-            setCalcTab(obj,src)            
+            setCalcTab(obj,src) 
         end                
 %%
         function setVariableLists(obj,src,mobj,caserec)
@@ -177,7 +177,7 @@ classdef muiManipUI < muiDataUI
             S.XYZlabels = {'X','Y','Z'};          %default button labels
             
             %Action button specifications
-            S.ActButNames = {'Refresh','IncNaN'}; %names assigned selection struct
+            S.ActButNames = {'Refresh','ExcNaN'}; %names assigned selection struct
             S.ActButText = {char(174),'+N'};      %labels for additional action buttons
             % Negative values in ActButPos indicate that a
             % button is alligned with a selection option numbered in the 
@@ -185,7 +185,7 @@ classdef muiManipUI < muiDataUI
             S.ActButPos = [0.86,-1;0.86,-3];      %positions for action buttons   
             % action button callback function names
             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-                            '@(src,evt)setIncNaN(src,evt)'};
+                            '@(src,evt)setExcNaN(src,evt)'};
             % tool tips for buttons             
             S.ActButTip = {'Refresh data list',...%tool tips for buttons
                            'Switch to exclude NaNs in output'};         

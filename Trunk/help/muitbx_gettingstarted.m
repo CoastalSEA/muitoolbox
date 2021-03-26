@@ -30,7 +30,7 @@
 % setTabProperties method has to be edited to match the class names for the
 % parameter inputs and the position for each parameter set on the tab. Finally, 
 % the calls to input classes and to run the model need to be edited to the 
-% class and method names to be used .
+% class and method names to be used.
 %
 % <include>../muiTemplates/UseModelUI_template.m</include>
 %

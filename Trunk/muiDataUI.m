@@ -377,8 +377,9 @@ classdef muiDataUI < handle %replaces DataGUIinterface
 %%    
         function updateCaseList(obj,src,~,mobj)
             %callback function from uicontrols keeps track of currrent selection            
+            
             if isa(src,'matlab.ui.container.Tab') 
-                %new tab or clear button selected
+                %new tab or clear button selected   
                 itab = strcmp(obj.Tabs2Use,src.Tag);
                 obj.TabContent(itab).Selections{1}.Value = 1;
                 setVariableLists(obj,src,mobj,1)
@@ -389,7 +390,14 @@ classdef muiDataUI < handle %replaces DataGUIinterface
                 if src.UserData~=src.Value     
                     setVariableLists(obj,ht,mobj,src.Value)
                 end
-            else          %dataset or variable selected has changed
+            elseif isa(src,'matlab.ui.control.UIControl') && ...
+                                                    strcmp(src.Tag,'Refresh')
+                %refresh case list button
+                ht = src.Parent;
+                itab = strcmp(obj.Tabs2Use,ht.Tag);
+                obj.TabContent(itab).Selections{1}.Value = 1;
+                setVariableLists(obj,ht,mobj,1)
+            else
                 %no need to update lists unless Case or Tab changes
             end
         end      

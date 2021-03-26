@@ -200,9 +200,8 @@ classdef muiDataSet < handle
             getdialog(sprintf('Data deleted from: %s',catrec.CaseDescription));
         end
 %%
-        function qcData(obj,classrec,catrec,muicat)
+        function qcData(obj,classrec,~,muicat)
             %apply quality control to a dataset
-            
             funcname = 'dataQC';
             [output,ok] = callFileFormatFcn(obj,funcname,obj);
             if ok<1 || isempty(output), return; end
@@ -210,7 +209,6 @@ classdef muiDataSet < handle
             %update dataset record - output contains {dst,datasetname}
             obj.Data.(output{2}) = output{1};             
             updateCase(muicat,obj,classrec);
-            getdialog(sprintf('Quality control applied to: %s',catrec.CaseDescription));
         end
 %%
         function datasetname = getDataSetName(obj)
@@ -228,29 +226,29 @@ classdef muiDataSet < handle
             datasetname = datasetnames{dataset};
         end
 %%        
-        function addCaseRecord(obj,muicat,varargin)
-            %add a case to the Catalogue and assign to DataSets
-            % varargin are as defined for dscatalogue.addRecord with
-            % classname derived from obj, viz:            
-            % casetype  - type of data set (e.g. keywords: model, data)
-            % casedesc  - description of case (optional)
-            % SupressPrompts - logical flag to use casedesc as record 
-            %                  description without prompting user (optional)
-            classname = metaclass(obj).Name;            
-            %add record to the catalogue and update mui.Cases.DataSets
-            caserec = addRecord(muicat,classname,varargin{:});
-            casedef = getRecord(muicat,caserec);
-            obj.CaseIndex = casedef.CaseID;
-            datasets = fieldnames(obj.Data);
-            for i=1:length(datasets)
-                if isa(obj.Data.(datasets{i}),'dstable')
-                    obj.Data.(datasets{i}).Description = casedef.CaseDescription;
-                end
-            end
-            %assign dataset to class record
-            id_class = setDataClassID(muicat,classname);              
-            muicat.DataSets.(classname)(id_class) = obj;
-        end         
+%         function addCaseRecord(obj,muicat,varargin)
+%             %add a case to the Catalogue and assign to DataSets
+%             % varargin are as defined for dscatalogue.addRecord with
+%             % classname derived from obj, viz:            
+%             % casetype  - type of data set (e.g. keywords: model, data)
+%             % casedesc  - description of case (optional)
+%             % SupressPrompts - logical flag to use casedesc as record 
+%             %                  description without prompting user (optional)
+%             classname = metaclass(obj).Name;            
+%             %add record to the catalogue and update mui.Cases.DataSets
+%             caserec = addRecord(muicat,classname,varargin{:});
+%             casedef = getRecord(muicat,caserec);
+%             obj.CaseIndex = casedef.CaseID;
+%             datasets = fieldnames(obj.Data);
+%             for i=1:length(datasets)
+%                 if isa(obj.Data.(datasets{i}),'dstable')
+%                     obj.Data.(datasets{i}).Description = casedef.CaseDescription;
+%                 end
+%             end
+%             %assign dataset to class record
+%             id_class = setDataClassID(muicat,classname);              
+%             muicat.DataSets.(classname)(id_class) = obj;
+%         end         
 %%
         function data = readTSinputFile(~,filename)
             %use Matlab detectImportOptions to decipher the header and read the
@@ -316,7 +314,8 @@ classdef muiDataSet < handle
             else
                 obj.Data.Dataset = dataset;  
             end
-            addCaseRecord(obj,muicat,varargin{:})
+%             addCaseRecord(obj,muicat,varargin{:})
+            setCase(muicat,obj,varargin{:});
         end                    
 %%
         function formatfile = setFileFormat(~)
@@ -367,7 +366,6 @@ classdef muiDataSet < handle
             
             %unpack varargin to define call function
             nvar = length(varargin);
-%             varlist = ['(funcname,var1'];
             varlist = '(funcname,var1';
             for i=2:nvar
                 varlist = sprintf('%s,var%d',varlist,i);

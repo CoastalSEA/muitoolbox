@@ -1,5 +1,5 @@
 %% muiManipUI
-% The _muiManipUI_ class inherits the <matlab:doc('muiDataUI') muiDataUI> 
+% The _muiManipUI_ class inherits the <matlab:doc('muidataui') muiDataUI> 
 % class and provides a user interface for selection of datasets or 
 % variables and using these in a Matlab(TM) expression or in a function
 % call.

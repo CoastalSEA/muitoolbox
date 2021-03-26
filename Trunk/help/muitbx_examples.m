@@ -41,3 +41,6 @@
 % _casenum_ and _options_ input arguments not used <br>
 % Runs the model and loads data twice to create a catalogue of four data
 % sets. then calls plot and display functions for selected cases.
+
+%% See Also
+% The demonstration UI provided in the <matlab:doc('modelui') ModelUI> App. 

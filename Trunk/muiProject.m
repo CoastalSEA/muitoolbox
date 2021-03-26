@@ -44,18 +44,6 @@ classdef muiProject < handle
             if isempty(answer), return; end            
             obj.ProjectName = answer{1};
             obj.ProjectDate = answer{2};
-%             if ~isempty(mobj.Cases.Catalogue)
-%                 button = questdlg('Correct Project Name in existing scenarios?',...
-%                                      'Edit Project','Yes','No','No');
-%                 if strcmp(button,'Yes') 
-%                     %WILL DEPEND ON HOW THIS IS HELD IN dscollection
-% %                     localObj = mobj.Cases;
-% %                     for i=1:length(localObj.CaseID)
-% %                         localObj.CaseModel{i}.pname = answer{1};
-% %                         localObj.CaseModel{i}.pdat = answer{2};
-% %                     end
-%                 end
-%             end
         end
     end
 end

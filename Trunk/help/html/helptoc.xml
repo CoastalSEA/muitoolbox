@@ -25,21 +25,20 @@
             <tocitem target="muiModelUI.html">muiModelUI</tocitem>
             <tocitem target="muiPropertyUI.html">muiPropertyUI</tocitem>
             <tocitem target="muiDataUI.html">muiDataUI</tocitem> 
-            <tocitem target="muiDataSet.html">muiDataSet</tocitem>     
+            <tocitem target="muiDataSet.html">muiDataSet</tocitem>
+
         </tocitem>
         <!-- Function reference next -->
         <!-- First item is page describing function categories, if any -->
-        <tocitem target="muitbx_func_help.html" 
-                 image="HelpIcon.FUNCTION">Function Reference
-            <tocitem target="dst2tsc.html">dst2tsc</tocitem>    
-            <tocitem target="tsc2dst.html">tsc2dst</tocitem>        
+        <tocitem target="muitbx_gettingstarted.html" 
+                 image="HelpIcon.GETTING_STARTED ">getting started   
         </tocitem>        
         <!-- Optional List of Examples, with hyperlinks to examples in other files -->
         <tocitem target="muitbx_examples.html" 
                  image="HelpIcon.EXAMPLES">muitoolbox Examples
         </tocitem>
         <!-- Optional link or links to your or other Web sites -->
-        <tocitem target="dstoolbox.html">dstoolbox
+        <tocitem target="muitbx_dstoolbox.html">dstoolbox
         </tocitem>       
     </tocitem>
 </toc>

@@ -17,7 +17,7 @@ classdef muiCatalogue < dscatalogue
 %--------------------------------------------------------------------------
 % 
     properties
-        %Catalogue          %inherited property from dscatalgue
+        %Catalogue          %inherited property from dscatalogue
         DataSets            %handle to class instances
     end
     
@@ -25,7 +25,9 @@ classdef muiCatalogue < dscatalogue
         function obj = muiCatalogue
             %constructor to initialise object
         end
-%%
+%% ------------------------------------------------------------------------
+% Methods used in ModelUI Project menu
+%--------------------------------------------------------------------------
         function saveCase(obj,caserec)  
             %write the results for a selected case to an excel file   
             if nargin<2  %if case to save has not been specified
@@ -129,8 +131,8 @@ classdef muiCatalogue < dscatalogue
             nrec = height(obj.Catalogue);
             if nrec==1
                 caserec = 1; %overrides caserec input if only one record
-            elseif nargin<3
-                %if case to view has not been specified or only one case
+            elseif nargin<2
+                %if case to view has not been specified
                 [caserec,ok] = selectCase(obj,'Select case to view:',...
                                                             'single',2); 
                 if ok<1, return; end                  
@@ -181,7 +183,8 @@ classdef muiCatalogue < dscatalogue
             datatype = inputdlg(prompt,title,1,{'data'});
             if isempty(datatype), return; end
             
-            addCaseRecord(cobj,obj,datatype);
+%             addCaseRecord(cobj,obj,datatype);
+            setCase(obj,cobj,datatype);
         end
 %%
         function exportCase(obj,caserec)
@@ -205,7 +208,9 @@ classdef muiCatalogue < dscatalogue
             save([pwd,'/',filename{1},'.mat'],'cobj') %save as cobj
             getdialog(sprintf('Case exported to: %s',filename{1}));
         end
-%%
+%% ------------------------------------------------------------------------
+% Methods to manipulate Cases held in the Catalogue
+%--------------------------------------------------------------------------
         function updateCase(obj,cobj,classrec,ismsg)
             %update the saved record with an amended version of instance
             if nargin<4
@@ -214,7 +219,9 @@ classdef muiCatalogue < dscatalogue
             classname = metaclass(cobj).Name;
             obj.DataSets.(classname)(classrec) = cobj;
             if ismsg
-                getdialog(sprintf('Updated case for %s',classname));
+                caserec = caseRec(obj,cobj.CaseIndex);
+                casedesc = obj.Catalogue.CaseDescription{caserec};
+                getdialog(sprintf('Updated case for %s',casedesc));
             end
         end  
 %%
@@ -242,11 +249,36 @@ classdef muiCatalogue < dscatalogue
             cobj = lobj(classrec);
         end
 %%
+        function setCase(obj,cobj,varargin)
+            %add a case to the Catalogue and assign to DataSets
+            % varargin are as defined for dscatalogue.addRecord with
+            % classname derived from obj, viz:            
+            % casetype  - type of data set (e.g. keywords: model, data)
+            % casedesc  - description of case (optional)
+            % SupressPrompts - logical flag to use casedesc as record 
+            %                  description without prompting user (optional
+            classname = metaclass(cobj).Name;            
+            %add record to the catalogue and update mui.Cases.DataSets
+            caserec = addRecord(obj,classname,varargin{:});
+            casedef = getRecord(obj,caserec);
+            cobj.CaseIndex = casedef.CaseID;
+            datasets = fieldnames(cobj.Data);
+            for i=1:length(datasets)
+                if isa(cobj.Data.(datasets{i}),'dstable')
+                    cobj.Data.(datasets{i}).Description = casedef.CaseDescription;
+                end
+            end
+            %assign dataset to class record
+            id_class = setDataClassID(obj,classname);              
+            obj.DataSets.(classname)(id_class) = cobj;
+        end
+%%
         function [dst,caserec,idset,dstxt] = getDataset(obj,caserec,idset)
             %use the caserec id to get a case and return selected dataset
-            %also returns caserec and idset as numeric index values
+            %also returns caserec and idset as numeric index values and dstxt 
             % caserec - record id in mui Catalogue
             % idset - numeric index or a name defined dataset MetaData property
+            % dstxt - dataset names used in class object Data property struct
             %function called by getProperty and muiDataUI.XYZselection
             if ~isnumeric(caserec)               
                 caserec = find(strcmp(obj.Catalogue.CaseDescription,caserec));
@@ -258,28 +290,28 @@ classdef muiCatalogue < dscatalogue
                 dstxt = idset; 
                 idset =  find(strcmp(datasetnames,dstxt));
             else
-                dstxt = datasetnames(idset);
+                dstxt = datasetnames{idset};
             end
             dst = cobj.Data.(datasetnames{idset});  %selected dataset
             varnames = dst.VariableNames;
-            if ~isprop(dst,varnames{1})         %dynamic properties not set
-                dst = activatedynamicprops(dst);
-            end
-        end
+            if ~isprop(dst,varnames{1})          %dynamic properties not set
+                dst = activatedynamicprops(dst); %dstable now uses 
+            end                                  %ConstructOnLoad so this 
+        end                                      %should no longer be needed
 %%
-        function props = getProperty(obj,UIsel,type)
+        function props = getProperty(obj,UIsel,outopt)
             %extract the data based on the selection made using a UI that
             %inherits muiDataUI and provides the UIselection struct
             % UIsel - UIselection struct that defines the dataset and
             %         dimensions/indices required
-            % type - options to return the data as an array, table, dstable,
+            % outopt - options to return the data as an array, table, dstable,
             %        a splittable where the 2nd dimension has been split into
             %        variables (see muiEditUI for example of usage), or a
             %        timeseries data set (assumes rows are datetime)
             % props - returns a struct containing data, description of 
             %         property being used and the associated label 
             props = setPropsStruct(obj);
-            if nargin<3, type = 'array'; end
+            if nargin<3, outopt = 'array'; end
             istable = false;
             [dst,~,~,dstxt] = getDataset(obj,UIsel.caserec,UIsel.dataset);
             [attribnames,attribdesc,attriblabel] = getVarAttributes(dst,UIsel.variable);
@@ -292,7 +324,7 @@ classdef muiCatalogue < dscatalogue
                 %returns all values within dimension range specified
                 [id,dvals] = getSelectedIndices(obj,UIsel,dst,attribnames);
                 label = attriblabel{1};
-                switch type
+                switch outopt
                     case 'array'
                         %extracts array for selected variable
                         data = getData(dst,id.row,id.var,id.dim); 
@@ -310,7 +342,8 @@ classdef muiCatalogue < dscatalogue
                         data = array2table(array,'RowNames',dimnames{1},...
                                             'VariableNames',dimnames{2});
                     case 'timeseries'
-                        
+                        userdst = getDSTable(dst,id.row,id.var,id.dim);
+                        data = dst2tsc(userdst);
                 end
                 istable = true;
             elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
@@ -332,8 +365,8 @@ classdef muiCatalogue < dscatalogue
                 errordlg('Incorrect property selection in getProperty') 
             end
             %
-            if ~istable && any(strcmp({'dstable','table'},type))
-                switch type                    
+            if ~istable && any(strcmp({'dstable','table'},outopt))
+                switch outopt                    
                     case 'dstable'
                         data = dstable(data,'VariableNames',{useprop});
                     case 'table'
@@ -350,7 +383,7 @@ classdef muiCatalogue < dscatalogue
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt)
             %select a case to use for something with options to subselect
             %the selection list based on class or type
-            % promtxt - text to use to prompt user
+            % promptxt - text to use to prompt user
             % mode - single or multiple selection mode            
             % selopt - selection options:
             %          0 = no subselection, 
@@ -397,10 +430,31 @@ classdef muiCatalogue < dscatalogue
             end
         end    
 %%
+        function addVariable2CaseDS(obj,caserec,newvar,dsp)
+            %add a variable to an existing Case dataset in the Catalogue
+            [cobj,classrec,catrec] = getCase(obj,caserec); %use getCase because need classrec
+            classname = catrec.CaseClass; 
+            datasetname = getDataSetName(cobj);
+            dst = cobj.Data.(datasetname);     %add variable to this dstable
+
+            %need to prevent duplication of variable name and description
+            newvarnum = num2str(length(dst.VariableNames)+1);
+            dsp.Variables.Name = [dsp.Variables.Name(1:end-1),newvarnum];
+            dsp.Variables.Description = [dsp.Variables.Description,newvarnum];
+            %might need to warn user that duplications of name and description not allowed
+            editDSproperty(dsp,'Variables'); 
+            %add the vatiable to the dstable and update the Dsproperties
+            dst = addvars(dst,newvar{:},'NewVariableNames',{dsp.Variables.Name});                    
+            nvar = length(dst.DSproperties.Variables);
+            dstdps = dst.DSproperties;
+            dstdps.Variables(nvar) = dsp.Variables;
+            dst.DSproperties = dstdps;
+            %save dstable to source class record
+            obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;
+        end
+%%
         function id_class = setDataClassID(obj,classname)                                                          
-            %assign the class instance and record ids and add new instance
-            %to class handle. obj - new instance of class, 
-            %handle - class handle, mobj - UI handle. 
+            %get the index for a new instance of class held in DataSets
             if isfield(obj.DataSets,classname) && ...
                                     ~isempty(obj.DataSets.(classname))
                 id_class = length(obj.DataSets.(classname))+1;
