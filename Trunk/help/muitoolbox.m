@@ -1,35 +1,50 @@
 %% muitoolbox
 % _muitoolbox_ is a collection of classes used to create bespoke UIs for models and data 
 % analysis. 
-%% Abstract classes
-% These include the following abstract classes:  <br>
-% *muiModelUI* – an abstract class that defines the requirements for a user interface and 
-% provides several methods that are implemented unless overloaded in the implementing class. <br>
-% *muPropertyUI* – an abstract class the provides the methods for loading and displaying 
-% input parameters, minimising the effort to set-up interactive data input. <br>
-% *muiDataUI* - an abstract class for creating graphic user interface to select data
-% and pass selection to applications. <br>
-% *muiDataSet* – an abstract class that defines the requirements for user interfaces to 
-% access the data. 
 
-%% Utility classes
-% In addition the toolbox includes the following utility classes: <br>
-% *muiCatalogue* – manages the storing and access to model Cases (imported data or model 
-% outputs). <br>
-% *muiProject* – holds current project details. <br>
-% *muiConstants* – standard physical values (acceleration due to gravity, densities, year 
-% to seconds, etc). <br>
-% *muiUserData* - import data sets using user-defined format file.  <br>
-% *muiEditUI* - data selection UI to edit data sets.  <br>
-% *muiPlotsUI* - data selection UI to generate plots.  <br>
-% *muiPlots* - methods for plot options based on UI selection. <br>
-% *muiStatsUI* - data selection UI for statistical anlysis. <br>
-% *muiStats* - methods for statistical analysis based on UI selectio.  <br>
-% *muiManipUI* - data selection UI to define an equiation of function call.  <br>
-% *muiUserModel* - methods to evaluate functions based on UI selection. 
+%% Licence
+% The code is provided as Open Source code (issued under a GNU General 
+% Public License).
+
+%% Requirements
+% muitoolbox is written in MATLAB(TM) and requires v2016b, or later. In addition, 
+% the toolbox makes use of  the <matlab:doc('dstoolbox') dstoolbox>.
+
+%% Abstract classes
+% These include the following abstract classes:
+%%
+% * *muiModelUI* – an abstract class that defines the requirements for a user interface and 
+% provides several methods that are implemented unless overloaded in the implementing class.
+% * *muPropertyUI* – an abstract class the provides the methods for loading and displaying 
+% input parameters, minimising the effort to set-up interactive data input.
+% * *muiDataUI* - an abstract class for creating graphic user interface to select data
+% and pass selection to applications.
+% * *muiDataSet* – an abstract class that defines the requirements for user interfaces to 
+% access the data. 
 %%
 % For further documentation of these classes see
-% <matlab:doc('muitbx_classes') muitoolbox classes>.
+% <matlab:doc('muitbx_abstractclasses') muitoolbox classes>.
+
+
+%% Utility classes
+% In addition the toolbox includes the following utility classes:
+%%
+% * *muiCatalogue* – manages the storing and access to model Cases (imported data or model 
+% outputs). 
+% * *muiProject* – holds current project details.
+% * *muiConstants* – standard physical values (acceleration due to gravity, densities, year 
+% to seconds, etc).
+% * *muiUserData* - import data sets using user-defined format file.
+% * *muiEditUI* - data selection UI to edit data sets.
+% * *muiPlotsUI* - data selection UI to generate plots.
+% * *muiPlots* - methods for plot options based on UI selection.
+% * *muiStatsUI* - data selection UI for statistical anlysis.
+% * *muiStats* - methods for statistical analysis based on UI selectio.
+% * *muiManipUI* - data selection UI to define an equiation of function call.
+% * *muiUserModel* - methods to evaluate functions based on UI selection. 
+%%
+% For further documentation of these classes see
+% <matlab:doc('muitbx_utilityclasses') muitoolbox classes>.
 %%
 % The _muitoolbox_ integrates with the <matlab:doc('dstoolbox') dstoolbox>, 
 % which stores and manages access to multi-dimensional data sets.
@@ -62,10 +77,12 @@
 
 %% Usage
 % The <matlab:doc('muitbx_example') muitoolbox example> provides details
-% of a simple implementation. An implementation of the suite of muitoolbox utilities 
-% is provided in the <matlab:doc('modelui') ModelUI> App, which also 
-% illustrates how to customise the default UI or define a bespoke UI.
+% of a simple implementation. The files for the example use case can be 
+% found in the example folder <matlab:example_folder here>. A full 
+% implementation of the suite of muitoolbox utilities is provided in the 
+% <matlab:doc('modelui') ModelUI> App, which also illustrates how to
+% customise the default UI, or define a bespoke UI.
 
 %% See Also
 % muitoolbox uses <matlab:doc('dstoolbox') dstoolbox> and use of both
-% toolboxes is llustrated in the <matlab:doc('modelui') ModelUI> App.
+% toolboxes is illustrated in the <matlab:doc('modelui') ModelUI> App.

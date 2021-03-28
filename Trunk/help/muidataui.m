@@ -1,9 +1,10 @@
 %% muiDataUI
-%
+% Abstract class for creating graphic user interfaces to select data
+% and pass selection to applications.
 
 
 %% Description
-%
+% 
 
 %% Input arguments
 %

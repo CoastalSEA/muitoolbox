@@ -8,7 +8,8 @@
 
 %% Description
 % Imported and model data sets are all assigned to a handle in muiCatalogue
-% which is in turn assigned to a handle in the main UI. <br>
+% which is in turn assigned to a handle in the main UI. 
+%%
 % Within UIs developed using the _muitoolbox_, the access syntax is as follows (see 
 % <matlab:doc('muitoolbox') muitoolbox> for details of the main UI structure):
 %%
@@ -17,9 +18,9 @@
 %   mobj.Cases.DataSets.(classname)(classrec) = classobj; %an instance of a class
 
 %% muiCatalogue properties
-% *Catalogue* inherited property from <matlab:doc('dscatalogue') dscatalogue>
-% that holds the case index, description, class name and class type. <br>
-% *DataSets* handle to dataset class instances, stored as a struct with the
+% * *Catalogue* inherited property from <matlab:doc('dscatalogue') dscatalogue>
+% that holds the case index, description, class name and class type.
+% * *DataSets* handle to dataset class instances, stored as a struct with the
 % field names derived from the class names. 
 
 %% muiCatalogue methods
@@ -120,28 +121,28 @@
 % The _caserec_ input is optional and if it is not defined the user 
 % is prompted to select a case.
 %%
-%   saveCase(muicat,caserec);
+%   saveCase(muicat,caserec);          %caserec is optonal
 
 %%
 % *deleteCases* select one or more records and delete records from catalogue 
 % and class instances. The _caserec_ input is optional and if it is not 
 % defined the user is prompted to select case(s).
 %%
-%   deleteCases(muicat,caserec);  %caserec is optonal
+%   deleteCases(muicat,caserec);       %caserec is optonal
 
 %%
 % *reloadCase* reload model input variables as the current settings. Where
 % _mobj_ is a handle to the main UI and _caserec_ is optional and if it 
 % is not defined the user is prompted to select a case.
 %%
-%   reloadCase(muicat,mobj,caserec);  
+%   reloadCase(muicat,mobj,caserec);   %caserec is optonal 
 
 %%
 % *viewCaseSettings* view the saved input data for a selected Case. Where
 % _caserec_ is optional and if it is not defined the user is prompted to 
 % select a case.
 %%
-%   viewCaseSettings(muicat,caserec)
+%   viewCaseSettings(muicat,caserec)   %caserec is optonal
 
 %%
 % *importCase* import a case from a mat file that was saved using exportCase

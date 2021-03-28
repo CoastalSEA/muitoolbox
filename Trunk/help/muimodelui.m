@@ -1,6 +1,6 @@
 %% muiModelUI
-%
-
+% Abstract class for creating graphic user interfaces with pulldown menus 
+% to control application and tabs to display settings and output.
 
 %% Description
 %

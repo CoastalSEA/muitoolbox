@@ -36,11 +36,11 @@ classdef muiDataSet < handle
         CaseIndex       %case index assigned when class instance is loaded
     end
     
-    properties (Transient) 
-%         sdst            %Transient dataset from individual files 
-%                         %that are combined to form master dstable
-
-    end
+%     properties (Transient) 
+% %         sdst            %Transient dataset from individual files 
+% %                         %that are combined to form master dstable
+% 
+%     end
     
     methods (Abstract)    
         %methods that all subclasses must define
@@ -251,7 +251,7 @@ classdef muiDataSet < handle
 %         end         
 %%
         function data = readTSinputFile(~,filename)
-            %use Matlab detectImportOptions to decipher the header and read the
+            %uses Matlab detectImportOptions to decipher the header and read the
             %data into a table where the columns use the variable names in file (if
             %defined). Check that no times are duplicated and standardise the data
             %so that missing times are removed and missing data are set to NaN

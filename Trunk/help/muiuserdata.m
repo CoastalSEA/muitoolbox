@@ -18,7 +18,8 @@
 
 %% muiDataSet methods
 % Methods for loading, adding, deleting and applying quality to control to
-% datasets are inherited from muitoolbox><matlab:doc('muidataset') muiDataSet>.
+% datasets are inherited from the muitoolbox <matlab:doc('muidataset') muiDataSet>
+% abstract class.
 
 %%
 % *tabPlot* generates a plot for display on Q-Plot tab. Uses the default

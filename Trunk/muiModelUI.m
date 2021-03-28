@@ -29,7 +29,7 @@ classdef muiModelUI < handle
             % mUI.StatsUI       %handle for statistics UI
             % mUI.Plots         %handle to muiPlots object
             % mUI.Stats         %handle to muiStats object
-        TabProps         %structure to hold PropertyTab and position for each data input
+        TabProps         %structure to hold TabDisplay and position for each data input
         ModelInputs      %classes required by model used in isValidModel check 
         DataUItabs       %structure to define muiDataUI tabs for each use 
     end
@@ -664,8 +664,8 @@ classdef muiModelUI < handle
 %%        
         function InputTabSummary(obj,src,~)
             %display table(s) of Property values on tab defined by src
-            %calls displayProperties for all classes with PropertyTab set
-            %to the same value as src.Tag            
+            %calls displayProperties for all classes with TabDisplay.Tab 
+            %set to the same value as src.Tag            
             ht1 = findobj(src,'Type','uitable');
             delete(ht1);
             ht2 = findobj(src,'Tag','TableTitle');

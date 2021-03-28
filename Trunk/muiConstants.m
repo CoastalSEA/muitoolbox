@@ -38,16 +38,4 @@ classdef muiConstants < muiPropertyUI
             obj.KinematicViscosity = 1.36e-6;
         end
     end
-%%    
-    methods 
-%         function obj = setConstantData
-%             obj = ConstantData;
-%         end
-%%
-%         function obj = editConstants(obj)
-%             %use PropertyInterface function to generate GUI
-%             obj = editProperties(obj);
-%         end
-        
-    end
 end

@@ -10,10 +10,10 @@
 % to a mat file.
 
 %% muiProject properties
-% *PathName* - path for user selected project mat file.  <br> 
-% *FileName* - user selected project mat file.  <br> 
-% *ProjectName* - project name defined in model setup: File>New.  <br> 
-% *ProjectDate* - date project was set up
+% * *PathName* - path for user selected project mat file.
+% * *FileName* - user selected project mat file.
+% * *ProjectName* - project name defined in model setup: File>New.
+% * *ProjectDate* - date project was set up
 
 %% muiProject methods
 % *editProject* - dialog box to edit project name and date. This is called from

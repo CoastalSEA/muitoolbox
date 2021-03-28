@@ -13,7 +13,7 @@
     <name>muitoolbox</name>
     <!-- (Required) Label for the toolbox. pick one: -->
     <!-- matlab, toolbox, simulink, blockset, links_targets  -->
-    <type>matlab</type>
+    <type>toolbox</type>
     <!-- (Required) Icon file to display in the Start button. Not currently used -->
     <!-- but required to parse the file -->
     <icon>CSEA-Logo-only.png</icon>

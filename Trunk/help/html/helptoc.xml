@@ -20,25 +20,46 @@
         <!-- Inside category, list its functions alphabetically -->
 
         <!-- User Guide comes next -->
-        <tocitem target="muitbx_classes.html" 
-            image="HelpIcon.USER_GUIDE">muitoolbox Classes
-            <tocitem target="muiModelUI.html">muiModelUI</tocitem>
-            <tocitem target="muiPropertyUI.html">muiPropertyUI</tocitem>
-            <tocitem target="muiDataUI.html">muiDataUI</tocitem> 
-            <tocitem target="muiDataSet.html">muiDataSet</tocitem>
-
+        <tocitem target="muitbx_abstractclasses.html" 
+            image="HelpIcon.USER_GUIDE">Abstract Classes
+            <tocitem target="muimodelui.html">muiModelUI</tocitem>
+            <tocitem target="muipropertyui.html">muiPropertyUI</tocitem>
+            <tocitem target="muidataui.html">muiDataUI</tocitem> 
+            <tocitem target="muidataset.html">muiDataSet</tocitem>
         </tocitem>
+
+        <!-- User Guide comes next -->
+        <tocitem target="muitbx_utilityclasses.html" 
+            image="HelpIcon.USER_GUIDE">Utility Classes
+            <tocitem target="muicatalogue.html">muiCatalogue</tocitem>
+            <tocitem target="muiproject.html">muiProject</tocitem>
+            <tocitem target="muiconstants.html">muiConstants</tocitem> 
+            <tocitem target="muiuserdata.html">muiUserData</tocitem>
+            <tocitem target="muieditui.html">muiEditUI</tocitem>
+            <tocitem target="muiplotsui.html">muiPlotsUI</tocitem>
+            <tocitem target="muiplots.html">muiPlots</tocitem>
+            <tocitem target="muistatsui.html">muiStatsUI</tocitem>
+            <tocitem target="muistats.html">muiStats</tocitem>
+            <tocitem target="muimanipui.html">muiManipUI</tocitem>
+            <tocitem target="muiusermodel.html">muiUserModel</tocitem>
+        </tocitem>
+        
         <!-- Function reference next -->
         <!-- First item is page describing function categories, if any -->
         <tocitem target="muitbx_gettingstarted.html" 
-                 image="HelpIcon.GETTING_STARTED ">getting started   
+                 image="HelpIcon.GETTING_STARTED">Getting Started   
         </tocitem>        
+
         <!-- Optional List of Examples, with hyperlinks to examples in other files -->
-        <tocitem target="muitbx_examples.html" 
-                 image="HelpIcon.EXAMPLES">muitoolbox Examples
+        <tocitem target="muitbx_exampleslist.html" 
+                 image="HelpIcon.EXAMPLE">Examples 
+                <tocitem target="muitbx_example.html">Simple model</tocitem>
+                <tocitem target="muitbx_modelui.html">ModelUI</tocitem>
         </tocitem>
+
         <!-- Optional link or links to your or other Web sites -->
-        <tocitem target="muitbx_dstoolbox.html">dstoolbox
+        <tocitem target="muitbx_dstoolbox.html"
+                 image="HelpIcon.USER_GUIDE">dstoolbox
         </tocitem>       
     </tocitem>
 </toc>

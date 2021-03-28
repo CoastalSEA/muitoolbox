@@ -88,7 +88,8 @@
 
 %% See Also
 % <matlab:doc('modelui_examples') Examples> of using the interface for
-% different applications <br>
+% different applications. The files for these examples can be found in
+% the example folder <matlab:example_folder here>.  <br>
 % <matlab:doc('dstoolbox') dstoolbox> documentation for details of 
 % _dstable_ and _dsproperties_. <br>
 % <matlab:doc('muitoolbox') muitoolbox> documentation for details of the

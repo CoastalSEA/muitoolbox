@@ -18,9 +18,10 @@
 % The class inherirs the <matlab:doc('muidataset') muiDataSet> properties 
 % for Data, RunParam, MetaData and CaseIndex. In addition, the selection 
 % from a <matlab:doc('muidataui') muiDataUI> derived UI are held as 
-% transient properties <br>
-% *UIsel* structure for the variable selection made in the calling UI
-% *UIset* structure for the settings made in the calling UI    
+% transient properties.
+%%
+% * *UIsel* - structure for the variable selection made in the calling UI.
+% * *UIset* - structure for the settings made in the calling UI. 
 
 %% muiUserModel methods
 % The main purpose of _muiUserModel_ is to implement the selections made in
