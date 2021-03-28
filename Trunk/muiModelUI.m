@@ -35,10 +35,10 @@ classdef muiModelUI < handle
     end
     
     properties 
-        Constants = muiConstants.Evoke  %constants used by applications
-        Info                            %project information
-        Cases                           %handle to DataSets and Catalogue
         Inputs                          %handle to data input classes
+        Cases                           %handle to DataSets and Catalogue
+        Info                            %project information
+        Constants = muiConstants.Evoke  %constants used by applications       
     end
 
     properties (Abstract, Access = protected)   
@@ -52,9 +52,8 @@ classdef muiModelUI < handle
         %methods that all subclasses must define
         setMenus(obj)         %application specific menus
         setTabs(obj)          %initialise tabs that are specific to the model
-        setTabAction(obj)     %define how selected data is to be used
+        setTabAction(obj)     %define how tab callbacks are to be handled.
         setTabProperties(obj) %get locations for data input display  
-%         runMenuOptions(obj)
     end    
 %%    
     methods (Access = protected)  %methods common to all uses

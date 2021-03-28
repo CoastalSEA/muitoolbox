@@ -74,15 +74,22 @@
 %%
 % data = readTSinputFile(obj,filename);  %returns a table of data read from filename
 
+%% Creating a class using muiPropertyUI
+% A template to create a class that uses muiPropertyUI can be found in the 
+% <matlab:template_folder muitemplates folder>. The template provides the code for a subclass
+% and the comments highlight where the file needs to be edited to adapt 
+% the template to a new application, as explained further in the 
+% <matlab:doc('muitbx_gettingstarted') Getting Started> documentation.
+
 %% muiUserData format file
 % Data import into a _muitoolbox_ UI using _muiUserData_ and classes that
 % inherit <matlab:doc('muidatadet') muiDataSet> requires a format file to
-% be created. A template is provided in the muiTemplates folder, which sets 
-% out the code for each of the functions requied, with comments to
+% be created. A template is provided in the <matlab:template_folder muitemplates folder>. 
+% and sets out the code for each of the functions requied, with comments to
 % highlight where the files need to be edited to adapt the templates to 
 % a different application. The format file has the following form:
-
-% <include>../muiTemplates/dataimport_format_template.m</include>
+%
+% <include>../muitemplates/dataimport_format_template.m</include>
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muicatalogue') muiCatalogue>,

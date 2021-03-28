@@ -715,7 +715,8 @@ classdef muiDataUI < handle %replaces DataGUIinterface
         end
 %%
         function setOrderOptionSettings(obj,itab)
-            %
+            %set the selected values for selections made for Type or Other
+            %variable types in the Tab Order setting
             order = obj.TabContent(itab).Order;
             setoptions = fieldnames(obj.UIsettings);         
             for i=1:2    %just check first two: Type and Other
@@ -781,7 +782,7 @@ classdef muiDataUI < handle %replaces DataGUIinterface
     methods (Static, Access = protected)
         function selection = uisel()
             %return a default struct for UI selection definition
-            %caseid or caserec?? Defaullt includes:
+            %Defaullt includes:
             % caserec - caserec in listid of selected case
             % dataset - id to field name in Data struct to select specific dstable
             % variable - id to selected Variable in table 

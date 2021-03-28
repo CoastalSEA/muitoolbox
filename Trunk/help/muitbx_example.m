@@ -45,4 +45,5 @@
 % sets. Then calls plot and display functions for selected cases.
 
 %% See Also
+% % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muitbx_gettingstarted') Getting Started>, and
 % The demonstration UI provided in the <matlab:doc('modelui') ModelUI> App. 

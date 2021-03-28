@@ -13,16 +13,17 @@
 % # Copy the class templates for the components from here to your working folder
 % # Create classes for each component by editing the templates as illustrated
 %   for each template below.
-%
 
 %%
-% Templates for the four main components are provided in the muiTemplates 
-% folder. The templates provide the code for each component and the comments
-% highlight where the files need to be edited to adapt the templates to 
-% a different application.
-%
+% Templates for the main components are provided in the muitemplates 
+% folder, which can be found <matlab:template_folder here>. The templates 
+% provide the code for each component and the comments highlight where the 
+% files need to be edited to adapt the templates to a different application. 
 
 %% Main UI
+% To adapt the demonstration <matlab:doc('modelui') ModelUI> App for a new
+% application, the class inherits the ModelUI class.
+%%
 % Define a classname that reflects the intended application. In the setMUI
 % method define the components of the application, such as the model and input
 % parameter classes used that define the ModelInputs property and the
@@ -32,12 +33,13 @@
 % the calls to input classes and to run the model need to be edited to the 
 % class and method names to be used.
 %
-% <include>../muiTemplates/UseModelUI_template.m</include>
+% <include>../muitemplates/UseModelUI_template.m</include>
 %
 %%
-% For bespoke implementations of the muiModelUI interface use the
-% UseUI_template.m instead (there are important differences in the class 
-% constructor method).
+% For bespoke implementations the new class should inherit the 
+% <matlab:doc('muimodelui') muiModelUI> interface. There are important 
+% differences in the class constructor method and these are highlighted in
+% the UseUI_template.m template file.
 
 %% Data import
 % For each type of _data_ to be imported, define a classname and edit the
@@ -57,7 +59,7 @@
 % stuct ensures that the meta-data is avaialble for subsequent use of the
 % data in plotting, statical analysis, etc.
 %
-% <include>../utils/DataImport_template.m</include>
+% <include>../muitemplates/DataImport_template.m</include>
 %
 %% Input parameters
 % For each set of _input parameters_, define a classname and edit the
@@ -66,7 +68,7 @@
 % (used in the input UI) for each parameter as a cell array of strings in 
 % the PropertyLabels property.
 %
-% <include>../muiTemplates/ParamInput_template.m</include>
+% <include>../muitemplates/ParamInput_template.m</include>
 %
 %% Models
 % For each _model_ to be included, define a classname and edit the
@@ -76,24 +78,55 @@
 % of the model output. This can use the default format or be customised in 
 % the tabPlot function.
 %
-% <include>../muiTemplates/Model_template</include>
+% <include>../muitemplates/Model_template</include>
 %
 %%
 % At the bottom of the template is the dataDSproperties function. This must
 % be edited to match the data being loaded. Working out the details of the
-% fomrat of the data being loaded helps to ensure that the data is being
+% format of the data being loaded helps to ensure that the data is being
 % formatted correctly and defining the metadata defined by the dsproperties
-% stuct ensures that the meta-data is avaialble for subsequent use of the
+% stuct ensures that the meta-data is avaialable for subsequent use of the
 % data in plotting, statical analysis, etc.	
+
+%% Data access UIs
+% Default interfaces for editing, plotting, statistical analysis and data
+% mainpulation are provided as part of the <matlab:doc('muitoolbox') muitoolbox>.
+% Alternative or addional UIs can be added using the <matlab:doc('muidataui') muiDataUI> 
+% abstract class. This allows a number of tabs to be defined, each with its
+% own set of controls to define the selection needed for a specific
+% application. See <matlab:doc('muieditui') muiEditUI>,
+% <matlab:doc('muiplotsui') muiPlotsUI>, <matlab:doc('muistatsui') muiStatsUI>
+% and <matlab:doc('muimanipui') muiManipUI> for examples of different
+% configurations. The setXXXXtab methods at the end of the template and
+% example classes, are used to define the content of each tab. The methods
+% that <matlab:doc('muidataui') muiDataUI> requires in a subclass include:
+%%
+% * *setTabContent* - define the layout options for individual tabs by
+% calling the setXXXXtab methods for each tab.
+% * *setVariableLists* - initialise selection lists defined for each tab
+% * *useSelection* - implement the actions to be taken in response to the
+% action buttons. The Clear and Close options are handled within muiDataUI.
+%%
+% 
+% <include>../muitemplates/DataUI_template</include>
+%
+%%
+% Classes derived from muiDataUI are intended to enable easy access to 
+% multi-dimensional data stored in <matlab:doc('dstable') dstables>,
+% allowing the user to select individual Cases and Datasets before selecting
+% specific variables and data ranges of both the variable and any associated
+% dimension data.
 
 %% See Also
 % <matlab:doc('modelui_examples') Examples> of using the interface for
 % different applications. The files for these examples can be found in
 % the example folder <matlab:example_folder here>.  <br>
+% <matlab:doc('muitoolbox') muitoolbox> documentation for details of the
+% _muiModelUI_ abstract interface class and the other UIs used in _ModelUI_. <br>
 % <matlab:doc('dstoolbox') dstoolbox> documentation for details of 
 % _dstable_ and _dsproperties_. <br>
-% <matlab:doc('muitoolbox') muitoolbox> documentation for details of the
-% _muiModelUI_ abstract interface class and the other UIs used in _ModelUI_.
+% The demonstration UI provided in the <matlab:doc('modelui') ModelUI> App. 
+
 
 
 

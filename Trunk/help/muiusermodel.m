@@ -1,6 +1,6 @@
 %% muiUserModel
-% Class for data that is derived using the muiManipUI interface included
-% in  ModelUI, CoastalTools and other ModelUI apps.
+% Class for data that are selected using the <matlab:doc('muimanipui') muiManipUI> 
+% interface included in  ModelUI, CoastalTools and other ModelUI apps.
 
 %% Syntax
 %%
@@ -25,7 +25,7 @@
 
 %% muiUserModel methods
 % The main purpose of _muiUserModel_ is to implement the selections made in
-% <matlab:doc('muinanipui') muiManipUI>. <br>
+% <matlab:doc('muimanipui') muiManipUI>. <br>
 % *createVar*  evaluate the user defined equation or function and report
 % single valued results or save vector and array results as either a new
 % variable in an existing dataset or as a new dataset.

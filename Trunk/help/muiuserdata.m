@@ -8,7 +8,8 @@
 
 %% Description
 % The class is used for importing _ad hoc_ datasets using a format file,
-% details of which are provided below.
+% details of which are provided below. The class inherits the 
+% <matlab:doc('muidatadet') muiDataSet> bstract class.
 
 %% muiDataSet properties
 % The class inherirs the <matlab:doc('muidataset') muiDataSet> properties 
@@ -28,12 +29,12 @@
 %% muiUserData format file
 % Data import into a _muitoolbox_ UI using _muiUserData_ and classes that
 % inherit <matlab:doc('muidatadet') muiDataSet> requires a format file to
-% be created. A template is provided in the muiTemplates folder, which sets 
-% out the code for each of the functions requied, with comments to
+% be created. A template is provided in the <matlab:template_folder muitemplates folder>, 
+% and sets out the code for each of the functions requied, with comments to
 % highlight where the files need to be edited to adapt the templates to 
 % a different application. The format file has the following form:
-
-% <include>../muiTemplates/dataimport_format_template.m</include>
+%
+% <include>../muitemplates/dataimport_format_template.m</include>
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muidatadet') muiDataSet>,

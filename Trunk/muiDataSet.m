@@ -36,19 +36,12 @@ classdef muiDataSet < handle
         CaseIndex       %case index assigned when class instance is loaded
     end
     
-%     properties (Transient) 
-% %         sdst            %Transient dataset from individual files 
-% %                         %that are combined to form master dstable
-% 
-%     end
-    
     methods (Abstract)    
         %methods that all subclasses must define
         tabPlot(obj)    %define how data should be displayed on tab
                         %when called by UI Plot tab
     end 
-%%
-%--------------------------------------------------------------------------
+%% ------------------------------------------------------------------------
 %   Methods for subclasses to load and add data
 %--------------------------------------------------------------------------
     methods (Static)
@@ -224,31 +217,7 @@ classdef muiDataSet < handle
                 if ok<1, return; end       
             end
             datasetname = datasetnames{dataset};
-        end
-%%        
-%         function addCaseRecord(obj,muicat,varargin)
-%             %add a case to the Catalogue and assign to DataSets
-%             % varargin are as defined for dscatalogue.addRecord with
-%             % classname derived from obj, viz:            
-%             % casetype  - type of data set (e.g. keywords: model, data)
-%             % casedesc  - description of case (optional)
-%             % SupressPrompts - logical flag to use casedesc as record 
-%             %                  description without prompting user (optional)
-%             classname = metaclass(obj).Name;            
-%             %add record to the catalogue and update mui.Cases.DataSets
-%             caserec = addRecord(muicat,classname,varargin{:});
-%             casedef = getRecord(muicat,caserec);
-%             obj.CaseIndex = casedef.CaseID;
-%             datasets = fieldnames(obj.Data);
-%             for i=1:length(datasets)
-%                 if isa(obj.Data.(datasets{i}),'dstable')
-%                     obj.Data.(datasets{i}).Description = casedef.CaseDescription;
-%                 end
-%             end
-%             %assign dataset to class record
-%             id_class = setDataClassID(muicat,classname);              
-%             muicat.DataSets.(classname)(id_class) = obj;
-%         end         
+        end       
 %%
         function data = readTSinputFile(~,filename)
             %uses Matlab detectImportOptions to decipher the header and read the
@@ -272,8 +241,7 @@ classdef muiDataSet < handle
             data= rmmissing(data,'DataVariables',1);
         end        
     end
-%%
-%--------------------------------------------------------------------------
+%% ------------------------------------------------------------------------
 %   Methods to set DataSet, RunParam, FileFormat and FileFormatID
 %--------------------------------------------------------------------------     
     methods (Access=protected)

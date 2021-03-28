@@ -21,7 +21,7 @@ classdef muiStats < handle
 %                         %           stats type options (selection held in Order)
         UIsel           %structure for the variable selection made in the UI
         UIset           %structure for the plot settings made in the UI
-        Data            %data to use in stastic (x,y,z)
+        Data            %data to use in statistic (x,y,z)
         MetaData        %text summary of primary variable selection
         Labels          %struct for XYZ labels
         Title           %Title text
