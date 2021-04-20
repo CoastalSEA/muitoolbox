@@ -1,6 +1,6 @@
 classdef ParamInput_template < muiPropertyUI                 % << Edit to classname
 %
-%-------class help------------------------------------------------------===
+%-------class help---------------------------------------------------------
 % NAME
 %   PropsInput_template.m
 % PURPOSE
@@ -47,7 +47,7 @@ classdef ParamInput_template < muiPropertyUI                 % << Edit to classn
     end
 %%  
     methods (Static)  
-        function obj = setParamInput(mobj,editflag)
+        function obj = setInput(mobj,editflag)
             %gui for user to set Parameter Input values
             classname = 'ParamInput_template';               % <<Edit to classname
             if isfield(mobj.Inputs,classname) && ...

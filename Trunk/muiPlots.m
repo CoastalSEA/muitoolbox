@@ -710,6 +710,8 @@ classdef muiPlots < handle
             ylabel(ytext);
             title(titletxt);
             hold off
+            cmap = cmap_selection;
+            colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext;   
         end
@@ -728,6 +730,8 @@ classdef muiPlots < handle
                 'RadLabels',4,'RadLabelLocation',{20 'top'},...
                 'RadialRange',radrange,'polardirection','cw');
             title(sprintf('Radial axis: %s\n%s',ytext,titletxt));
+            cmap = cmap_selection;
+            colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext; 
         end       

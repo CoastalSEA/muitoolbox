@@ -261,7 +261,7 @@ classdef muiCatalogue < dscatalogue
             %add record to the catalogue and update mui.Cases.DataSets
             caserec = addRecord(obj,classname,varargin{:});
             casedef = getRecord(obj,caserec);
-            cobj.CaseIndex = casedef.CaseID;
+            setCaseIndex(cobj,casedef.CaseID);
             datasets = fieldnames(cobj.Data);
             for i=1:length(datasets)
                 if isa(cobj.Data.(datasets{i}),'dstable')
@@ -297,7 +297,7 @@ classdef muiCatalogue < dscatalogue
             if ~isprop(dst,varnames{1})          %dynamic properties not set
                 dst = activatedynamicprops(dst); %dstable now uses 
             end                                  %ConstructOnLoad so this 
-        end                                      %should no longer be needed
+        end                                      %should no longer be needed BUT IT IS!
 %%
         function props = getProperty(obj,UIsel,outopt)
             %extract the data based on the selection made using a UI that
@@ -410,7 +410,7 @@ classdef muiCatalogue < dscatalogue
         function useCase(obj,mode,classname,action)
             %select which existing data set to use and pass to action method
             % mode - none, single or multiple selection mode  
-            % classname - name of class to select cases for
+            % classname - cell array of class name(s) to select cases for
             % action - method of class to pass class object to (eg addData 
             %          in muiDataSet) 
             if strcmp(mode,'none')

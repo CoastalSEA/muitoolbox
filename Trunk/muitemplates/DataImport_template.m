@@ -1,6 +1,6 @@
 classdef DataImport_template                                 % << Edit to classname
 %
-%-------class help------------------------------------------------------===
+%-------class help---------------------------------------------------------
 % NAME
 %   DataImport_temaplate.m
 % PURPOSE

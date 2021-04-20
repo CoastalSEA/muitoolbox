@@ -1,6 +1,6 @@
 classdef Model_template < muiDataSet                         % << Edit to classname
 %
-%-------class help------------------------------------------------------
+%-------class help---------------------------------------------------------
 % NAME
 %   Model_template.m
 % PURPOSE

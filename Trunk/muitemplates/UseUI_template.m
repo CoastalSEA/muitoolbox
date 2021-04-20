@@ -158,7 +158,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
         end    
  %%
         function setTabAction(~,src,cobj)
-            %function required by GUIinterface and sets action for selected
+            %function required by muiModelUI and sets action for selected
             %tab (src)
             switch src.Tag                                    % << Edit match tab requirements
                 case 'Plot' 

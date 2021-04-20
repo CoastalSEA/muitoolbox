@@ -1,4 +1,4 @@
-classdef muiDataUI < handle %replaces DataGUIinterface
+classdef (Abstract = true) muiDataUI < handle
 %
 %-------abstract class help------------------------------------------------
 % NAME

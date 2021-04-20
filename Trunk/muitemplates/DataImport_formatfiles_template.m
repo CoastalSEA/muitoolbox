@@ -1,6 +1,6 @@
 classdef DataImport_formatfiles_template < muiDataSet        % << Edit to classname
 %
-%-------class help------------------------------------------------------===
+%-------class help---------------------------------------------------------
 % NAME
 %   DataImport_formatfiles_template.m
 % PURPOSE

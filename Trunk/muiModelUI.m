@@ -1,4 +1,4 @@
-classdef muiModelUI < handle
+classdef (Abstract = true) muiModelUI < handle
 %
 %-------abstract class help------------------------------------------------
 % NAME
@@ -17,9 +17,8 @@ classdef muiModelUI < handle
 %       
     properties (Hidden, Transient)
         %struct to handles for UI
-        mUI = struct('Figure',[],'Menus',[],'Tabs',[],'PlotsUI',[],...
-                             'EditUI',[],'ManipUI',[],'StatsUI',[],...
-                                                'Plots',[],'Stats',[])        
+        mUI = struct('Figure',[],'Menus',[],'Tabs',[],'EditUI',[],'ManipUI',[],...
+                           'PlotsUI',[],'Plots',[],'StatsUI',[],'Stats',[])                                                       
             % mUI.Figure        %handle for main UI figure
             % mUI.Menus         %handle for drop down menus in main UI
             % mUI.Tabs          %handle for the Tab Group in the main main UI
@@ -355,7 +354,17 @@ classdef muiModelUI < handle
             if strcmp(ext,'.mat')
                 loadModel(obj);
             end
-            obj.DrawMap;
+%             obj.DrawMap;
+            
+            %force the initialisation of datasets.
+            ht = findobj(obj.mUI.Tabs.Children,'-depth',0,...
+                                         '-not','ButtonDownFcn','gcbo;');
+            for i=1:length(ht)
+                hs = func2str(ht(i).ButtonDownFcn);
+                if contains(hs,'refresh')
+                    DrawMap(obj,ht(i));
+                end
+            end
         end
 %%        
         function obj = savefile(obj,~,~)
@@ -674,7 +683,7 @@ classdef muiModelUI < handle
             for k=1:length(h_mdl)
                 sobj = obj.Inputs.(h_mdl{k});
                 if ~isempty(sobj) && isprop(sobj(1),'TabDisplay')...
-                                  && strcmp(sobj.TabDisplay.Tab,src.Tag)
+                                  && strcmp(sobj(1).TabDisplay.Tab,src.Tag)
                     %obj inherits PropertyInterface
                     displayProperties(sobj,src);
                 end
@@ -934,5 +943,28 @@ classdef muiModelUI < handle
             delete(obj.mUI.(guiobjtxt))
             obj.mUI.(guiobjtxt) = [];
         end
-    end
+%%
+        function cobj = getClassObj(obj,classtype,classname,msgtxt)
+            %check if class exists and return class handle  
+            % classtype - Inputs or Cases
+            % classname - name of class being called
+            % msgtxt - message to display if class does not exist (optional)
+            if strcmp(classtype,'Cases')
+                lobj = obj.Cases.DataSets; %map Cases to DataSets property
+            else
+                lobj = obj.Inputs;
+            end
+            %
+            if isfield(lobj,classname) && ...
+                            isa(lobj.(classname),classname)                
+                cobj = lobj.(classname);  
+            else
+                if nargin>2
+                    warndlg(msgtxt);
+                end
+                cobj = []; 
+            end
+        end
+    
+    end    
 end

@@ -1,4 +1,4 @@
-classdef muiPropertyUI  < matlab.mixin.Copyable
+classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
 %
 %-------abstract class help------------------------------------------------
 % NAME
@@ -236,27 +236,27 @@ classdef muiPropertyUI  < matlab.mixin.Copyable
             propnames = getPropertyNames(obj);
             userdata = cell(length(propnames),1);
             idx= 1;
-			for k=1:length(propnames)
+            for k=1:length(propnames)
                 userdata{idx,1} = obj.PropertyLabels{k};
                 propvalue = obj.(propnames{k});
                 if isdatetime(propvalue)
-                    %datetime value (convert to string for display)                    
+                    %datetime value (convert to string for display)
                     userdata{idx,2} = char(propvalue);
                 elseif iscell(propvalue)
                     %multiple cell strings (concatenate to single string)
                     for j=1:length(propvalue)
                         userdata{idx,1} = obj.PropertyLabels{k};
-                        userdata{idx,2} = propvalue{j}; 
+                        userdata{idx,2} = propvalue{j};
                         idx = idx+1;
                     end
-                    idx = idx-1;   %compensate for main loop addition               
-                elseif isnumeric(propvalue) || ...
-                       ischar(propvalue) || islogical(propvalue)
-                    %numeric, logical, or char                  
-                    userdata{idx,2} = propvalue;
-                else
-                    %numerical vector (convert to string for display)                   
+                    idx = idx-1;   %compensate for main loop addition
+                elseif isnumeric(propvalue) && length(propvalue)>1
+                    %numerical vector (convert to string for display)
                     userdata{idx,2} = num2str(propvalue);                    
+                else
+%                       || ischar(propvalue) || islogical(propvalue)  %changed for use in ASMITA                  
+                    %numeric, logical, or char
+                    userdata{idx,2} = propvalue;
                 end
                 idx = idx+1;
             end
@@ -287,7 +287,8 @@ classdef muiPropertyUI  < matlab.mixin.Copyable
             propnames = {};
 			for k=1:length(mp)
                 %remove hidden, transient and constant properties
-				idx = mp(k).Transient + mp(k).Hidden + mp(k).Constant;
+				idx = mp(k).Transient + mp(k).Hidden + mp(k).Constant +...
+                                                       + mp(k).Dependent;
                 %remove superclass properties
                 idx = idx + any(strcmp(scnames, mp(k).Name)); 
                 if idx<1

@@ -32,10 +32,22 @@ classdef muiConstants < muiPropertyUI
 %%        
     methods (Access = private)
         function obj = muiConstants
+            %constructor defines values of constants
             obj.Gravity = 9.81;
             obj.WaterDensity = 1025;
             obj.SedimentDensity = 2650;
             obj.KinematicViscosity = 1.36e-6;
+        end
+    end
+%%
+    methods
+        function cn = getConstantStruct(obj)
+            %contant values as a struct with abbreviated field names
+            cn.y2s = obj.y2s;
+            cn.g = obj.Gravity;
+            cn.rhow = obj.WaterDensity;
+            cn.rhos = obj.SedimentDensity;
+            cn.visc = obj.KinematicViscosity;
         end
     end
 end

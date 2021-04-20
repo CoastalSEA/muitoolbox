@@ -1,6 +1,6 @@
 classdef DataUI_template < muiDataUI                          % << Edit to classname
  %
-%-------class help------------------------------------------------------
+%-------class help---------------------------------------------------------
 % NAME
 %   DataUI_template.m                                         % << Edit to file name
 % PURPOSE

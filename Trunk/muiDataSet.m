@@ -1,4 +1,4 @@
-classdef muiDataSet < handle
+classdef (Abstract = true) muiDataSet < handle
 %
 %-------class help------------------------------------------------------
 % NAME
@@ -244,7 +244,7 @@ classdef muiDataSet < handle
 %% ------------------------------------------------------------------------
 %   Methods to set DataSet, RunParam, FileFormat and FileFormatID
 %--------------------------------------------------------------------------     
-    methods (Access=protected)
+    methods (Access = {?muiDataSet,?muiCatalogue}) %self reference is equivalent to protected
         function setRunParam(obj,mobj,varargin)
             %assign the run parameters needed for a model
             classname = metaclass(obj).Name;
@@ -282,9 +282,13 @@ classdef muiDataSet < handle
             else
                 obj.Data.Dataset = dataset;  
             end
-%             addCaseRecord(obj,muicat,varargin{:})
             setCase(muicat,obj,varargin{:});
-        end                    
+        end                  
+%%
+        function setCaseIndex(obj,caseid)
+            %Assign the CaseIndex property (called by muiCatalogue.setCase)
+            obj.CaseIndex = caseid;
+        end
 %%
         function formatfile = setFileFormat(~)
             %prompt user to select a FileFormat m file
@@ -368,10 +372,14 @@ classdef muiDataSet < handle
 
             %get main variable
             pdat.V = dst.(varname);
+            if size(pdat.V,1)==1
+                pdat.V = squeeze(pdat.V);
+            end
             labs.V = attlabels{1};
             
             %find if there are rows and if they are monotonic            
-            if vsze(1)>1 
+            if vsze(1)>1 || ...  %multiple rows
+                    (vsze(1)==1 && ~isempty(dst.RowNames))
                 nr = 3;           %dimension offset if rows
                 rdim = 'X';
                 istime = false;

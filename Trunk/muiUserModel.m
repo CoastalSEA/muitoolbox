@@ -2,7 +2,7 @@ classdef muiUserModel < muiDataSet
 %
 %-------class help------------------------------------------------------
 % NAME
-%   ctWaveModel.m
+%   muiUserModel.m
 % PURPOSE
 %    Class for data that is derived using the muiManipUI interface included
 %    in  ModelUI, CoastalTools and other ModelUI apps
