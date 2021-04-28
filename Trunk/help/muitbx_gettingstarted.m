@@ -118,6 +118,8 @@
 % dimension data.
 
 %% See Also
+% A full list of the <matlab:doc('muitemplates') Templates> which can be found in
+% the templates folder <matlab:template_folder here>.  <br>
 % <matlab:doc('modelui_examples') Examples> of using the interface for
 % different applications. The files for these examples can be found in
 % the example folder <matlab:example_folder here>.  <br>

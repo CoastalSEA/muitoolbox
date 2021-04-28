@@ -6,7 +6,7 @@
     <param.company>University of Southampton</param.company>
     <param.summary>muitoolbox is used to create bespoke interfaces for modelling applications.</param.summary>
     <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
-    <param.screenshot>${PROJECT_ROOT}\mui_logo.jpg</param.screenshot>
+    <param.screenshot>${PROJECT_ROOT}\help\html\muitoolbox_logo.png</param.screenshot>
     <param.version>1.0</param.version>
     <param.output>${PROJECT_ROOT}\MUItoolbox.mltbx</param.output>
     <param.products.name />
@@ -48,6 +48,11 @@ File exclusion list.txt
     <param.examples>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;examples&gt;
    &lt;exampleCategory name="help"&gt;
+      &lt;example name="mui_func_ref" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/mui_func_ref.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/mui_func_ref.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
       &lt;example name="muicatalogue" type="html"&gt;
          &lt;file type="source"&gt;/help/html/muicatalogue.html&lt;/file&gt;
          &lt;file type="main"&gt;/help/muicatalogue.m&lt;/file&gt;
@@ -153,6 +158,11 @@ File exclusion list.txt
          &lt;file type="main"&gt;/help/muitbx_utilityclasses.m&lt;/file&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
+      &lt;example name="muitemplates" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/muitemplates.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/muitemplates.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
       &lt;example name="muitoolbox" type="html"&gt;
          &lt;file type="source"&gt;/help/html/muitoolbox.html&lt;/file&gt;
          &lt;file type="main"&gt;/help/muitoolbox.m&lt;/file&gt;
@@ -168,6 +178,11 @@ File exclusion list.txt
          &lt;file type="main"&gt;/help/muiusermodel.m&lt;/file&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
+      &lt;example name="psfunctions" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/psfunctions.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/psfunctions.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
    &lt;/exampleCategory&gt;
 &lt;/examples&gt;</param.examples>
     <param.demosxml />
@@ -175,13 +190,14 @@ File exclusion list.txt
     <param.registered.apps />
     <param.docs>${PROJECT_ROOT}\info.xml</param.docs>
     <param.getting.started.guide>${PROJECT_ROOT}\doc\GettingStarted.mlx</param.getting.started.guide>
-    <param.matlabpath.excludes />
+    <param.matlabpath.excludes>
+      <item>/D__/Work/Tools/MATLAB/MUImodels2/muiApps/muiAppStatsFcns</item>
+      <item>/D__/Work/Tools/MATLAB/MUImodels2/muiApps/muiAppCoastalFcns</item>
+    </param.matlabpath.excludes>
     <param.javaclasspath.excludes />
     <param.exported.on.package>false</param.exported.on.package>
     <param.required.addons>
-      <requiredaddons>
-        <requiredAddOn downloadURL="www.coastalsea.uk/downloads" earliest="earliest" fromRepository="false" id="3fed2193-17cc-4e12-9a85-874c6bf5fd0d" include="true" latest="latest">dstoolbox</requiredAddOn>
-      </requiredaddons>
+      <requiredaddons />
     </param.required.addons>
     <param.matlab.project.id />
     <param.matlab.project.name />
@@ -209,7 +225,6 @@ File exclusion list.txt
       <param.demosxml />
       <param.apps />
       <param.registered.apps />
-      <param.matlabpath.excludes />
       <param.javaclasspath.excludes />
       <param.exported.on.package />
       <param.matlab.project.id />
@@ -230,20 +245,17 @@ File exclusion list.txt
       <file>${PROJECT_ROOT}</file>
     </fileset.rootdir>
     <fileset.rootfiles>
-      <file>${PROJECT_ROOT}\clearUIclass.m</file>
-      <file>${PROJECT_ROOT}\demos auto.xml</file>
       <file>${PROJECT_ROOT}\demos.xml</file>
       <file>${PROJECT_ROOT}\doc</file>
-      <file>${PROJECT_ROOT}\Docs</file>
       <file>${PROJECT_ROOT}\example</file>
       <file>${PROJECT_ROOT}\help</file>
       <file>${PROJECT_ROOT}\info.xml</file>
-      <file>${PROJECT_ROOT}\mui_logo.jpg</file>
       <file>${PROJECT_ROOT}\muicatalogue.m</file>
       <file>${PROJECT_ROOT}\muiConstants.m</file>
       <file>${PROJECT_ROOT}\muiDataSet.m</file>
       <file>${PROJECT_ROOT}\muiDataUI.m</file>
       <file>${PROJECT_ROOT}\muiEditUI.m</file>
+      <file>${PROJECT_ROOT}\muifunctions</file>
       <file>${PROJECT_ROOT}\muiManipUI.m</file>
       <file>${PROJECT_ROOT}\muiModelUI.m</file>
       <file>${PROJECT_ROOT}\muiPlots.m</file>
@@ -253,13 +265,33 @@ File exclusion list.txt
       <file>${PROJECT_ROOT}\muiStats.m</file>
       <file>${PROJECT_ROOT}\muiStatsUI.m</file>
       <file>${PROJECT_ROOT}\muitemplates</file>
+      <file>${PROJECT_ROOT}\muitoolbox_logo.jpg</file>
       <file>${PROJECT_ROOT}\muiUserData.m</file>
       <file>${PROJECT_ROOT}\muiUserModel.m</file>
-      <file>${PROJECT_ROOT}\utils</file>
+      <file>${PROJECT_ROOT}\psfunctions</file>
     </fileset.rootfiles>
     <fileset.depfun.included />
     <fileset.depfun.excluded>
-      <file>D:\Work\Tools\MATLAB\MUImodels\ModelUI\NumInputdlg.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\cellstruct2cell.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\getdatatype.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\getdateformat.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\getdialog.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\getfiles.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\getvariabledimensions.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\mat2clip.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\num2duration.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\readinputfile.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\setactionbutton.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\setdialog.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\str2var.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\tablefigureUI.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\tabtablefigure.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\dstfunctions\var2str.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\example\diffusion2Dmodel.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\help\dscatalogue.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\help\dsproperties.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\help\dst2tsc.m</file>
+      <file>D:\Work\Tools\MATLAB\MUImodels2\dstoolbox\help\dstable.m</file>
     </fileset.depfun.excluded>
     <fileset.package />
     <build-deliverables>

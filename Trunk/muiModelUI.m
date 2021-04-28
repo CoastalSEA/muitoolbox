@@ -74,7 +74,7 @@ classdef (Abstract = true) muiModelUI < handle
         function splashFigure(obj,modelLogo)
             %display splash figure as part of model initialisation
             if nargin<2 || isempty(modelLogo)
-                modelLogo = 'mui_logo.jpg';
+                modelLogo = 'muitoolbox_logo.jpg';
             end
             vtxt = sprintf('%s  Version: %s;  Copyright: %s',...
                                      obj.modelName,obj.vNumber,obj.vDate);

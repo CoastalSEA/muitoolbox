@@ -1,6 +1,6 @@
-%% muifunctions
-% Summary of functions available in muifunctions folder. Use the Matlab(TM)
-% help function in the command window to get forther details of each
+%% muitoolbox functions
+% Summary of functions available in the _muifunctions_ folder. Use the Matlab(TM)
+% help function in the command window to get further details of each
 % function.
 
 %%
@@ -11,7 +11,8 @@
 % - create a yes/no panel within a figure
 % 
 % * *add_file_header.m*
-% - function to add the same header to batch of user selected files
+% - function to add the same header to batch of user selected files (eg to
+% add a format definition to the top of a data file)
 % 
 % * *check_vector_lengths.m*
 % - check that all input values are either scalar or vectors of the same length 
@@ -23,16 +24,15 @@
 % - clean table by checking numeric data are not cells and 
 % replacing non-standard values
 % 
-% * *cmap_selection.m*
-% - select a color map definition from Matlab(TM) default list and cbrewer
-% generated mat files
-% 
 % * *editrange.m*
 % - button callback function to edit range and enter in a text uicontrol
 % 
 % * *editrange_ui.m*
 % - test whether Vin is datetime and if so use datepicker otherwise use  
 % inputdlg to let user edit range values
+%
+% * *functionlibrarylist.m*
+% - Lists available functions for use in DataManip
 % 
 % * *getintervaldata.m*
 % - compute the mean values of the property values in dst2 between the time
@@ -54,9 +54,6 @@
 % * *getwidget.m*
 % - widget for text,input uicontrol and control buttons (eg edit) 
 % 
-% * *godisplay.m*
-% - display the legend name or DisplayName of the selected graphical object
-% 
 % * *inpaint_nans.m* from Matlab(TM) Forum
 % - in-paints over nans in an array (Copyright  John D'Errico)
 % 
@@ -71,11 +68,12 @@
 % * *isvalidrange.m*
 % - check user input is valid for the data type used and within bounds
 % 
-% * *mcolor.m*
-% - select a default Matlab(TM) color definition from table
-% 
 % * *minmax.m*
 % - find min and max of multidimensional numeric or ordinal array
+%
+% * *paste_text.m*
+% - callback function to paste the contents of the clipboard
+% to a uicontrol (src)
 % 
 % * *range2var.m*
 % - convert range character array start and end variables
@@ -88,7 +86,11 @@
 % 
 % * *setdatatype.m*
 % - set the data type of a text string, where the data type can be: 
-%   logical,integer,float,char,string,categorical,datetime,duration  
+% logical,integer,float,char,string,categorical,datetime,duration  
+%
+% * *setExcNaN.m* 
+% - callback function for button to set data selection to include 
+% or exclude NaNs
 % 
 % * *setslider.m*
 % - define slider range text and value for data selection uicontrol  
@@ -96,6 +98,14 @@
 % * *sortplots.m*
 % - reorder plot handles so that the legend plots in sequence added
 % 
+% * *setPolar.m* 
+% - callback function for button to set XY plot to be polar 
+% instead of cartesian
+%
+% * *setXYorder.m*
+% - callback function for button to switch X and Y data (eg on
+% a UI selecting data for plotting)
+%
 % * *tablefigureUI.m*
 % - generate tablefigure and add buttons and controls to edit and return
 % updated table

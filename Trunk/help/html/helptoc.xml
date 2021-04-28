@@ -42,12 +42,15 @@
             <tocitem target="muistats.html">muiStats</tocitem>
             <tocitem target="muimanipui.html">muiManipUI</tocitem>
             <tocitem target="muiusermodel.html">muiUserModel</tocitem>
+            <tocitem target="muitemplates.html">List of templates</tocitem>
         </tocitem>
 
          <!-- Function reference next -->
         <!-- First item is page describing function categories, if any -->
-        <tocitem target="muifunctions.html" 
-                 image="HelpIcon.FUNCTION">Function Reference      
+        <tocitem target="mui_func_ref.html" 
+            image="HelpIcon.FUNCTION">Function Reference 
+            <tocitem target="muifunctions.html">Utility functions</tocitem> 
+            <tocitem target="psfunctions.html">Plot and statistical functions</tocitem>       
         </tocitem>      
 
         <!-- Getting started -->
