@@ -6,7 +6,7 @@ classdef ParamInput_template < muiPropertyUI                 % << Edit to classn
 % PURPOSE
 %   Class for input parameters for some component of the UI application
 % USAGE
-%   obj = PamamInput_template.setParamInput(mobj); %mobj is a handle to Main UI
+%   obj = PamamInput_template.setInput(mobj); %mobj is a handle to Main UI
 % SEE ALSO
 %   inherits muiPropertyUI
 %

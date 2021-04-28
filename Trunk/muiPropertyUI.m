@@ -110,7 +110,16 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             for k=1:length(propnames)
                 obj.(propnames{k}) = 0;
             end
-        end        
+        end    
+%%
+        function obj = updateProperties(obj,values)
+            %update the class properties with the values that are not Transient 
+            %or Hidden using values cell array
+            propnames = getPropertyNames(obj);
+            for k=1:length(propnames)
+                obj.(propnames{k}) = values{k};
+            end
+        end
 %%
         function propdata = getPropertiesStruct(obj)
             %get the property values and return as a struct using property names
@@ -152,6 +161,8 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             checkProps = cellfun(@isempty,localProperties);
             if all(~checkProps)
                 isvalid = true;
+            else
+                isvalid = false;
             end
         end        
     end

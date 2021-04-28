@@ -390,18 +390,21 @@ classdef muiCatalogue < dscatalogue
             %          1 = subselect using class, 
             %          2 = subselect using type, 
             %          3 = subselect using both
-            classops = unique(obj.Catalogue.CaseClass);
-            typeops  = unique(obj.Catalogue.CaseType);
-            classel = []; typesel = [];
+            ok = 1;
+            classops = cellstr(unique(obj.Catalogue.CaseClass));
+            typeops  = cellstr(unique(obj.Catalogue.CaseType));
+            classel = []; typesel = []; ok = 1;
             if selopt==1
-                classel  = selectRecordOptions(obj,classops,'Select classes:');
+                [classel,ok]  = selectRecordOptions(obj,classops,'Select classes:');
             elseif selopt==2
-                typesel  = selectRecordOptions(obj,typeops,'Select types:');
+                [typesel,ok]  = selectRecordOptions(obj,typeops,'Select types:');
             elseif selopt==3
+                %if user cancels in selectRecordOptions use All
                 classel  = selectRecordOptions(obj,classops,'Select classes:');
                 typesel  = selectRecordOptions(obj,typeops,'Select types:'); 
             end
-
+            if ok<1, caserec = []; return; end
+        
             [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
                                 'CaseType',typesel,'CaseClass',classel,...
                                 'SelectionMode',mode,'ListSize',[250,200]);
@@ -490,7 +493,8 @@ classdef muiCatalogue < dscatalogue
             idx.var = UIsel.variable;
             uidims = UIsel.dims;
             ndim = length(uidims);
-            idx.row = 1; dimnames.row = dst.RowNames;
+            idx.row = 1; 
+%             dimnames.row = dst.RowNames;
             idx.dim = cell(1,ndim-1);
             for i=1:ndim
                 %assign to dimension or row                    

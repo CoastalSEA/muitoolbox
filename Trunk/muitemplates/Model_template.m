@@ -4,7 +4,7 @@ classdef Model_template < muiDataSet                         % << Edit to classn
 % NAME
 %   Model_template.m
 % PURPOSE
-%   Class description - Class for Model XXXXX to be run as a ModelUI app
+%   Class description - Class for Model XXXXX to be run as a muitoolbox app
 %
 % SEE ALSO
 %   muiDataSet

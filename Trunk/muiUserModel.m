@@ -355,7 +355,7 @@ classdef muiUserModel < muiDataSet
                         if ok<1, return; end
                         caserec = casered(idx);
                     end
-                    addVariable2CaseDS(muicat,caserec,newvar,dsp);
+                    addVariable2CaseDS(muicat,caserec,results,dsp);
 %                     [cobj,classrec,catrec] = getCase(muicat,caserec); %use getCase because need classrec
 %                     classname = catrec.CaseClass; 
 %                     datasetname = getDataSetName(cobj);

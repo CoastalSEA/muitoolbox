@@ -66,13 +66,32 @@
 %   datasetname = getDataSetName(obj);   %obj is a class instance
 
 %%
+% *selectClassInstance* - Prompt to select a class instance from an array 
+% of class instances held in obj. Filter based on a class
+% property is optional, where propname is the class property to test and 
+% propvalue is the value to match. Returns class instance and selected 
+% dataset. Flag ok=1 if successful and ok =0 if user cancels selection.
+% 
+%%
+%   [cobj,dst,ok] = selectClassInstance(obj,propname,propvalue);
+
+%%
+% *getClassInstances* - get the class indices for the instances in an array 
+% of class instances, obj, where the class property name, propname (as a character 
+% vector), matches propvalue (propvalue can be a numeric or logical array,
+% or a cell array of character vectors, or a string array - similar to 
+% Matlab(TM) <matlab:doc('ismember') ismember>)
+%%
+%   caseidx = getClassInstances(obj,propname,propvalue);
+
+%%
 % *readTSinputFile* - uses Matlab detectImportOptions to decipher the header and read the
 % data into a table, where the columns use the variable names in file (if
 % defined). Checks are made to ensure that no times are duplicated and the data
 % are standardised so that missing times are removed and missing data are set to NaN
 % Time MUST be first column in table to use this function.
 %%
-% data = readTSinputFile(obj,filename);  %returns a table of data read from filename
+%   data = readTSinputFile(obj,filename);  %returns a table of data read from filename
 
 %% Creating a class using muiPropertyUI
 % A template to create a class that uses muiPropertyUI can be found in the 

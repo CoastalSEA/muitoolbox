@@ -35,9 +35,9 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
     methods (Access = protected)
         function obj = setMUI(obj)
             %initialise standard figure and menus    
-            %classes required to run model             
-            %format:                                         % << Edit to model and input parameters classnames 
+            %classes required to run model, format:
             %obj.ModelInputs.<model classname> = {'Param_class1',Param_class2',etc}
+            %                                        % << Edit to model and input parameters classnames 
             obj.ModelInputs.Model_template = {'ParamInput_template'};
             %tabs to include in DataUIs for plotting and statistical analysis
             %select which of the options are needed and delete the rest
@@ -98,8 +98,8 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             menu.Project(3).Callback = repmat({@obj.projectMenuOptions},[1,2]);
             
             %% Setup menu -------------------------------------------------
-            menu.Setup(1).List = {'Import Data','Input parameters',...
-                                      'Run parameters','Model Constants'};                                    
+            menu.Setup(1).List = {'Import Data','Input Parameters',...
+                                      'Run Parameters','Model Constants'};                                    
             menu.Setup(1).Callback = [{'gcbo;'},repmat({@obj.setupMenuOptions},[1,3])];
             %add separators to menu list (optional - default is off)
             menu.Setup(1).Separator = {'off','off','off','on'}; %separator preceeds item
@@ -183,12 +183,12 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
         function setupMenuOptions(obj,src,~)
             %callback functions for data input
             switch src.Text
-                case 'Input parameters'                       % << Edit to call Parameter Input class
+                case 'Input Parameters'                       % << Edit to call Parameter Input class
                     ParamInput_template.setParamInput(obj);  
                     %update tab display with input data
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
-                case 'Run parameters'                         % << Edit to call Data Import class
+                case 'Run Parameters'                         % << Edit to call Data Import class
                     ParamInput_template.setParamInput(obj);  
                     %update tab display with input data
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
@@ -230,9 +230,9 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
         function analysisMenuOptions(obj,src,~)
             switch src.Text
                 case 'Plots'
-                    obj.mUI.Plots = muiPlotsUI.getPlotsUI(obj);
+                    obj.mUI.PlotsUI = muiPlotsUI.getPlotsUI(obj);
                 case 'Statistics'
-                    obj.mUI.Stats = muiStatsUI.getStatsUI(obj);
+                    obj.mUI.StatsUI = muiStatsUI.getStatsUI(obj);
             end            
         end
 

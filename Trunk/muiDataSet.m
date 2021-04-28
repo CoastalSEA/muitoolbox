@@ -204,20 +204,66 @@ classdef (Abstract = true) muiDataSet < handle
             updateCase(muicat,obj,classrec);
         end
 %%
-        function datasetname = getDataSetName(obj)
+        function [datasetname,ok] = getDataSetName(obj)
             %check whether there is more than one dstable and select
-            dataset = 1;
+            dataset = 1; ok = 1; datasetname = [];  %initialise variables
+            
             datasetnames = fieldnames(obj.Data);
             if length(datasetnames)>1
                 promptxt = {'Select dataset'};
-                title = 'Save dataset';
+                title = 'DataSet names';
                 [dataset,ok] = listdlg('PromptString',promptxt,...
                            'SelectionMode','single','Name',title,...
                            'ListSize',[300,100],'ListString',datasetnames);
-                if ok<1, return; end       
+                if ok<1,  return; end       
             end
             datasetname = datasetnames{dataset};
-        end       
+        end  
+%%
+        function [cobj,dst,ok] = selectClassInstance(obj,propname,propvalue)
+            %Prompt to select a class instance. Filter based on a class
+            %property is optional. Returns class instance and selected
+            %dataset
+            select = 1; dst = [];   %initialise variables
+            
+            [dsname,ok] = getDataSetName(obj(1));
+            if ok<1,  return; end  
+            caselist = arrayfun(@(x) x.Data.(dsname).Description,obj,...
+                                                    'UniformOutput',false);                                  
+            if length(caselist)>1                                    
+                if nargin==3 && ~isempty(propvalue)      
+                    %subselect based on user defined class property and value
+                    proplist = {obj(:).(propname)};
+                    idx = find(ismember(proplist,propvalue));
+                    caselist = caselist(idx);
+                end
+                %
+                if length(caselist)>1 
+                    promptxt = {'Select case to use:'};
+                    title = 'Class instances';
+                    [select,ok] = listdlg('PromptString',promptxt,...
+                               'SelectionMode','single','Name',title,...
+                               'ListSize',[300,100],'ListString',caselist);
+                    if ok<1, return; end     
+                end
+            end
+            
+            if length(obj)~=length(caselist)
+                %find index if full list if subselection used
+                select = idx(select);
+            end
+            
+            cobj = obj(select);
+            dst = cobj.Data.(dsname);
+        end
+%%
+        function caseidx = getClassInstances(obj,propname,propvalue)
+            %get the class indices for the instances where propname 
+            %matches propvalue (propvalue can be a cell array
+            proplist = {obj(:).(propname)};
+            idx = ismember(proplist,propvalue);
+            caseidx = [obj(idx).CaseIndex];
+        end
 %%
         function data = readTSinputFile(~,filename)
             %uses Matlab detectImportOptions to decipher the header and read the
@@ -515,6 +561,8 @@ classdef (Abstract = true) muiDataSet < handle
             ylabel(labels.Y);  
             zlabel(labels.V)  
             view(3);
+            cmap = cmap_selection;
+            colormap(cmap)
             cb = colorbar;
             cb.Label.String = labels.V;
         end   

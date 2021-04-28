@@ -18,7 +18,7 @@ classdef (Abstract = true) muiModelUI < handle
     properties (Hidden, Transient)
         %struct to handles for UI
         mUI = struct('Figure',[],'Menus',[],'Tabs',[],'EditUI',[],'ManipUI',[],...
-                           'PlotsUI',[],'Plots',[],'StatsUI',[],'Stats',[])                                                       
+                     'PlotsUI',[],'Plots',[],'StatsUI',[],'Stats',[])                                                       
             % mUI.Figure        %handle for main UI figure
             % mUI.Menus         %handle for drop down menus in main UI
             % mUI.Tabs          %handle for the Tab Group in the main main UI
@@ -631,12 +631,12 @@ classdef (Abstract = true) muiModelUI < handle
                     subset = [];
             end
         end
- %%
-        function tabRunModel(obj)
-            %run the model (assumes the default model call is used in UI)
-            src.Text = 'Run Model';
-            runMenuOptions(obj,src,[]);
-        end 
+%  %%
+%         function tabRunModel(obj)
+%             %run the model (assumes the default model call is used in UI)
+%             src.Text = 'Run Model';
+%             runMenuOptions(obj,src,[]);
+%         end 
 %%  Need to see if this is needed
 %%  ModelUI calls this for Q-Plot and Stats********************************
         function getTabData(obj,src,~)
@@ -649,13 +649,14 @@ classdef (Abstract = true) muiModelUI < handle
                 return;
             elseif isempty(muicat)
                 %there are no model results saved so run model
-                tabRunModel(obj);
-                %check whether model returned a result
-                if isempty(muicat)
-                    ht = findobj(src,'Type','axes');
-                    delete(ht);
-                    return;
-                end
+                return;
+%                 tabRunModel(obj);
+%                 %check whether model returned a result
+%                 if isempty(muicat)
+%                     ht = findobj(src,'Type','axes');
+%                     delete(ht);
+%                     
+%                 end
             end
 
             if height(muicat)>1
@@ -896,22 +897,17 @@ classdef (Abstract = true) muiModelUI < handle
                 rethrow(ME)                     
             end
         end
-%%
-%         function minp = getModelInputs(obj,classname)
-%             %property ModelInputs is protected. return values for specific
-%             %class. Used in muiDataSet
-%             minp = obj.ModelInputs.(classname);
-%         end
 %%  
         function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs
             %first input variable is the ModelUI handle (unused)
             name = class(guiobj);
-            %handle subclasses that inherit standard GUI
-            idx = regexp(name,'_');
-            if ~isempty(idx)
-                name = name(idx+1:end);
-            end
+            %handle subclasses that inherit standard GUI - code below
+            %assumes 3 charachter suffix
+            % idx = regexp(name,'_');
+            % if ~isempty(idx)
+            %     name = name(idx+1:end);
+            % end
             switch name
                 %define case for each plot/data GUI
                 case 'muiPlotsUI'
@@ -931,13 +927,6 @@ classdef (Abstract = true) muiModelUI < handle
                 case 'muiStatsUI'
                     figObj = findobj('Tag','StatFig','-or','Tag','StatTable');                   
                     deleteFigObj(obj,figObj,'Stats');
-                    
-%                 case 'muiEditUI'
-%                     delete(obj.mUI.EditUI)
-%                     obj.mUI.EditUI = [];
-%                 case 'muiManipUI'
-%                     delete(obj.mUI.ManipUI)
-%                     obj.mUI.ManipUI = [];
             end
             guiobjtxt = name(4:end);
             delete(obj.mUI.(guiobjtxt))

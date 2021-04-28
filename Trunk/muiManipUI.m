@@ -41,7 +41,9 @@ classdef muiManipUI < muiDataUI
             elseif isa(mobj.mUI.ManipUI,'muiManipUI')
                 obj = mobj.mUI.ManipUI;
                 if isempty(obj.dataUI.Figure)
-                    obj = obj.setDataUIfigure(mobj);    %initialise figure 
+                    %initialise figure 
+                    guititle = 'Derive output';
+                    setDataUIfigure(obj,mobj,guititle);   
                     setDataUItabs(obj,mobj); %add tabs 
                 else
                     getdialog('Derive Output UI is open');

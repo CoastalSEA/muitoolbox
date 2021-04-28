@@ -40,7 +40,9 @@ classdef muiEditUI < muiDataUI
             elseif isa(mobj.mUI.EditUI,'muiEditUI')
                 obj = mobj.mUI.EditUI;
                 if isempty(obj.dataUI.Figure)
-                    obj = obj.setDataUIfigure(mobj);    %initialise figure 
+                    %initialise figure 
+                    guititle = 'Select Data for Editing';
+                    setDataUIfigure(obj,mobj,guititle);    
                     setDataUItabs(obj,mobj); %add tabs 
                 else
                     getdialog('Edit UI is open');

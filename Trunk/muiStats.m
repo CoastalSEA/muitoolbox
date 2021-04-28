@@ -109,7 +109,7 @@ classdef muiStats < handle
             nvar = length(obj.UIsel);
             %initialise struct used in muiCatalogue.getProperty
             props(nvar) = setPropsStruct(muicat);
-            xyzset = [gobj.UIselection(:).caserec]==0;
+            xyzset = [obj.UIsel(:).caserec]==0;
             for i=1:nvar
                 %get the data and labels for each variable
                 if obj.UIsel(i).caserec>0
@@ -376,14 +376,16 @@ classdef muiStats < handle
             else
                 src = tab;
             end
-        end             
+        end    
+    end
 %%
-        function [obj,ok] = setTaylorParams(obj)
+    methods (Static)
+        function skill = setTaylorParams(skill)
             %Skill score requires correlation and exponent. Give user option
             %to include skill score and then set parameters if included
             %persists until muiStats is deleted
             %obj - muiStats object
-            skill = obj.Taylor;
+%             skill = obj.Taylor;
             if isempty(skill)
                 skill = muiStats.skillStruct();
                 skill.Inc = questdlg('Plot skill score?',...
@@ -405,7 +407,7 @@ classdef muiStats < handle
                 skill.iter = logical(str2double(answer{4})); %local skill iteration method
                 %skill.SD = [];                     %subdomain sampling (not used)
             end
-            obj.Taylor = skill;
+%             obj.Taylor = skill;
             ok = 1;
         end
     end

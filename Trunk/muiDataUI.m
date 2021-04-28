@@ -8,6 +8,12 @@ classdef (Abstract = true) muiDataUI < handle
 %   and pass selection to applications
 % NOTES
 %   Typically called by class implementation of muiModelUI
+%   Naming convention for UIs is that the first 3 letters of the claas name
+%   are not included in the handle name used in proporty mobj.mUI 
+%   eg: class muiPlotsUI + mobj.mUI.PlotsUI, and CT_SimUI + mobj.mUI.SimUI
+%   This allows classes that inherit a muitoolbox UI to use the same handle
+%   assignment, eg when CT_PlotsUI inherits muiPlotsUI. Ensures that
+%   muiModelUI.clearDataUI finds the correct UI object to delete.
 % SEE ALSO
 %   ModelPlots.m amd DataStats for examples of usage
 %
@@ -33,7 +39,7 @@ classdef (Abstract = true) muiDataUI < handle
     methods (Abstract,Access=protected) %methods that all subclasses must define
         setTabContent(obj,src)          %layout options for individual tabs 
         setVariableLists(obj,src,mobj,crec)  %initialise selection variables
-        useSelection(obj,src,evt,mobj)  %function to do something with selected data
+        useSelection(obj,src,mobj)  %function to do something with selected data
     end
 %--------------------------------------------------------------------------
 % initialise figure and tabs

@@ -43,9 +43,14 @@
             <tocitem target="muimanipui.html">muiManipUI</tocitem>
             <tocitem target="muiusermodel.html">muiUserModel</tocitem>
         </tocitem>
-        
-        <!-- Function reference next -->
+
+         <!-- Function reference next -->
         <!-- First item is page describing function categories, if any -->
+        <tocitem target="muifunctions.html" 
+                 image="HelpIcon.FUNCTION">Function Reference      
+        </tocitem>      
+
+        <!-- Getting started -->
         <tocitem target="muitbx_gettingstarted.html" 
                  image="HelpIcon.GETTING_STARTED">Getting Started   
         </tocitem>        

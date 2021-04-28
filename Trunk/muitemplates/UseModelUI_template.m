@@ -171,7 +171,7 @@ classdef UseModelUI_template < ModelUI                       % << Edit to classn
             %callback functions to run model
             switch src.Text                   
                 case 'Run Model'                             % << Edit to call Model class
-                    Model_tamplate.runModel(obj); 
+                    Model_template.runModel(obj); 
                 case 'Derive Output'
                     obj.mUI.Manip = muiManipUI.getManipUI(obj);
             end            
