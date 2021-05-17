@@ -43,7 +43,8 @@ function cmap = cmap_selection(idsel)
         case 'YlGnBu'
             cmap = YlGnBu();
         case 'anomalie'
-            cmap = load('cmapanomalie','-mat');
+            cstruct = load('cmapanomalie','-mat');
+            cmap = cstruct.cmapanomalie;
         otherwise
             cmap = colormap(matlabcmaps{idsel});
     end

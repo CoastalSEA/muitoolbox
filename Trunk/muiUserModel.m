@@ -59,8 +59,7 @@ classdef muiUserModel < muiDataSet
             if ok<1, return; end 
             waitbar(0.8)
             %use t,x,y,z variables to evaluate user equation
-            %NB: any Scaling selected will have been applied in getVatiable 
-            %called by getData (getVariable is in DataGuiInterface).
+            %NB: any Scaling selected will have been applied      ??????????????
             if inp.isdst
                 varout = callfcn_dst(obj,props,mobj,inp);
             else
@@ -242,7 +241,7 @@ classdef muiUserModel < muiDataSet
             %array, any user text, handle to main UI and the inp selection
             %struct with both the user equation and the function name
             idx = ~cellfun(@isempty,{props(:).case});  %index for used XYZ variables
-            dst = props(idx); %to just pass dstables use props(idx).data ***
+            dst = props(idx); %to just pass dstables use props(idx).data ***????
             try
                 %handle to anonymous function based on user equation
                 heq = str2func(['@(dst,utext,mobj) ',inp.eqn]);

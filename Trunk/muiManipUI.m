@@ -158,8 +158,8 @@ classdef muiManipUI < muiDataUI
             %Header size and text
             S.HeadPos = [0.8,0.14]; %vertical position and height of header
             txt1 = 'Select the variables to be used and assign to X Y Z buttons.';
-            txt2 = '?';
-            txt3 = 'You may be prompted to sub-sample the data if multi-dimensional.';
+            txt2 = 'You may be prompted to sub-sample the data if multi-dimensional.';
+            txt3 = 'Use the Function to select a function, or define a Matlab expression.';
             S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  

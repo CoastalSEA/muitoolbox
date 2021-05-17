@@ -155,11 +155,11 @@ classdef UseModelUI_template < ModelUI                       % << Edit to classn
             %callback functions for data input
             switch src.Text
                 case 'Input parameters'                      % << Edit to call Parameter Input class
-                    ParamInput_template.setParamInput(obj);                             
+                    ParamInput_template.setInput(obj);                             
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
                 case 'Run parameters'                        % << Edit to call Parameter Input class
-                    ParamInput_template.setParamInput(obj);                             
+                    ParamInput_template.setInput(obj);                             
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
                 case 'Model Constants'
@@ -175,6 +175,10 @@ classdef UseModelUI_template < ModelUI                       % << Edit to classn
                 case 'Derive Output'
                     obj.mUI.Manip = muiManipUI.getManipUI(obj);
             end            
-        end                    
+        end  
+                %% Help menu ------------------------------------------------------
+        function Help(~,~,~)
+            docsearch UseModelUI_template                               % << Edit to documentation name if available
+        end
     end
 end

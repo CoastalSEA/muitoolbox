@@ -31,6 +31,7 @@ function output = dataimport_format_template(funcall,varargin)
         case 'dataQC'
             output = dataQC(varargin{1});  
         case 'getPlot'
+            %output = 0; if using the default tab plot in muiDataSet, else
             output = getPlot(varargin{:});
     end
 end

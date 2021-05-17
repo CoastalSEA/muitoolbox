@@ -15,7 +15,7 @@
 % etc) and only some of these may be needed in a given application.
 %%
 % The properties _UIselections_ and _UIsettings_ are initialised and set
-% by the muiDataUI superclass and define the selections made by the user.
+% by the muiDataUI superclass and hold the selections made by the user.
 %
 %% muiManipUI methods
 % *getManipUI* - static function used to initialise the UI from the main UI
@@ -34,20 +34,20 @@
 % dataset RowNames (eg time), without the need to assign T to a button. 
 % The variables can be written in upper or lower case. For each variable defined 
 % in the call, a variable must be assigned to one or more of the XYZ buttons
-% (with the exception of T). In addition text inputs 
-% required by the call and the model object (mobj) can also be passed. 
+% (with the exception of T). In addition, text inputs 
+% required by the call and the model instance (mobj) can also be passed. 
 % Comments can be used to pass additional instructions, such as the
 % inclusion of the RowNames in the output to be saved as a new dataset,
 % using either %time or %rows. 
 %%
-% For example:
+% For example any of the following could be entered into the equation box:
 %%
 %   x.^2+y   %time
 %   myfunction1(x,y,t,'usertext') 
 %   myfunction2(x,mobj)
 %%
 % The output from this type of function call can be figures or tables, a 
-% single numeric value, or a daatset to be saved (character vector or array).
+% single numeric value, or a dataset to be saved (character vector or array).
 % External functions must return output as a cell array with the new variable
 % in the first cell and data to be used to define RowNames in the second
 % cell. If the %time or %rows instruction is included in the call, row data
@@ -77,7 +77,7 @@
 % and RowNames for each dataset selected. For this option up to 3 variables
 % can be selected but they are defined in the call using dst, for example:
 %%
-%   mufunction3(dst,'usertext',mobj)
+%   myfunction3(dst,'usertext',mobj)
 %%
 % This passes the selected variables as a struct array of dstables to the
 % function. Using this syntax the function can return a dstable, or struct of

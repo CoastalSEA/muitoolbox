@@ -1,6 +1,6 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
   <configuration file="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\muitoolbox.prj" location="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
-    <param.appname>MUItoolbox</param.appname>
+    <param.appname>muitoolbox</param.appname>
     <param.authnamewatermark>Ian Towend</param.authnamewatermark>
     <param.email>i.townend@coastalsea.uk</param.email>
     <param.company>University of Southampton</param.company>
@@ -8,7 +8,7 @@
     <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
     <param.screenshot>${PROJECT_ROOT}\help\html\muitoolbox_logo.png</param.screenshot>
     <param.version>1.0</param.version>
-    <param.output>${PROJECT_ROOT}\MUItoolbox.mltbx</param.output>
+    <param.output>${PROJECT_ROOT}\muitoolbox.mltbx</param.output>
     <param.products.name />
     <param.products.id />
     <param.products.version />
@@ -24,9 +24,7 @@ test_code
 Working docs
 %
 % A single file in the toolbox folder:
-setMUIpaths.m
-rmMUIpaths.m
-File exclusion list.txt
+setmuipath.m
 %
 % A single file in a subfolder of the toolbox folder:
 % example/.svn
@@ -48,145 +46,27 @@ File exclusion list.txt
     <param.examples>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;examples&gt;
    &lt;exampleCategory name="help"&gt;
-      &lt;example name="mui_func_ref" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/mui_func_ref.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/mui_func_ref.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muicatalogue" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muicatalogue.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muicatalogue.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muiconstants" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muiconstants.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muiconstants.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muidataset" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muidataset.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muidataset.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muidataui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muidataui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muidataui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muieditui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muieditui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muieditui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muifunctions" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muifunctions.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muifunctions.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muimanipui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muimanipui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muimanipui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muimodelui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muimodelui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muimodelui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muiplots" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muiplots.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muiplots.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muiplotsui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muiplotsui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muiplotsui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muiproject" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muiproject.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muiproject.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muipropertyui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muipropertyui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muipropertyui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muistats" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muistats.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muistats.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muistatsui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muistatsui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muistatsui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_abstractclasses" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_abstractclasses.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_abstractclasses.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_dstoolbox" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_dstoolbox.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_dstoolbox.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_example" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_example.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_example.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_exampleslist" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_exampleslist.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_exampleslist.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_gettingstarted" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_gettingstarted.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_gettingstarted.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_modelui" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_modelui.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_modelui.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitbx_utilityclasses" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitbx_utilityclasses.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitbx_utilityclasses.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="muitemplates" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muitemplates.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitemplates.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
       &lt;example name="muitoolbox" type="html"&gt;
          &lt;file type="source"&gt;/help/html/muitoolbox.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muitoolbox.m&lt;/file&gt;
+         &lt;file type="main"/&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
-      &lt;example name="muiuserdata" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muiuserdata.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muiuserdata.m&lt;/file&gt;
+      &lt;example name="Examples" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/muitbx_example.html&lt;/file&gt;
+         &lt;file type="main"/&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
-      &lt;example name="muiusermodel" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/muiusermodel.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/muiusermodel.m&lt;/file&gt;
-         &lt;file type="thumbnail"/&gt;
-      &lt;/example&gt;
-      &lt;example name="psfunctions" type="html"&gt;
-         &lt;file type="source"&gt;/help/html/psfunctions.html&lt;/file&gt;
-         &lt;file type="main"&gt;/help/psfunctions.m&lt;/file&gt;
+      &lt;example name="List of examples" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/muitbx_exampleslist.html&lt;/file&gt;
+         &lt;file type="main"/&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
    &lt;/exampleCategory&gt;
 &lt;/examples&gt;</param.examples>
     <param.demosxml />
-    <param.apps />
+    <param.apps>
+      <file>${PROJECT_ROOT}\ModelUI.mlappinstall</file>
+    </param.apps>
     <param.registered.apps />
     <param.docs>${PROJECT_ROOT}\info.xml</param.docs>
     <param.getting.started.guide>${PROJECT_ROOT}\doc\GettingStarted.mlx</param.getting.started.guide>
@@ -223,7 +103,6 @@ File exclusion list.txt
       <param.platforms />
       <param.exclude.pcodedmfiles />
       <param.demosxml />
-      <param.apps />
       <param.registered.apps />
       <param.javaclasspath.excludes />
       <param.exported.on.package />
@@ -295,7 +174,7 @@ File exclusion list.txt
     </fileset.depfun.excluded>
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}" name="MUItoolbox.mltbx" optional="false">D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\MUItoolbox.mltbx</file>
+      <file location="${PROJECT_ROOT}" name="muitoolbox.mltbx" optional="false">D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\muitoolbox.mltbx</file>
     </build-deliverables>
     <workflow />
     <matlab>

@@ -10,6 +10,7 @@ classdef muiUserData < muiDataSet
 %   obj = UserData()
 % SEE ALSO
 %   inherits muiDataSet and uses dstable and dscatalogue
+%   see CoastalTools for example of usage
 %
 % Author: Ian Townend
 % CoastalSEA (c) Jan 2021
@@ -42,7 +43,7 @@ classdef muiUserData < muiDataSet
         function tabPlot(obj,src)
             %generate plot for display on Q-Plot tab
             funcname = 'getPlot';
-            dst = obj.Data{1};
+            dst = obj.Data.Dataset;
             [var,ok] = callFileFormatFcn(obj,funcname,dst,src);
             if ok<1, return; end
             

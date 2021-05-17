@@ -16,7 +16,7 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 %   option  - New, Add, Delete; 
 %   rLim    - radial limit
 %   skill   - structure with:
-%             inc - flag to include skill score + parameters
+%             inc - flag to include skill score + parameters if true
 %             Ro - Reference correlation, 
 %             n - Exponent, 
 %             W - number of points to sub-sample over: +/-W (-)
@@ -42,7 +42,7 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
     cfstats = getDifferenceStats(refvar,testvar);
 
     %get skill score if required
-    if strcmp(skill.Inc,'Yes')
+    if skill.Inc
         skill = getSkillScores(skill,cfstats,refvar,testvar);
     else
         skill.global = [];
@@ -389,12 +389,12 @@ end
 %%
 function score = getLocalSkill(skill,refvar,testvar)
     %iterate over data set based on interval W defined in skill struct
-    %iter =  true iterates for i=1:m-2W, 
+    %iter =  true iterates for i=1:m-2W,
     %iter = false avoids overlaps and iterates over i=1:2W:m--2W
-   if isa(refvar,'timeseries')
-    tt = getabstime(refvar);
-    refvar = refvar.Data;
-    testvar = testvar.Data;
+    if isa(refvar,'timeseries')
+        tt = getabstime(refvar);
+        refvar = refvar.Data;
+        testvar = testvar.Data;
     else
         tt = [];
     end

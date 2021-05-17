@@ -388,8 +388,9 @@ classdef muiStats < handle
 %             skill = obj.Taylor;
             if isempty(skill)
                 skill = muiStats.skillStruct();
-                skill.Inc = questdlg('Plot skill score?',...
+                answer = questdlg('Plot skill score?',...
                                      'Skill score','Yes','No','Yes');
+                if strcmp(answer,'Yes'), skill.Inc = true; end                 
             end
             %
             if strcmp(skill.Inc,'Yes')      %flag to include skill score
@@ -415,7 +416,7 @@ classdef muiStats < handle
     methods (Static, Access=private)
          function skill = skillStruct()
             %return an empty struct for the Taylor skill input parameters
-            skill = struct('Inc','No','Ro',1,'n',1,'W',0,'iter',false,'SD',[]);
+            skill = struct('Inc',false,'Ro',1,'n',1,'W',0,'iter',false,'SD',[]);
         end          
     end
 end

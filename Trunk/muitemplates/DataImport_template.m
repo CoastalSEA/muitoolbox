@@ -9,8 +9,7 @@ classdef DataImport_template                                 % << Edit to classn
 % USAGE
 %   obj = DataImport_template()
 % SEE ALSO
-%   inherits muiDataSet and uses dstable and dscatalogue
-%   format files used to load data of varying formats (variables and file format)
+%   uses dstable and dscatalogue
 %
 % Author: Ian Townend
 % CoastalSEA (c) Jan 2021
@@ -180,7 +179,7 @@ classdef DataImport_template                                 % << Edit to classn
             [data,header] = readinputfile(filename,nhead,dataSpec);
         end       
 %%        
-        function dsp = dataDSproperties(~)
+        function dsp = setDSproperties(~)
             %define the metadata properties for the demo data set
             dsp = struct('Variables',[],'Row',[],'Dimensions',[]);  
             %define each variable to be included in the data table and any

@@ -184,12 +184,12 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             %callback functions for data input
             switch src.Text
                 case 'Input Parameters'                       % << Edit to call Parameter Input class
-                    ParamInput_template.setParamInput(obj);  
+                    ParamInput_template.setInput(obj);  
                     %update tab display with input data
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
                 case 'Run Parameters'                         % << Edit to call Data Import class
-                    ParamInput_template.setParamInput(obj);  
+                    ParamInput_template.setInput(obj);  
                     %update tab display with input data
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
@@ -238,7 +238,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
 
         %% Help menu ------------------------------------------------------
         function Help(~,~,~)
-            doc UseUI_template                               % << Edit to documentation name if available
+            docsearch UseUI_template                               % << Edit to documentation name if available
         end
 %% ------------------------------------------------------------------------
 % Overload muiModelUI.MapTable to customise Tab display of records (if required)
