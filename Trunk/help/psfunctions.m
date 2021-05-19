@@ -8,6 +8,10 @@
 % - select a color map definition from Matlab(TM) default list and cbrewer
 % generated mat files
 %
+% * *complex_vectors.m*
+% - creates a polar plot of the movement at each interval from one position
+% to the next
+%
 % * *descriptive_stats.m*
 % - generate descriptive stats table for timeseries or table of a variable
 % 
@@ -16,6 +20,14 @@
 % 
 % * *mcolor.m*
 % - select a default Matlab(TM) color definition from table
+%
+% * *peakseek.m* 
+% - alternative to the findpeaks function. From Matlab(TM) Forum, 
+% Peter O'Connor, (c) 2010.
+%
+% * *phaseplot.m*
+% - variation of x and y with time. e.g. centroid of beach profiles or 
+% recursive plots such as x = x(t) v  y = x(t+1)  
 %
 % * *regression_model.m*
 % - transform data for selected regression model and return regression
@@ -36,9 +48,9 @@
 % - create plot of Taylor diagram and, optionally, plot compute skill score
 % and a skill map (2 or 3D depending on data)
 %
-% * *wind_rose.m* from Matlab(TM) Forum
-% - plot wind/wave rose to show direction and intensity of variable
-% (copyright MMA 26-11-2007, mma@odyle.net, IEO, Instituto Español de Oceanografía
+% * *wind_rose.m* 
+% - plot wind/wave rose to show direction and intensity of variable. 
+% From Matlab(TM) Forum (c) MMA 26-11-2007, Instituto Español de Oceanografía
 % La Coruña, España)
 %
 % * *xcorrelation_plot.m*

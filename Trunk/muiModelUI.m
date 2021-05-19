@@ -454,6 +454,10 @@ classdef (Abstract = true) muiModelUI < handle
                 msg2 = sprintf('If saved, will be saved as %s',obj.FigTitle);
                 warndlg(sprint('%s\n%s',msg1,msg2))  
             end
+            %activate variables in dstables
+            if isa(obj.Cases,'muiCatalogue')
+                activateTables(obj.Cases);
+            end
             %
             clear sobj
         end    
@@ -557,7 +561,7 @@ classdef (Abstract = true) muiModelUI < handle
             muicat = obj.Cases;   %handle to muiCatalogue
             switch src.Text
                 case 'Edit Description'            
-                    editRecord(muicat);
+                    editCase(muicat);
                     obj.DrawMap; 
                 case 'Edit Data Set'
                     obj.mUI.EditUI = muiEditUI.getEditUI(obj);    
@@ -631,14 +635,7 @@ classdef (Abstract = true) muiModelUI < handle
                     subset = [];
             end
         end
-%  %%
-%         function tabRunModel(obj)
-%             %run the model (assumes the default model call is used in UI)
-%             src.Text = 'Run Model';
-%             runMenuOptions(obj,src,[]);
-%         end 
-%%  Need to see if this is needed
-%%  ModelUI calls this for Q-Plot and Stats********************************
+%%
         function getTabData(obj,src,~)
             %get data required for a tab action (eg plot or tabulation)
             %user selected data are held in the structure 'inp' including:
@@ -648,15 +645,8 @@ classdef (Abstract = true) muiModelUI < handle
             if isempty(muicat) && isempty(obj.Inputs) %no runs & no data
                 return;
             elseif isempty(muicat)
-                %there are no model results saved so run model
+                %there are no model results saved
                 return;
-%                 tabRunModel(obj);
-%                 %check whether model returned a result
-%                 if isempty(muicat)
-%                     ht = findobj(src,'Type','axes');
-%                     delete(ht);
-%                     
-%                 end
             end
 
             if height(muicat)>1

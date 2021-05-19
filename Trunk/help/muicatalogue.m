@@ -102,6 +102,16 @@
 %   addVariable2CaseDS(muicat,caserec,newvar,dsp)
 
 %%
+% *activateTables* activates the dynamic properties of all the tables held
+% as Cases in the Catalogue. When a <matlab:doc('dstable') dsctable> is loaded the dynamic
+% properties need to be restored. Calls the dstable function _activatedynamicprops_
+% which initialises the dynamic properties for the variables in the
+% dstable. This is useful when loading classes that contain dstables from 
+% a file. It is used by the _loadModel_ function in <matlab:doc('muimodelui') muiModelUI>.
+%%
+%   activateTables(muicat)
+
+%%
 % *setDataClassID* get the index for a new instance of class held in
 % DataSets, where _classname_ is the name of the class to use.
 %%
@@ -115,6 +125,14 @@
 %% muiCatalogue methods used in ModelUI Project menu
 % The example interface provided in <matlab:doc('modelui') ModelUI>
 % includes a number of tools that manipulate Cases held in muiCatalogue.
+
+%%
+% *editCase* edit Case description of the selected case. Calls _editRecord_
+% in <matlab:doc('dscatalogue') dscatalogue> to update the catalogue and
+% updates the Description property in any dstables held in the Case
+% DataSets property.
+%%
+%   editCase(muicat,caserec);          %caserec is optonal
 
 %%
 % *saveCase* writes the results for a selected case to an Excel file.

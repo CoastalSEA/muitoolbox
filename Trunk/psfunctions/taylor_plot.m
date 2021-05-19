@@ -167,8 +167,13 @@ function plotTaylor(metatxt,cfstats,option,score)
     symb = 'o';
     restxt = sprintf('corr=%.3f; ndstd=%.3f for %s',corr,ndteststd,metatxt{2});     
     if ~isempty(score.global)  
-        usertst = sprintf('%s with skill Sg=%1.3g, Sl=%1.3g (Ro=%1.2g, n=%1.1g)',...
-                       restxt,score.global,score.local,score.Ro,score.n);
+        if score.iter
+            itxt = 'for all cells';
+        else
+            itxt = 'with no overlaps';
+        end
+        usertst = sprintf('%s with skill Sg=%1.3g, Sl=%1.3g (Ro=%1.2g, n=%1.1g, W=%d, %s)',...
+                 restxt,score.global,score.local,score.Ro,score.n,score.W);
     else
         usertst = restxt;
     end

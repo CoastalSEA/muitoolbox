@@ -432,7 +432,7 @@ classdef (Abstract = true) muiDataSet < handle
                 t = dst.RowNames;                
                 if isdatetime(t) || isduration(t) || isnumeric(t)
                     istime = true;  rdim = 'T';
-                elseif isnumeric(rows) && issorted(t,'monotonic')
+                elseif isnumeric(t) && issorted(t,'monotonic')
                     istime = true;  rdim = 'T';
                 end
                 pdat.(rdim) = t;

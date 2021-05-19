@@ -27,7 +27,7 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
 %   followed by a 'while ok<1' loop with (if butnames are Yes and No)
 %       waitfor(h_but,'Tag');
 %       if ~ishandle(h_but) %this handles the user deleting figure window    
-%          ok = 0;
+%          ok = 1;  %continue or return depending on usage
 %       elseif strcmp(h_but.Tag,'No')
 %          %Do something
 %          h_but.Tag = '';

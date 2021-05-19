@@ -28,6 +28,22 @@ classdef muiCatalogue < dscatalogue
 %% ------------------------------------------------------------------------
 % Methods used in ModelUI Project menu
 %--------------------------------------------------------------------------
+        function editCase(obj,caserec)
+            %edit Case description in the Catalogue record and update the
+            %Description property in any dstables held in DataSets
+            if nargin<2, caserec = []; end
+            [caserec,newdesc] = editRecord(obj,caserec);
+     
+            [cobj,~,~] = getCase(obj,caserec);
+            if isprop(cobj,'Data') && ~isempty(cobj.Data)
+                dsnames = fieldnames(cobj.Data);
+                for k=1:length(dsnames)
+                    dst = cobj.Data.(dsnames{k});
+                    dst.Description = newdesc{1};
+                end
+            end
+        end
+%%
         function saveCase(obj,caserec)  
             %write the results for a selected case to an excel file   
             if nargin<2  %if case to save has not been specified
@@ -147,21 +163,20 @@ classdef muiCatalogue < dscatalogue
             else
                 ninp = length(inputs);
                 propdata = {}; proplabels = {};
-                for k=1:ninp
+                for k=1:ninp         %concatenate the Run Parameters
                     localObj = cobj.RunParam.(inputs{k});
                     propdata = vertcat(propdata,getProperties(localObj)); %#ok<AGROW>
                     proplabels = vertcat(proplabels,getPropertyNames(localObj)); %#ok<AGROW>
                 end
                 idx = find(~(cellfun(@isscalar,propdata)));
-                for i=1:length(idx)
-                    propdata{idx(i)} = num2str(propdata{idx(i)});
+                for i=1:length(idx)  %convert any numerical data to strings
+                    propdata{idx(i)} = num2str(propdata{idx(i)}); %#ok<AGROW>
                 end
-                propdata = [proplabels,propdata];
+                propdata = [proplabels,propdata]; %cell array of labels and values
                 figtitle = sprintf('Settings used for %s',casedesc);
                 varnames = {'Variable','Values'};                                
-                h_fig = tablefigure('Scenario settings',figtitle,{},varnames,propdata);
-                %adjust position on screen            
-            
+                h_fig = tablefigure('Scenario settings',figtitle,{},varnames,propdata); %#ok<NASGU>
+                %use h_fig to adjust position on screen if required                
             end            
         end   
 %%
@@ -351,15 +366,11 @@ classdef muiCatalogue < dscatalogue
                 idrow = getIndices(obj,dst.RowNames,UIsel.range);
                 data = dst.RowNames(idrow); %returns values in source data type
                 useprop = dst.TableRowName;
-%                 rowlabel = getLabels(dst,'Row');
                 label = attriblabel{2};
             elseif any(strcmp(dst.DimensionNames,useprop))
                 %return selected dimension              
                 iddim = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
-                data = dst.Dimensions.(useprop)(iddim);
-%                 dimlabels = getLabels(dst,'Dimension');
-                %subtract variable and row (if used)
-                if height(dst.DataTable)>1, nr=2; else, nr=1; end                  
+                data = dst.Dimensions.(useprop)(iddim);               
                 label = attriblabel{UIsel.property}; 
             else
                 errordlg('Incorrect property selection in getProperty') 
@@ -390,7 +401,6 @@ classdef muiCatalogue < dscatalogue
             %          1 = subselect using class, 
             %          2 = subselect using type, 
             %          3 = subselect using both
-            ok = 1;
             classops = cellstr(unique(obj.Catalogue.CaseClass));
             typeops  = cellstr(unique(obj.Catalogue.CaseType));
             classel = []; typesel = []; ok = 1;
@@ -431,7 +441,30 @@ classdef muiCatalogue < dscatalogue
                                     [action,'(cobj,classrec,catrec,muicat)']]); 
                 heq(cobj,classrec,catrec,obj);  %instance of class object
             end
-        end    
+        end 
+%%
+        function activateTables(obj)
+            %load dstables held as Data in muiDataSet derived classes and 
+            %saved to DataSets in a muiCatalogue so that the dynamic
+            %properties are accessible
+            if isempty(obj.DataSets), return; end
+            fnames = fieldnames(obj.DataSets);
+            if ~isempty(fnames)
+                for i=1:length(fnames)
+                    cobj = obj.DataSets.(fnames{i});
+                    for j = 1:length(cobj)
+                        if isprop(cobj(j),'Data') && ~isempty(cobj(j).Data)
+                            dsnames = fieldnames(cobj(j).Data);
+                            for k=1:length(dsnames)
+                                dst = cobj(j).Data.(dsnames{k});
+                                varnames = dst.VariableNames;
+                                activatedynamicprops(dst,varnames);
+                            end
+                        end
+                    end
+                end
+            end
+        end
 %%
         function addVariable2CaseDS(obj,caserec,newvar,dsp)
             %add a variable to an existing Case dataset in the Catalogue
