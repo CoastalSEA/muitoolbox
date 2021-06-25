@@ -209,7 +209,7 @@ classdef muiStatsUI < muiDataUI
 %             S.TabButPos = [0.1,0.03;0.3,0.03];    %default positions
             
             %XYZ panel definition (if required)
-            S.XYZnset = 2;                          %minimum number of buttons to use
+            S.XYZnset = 1;                          %minimum number of buttons to use
             S.XYZmxvar = [1,1];                     %maximum number of dimensions per selection
             S.XYZpanel = [0.05,0.20,0.9,0.1];       %position for XYZ button panel
             S.XYZlabels = {'Var'};                  %default button labels

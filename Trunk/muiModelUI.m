@@ -925,13 +925,18 @@ classdef (Abstract = true) muiModelUI < handle
 %%
         function cobj = getClassObj(obj,classtype,classname,msgtxt)
             %check if class exists and return class handle  
-            % classtype - Inputs or Cases
+            % classtype - Cases, Inputs or mUI field
             % classname - name of class being called
             % msgtxt - message to display if class does not exist (optional)
             if strcmp(classtype,'Cases')
                 lobj = obj.Cases.DataSets; %map Cases to DataSets property
             else
-                lobj = obj.Inputs;
+                lobj = obj.(classtype);
+                if strcmp(classtype,'mUI') && ~isempty(lobj.(classname))
+                    %mUI does not use Class names for field names
+                    cobj = lobj.(classname);
+                    return
+                end
             end
             %
             if isfield(lobj,classname) && ...

@@ -5,18 +5,21 @@ function [timeints,timeunits] = set_time_units(dates,offset,timeunits)
 %   set_time_units.m
 %PURPOSE
 %   convert datetimes to durations with selected time units and an
-%   optional offset from zero
+%   optional offset from zero. prompts for units if not defined
 % USAGE
 %   [timeints,units] = set_time_units(dates)
 % INPUT
-%   dated - datetime vector to define durations
-%   offset - duration offset
-%   timeunits - unit of time duration to use
+%   dates - datetime vector to define durations
+%   offset - duration offset (optional or empty)
+%   timeunits - unit of time duration to use (optional)
 % OUTPUT
-%   timeints - selected time unit
+%   timeints - durations from t0 in selected time units. If there is an
+%              offset>0 the durations are from the first value of dates, 
+%              otherwise they are from 1-Jan-0001.
 %   timeunits - user selected units for duration 
 % NOTES
-%   some stats routines pass offset=eps(0) to avoid divide by zereo
+%   some stats routines pass offset=eps(0) to avoid divide by zero when
+%   using durations from t(1).
 % SEE ALSO
 %   used in regression_plot.m
 %
@@ -31,17 +34,23 @@ function [timeints,timeunits] = set_time_units(dates,offset,timeunits)
         timeunits = getTimeUnits();
     end
     %
+    if offset>0
+        t0 = dates(1);
+    else
+        t0 = datetime(1,1,1);
+    end
+    %
     switch timeunits
         case 'years'
-            timeints = years(dates-dates(1)+offset); 
+            timeints = years(dates-t0+offset); 
         case 'days'
-            timeints = days(dates-dates(1)+offset); 
+            timeints = days(dates-to+offset); 
         case 'hours'
-            timeints = hours(dates-dates(1)+offset); 
+            timeints = hours(dates-t0+offset); 
         case 'minutes'
-            timeints = minutes(dates-dates(1)+offset);   
+            timeints = minutes(dates-t0+offset);   
         case 'seconds'
-            timeints = seconds(dates-dates(1)+offset); 
+            timeints = seconds(dates-t0+offset); 
         otherwise
             warndlg('Only years, days, hours, minutes or seconds handled')
             return

@@ -8,62 +8,82 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
 % USAGE
 %   regression_plot(ind_ds,dep_ds,metatxt,model)
 % INPUT
-%   ind_ds - independent data set
+%   ind_ds - independent data set 
 %   dep_ds - dependent data set
 %   metatxt - cell array for describing user selection, 
-%             order is {dependent label, independent label, title, data selection} 
+%             order is {independent label, dependent label, title, data selection} 
 %             only labels are required but data selection must be cell(4)
 %   model - regression model to fit
 % OUTPUT
 %   plot of results from regression_model
 % NOTES
-%   timeseries data are interpolated to a common time, all other data have
-%   to be the same length vectors
+%   Input data can be numeric, datetime, duration, ordinal, or
+%   timeseries data in a dstable which are interpolated to a common time
+%   Interpoaltion is over period with common data overlap using the data 
+%   set with the least points as the reference data set.
+%   Datasets of different length that are not timeseries are interpolated
+%   to the same length by assuming data are uniformly spaced
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-    istime = [];
-    if isa(ind_ds,'timeseries') && isa(dep_ds,'timeseries')
-        %both variables are timeseries data
-        [~,idx] = min([dep_ds.Length,ind_ds.Length]);
-        switch idx %use ts with least points as ts to interpolate onto                
-            case 1
-                time = getabstime(dep_ds);
-                indat = TSDataSet.interpolateTSdata(ind_ds,time); 
-                depdat = dep_ds.Data;
-            case 2
-                time = getabstime(ind_ds);
-                depdat = TSDataSet.interpolateTSdata(dep_ds,time);
-                indat = ind_ds.Data;
-        end
-    elseif isa(ind_ds,'timeseries') || isa(dep_ds,'timeseries')
-        %one of the variables is a timeseries
-        %assume that they are the same length
-        if isa(ind_ds,'timeseries') && isdatetime(dep_ds)
-            indat = ind_ds.Data;
-            %eps(0) to avoid divide by zero in linear regression  
-            [depdat,istime] = set_time_units(dep_ds,eps(0));              
-        elseif isa(dep_ds,'timeseries') && isdatetime(ind_ds)
-            [indat,istime] = set_time_units(ind_ds,eps(0));  
-            depdat = dep_ds.Data;
+    istime = []; indat = []; depdat = [];
+    if isa(ind_ds,'dstable') && isa(ind_ds,'dstable')
+        %both are timeseries data sets and may need interpolation
+        if (isdatetime(ind_ds.RowNames) || isduration(ind_ds.RowNames)) && ...
+                (isdatetime(dep_ds.RowNames) || isduration(dep_ds.RowNames))
+            %both data sets are time or duration timeseries
+            [ind_ds,dep_ds] = getoverlappingtimes(ind_ds,dep_ds,false);
+            %use ts with least points as ts to interpolate onto 
+            indat = ind_ds.DataTable{:,1};
+            depdat = dep_ds.DataTable{:,1};
+            if height(ind_ds)<height(dep_ds)            
+                depdat = interp1(dep_ds.RowNames,depdat,ind_ds.RowNames,'linear');
+            else
+                indat = interp1(ind_ds.RowNames,indat,dep_ds.RowNames,'linear');            
+            end
         else
-            warndlg('Unknown data types in regression_plot');
-            return;
+            warndlg('dstables are not both timeseries data sets')
+            return
         end
-    else   %not time series data
-        if istable(ind_ds)
-            ind_ds = squeeze(ind_ds{:,1});
-            if iscell(ind_ds) && ischar(ind_ds{1})
-                ind_ds = double(categorical(ind_ds,'Ordinal',true));
-            end
-            dep_ds = squeeze(dep_ds{:,1}); 
-            if iscell(dep_ds) && ischar(dep_ds{1})
-                dep_ds = double(categorical(dep_ds,'Ordinal',true));
-            end
+    end
+
+    %convert ordinal categorical data to numeric values
+    if iscell(ind_ds) && ischar(ind_ds{1})
+        ind_ds = double(categorical(ind_ds,'Ordinal',true));
+    end
+    %
+    if iscell(dep_ds) && ischar(dep_ds{1})
+        dep_ds = double(categorical(dep_ds,'Ordinal',true));
+    end   
+
+    if isdatetime(ind_ds) || isdatetime(dep_ds)
+        %one of the inputs is time (assume both are not time)    
+        if isdatetime(ind_ds)
+            [indat,istime] = set_time_units(ind_ds);  
+            depdat = dep_ds; 
+            idx = 1;
+        else 
+            indat = ind_ds;
+            [depdat,istime] = set_time_units(dep_ds); 
+            idx = 2;
         end
-        %
+    elseif isduration(ind_ds) || isduration(dep_ds)
+        %one fo the inputs is duration
+        indat = ind_ds;
+        depdat = dep_ds; 
+        if isduraion(indat)
+            istime = indat.Format;
+            idx = 1;
+        else 
+            istime = depdat.Format;
+            idx = 2;
+        end
+    end
+
+    %check if data sets are same length and if not try interpolating
+    if isempty(indat) %exclude time data which is already assigned
         nind = length(ind_ds); ndep = length(dep_ds);
         if nind==ndep 
             indat = ind_ds;
@@ -84,10 +104,13 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
             warndlg(msg);
         end
     end
+    
+    %now call regression model
     nint = 10; %number of points in regression line
     [~,~,~,x,y,res] = regression_model(indat,depdat,model,nint);
+    
+    %modify the metatxt if time units have been defined
     if ~isempty(istime)
-        if isdatetime(ind_ds), idx = 1; else, idx = 2; end
         metatxt{idx} = sprintf('%s (%s)',metatxt{idx},istime);    
     end
     plot_figure(indat,depdat,x,y,res,metatxt);

@@ -93,15 +93,17 @@ function [slope,intercept,Rsq] = simpleLinearRegression(x,y)
     % y = a + b.x, where a is the y-intercept and b is the slope
     % for intercept=0 just use slope=x\y
     % this code uses y = intercept + slope.x
+    % x and y should not include any NaNs or NaTs.
     if length(x)~=length(y)
         slope = 0; intercept = 0; Rsq = 0;
         return;
     end
     
-    idx = ~isnan(x) & ~isnan(y); %remove any NaNs
-    %[m,n] = size(x);
-    xx = x(idx);
-    yy = y(idx);
+    [~,idx] = rmmissing(x);  %requires v2016b - handles NaN and NaT
+    [~,idy] = rmmissing(y);
+    idd = ~idx & ~idy;
+    xx = x(idd);
+    yy = y(idd);
     
     if size(xx,2)>1
         xx = xx';   yy = yy'; 

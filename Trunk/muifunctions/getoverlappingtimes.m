@@ -13,8 +13,8 @@ function [ds1out,ds2out] = getoverlappingtimes(ds1,ds2,isoffset)
 %   dst2 - dstable containing time series data
 %   isoffset - logical flag to indicate if an offset is to be included
 % OUTPUT
-%   dst1out - trimmed dst1 to same period as dst2
-%   dst2out - trimmed dst2 to same period as dst2 
+%   dst1out - trimmed dst1 to period that is common to dst1 and dst2
+%   dst2out - trimmed dst2 to period that is common to dst1 and dst2
 % NOTES
 %   isoffset is used to extend the duration of the records returned to
 %   ensure that dst1 starts before dst2 (using a mean value if no data
@@ -22,7 +22,7 @@ function [ds1out,ds2out] = getoverlappingtimes(ds1,ds2,isoffset)
 %   data with the wave data starting one time interval before the start of
 %   the beach profile data.
 % SEE ALSO
-%   getinterdata.m to extract mean values in the intervals of a less
+%   getintervaldata.m to extract mean values in the intervals of a less
 %   frequently sampled dataset. Uses dstable version of getsampleusingtime
 %
 % Author: Ian Townend

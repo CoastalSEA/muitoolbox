@@ -24,19 +24,27 @@ function xcorrelation_plot(ds1,ds2,metatxt)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-    if isa(ds1,'timeseries')
-        [~,idx] = min([ds1.Length,ds2.Length]);
-        switch idx %use ts with least points as ts to interpolate onto                
-            case 1
-                mtime = getabstime(ds1);
-                refdat = ds1.Data;                               %x
-                lagdat = TSDataSet.interpolateTSdata(ds2,mtime); %y   
-            case 2
-                mtime = getabstime(ds2);
-                refdat = TSDataSet.interpolateTSdata(ds1,mtime); %x
-                lagdat = ds2.Data;                               %y
+
+    if isa(ds1,'dstable') && isa(ds2,'dstable')
+        %both are timeseries data sets and may need interpolation
+        if (isdatetime(ds1.RowNames) || isduration(ds1.RowNames)) && ...
+                (isdatetime(ds2.RowNames) || isduration(ds2.RowNames))
+            %both data sets are time or duration timeseries
+            [ref_ds,lag_ds] = getoverlappingtimes(ds1,ds2,false);
+            %use ts with least points as ts to interpolate onto 
+            refdat = ref_ds.DataTable{:,1};
+            lagdat = lag_ds.DataTable{:,1};
+            if height(ref_ds)<height(lag_ds)            
+                lagdat = interp1(lag_ds.RowNames,lagdat,ref_ds.RowNames,'linear');
+                mtime = ref_ds.RowNames;
+            else
+                refdat = interp1(ref_ds.RowNames,refdat,lag_ds.RowNames,'linear');            
+                mtime = lag_ds.RowNames;
+            end
+        else
+            warndlg('dstables are not both timeseries data sets')
+            return
         end
-        mtime = datetime(mtime);
 
         %simple sign wave code to test function------------------------
 %             mtime = datetime:hours(1):datetime+days(4);                       

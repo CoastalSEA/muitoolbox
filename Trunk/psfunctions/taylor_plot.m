@@ -43,7 +43,7 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 
     %get skill score if required
     if skill.Inc
-        skill = getSkillScores(skill,cfstats,refvar,testvar);
+        skill = getSkillScores(skill,cfstats,refvar,testvar,metatxt);
     else
         skill.global = [];
     end
@@ -172,8 +172,8 @@ function plotTaylor(metatxt,cfstats,option,score)
         else
             itxt = 'with no overlaps';
         end
-        usertst = sprintf('%s with skill Sg=%1.3g, Sl=%1.3g (Ro=%1.2g, n=%1.1g, W=%d, %s)',...
-                 restxt,score.global,score.local,score.Ro,score.n,score.W);
+        usertst = sprintf('%s with skill S.G=%1.3g, S.L=%1.3g. (Ro=%1.2g, n=%1.1g, W=%d, %s)',...
+                 restxt,score.global,score.local,score.Ro,score.n,score.W,itxt);
     else
         usertst = restxt;
     end
@@ -184,7 +184,7 @@ function plotTaylor(metatxt,cfstats,option,score)
         case 'New'                    
             useref = metatxt{1};  
             polarplot(figax,pi/2,1,'+','LineWidth',2.0,...
-            'DisplayName','Reference','Tag','1','UserData',useref);
+            'DisplayName','Reference','Tag','0','UserData',useref);
             %[polarscatter requires 2016b or later 
             % to use replace polarplot calls with polarscatter and 
             % findobj(figax,'Type','Line') to  findobj(figax,'Type','Scatter');
@@ -193,21 +193,21 @@ function plotTaylor(metatxt,cfstats,option,score)
             legtext = sprintf('cf #1: B=%.3f; E"=%.3f',bias,ndcrmsd);                                            
             polarplot(figax,acoscor,ndteststd,...
               symb,'LineWidth',1.5,'DisplayName',legtext,...
-              'Tag','2','UserData',usertst);
+              'Tag','1','UserData',usertst);
             h1 = legend(figax,'show','Location','northeastoutside');
             h1.Tag = 'Taylor';
         case 'Add'
             hp = findobj(figax,'Type','Line');
             idx = length(hp)+1;
             hpoints = findobj(figax,'Type','Line','Marker',symb);
-            idcase = length(hpoints)+2;
+            idcase = length(hpoints)+1;
             %plot test case
             legtext = sprintf('cf #%d: B=%.3f; E"=%.3f',...
                                             idcase,bias,ndcrmsd);  
             hp(idx) = polarplot(figax,acoscor,ndteststd,...
               symb,'LineWidth',1.5,'DisplayName',legtext,...
               'Tag',num2str(idcase),'UserData',usertst);
-            hp = sortPlots(hp);
+            hp = sortplots(hp);
             hp = suppressGridLines(hp);
             h1 = legend(figax,hp,'Location','northeastoutside');
             h1.Tag = 'Taylor';
@@ -230,24 +230,13 @@ function plotTaylor(metatxt,cfstats,option,score)
                 if isempty(figpts)
                     delete(figleg)
                 else
-                    figpts = sortPlots(figpts);
+                    figpts = sortplots(figpts);
                     hl = legend(figax,figpts,'Location','northeastoutside');
                     hl.Tag = 'Taylor';
                 end
             end
     end
     hold(figax,'off')  
-    %
-    function orderedhp = sortPlots(hp)
-        %reorder plot handles so that the legend plots in sequence
-        %added
-        linetag = zeros(1,length(hp));
-        for ij = 1:length(hp)
-            linetag(ij) = str2double(hp(ij).Tag);
-        end
-        [~,idx] = sort(linetag);
-        orderedhp = hp(idx);            
-    end  
     %
     function newhp = suppressGridLines(hp)
         %re-impose suppression of grid lines in the Taylot diagram plot
@@ -329,12 +318,12 @@ function TaylorPlotFigure(rLim)
         fig = findobj('Name','Taylor Diagram');
         figax = fig.CurrentAxes;
         figpts = findobj(figax,'Type','Line','-not','Tag','RMSgrid');
-        figpts = sortPlots(figpts);
+        figpts = sortplots(figpts);
         nrec = length(figpts);
         tstrings = cell(nrec,1);
-        for i=1:nrec
-            tstrings{i} = [figpts(i).DisplayName,'; ',...
-                                            figpts(i).UserData];
+        tstrings{1} = [figpts(1).DisplayName,': ',figpts(1).UserData];                                            
+        for i=2:nrec
+            tstrings{i} = [figpts(i).DisplayName,'; ',figpts(i).UserData];                             
         end
         if isempty(tstrings), return; end
         hg = figure('Name','Taylor Diagram Summary','Units','normalized',...                
@@ -357,17 +346,6 @@ function TaylorPlotFigure(rLim)
     end
 end
 %%
- function orderedhp = sortPlots(hp)
-    %reorder plot handles so that the legend plots in sequence
-    %added
-    linetag = zeros(1,length(hp));
-    for i = 1:length(hp)
-        linetag(i) = str2double(hp(i).Tag);
-    end
-    [~,idx] = sort(linetag);
-    orderedhp = hp(idx);            
- end 
-%%
 function score = getSkill(skill,cfstats)
     %get the skill score as defined in Taylor, K. E. (2001). 
     %"Summarizing multiple aspects of model performance in a single diagram." 
@@ -380,19 +358,19 @@ function score = getSkill(skill,cfstats)
     score = 4*(1+R)^n/((sigobs+1/sigobs)^2*(1+Ro)^n);   
 end
 %%
-function skill = getSkillScores(skill,cfstats,refvar,testvar)
+function skill = getSkillScores(skill,cfstats,refvar,testvar,metatxt)
     %get the global and local skill scores using the approach of Taylor,
     %2001 and the local weighting procedure of Bosboom, 2014 (if defined)
     skill.global = getSkill(skill,cfstats);
     W = skill.W;
     if W>0
-        skill.local = getLocalSkill(skill,refvar,testvar);
+        skill.local = getLocalSkill(skill,refvar,testvar,metatxt);
     else
-        skill.local = NaN;
+        skill.local = [];
     end
 end
 %%
-function score = getLocalSkill(skill,refvar,testvar)
+function score = getLocalSkill(skill,refvar,testvar,metatxt)
     %iterate over data set based on interval W defined in skill struct
     %iter =  true iterates for i=1:m-2W,
     %iter = false avoids overlaps and iterates over i=1:2W:m--2W
@@ -415,6 +393,10 @@ function score = getLocalSkill(skill,refvar,testvar)
         indx = 1:2*W:m-2*W;
         indy = 1:2*W:n-2*W;
     end
+    
+    %generate title
+    titletxt = sprintf('Reference: %s\nTest: %s',metatxt{1},metatxt{2});
+    
     %check with data is a vector or matrix and iterate over dimensions
     ss = zeros(length(indx),length(indy));
     ts = cell(length(indx),1);
@@ -437,7 +419,7 @@ function score = getLocalSkill(skill,refvar,testvar)
         else
             ts = datetime(ts);
         end
-        plotSkillGraph(ts,ss)
+        plotSkillGraph(ts,ss,titletxt)
     else       %data is a 2-D array
         for i=indx
             for j=indy
@@ -455,7 +437,7 @@ function score = getLocalSkill(skill,refvar,testvar)
         %window used for local skill
         skill.SD.x = round(skill.SD.x/xr);
         skill.SD.y = round(skill.SD.y/yr);
-        plotSkillMap(ss,skill);
+        plotSkillMap(ss,skill,titletxt);
     end  
     %apply subdomain mask
     if ~isempty(skill.SD)   
@@ -476,7 +458,7 @@ function score = getLocalSkill(skill,refvar,testvar)
     end
 end
 %%
-function plotSkillMap(ss,skill)
+function plotSkillMap(ss,skill,titletxt)
     %plot a figure showing the local skill scores as a map
     h_fig = figure('Name','Skill Map', ...
         'Units','normalized','HandleVisibility','on', ...
@@ -493,9 +475,10 @@ function plotSkillMap(ss,skill)
     end
     xlabel('Length intervals'); 
     ylabel('Width intervals'); 
+    title(titletxt)
 end
 %%
-function plotSkillGraph(tt,ss)
+function plotSkillGraph(tt,ss,titletxt)
     %plot a figure showing the local skill scores as a graph
     h_fig = figure('Name','Skill Graph', ...
         'Units','normalized','HandleVisibility','on', ...
@@ -504,4 +487,5 @@ function plotSkillGraph(tt,ss)
     plot(ax,tt,ss);
     xlabel('Intervals'); 
     ylabel('Local Skill Score'); 
+    title(titletxt)
 end

@@ -27,9 +27,9 @@ classdef (Abstract = true) muiDataSet < handle
         %      Variables with different dimensions should be stored in 
         %      seperate dstables. Variables with time-varying dimensions 
         %      should store the dimensions as variables.
-        DataFormats     %cell array of data formats available 
-        idFormat        %class instance file format    
-        FileSpec        %file loading spec {MultiSelect(on/off),FileType}       
+        DataFormats %cell array of data formats available 
+        idFormat    %class instance file format    
+        FileSpec    %file loading spec {MultiSelect(on/off),FileType}       
     end
     
     properties (Hidden, SetAccess=private)
@@ -161,7 +161,7 @@ classdef (Abstract = true) muiDataSet < handle
                 dst.(delist{att2use}) = [];  %delete selected variable
             else
                 %use access via DataTable so that values are returned as
-                %cell array fo character vectors
+                %cell array of character vectors
                 dimprops = dst.DataTable.Properties;
                 %get list of row or dimension values
                 if strcmp(delist{att2use},'RowNames')
@@ -171,16 +171,14 @@ classdef (Abstract = true) muiDataSet < handle
                     dimlist = dimprops.CustomProperties.Dimensions.(delist{att2use});
                     isrow = false;
                 end                
-                [row2use,ok] = listdlg('PromptString',promptxt,...
+                [rows2use,ok] = listdlg('PromptString',promptxt,...
                                  'Name',title,'SelectionMode','multiple',...
                                  'ListSize',[120,300],'ListString',dimlist);
                 if ok<1, return; end  
                 %delete selected values for row or dimension                
-                idx = setdiff((1:length(dimlist)),row2use); %rows to be kept
-                if isrow     
-                    dst.DataTable(row2use,:) = [];    %delete rows
-                    updateRange(dst,'Row',1)
-                    % dst = getDSTable(dst,idx);      %resample dstable
+                idx = setdiff((1:length(dimlist)),rows2use); %rows to be kept
+                if isrow  
+                    dst = removerows(dst,rownames);          %delete rows
                 else
                     dimcall = sprintf('Dimensions.%s',delist{att2use});                    
                     dimlist = dst.Dimensions.(delist{att2use})(idx);

@@ -1,4 +1,4 @@
-function [stats,h_fig] = descriptive_stats(mobj,data,metatxt,src)
+function [stats,h_fig] = descriptive_stats(data,metatxt,src)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -19,8 +19,8 @@ function [stats,h_fig] = descriptive_stats(mobj,data,metatxt,src)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-    if isa(data,'timeseries')
-        stats = getTSstats(data,metatxt,mobj);        
+    if isa(data,'dstable')
+        stats = getTSstats(data,metatxt);        
     else
         stats = getDSstats(data,metatxt);
     end
@@ -33,31 +33,40 @@ function [stats,h_fig] = descriptive_stats(mobj,data,metatxt,src)
     h_fig = tablefigure(src,metatxt,stats);
 end
 %%
-function stats = getTSstats(ts,metatxt,mobj)
+function stats = getTSstats(data,metatxt)
     %compute descriptive statistics (mean,std,etc) for selected
     %timeseries variable
     stats = []; 
-    cthr = getSeasonUI(mobj);
+    cthr = getSeasonUI();
     if isempty(cthr), return; end %user cancelled
     if isempty(cthr{1}) || isempty(cthr{2}) %check for valid entry
         warntxt = sprintf('Invalid data entry:\nEnter 0 and 1 for basic stats');
         warndlg(warntxt);
         return; 
     end
+    
+    dst = data.DataTable;
+    ts = timeseries(dst{:,1},dst.Properties.RowNames);
+    
     %get statistics for time series as a whole
     stats = time_stats(ts,cthr);
-    strtend = TSDataSet.getTSstartend(ts,false);
-    stats.Properties.Description = sprintf('Descriptive statistics for %s from %s to %s',...
-                                             metatxt{1},strtend{1},strtend{2});
+    stats.Properties.Description = metatxt;
     %get statistics for seasons if defined
     seasons = eval(cthr{2});
-    stats.Properties.UserData  = cellstr(num2str(seasons));
-    if length(seasons)>1
+%     stats.Properties.UserData  = cellstr(num2str(seasons));
+    if length(seasons)>1   
+        seastr = cellstr(num2str(seasons));
+        seastxt = 'Seasons:';
         stats = season_stats(ts,cthr,stats,seasons);
+        varnames = stats.Properties.VariableNames;
+        for i=2:length(varnames)
+            seastxt = sprintf('%s %s - %s',seastxt,varnames{i},seastr{i-1});
+        end
+        stats.Properties.Description = sprintf('%s\n%s',metatxt,seastxt);
     end 
 end
 %%
-function cthr = getSeasonUI(mobj)
+function cthr = getSeasonUI()
     %    
     figtitle = 'Seasonal Definitions';
     varnames = {'Seasons','Syntax'};
@@ -76,8 +85,8 @@ function cthr = getSeasonUI(mobj)
     h_tab = findobj(h_fig,'Tag','uitablefigure');
     h_tab.ColumnEditable = [false true];    
     h_but = findobj(h_fig,'String','Copy to clipboard');
-    h_but.Position(1) = h_but.Position(1)-20;
-    h_but.Position(3) = h_but.Position(3)+20;
+    h_but.Position(1) = h_but.Position(1)-0.020;
+    h_but.Position(3) = h_but.Position(3)+0.020;
     h_but.String = 'Copy Syntax & Close';
     h_but.Tooltip = 'Copy selected syntax to clipboard';
     %callbacks to copy cell content and close UI

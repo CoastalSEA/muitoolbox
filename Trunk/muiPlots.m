@@ -123,7 +123,7 @@ classdef muiPlots < handle
             getFigure(obj); 
             %call the specific plot type requested
             callPlotType(obj);
-            %assign PlotFig instance to handle
+            %assign muiPlots instance to handle
             mobj.mUI.Plots = obj;
             obj.Plot.CurrentFig.Visible = 'on';
         end

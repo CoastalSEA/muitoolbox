@@ -68,6 +68,10 @@
 % 
 % * *inputUI.m*
 % - creates a multi-field UI
+%
+% * *isdatdur.m*
+% - identify whether RowNames or a Variable in a dstable are datetime or duration
+% data types  
 % 
 % * *isvalidrange.m*
 % - check user input is valid for the data type used and within bounds

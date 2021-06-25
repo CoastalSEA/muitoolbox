@@ -4,13 +4,16 @@ function acolor = mcolor(idx)
 % NAME
 %   mcolor.m
 % PURPOSE
-%   select a default Matlab color definition from table
+%   select a default Matlab colour definition from table
 % USAGE
 %   acolor = mcolor(idx)
 % INPUTS
-%   idx - index to row selection in color table (integer or text)
+%   idx - index to row selection in colour table (integer or text)
 % OUTPUT
-%   acolor - RGB values for selected color
+%   acolor - RGB values for selected colour
+% NOTES
+%   colours defined include dark blue, orange, yellow, purple, green, light
+%   blue, scarlet, light grey dark grey
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2020
@@ -24,7 +27,7 @@ matlabcolor = [ 0,      0.4470, 0.7410;...   %dark blue
                 0.3010, 0.7450, 0.9330;...   %light blue
                 0.6350, 0.0780, 0.1840;...   %scarlet
                 0.90,   0.90,   0.90;...     %light grey
-                0.95,   0.95,   0.95];       %darker grey
+                0.95,   0.95,   0.95];       %dark grey
             
 colornames = {'dark blue';'orange';'yellow';'purple';'green';'light blue';...
               'scarlet';'light grey';'dark grey'};

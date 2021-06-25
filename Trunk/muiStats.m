@@ -40,7 +40,7 @@ classdef muiStats < handle
     methods (Static)
         function getStats(gobj,src,mobj)
             %get existing instance or create new class instance
-            if isa(mobj.mUI.Stats,'muiStats')
+            if isa(mobj.mUI.Stats,'muiStats') && isvalid(mobj.mUI.Stats)
                 obj = mobj.mUI.Stats;    %get existing instance  
                 clearPreviousStatsData(obj);
             else
@@ -60,28 +60,27 @@ classdef muiStats < handle
                 setStats(obj,src,mobj);
             end
         end
+    end
 %%
-    
-        function tabStats(mobj,src,~)
+   methods 
+        function tabStats(obj,src)
             %pass current statistical results held in obj.StatOut to a 
             %table on the Stats tab (if included in the main UI)
-            if isa(mobj.mUI.Stats,'muiStats')
-                obj = mobj.mUI.Stats;
-            else
-                warndlg('No statistics results available')
-                return;
-            end
+            ht = src.Children;   %clear any existing tab content
+            delete(ht);
             
             if strcmp(src.Tag,'Descriptive')
                 idx = selectStatOuput(obj.DescOut);
                 if isempty(idx), return; end
-                SummaryTable(mobj,obj.DescOut{idx},'StatTable',src);
+                metatxt = obj.DescOut{idx}.Properties.Description; 
+                tablefigure(src,metatxt,obj.DescOut{idx});
             else
                 idx = selectStatOuput(obj.ExtrOut);
                 if isempty(idx), return; end
-                SummaryTable(mobj,obj.ExtrOut{idx},'StatTable',src);
+                metatxt = obj.ExtrOut{idx}.Properties.Description; 
+                tablefigure(src,metatxt,obj.ExtrOut{idx});
             end
-            %
+            %-nested function----------------------------------------------
             function idx = selectStatOuput(output)
                 idx = [];
                 nruns = length(output);
@@ -113,7 +112,7 @@ classdef muiStats < handle
             for i=1:nvar
                 %get the data and labels for each variable
                 if obj.UIsel(i).caserec>0
-                    props(i) = getProperty(muicat,obj.UIsel(i),'array');
+                    props(i) = getProperty(muicat,obj.UIsel(i),'dstable');
                     if isempty(props(i).data), ok = ok-1; end
                 end
             end  
@@ -123,22 +122,23 @@ classdef muiStats < handle
             for i=1:length(props)
                 %assign the data to the correct axis
                 %NB this assigns data in order assigned on tab. If Y and Z
-                %defined on tab this is assigned as X and Y          
-                data2use = props(i).data;
+                %defined on tab this is assigned as X and Y        
                 if obj.UIsel(i).scale>1 %apply selected scaling to variable
                     usescale = obj.UIset.scaleList{obj.UIsel(i).scale};
                     dim = 1; %dimension to apply scaling function if matrix
+                    data2use = props(i).data.DataTable{:,1};
                     data2use = scalevariable(data2use,usescale,dim);
-                end
-                obj.Data.(xyz{i}) = data2use;
+                    props(i).data.DataTable{:,1} = data2use;
+                end                
+                obj.Data.(xyz{i}) = props(i).data;
                 obj.Labels.(xyz{i}) = props(i).label;
                 obj.MetaData.(xyz{i}) = obj.UIsel(i).desc;                
             end
             %description of selection (may need sub-selection if more than
-            %one case/variable used in plot)
+            %one case/variable used)
             dimtxt = {props(:).desc};
-            title = sprintf('%s (',dimtxt{1});
-            for j=2:length(dimtxt)
+            title = sprintf('%s (',dimtxt{end});
+            for j=1:length(dimtxt)-1
                 title = sprintf('%s%s, ',title,dimtxt{j});
             end
             obj.Title = sprintf('%s)',title(1:end-2));  
@@ -156,7 +156,9 @@ classdef muiStats < handle
                     getTaylorStats(obj,src);
                 case 'Intervals'
                     getIntervalStats(obj,mobj);
-            end             
+            end    
+            %assign muiStats instance to handle
+            mobj.mUI.Stats = obj;
         end
 %%
 %--------------------------------------------------------------------------
@@ -184,6 +186,7 @@ classdef muiStats < handle
                 obj.Data.X = obj.Data.Y;
                 obj.MetaData.X = obj.MetaData.Y;
             end
+            dataset = obj.Data.X.DataTable{:,1};
             %to assign to a tab need to define src. If src not defined 
             %(ie [])then a stand-alone figure is used
             src = getTabHandle(obj,mobj,1);
@@ -194,7 +197,7 @@ classdef muiStats < handle
             end
             mtxt = 'Selection used:';
             mtxt = {sprintf('%s\nX: %s',mtxt,obj.MetaData.X)};
-            obj.DescOut{idx} = descriptive_stats(mobj,obj.Data.X,mtxt,src);
+            obj.DescOut{idx} = descriptive_stats(dataset,mtxt,src);
             msgtxt = sprintf('Results are displayed on the Stats>%s tab',strip(src.Title));
             getdialog(msgtxt);
         end
@@ -210,16 +213,13 @@ classdef muiStats < handle
             model = regression_models{indx}; %selected model type
             
             %check that user has correctly defined X and Y
-            isvalid = isValidSelection(obj,'Regression');
-            if~isvalid, return; end
-            
-%             %handle time formats
-%             if isdatetime(obj.Data.X) 
-%             elseif isduration(obj.Data.X)                
-%             end
-
+            isvalid = isValidSelection(obj,'Regression',false);
+            if ~isvalid, return; end            
             metadata = setMetaData(obj);
-          
+            
+            %handle time formats
+            checkDatDur(obj)
+
             regression_plot(obj.Data.X,obj.Data.Y,metadata,model);
         end
 %%
@@ -228,15 +228,12 @@ classdef muiStats < handle
             % X taken as reference variable and Y as the lag variable
             
             %check that user has correctly defined X and Y
-            isvalid = isValidSelection(obj,'Regression');
-            if~isvalid, return; end
-            
-%             %handle time formats
-%             if isdatetime(obj.Data.X) 
-%             elseif isduration(obj.Data.X)                
-%             end
-
+            isvalid = isValidSelection(obj,'Cross-correlation',false);
+            if ~isvalid, return; end
             metadata = setMetaData(obj);
+            
+            %handle time formats
+            checkDatDur(obj)
 
             xcorrelation_plot(obj.Data.X,obj.Data.Y,metadata);
         end
@@ -247,17 +244,17 @@ classdef muiStats < handle
          function getTimeseriesStats(obj,mobj,srcVal) 
             %retrieve selected dataset and call relevant functions 
             %based on user selection
-            statoption = obj.DataSelection.C{9,1};
-            [ts,metatxt,dataObj] = getDatasetVars(obj,mobj,{},'C',1,1);
-            %if dataset comes back as a table convert to timeseries
-            if isempty(ts)
-                return;
-            elseif isa(ts,'table')  %1=table. 0=timeseries
-                %convert table to a vector timeseries
-                ts = table2ts(dataObj,ts);
-            end   
+%             statoption = obj.DataSelection.C{9,1};
+%             [ts,metatxt,dataObj] = getDatasetVars(obj,mobj,{},'C',1,1);
+%             %if dataset comes back as a table convert to timeseries
+%             if isempty(ts)
+%                 return;
+%             elseif isa(ts,'table')  %1=table. 0=timeseries
+%                 %convert table to a vector timeseries
+%                 ts = table2ts(dataObj,ts);
+%             end   
             %
-            switch statoption
+            switch obj.UIset.Type.String
                 case 'Descriptive'
                     %to assign to a tab need to define src. If src not defined 
                     %(ie [])then a stand-alone figure is used
@@ -266,7 +263,7 @@ classdef muiStats < handle
                     if ~isempty(obj.DescOut)
                         idx = length(obj.DescOut)+1;
                     end
-                    obj.DescOut{idx} = descriptive_stats(mobj,ts,metatxt,src);
+                    obj.DescOut{idx} = descriptive_stats(obj.Data.X,obj.MetaData.X,src);
                 case 'Peaks'
                     PeaksStats(obj,mobj,ts,metatxt);
                 case 'Clusters'
@@ -290,8 +287,32 @@ classdef muiStats < handle
 %--------------------------------------------------------------------------
 % Functions called to implement Timeseries options
 %--------------------------------------------------------------------------
-
-
+        function checkDatDur(obj)
+            %check whether inputs are datetime or duration
+            %isdd true if datetime or duration, isdt true if datetime
+            [isdd,~] = isdatdur('RowNames',obj.Data.X,obj.Data.Y);
+            %isdv true if datetime or duration, istv true if datetime
+            varnames = [obj.Data.X.VariableNames,obj.Data.Y.VariableNames];
+            [isdv,istv] = isdatdur(varnames,obj.Data.X,obj.Data.Y);
+            
+            %re-assign if one of the variables is datetime or duration, or
+            %the RowNames are not datetime or duration
+            %pass dstables if the RowNames are datetime or duration to 
+            %allow interpolation to common time intervals.
+            
+            if ~all(isdd)  
+                %selected datasets do not both have datetime or duration RowNames
+                obj.Data.X = obj.Data.X.DataTable{:,1};
+                obj.Data.Y = obj.Data.Y.DataTable{:,1};
+                if any(isdv)
+                    if istv(1) %variable assigned to X is a datetime
+                        obj.Data.X = set_time_units(obj.Data.X);
+                    else       %variable assigned to Y is a datetime
+                        obj.Data.Y = set_time_units(obj.Data.Y);
+                    end
+                end
+            end
+        end
 
 %%
 %--------------------------------------------------------------------------
@@ -302,12 +323,12 @@ classdef muiStats < handle
             
             %check that user has correctly defined X and Y
             isvalid = isValidSelection(obj,'Taylor Plot');
-            if~isvalid, return; end
+            if ~isvalid, return; end
             metadata = setMetaData(obj);
             
             rLim = obj.UIset.Other;
             %see if user wants to include skill score
-            [obj,ok] = setTaylorParams(obj);
+            ok = setTaylorParams(obj);
             if ok<1, return; end
 
             taylor_plot(obj.Data.X,obj.Data.Y,metadata,src.String,...
@@ -317,8 +338,32 @@ classdef muiStats < handle
 %--------------------------------------------------------------------------
 % Functions called to implement Interval Statistics
 %--------------------------------------------------------------------------
-
-
+        function getIntervalStats(obj,src)
+            % find intervals in one timeseries and compute statistcs within each
+            % interval in a second timeseries (use tsc for multiple variables
+            
+            %check that user has defined X and Y
+            isvalid = isValidSelection(obj,'Interval statistics');
+            if ~isvalid, return; end
+            metadata = setMetaData(obj);
+            
+            txt1 = 'Define the statistical variables to be used';
+            txt2 = 'Select from: reclength,median,mean,std,var,min,max,sum';
+            txt3 = '   (e.g. mean,std,min,max)'; 
+            txt4 = 'OR All';                                                    
+            inptxt = sprintf('%s\n%s\n%s\n%s\n',txt1,txt2,txt3,txt4);                                
+            statops = inputdlg(inptxt,'Interval statistics',1,{'mean, std'});
+            if isempty(statops), return; end  %user cancelled   
+          
+            tsc = getintervaldata(reftsc,smptsc,statops);  
+            
+            
+            dst = sprintf('Intervals Stats using %s',smp{1,1});            
+            
+            
+            
+            
+        end
 %%
 %--------------------------------------------------------------------------
 % Functions called by implementation functions
@@ -332,13 +377,13 @@ classdef muiStats < handle
             obj.Order = [];           %order of variables for selected plot type
         end
 %%
-        function isvalid = isValidSelection(obj,fncdesc)
+        function isvalid = isValidSelection(obj,fncdesc,iseq)
             %check that user has made a valid selection for function
             fnames = fields(obj.Data);
             if length(fnames)<2
                 warndlg(sprintf('Select X and Y for %s',fncdesc))
                 isvalid = false;
-            elseif length(obj.Data.X)~=length(obj.Data.Y)
+            elseif iseq && length(obj.Data.X)~=length(obj.Data.Y)
                 warndlg('Variables need to be the same length')
                 isvalid = false;
             else
@@ -377,15 +422,13 @@ classdef muiStats < handle
                 src = tab;
             end
         end    
-    end
 %%
-    methods (Static)
-        function skill = setTaylorParams(skill)
+        function ok = setTaylorParams(obj)
             %Skill score requires correlation and exponent. Give user option
             %to include skill score and then set parameters if included
             %persists until muiStats is deleted
             %obj - muiStats object
-%             skill = obj.Taylor;
+            skill = obj.Taylor;
             if isempty(skill)
                 skill = muiStats.skillStruct();
                 answer = questdlg('Plot skill score?',...
@@ -393,7 +436,7 @@ classdef muiStats < handle
                 if strcmp(answer,'Yes'), skill.Inc = true; end                 
             end
             %
-            if strcmp(skill.Inc,'Yes')      %flag to include skill score
+            if skill.Inc      %flag to include skill score
                 default = {num2str(skill.Ro),num2str(skill.n),...
                     num2str(skill.W),num2str(skill.iter)};
                 promptxt = {'Reference correlation, Ro','Exponent,n ',...
@@ -408,7 +451,7 @@ classdef muiStats < handle
                 skill.iter = logical(str2double(answer{4})); %local skill iteration method
                 %skill.SD = [];                     %subdomain sampling (not used)
             end
-%             obj.Taylor = skill;
+            obj.Taylor = skill;
             ok = 1;
         end
     end
