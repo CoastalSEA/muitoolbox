@@ -91,6 +91,9 @@
 % 
 % * *scalevariable.m*
 % - rescale a variable (vector or matrix) based on user selection
+%
+% * *setcase.m*
+% - set case number and prompt user to provide a description
 % 
 % * *setdatatype.m*
 % - set the data type of a text string, where the data type can be: 

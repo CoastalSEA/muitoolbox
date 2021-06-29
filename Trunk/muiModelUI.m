@@ -686,9 +686,6 @@ classdef (Abstract = true) muiModelUI < handle
 %--------------------------------------------------------------------------    
         function caseCallback(obj,src,evt)
             %called from tabs listing cases by clicking on a tab row
-            %check that there are some cases
-%             if isempty(obj.Cases.Catalogue.CaseID), return; end 
-            %get selected case            
             selrow = evt.Indices(1);
             idx = find(tabSubset(obj,src.Parent.Tag)); 
             if isempty(idx), return; end

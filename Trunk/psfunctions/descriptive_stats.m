@@ -10,7 +10,7 @@ function [stats,h_fig] = descriptive_stats(data,metatxt,src)
 % INPUTS
 %   data - timeseries of variable or table of variable
 %   metatxt - text describing user selection 
-%   src - handle to tab for results display (empty if stand-alone figure)
+%   src - handle to tab for results display (optional or empty if stand-alone figure)
 % OUTPUT
 %   stats - summary table or results
 %   h_fig - handle to figure (or tab if src used)
@@ -19,14 +19,17 @@ function [stats,h_fig] = descriptive_stats(data,metatxt,src)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
+    if nargin<3
+        src = [];
+    end
+    %
     if isa(data,'dstable')
         stats = getTSstats(data,metatxt);        
     else
         stats = getDSstats(data,metatxt);
     end
     if isempty(stats), return; end
-    
-%     SummaryTable(mobj,stats,'StatTable',src)
+    %
     if isempty(src)
         src = 'General statistics';
     end 
@@ -50,19 +53,20 @@ function stats = getTSstats(data,metatxt)
     
     %get statistics for time series as a whole
     stats = time_stats(ts,cthr);
-    stats.Properties.Description = metatxt;
+    stats.Properties.Description =  sprintf('Descriptive statistics for %s',...
+                                                            metatxt);
     %get statistics for seasons if defined
     seasons = eval(cthr{2});
 %     stats.Properties.UserData  = cellstr(num2str(seasons));
     if length(seasons)>1   
         seastr = cellstr(num2str(seasons));
-        seastxt = 'Seasons:';
+        seastxt = [];
         stats = season_stats(ts,cthr,stats,seasons);
         varnames = stats.Properties.VariableNames;
         for i=2:length(varnames)
-            seastxt = sprintf('%s %s - %s',seastxt,varnames{i},seastr{i-1});
+            seastxt = sprintf('%s%s - %s;  ',seastxt,varnames{i},seastr{i-1});
         end
-        stats.Properties.Description = sprintf('%s\n%s',metatxt,seastxt);
+        stats.Properties.Description = sprintf('%s\nSeasons: %s',metatxt,seastxt);
     end 
 end
 %%
@@ -208,7 +212,7 @@ function stats = getDSstats(data,metatxt)
                            sum(data,[1,2],'omitnan');slope;intcpt;Rsq];   
     stats.(varname) = vals;
     stats.Properties.Description = sprintf('Descriptive statistics for %s',...
-                                                            metatxt{1});                                            
+                                                            metatxt);                                            
 end   
 %% 
 function seasonalPlot(stats)

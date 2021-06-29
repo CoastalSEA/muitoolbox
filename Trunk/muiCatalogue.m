@@ -153,20 +153,28 @@ classdef muiCatalogue < dscatalogue
                                                             'single',2); 
                 if ok<1, return; end                  
             end
-            [cobj,~,catrec] = getCase(obj,caserec);
+            [cobj,~,catrec] = getCase(obj,caserec);            
             
-            casedesc = catrec.CaseDescription;
-            inputs = fieldnames(cobj.RunParam);
             if isempty(cobj.RunParam)
                 warndlg('The case selected has no input data');
                 return;
             else
+                casedesc = catrec.CaseDescription;
+                inputs = fieldnames(cobj.RunParam);
+
                 ninp = length(inputs);
                 propdata = {}; proplabels = {};
                 for k=1:ninp         %concatenate the Run Parameters
                     localObj = cobj.RunParam.(inputs{k});
-                    propdata = vertcat(propdata,getProperties(localObj)); %#ok<AGROW>
-                    proplabels = vertcat(proplabels,getPropertyNames(localObj)); %#ok<AGROW>
+                    if isa(localObj,'muiPropertyUI')
+                        propstruct = getPropertiesStruct(localObj);
+                        propdata = vertcat(propdata,struct2cell(propstruct)); %#ok<AGROW>
+                        proplabels = vertcat(proplabels,fieldnames(propstruct)); %#ok<AGROW>
+                    else
+                        caserec = caseRec(obj,localObj);
+                        propdata = vertcat(propdata,obj.Catalogue.CaseDescription{caserec}); %#ok<AGROW>
+                        proplabels = vertcat(proplabels,obj.Catalogue.CaseClass{caserec}); %#ok<AGROW>
+                    end
                 end
                 idx = find(~(cellfun(@isscalar,propdata)));
                 for i=1:length(idx)  %convert any numerical data to strings

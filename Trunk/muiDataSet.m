@@ -275,22 +275,39 @@ classdef (Abstract = true) muiDataSet < handle
                 data = [];
                 return; 
             end
-
+            
             %check for duplicate records - time is first column in table!!!
             [~,iu] = unique(data.(1));
             data = data(iu,:);
             %check for missing data
             data = standardizeMissing(data,[99,99.9,99.99,999,9999]);
             %check for incorrect date-time (NAT)
-            data= rmmissing(data,'DataVariables',1);
-        end        
+            data = rmmissing(data,'DataVariables',1);
+        end   
+%%
+        function setDataSetRecord(obj,muicat,dataset,varargin)
+            %assign dataset to class Data property and update catalogue
+            % muicat - muiCatalogue object
+            % dataset - the dataset or cell array of data sets to be added
+            % varargin - input to dscatalogue.addRecord. minimum is
+            %            datatype but can also include a cell with the case 
+            %            description and logical flag to supress user prompt
+            if isstruct(dataset)
+                obj.Data = dataset;   %can be struct of multiple tables
+            else
+                obj.Data.Dataset = dataset;  
+            end
+            setCase(muicat,obj,varargin{:});
+        end           
+        
     end
 %% ------------------------------------------------------------------------
 %   Methods to set DataSet, RunParam, FileFormat and FileFormatID
 %--------------------------------------------------------------------------     
     methods (Access = {?muiDataSet,?muiCatalogue}) %self reference is equivalent to protected
         function setRunParam(obj,mobj,varargin)
-            %assign the run parameters needed for a model
+            %assign the run parameters needed for a model (NB data source
+            %files are saved to the dstable.Source property)
             classname = metaclass(obj).Name;
             minp = mobj.ModelInputs.(classname);
 
@@ -313,21 +330,21 @@ classdef (Abstract = true) muiDataSet < handle
                 end
             end            
         end
-%%
-        function setDataSetRecord(obj,muicat,dataset,varargin)
-            %assign dataset to class Data property and update catalogue
-            % muicat - muiCatalogue object
-            % dataset - the dataset or cell array of data sets to be added
-            % varargin - input to dscatalogue.addRecord. minimum is
-            %            datatype but can also include a cell with the case 
-            %            description and logical flag to supress user prompt
-            if isstruct(dataset)
-                obj.Data = dataset;   %can be struct of multiple tables
-            else
-                obj.Data.Dataset = dataset;  
-            end
-            setCase(muicat,obj,varargin{:});
-        end                  
+% %%
+%         function setDataSetRecord(obj,muicat,dataset,varargin)
+%             %assign dataset to class Data property and update catalogue
+%             % muicat - muiCatalogue object
+%             % dataset - the dataset or cell array of data sets to be added
+%             % varargin - input to dscatalogue.addRecord. minimum is
+%             %            datatype but can also include a cell with the case 
+%             %            description and logical flag to supress user prompt
+%             if isstruct(dataset)
+%                 obj.Data = dataset;   %can be struct of multiple tables
+%             else
+%                 obj.Data.Dataset = dataset;  
+%             end
+%             setCase(muicat,obj,varargin{:});
+%         end                  
 %%
         function setCaseIndex(obj,caseid)
             %Assign the CaseIndex property (called by muiCatalogue.setCase)

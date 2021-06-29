@@ -87,9 +87,9 @@ classdef muiStats < handle
                 if nruns>1
                     rundesc = cell(nruns,1);
                     for i=1:nruns
-                        rundesc{i} = output{i}.Properties.Description;                        
+                        rundesc{i} = output{i}.Properties.UserData;                        
                     end
-                    [idx,ok] = listdlg('PromptString','Select a regression model:',...
+                    [idx,ok] = listdlg('PromptString','Select a case:',...
                            'SelectionMode','single','ListSize',[500,100],...
                            'ListString',rundesc);
                     if ok<1, idx = 1; end
@@ -183,21 +183,29 @@ classdef muiStats < handle
         function getDescriptiveStats(obj,mobj)
             %call descriptive_stats based on user selection  
             if isempty(obj.Data.X) && ~isempty(obj.Data.Y)
+                %move Y to X if defined and no X defined
                 obj.Data.X = obj.Data.Y;
                 obj.MetaData.X = obj.MetaData.Y;
             end
             dataset = obj.Data.X.DataTable{:,1};
+            if isdatetime(dataset)
+                %adjust datetime to a duration
+                dataset = set_time_units(dataset);
+            end
             %to assign to a tab need to define src. If src not defined 
             %(ie [])then a stand-alone figure is used
             src = getTabHandle(obj,mobj,1);
-            delete(src.Children);   %remove existing tab contents
-            idx = 1;
-            if ~isempty(obj.DescOut)
-                idx = length(obj.DescOut)+1;
-            end
-            mtxt = 'Selection used:';
-            mtxt = {sprintf('%s\nX: %s',mtxt,obj.MetaData.X)};
-            obj.DescOut{idx} = descriptive_stats(dataset,mtxt,src);
+%             mtxt = 'Selection used:';
+%             mtxt = {sprintf('%s\nX: %s',mtxt,obj.MetaData.X)};
+            results = descriptive_stats(dataset,obj.MetaData.X,src);
+            [idx,casedesc] = setcase(obj.DescOut,false);
+            results.Properties.UserData = casedesc;
+            obj.DescOut{idx} = results;
+            
+            
+            
+%             obj.DescOut{idx} = descriptive_stats(dataset,mtxt,src);
+
             msgtxt = sprintf('Results are displayed on the Stats>%s tab',strip(src.Title));
             getdialog(msgtxt);
         end
@@ -259,24 +267,23 @@ classdef muiStats < handle
                     %to assign to a tab need to define src. If src not defined 
                     %(ie [])then a stand-alone figure is used
                     src = getTabHandle(obj,mobj,1);  
-                    idx = 1;
-                    if ~isempty(obj.DescOut)
-                        idx = length(obj.DescOut)+1;
-                    end
-                    obj.DescOut{idx} = descriptive_stats(obj.Data.X,obj.MetaData.X,src);
-                case 'Peaks'
-                    PeaksStats(obj,mobj,ts,metatxt);
+                    results = descriptive_stats(obj.Data.X,obj.MetaData.X,src);
+                    [idx,casedesc] = setcase(obj.DescOut,false);
+                    results.Properties.UserData = casedesc;
+                    obj.DescOut{idx} = results;
+                case 'Regression'
+                    obj.Data.Y = obj.Data.X;  %assign variable to Y
+                    %Assign the RowNames datetime to X as a dstable so that
+                    %checkDatDur in getRegressionStats works
+                    obj.Data.X = dstable(obj.Data.X.RowNames,'VariableNames','Time');
+                    obj.Data.X.VariableDescriptions = {'Time'};
+                    getRegressionStats(obj);
+                case 'Peaks'                    
+                    getPeaksStats(obj,mobj);
                 case 'Clusters'
-                    ClusterStats(obj,mobj,ts,metatxt);
+                    getClusterStats(obj,mobj);
                 case 'Extremes'
-                    %to assign to a tab need to define src. If src not defined 
-                    %(ie [])then a stand-alone figure is used
-                    src = getTabHandle(obj,mobj,2);
-                    idx = 1;
-                    if ~isempty(obj.ExtrOut)
-                        idx = length(obj.ExtrOut)+1;
-                    end
-                    obj.ExtrOut{idx} = extreme_stats(mobj,ts,metatxt,src);
+                    getExtremeStats(obj,mobj);
                 case 'Poisson Stats'
                     poisson_stats(ts,metatxt);
                 case 'User'
@@ -313,8 +320,71 @@ classdef muiStats < handle
                 end
             end
         end
-
 %%
+        function getPeaksStats(obj,mobj)
+            %find peaks above a threshold and write the timeseries of peaks
+            dst = obj.Data.X;
+            [idpks,ops] = getpeaks(dst);
+            if isempty(ops), return; end          
+            dst = getDSTable(dst,idpks,':');
+            %assign metadata about model
+            dst.Source = sprintf('%S peaks using %s',dst.VariableNames{1},...
+                                                        dst.Description);  
+            dst.MetaData = sprintf('Peaks from %s, threshold=%.4g, method=%.4g, minimum interval=%.4g',...
+                obj.MetaData.X,ops.threshold,ops.method,ops.tint);
+            %get new object based on source data class
+            classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(1).caserec); 
+            heq = str2func(classname);
+            cobj = heq();  %instance of class object
+            %save results  
+            setDataSetRecord(cobj,mobj.Cases,dst,'stats');
+            getdialog('Run complete');
+        end         
+%%
+        function getClusterStats(obj,mobj)
+            %find clusters above a specified threshold and save as a new
+            %data record with peak values and a flag for cluster number 
+            dst = obj.Data.X;
+            [idcls,ops] = getclusters(dst);
+            if isempty(ops), return; end
+            %get subset of source timeseries using id of peaks in each
+            %cluster and a flag to record cluster number
+            numcluster = []; clusterdates = [];
+            for i=1:length(idcls)
+                numcluster = [numcluster;i*ones(length(idcls(i).pks),1)]; %#ok<AGROW>
+                clusterdates = [clusterdates;idcls(i).date]; %#ok<AGROW>
+            end
+            dst = getDSTable(dst,clusterdates,':');
+            dst = addvars(dst,numcluster,'NewDSproperties',...
+                {'ClusterNumber','Cluster Numbers','-','Cluster Numbers','-'});
+%                                 {{'ClusterNumber'},{'Cluster Numbers'},{'-'},{'Cluster Numbers'},{'-'}});
+                
+%             dst = addvars(dst,numcluster,'NewVariableNames',{'ClusterNumber'});
+            %assign metadata about model
+            dst.Source = sprintf('%S peaks using %s',dst.VariableNames{1},...
+                                                        dst.Description);
+            dst.MetaData = sprintf('Clusters from %s, threshold=%.4g, method=%.4g, minimum interval=%.4g and time between clusters of %0.4g',...
+                obj.MetaData.X,ops.threshold,ops.method,ops.tint,ops.clint);
+            %get new object based on source data class
+            classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(1).caserec); 
+            heq = str2func(classname);
+            cobj = heq();  %instance of class object
+            %save results  
+            setDataSetRecord(cobj,mobj.Cases,dst,'stats');
+            getdialog('Run complete');
+        end
+%%
+        function getExtremeStats(obj,mobj)
+            %compute extreme values for a range of return periods using GPD            
+            src = getTabHandle(obj,mobj,2);%to assign to a tab need to define src
+            mtxt = {sprintf('Selection used:\nX: %s',obj.MetaData.X)};
+            stats = extreme_stats(obj.Data.X,mtxt,src);
+            [idx,casedesc] = setcase(obj.DescOut,false);
+            stats.Properties.UserData = casedesc;
+            obj.ExtrOut{idx} = stats;  
+            msgtxt = sprintf('Results are displayed on the Stats>%s tab',strip(src.Title));
+            getdialog(msgtxt);
+        end
 %--------------------------------------------------------------------------
 % Functions called to implement Taylor Plot 
 %--------------------------------------------------------------------------
@@ -407,19 +477,20 @@ classdef muiStats < handle
         function src = getTabHandle(~,mobj,idx)
             %find the handle of the tab if there is one
             %obj - DataStats UI object, mobj - Main UI object
+            %idx - index for subtab to use as Tag name or numeric index
             tabobj = findobj(mobj.mUI.Tabs.Children,'-regexp','Tag','Stat');
-            subtabgrp = tabobj(1).Children;
+            subtabgrp = tabobj(1).Children;  %tabgroup to use
             statstabs = subtabgrp.Children;
-            if idx==1
-                tab = statstabs(1);
-            else
-                tab = statstabs(2);
+            if ischar(idx)
+                idx = find(strcmp({statstabs(:).Tag},idx));
             end
+            tab = statstabs(idx);            %tab to use
             %
             if isempty(tab)
                 src = [];
             else
                 src = tab;
+                delete(src.Children);  %clear existing tab
             end
         end    
 %%

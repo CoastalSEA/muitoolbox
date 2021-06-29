@@ -201,7 +201,7 @@ classdef muiStatsUI < muiDataUI
             S.Titles = {'Case','Datset','Variable','Statistic'};            
             S.Style = repmat({'popupmenu'},1,4);
             S.Order = {'Case','Dataset','Variable','Type'};
-            S.Type = {'Descriptive','Peaks','Clusters','Extremes',...
+            S.Type = {'Descriptive','Regression','Peaks','Clusters','Extremes',...
                         'Poisson Stats','User'};
            
             %Tab control button options

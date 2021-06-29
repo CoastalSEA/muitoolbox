@@ -4,6 +4,9 @@
 % function.
 
 %%
+% * *clusters.m*
+% - function to find clusters of peaks over a threshold
+%
 % * *cmap_selection.m*
 % - select a color map definition from Matlab(TM) default list and cbrewer
 % generated mat files
@@ -14,6 +17,18 @@
 %
 % * *descriptive_stats.m*
 % - generate descriptive stats table for timeseries or table of a variable
+%
+% * *extreme_stats.m*
+% - compute extreme values for a range of return periods using the GPD
+% method (General Pareto Distrtibution)
+%
+% * *getclusters.m*
+% - identify cluster in a timeseries with options to adjust threshold, 
+% method of selection and interval between clusters
+%
+% * *getpeaks.m*
+% - find peak in a timeseries with options to adjust threshold, 
+% method of selection and interval between peaks
 % 
 % * *godisplay.m*
 % - display the legend name or DisplayName of the selected graphical object
@@ -21,9 +36,17 @@
 % * *mcolor.m*
 % - select a default Matlab(TM) color definition from table
 %
+% * * mgpdfit.m*
+% - maximum likelihood estimate of the fit parameters for a GPD and compute return period
+% estimates and confidence intervals (user prompt for plotted output)
+%
 % * *peakseek.m* 
 % - alternative to the findpeaks function. From Matlab(TM) Forum, 
 % Peter O'Connor, (c) 2010.
+%
+% * *peaksoverthreshold.m*
+% - function to find the peaks over a threshold, v_thr, and return 
+% these values, or the index of the these values, for the vector, var. 
 %
 % * *phaseplot.m*
 % - variation of x and y with time. e.g. centroid of beach profiles or 
