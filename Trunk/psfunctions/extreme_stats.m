@@ -37,7 +37,7 @@ function [stats,h_fig] = extreme_stats(ts,metatxt,src)
     if isempty(src)
         src = 'Extreme statistics';
     end 
-    h_fig = tablefigure(src,metatxt,stats);
+    h_fig = tablefigure(src,stats.Properties.Description,stats);
 end
 %%
 function [zp,threshold,npeaks,paramEsts,parmci,strend] = get_extremes(ts)    

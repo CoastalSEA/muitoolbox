@@ -137,11 +137,15 @@ classdef muiStats < handle
             %description of selection (may need sub-selection if more than
             %one case/variable used)
             dimtxt = {props(:).desc};
-            title = sprintf('%s (',dimtxt{end});
-            for j=1:length(dimtxt)-1
-                title = sprintf('%s%s, ',title,dimtxt{j});
+            if length(dimtxt)>1
+                title = sprintf('%s (',dimtxt{end});
+                for j=1:length(dimtxt)-1
+                    title = sprintf('%s%s, ',title,dimtxt{j});
+                end
+                obj.Title = sprintf('%s)',title(1:end-2));  
+            else
+                obj.Title = dimtxt{1};
             end
-            obj.Title = sprintf('%s)',title(1:end-2));  
         end       
 %%      
         function setStats(obj,src,mobj)
@@ -275,7 +279,7 @@ classdef muiStats < handle
                     obj.Data.Y = obj.Data.X;  %assign variable to Y
                     %Assign the RowNames datetime to X as a dstable so that
                     %checkDatDur in getRegressionStats works
-                    obj.Data.X = dstable(obj.Data.X.RowNames,'VariableNames','Time');
+                    obj.Data.X = dstable(obj.Data.X.RowNames,'VariableNames',{'Time'});
                     obj.Data.X.VariableDescriptions = {'Time'};
                     getRegressionStats(obj);
                 case 'Peaks'                    
@@ -285,9 +289,9 @@ classdef muiStats < handle
                 case 'Extremes'
                     getExtremeStats(obj,mobj);
                 case 'Poisson Stats'
-                    poisson_stats(ts,metatxt);
+                    poisson_stats(obj.Data.X,obj.MetaData.X);
                 case 'User'
-                    UserStats(obj,mobj,srcVal,ts,metatxt);
+                    user_stats(obj,mobj,srcVal);
             end
          end
 %%

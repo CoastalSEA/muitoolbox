@@ -22,6 +22,9 @@
 % - compute extreme values for a range of return periods using the GPD
 % method (General Pareto Distrtibution)
 %
+% * *fittedtitle.m*
+% - fit title text to the width of a figure (handles title and sgtitle).
+%
 % * *getclusters.m*
 % - identify cluster in a timeseries with options to adjust threshold, 
 % method of selection and interval between clusters
@@ -52,6 +55,11 @@
 % - variation of x and y with time. e.g. centroid of beach profiles or 
 % recursive plots such as x = x(t) v  y = x(t+1)  
 %
+% * *poisson_stats.m*
+% - compute the inter-arrival time, magnitude and duration of
+% events assuming that they are a Poisson process
+% fitting an exponential pdf and plotting 
+%
 % * *regression_model.m*
 % - transform data for selected regression model and return regression
 % coefficients and sample values
@@ -71,6 +79,9 @@
 % - create plot of Taylor diagram and, optionally, plot compute skill score
 % and a skill map (2 or 3D depending on data)
 %
+% * *user_stats.m*
+% - function to allow user to implement own model
+%
 % * *wind_rose.m* 
 % - plot wind/wave rose to show direction and intensity of variable. 
 % From Matlab(TM) Forum (c) MMA 26-11-2007, Instituto Español de Oceanografía
@@ -80,3 +91,7 @@
 % - generate a cross-correlation plot for user selected data and model
 % timeseries data are interpolated to a common time over shortest record,
 % all other data have to be the same length vectors 
+%
+% * *zero_crossing.m*
+% - Function to calculate the zero-crossing. Used to calculate the up and
+% down crossings of a threshold for time series data

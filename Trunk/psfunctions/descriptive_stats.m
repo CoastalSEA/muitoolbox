@@ -33,7 +33,7 @@ function [stats,h_fig] = descriptive_stats(data,metatxt,src)
     if isempty(src)
         src = 'General statistics';
     end 
-    h_fig = tablefigure(src,metatxt,stats);
+    h_fig = tablefigure(src,stats.Properties.Description,stats);
 end
 %%
 function stats = getTSstats(data,metatxt)
