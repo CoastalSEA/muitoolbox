@@ -178,6 +178,8 @@ classdef muiStats < handle
                     getRegressionStats(obj)
                 case 'Cross-correlation'
                     getCrossCorrelationStats(obj)
+                case 'User'
+                    user_stats(obj,mobj,srcVal);
             end                    
         end       
 %%        
@@ -199,17 +201,10 @@ classdef muiStats < handle
             %to assign to a tab need to define src. If src not defined 
             %(ie [])then a stand-alone figure is used
             src = getTabHandle(obj,mobj,1);
-%             mtxt = 'Selection used:';
-%             mtxt = {sprintf('%s\nX: %s',mtxt,obj.MetaData.X)};
             results = descriptive_stats(dataset,obj.MetaData.X,src);
             [idx,casedesc] = setcase(obj.DescOut,false);
             results.Properties.UserData = casedesc;
             obj.DescOut{idx} = results;
-            
-            
-            
-%             obj.DescOut{idx} = descriptive_stats(dataset,mtxt,src);
-
             msgtxt = sprintf('Results are displayed on the Stats>%s tab',strip(src.Title));
             getdialog(msgtxt);
         end
@@ -331,8 +326,8 @@ classdef muiStats < handle
             [idpks,ops] = getpeaks(dst);
             if isempty(ops), return; end          
             dst = getDSTable(dst,idpks,':');
-            %assign metadata about model
-            dst.Source = sprintf('%S peaks using %s',dst.VariableNames{1},...
+            %assign metadata about statistic
+            dst.Source = sprintf('%s peaks using %s',dst.VariableNames{1},...
                                                         dst.Description);  
             dst.MetaData = sprintf('Peaks from %s, threshold=%.4g, method=%.4g, minimum interval=%.4g',...
                 obj.MetaData.X,ops.threshold,ops.method,ops.tint);
@@ -361,11 +356,8 @@ classdef muiStats < handle
             dst = getDSTable(dst,clusterdates,':');
             dst = addvars(dst,numcluster,'NewDSproperties',...
                 {'ClusterNumber','Cluster Numbers','-','Cluster Numbers','-'});
-%                                 {{'ClusterNumber'},{'Cluster Numbers'},{'-'},{'Cluster Numbers'},{'-'}});
-                
-%             dst = addvars(dst,numcluster,'NewVariableNames',{'ClusterNumber'});
-            %assign metadata about model
-            dst.Source = sprintf('%S peaks using %s',dst.VariableNames{1},...
+            %assign metadata about statistic
+            dst.Source = sprintf('%s peaks using %s',dst.VariableNames{1},...
                                                         dst.Description);
             dst.MetaData = sprintf('Clusters from %s, threshold=%.4g, method=%.4g, minimum interval=%.4g and time between clusters of %0.4g',...
                 obj.MetaData.X,ops.threshold,ops.method,ops.tint,ops.clint);
@@ -396,47 +388,83 @@ classdef muiStats < handle
             %call taylor_plot based on user selection
             
             %check that user has correctly defined X and Y
-            isvalid = isValidSelection(obj,'Taylor Plot');
+            isvalid = isValidSelection(obj,'Taylor Plot',true);
             if ~isvalid, return; end
-            metadata = setMetaData(obj);
-            
+            refts = obj.Data.X;
+            tests = obj.Data.Y;
+            metadata{1} = sprintf('%s: %s',refts.Description,refts.VariableDescriptions{1});
+            metadata{2} = sprintf('%s: %s',tests.Description,tests.VariableDescriptions{1});
             rLim = obj.UIset.Other;
             %see if user wants to include skill score
             ok = setTaylorParams(obj);
             if ok<1, return; end
-
-            taylor_plot(obj.Data.X,obj.Data.Y,metadata,src.String,...
+            
+            taylor_plot(refts,tests,metadata,src.String,...
                                                         rLim,obj.Taylor);
         end
 %%
 %--------------------------------------------------------------------------
 % Functions called to implement Interval Statistics
 %--------------------------------------------------------------------------
-        function getIntervalStats(obj,src)
+        function getIntervalStats(obj,mobj)
             % find intervals in one timeseries and compute statistcs within each
             % interval in a second timeseries (use tsc for multiple variables
             
             %check that user has defined X and Y
-            isvalid = isValidSelection(obj,'Interval statistics');
-            if ~isvalid, return; end
-            metadata = setMetaData(obj);
+            isvalid = isValidSelection(obj,'Interval statistics',false);
+            if ~isvalid, return; end            
+            %ensure that the two records overlap
+            [ds1,ds2] = getoverlappingtimes(obj.Data.X,obj.Data.Y,true);
             
-            txt1 = 'Define the statistical variables to be used';
-            txt2 = 'Select from: reclength,median,mean,std,var,min,max,sum';
-            txt3 = '   (e.g. mean,std,min,max)'; 
-            txt4 = 'OR All';                                                    
-            inptxt = sprintf('%s\n%s\n%s\n%s\n',txt1,txt2,txt3,txt4);                                
-            statops = inputdlg(inptxt,'Interval statistics',1,{'mean, std'});
-            if isempty(statops), return; end  %user cancelled   
-          
-            tsc = getintervaldata(reftsc,smptsc,statops);  
+            statoptions = {'median','mean','std','var','min','max','sum'};
+            txt1 = 'Define the statistical function to be used';
+            txt2 = 'Select from: median, mean, std, var, min, max, sum';                                                
+            inptxt = sprintf('%s\n%s',txt1,txt2);   
+            selstat = {'mean'};
+%             stext = 'Intervals Stats using: ';
+            ok = 1; count = 1;
+            while ok>0
+                selstat = inputdlg(inptxt,'Interval statistics',1,selstat);
+                if isempty(selstat)       %user cancelled
+                    return;
+                elseif ismember(selstat{1},statoptions)
+                    statxt = sprintf('@(x) %s(x)',selstat{1});
+                    statfunc = str2func(statxt);         
+                    [statval{1,count},numts] = getintervaldata(ds1,ds2,statfunc); 
+                    stext{1,count} = selstat{1};            
+                    count = count+1;
+
+                    %
+                    quest = 'Do you want to resample using a different statistcal function?';
+                    answer = questdlg(quest,'Interval Statistics',...
+                                        'Yes','No','No');
+                    if strcmp(answer,'No'), ok = 0; end
+                else
+                    getdialog('Option entered is not in list')
+                end
+            end
+            stext{1,count} = 'reclength';
+            %save results as a dstable, including dates from ts1,
+            %recordlength of ts2 in each interval and the selected
+            %statistical functions.
+            dst = dstable(statval{:},numts,'RowNames',ds1.RowNames);
+%             dsp1 = ds1.DSproperties;
+            dsp = ds2.DSproperties;
+            dsp.Variables = muiStats.setVariableDSP(dsp,stext);
+            dst.DSproperties = dsp;
             
-            
-            dst = sprintf('Intervals Stats using %s',smp{1,1});            
-            
-            
-            
-            
+            %assign metadata about statistic
+            dst.Source = sprintf('Interval stats for %s from %s using reference times from %s ',...
+                         ds2.VariableNames{1},ds2.Description,ds1.Description);
+            dst.MetaData = sprintf('Interval stats for %s using time intervals from %s',...
+                            obj.MetaData.Y,obj.MetaData.X);
+            %get new object based on source data class
+            classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(2).caserec); 
+            heq = str2func(classname);
+            cobj = heq();  %instance of class object
+            %save results  
+            setDataSetRecord(cobj,mobj.Cases,dst,'stats');
+            getdialog('Run complete');
         end
 %%
 %--------------------------------------------------------------------------
@@ -453,15 +481,19 @@ classdef muiStats < handle
 %%
         function isvalid = isValidSelection(obj,fncdesc,iseq)
             %check that user has made a valid selection for function
+            % fncdesc - description of function to use
+            % iseq - logical flag, true if length of variables to be checked
             fnames = fields(obj.Data);
             if length(fnames)<2
                 warndlg(sprintf('Select X and Y for %s',fncdesc))
                 isvalid = false;
-            elseif iseq && length(obj.Data.X)~=length(obj.Data.Y)
-                warndlg('Variables need to be the same length')
-                isvalid = false;
             else
                 isvalid = true;
+            end
+            %
+            if iseq && isvalid && length(obj.Data.X)~=length(obj.Data.Y)
+                warndlg('Variables need to be the same length')
+                isvalid = false;
             end            
         end
 %%
@@ -513,28 +545,76 @@ classdef muiStats < handle
             %
             if skill.Inc      %flag to include skill score
                 default = {num2str(skill.Ro),num2str(skill.n),...
-                    num2str(skill.W),num2str(skill.iter)};
+                    num2str(skill.W),num2str(skill.iter),num2str(skill.subdomain)};
                 promptxt = {'Reference correlation, Ro','Exponent,n ',...
-                            'Local skill window','Iteration option (0 or 1)'};
+                            'Local skill window','Iteration option (0 or 1)',...
+                            'Skill score averaging window (grids only)'};
                 titletxt = 'Define skill score parameters:';
                 answer = inputdlg(promptxt,titletxt,1,default);
                 if isempty(answer), ok = 0; return; end
                 
-                skill.Ro = str2double(answer{1});   %reference correlation coefficient
-                skill.n = str2double(answer{2});    %skill exponent
-                skill.W = str2double(answer{3});    %local skill sampling window
+                skill.Ro = str2double(answer{1});     %reference correlation coefficient
+                skill.n = str2double(answer{2});      %skill exponent
+                skill.W = str2double(answer{3});      %local skill sampling window
                 skill.iter = logical(str2double(answer{4})); %local skill iteration method
-                %skill.SD = [];                     %subdomain sampling (not used)
+                skill.subdomain = str2num(answer{5}); %#ok<ST2NM> %subdomain sampling (use str2num to handle vector)
+                [vdim,~,vsze] = getvariabledimensions(obj.Data.X,1);
+                if vdim==2
+                    skill.SD = getSubDomain(obj,skill.subdomain,vsze);
+                end
             end
             obj.Taylor = skill;
             ok = 1;
+        end
+%%
+        function sd = getSubDomain(obj,subdomain,vsze)
+            %find the subdomain in integer grid indices defined by x,y range
+            %subdomain defined as [x0,xN,y0,yN];
+            dst = obj.Data.X;
+            if ~isempty(dst.Dimensions)
+                dnames = dst.DimensionNames;
+                x = dst.Dimensions.(dnames{1});
+                y = dst.Dimensions.(dnames{2});
+            else
+                x = 1:vsze(2);
+                y = 1:vsze(3);
+            end
+
+            if isempty(subdomain) || length(subdomain)~=4
+                subdomain = [min(x),max(x),min(y),max(y)];
+            end
+            ix0 = find(x<=subdomain(1),1,'last');
+            ixN = find(x>=subdomain(2),1,'first');
+            iy0 = find(y<=subdomain(3),1,'last');
+            iyN = find(y>=subdomain(4),1,'first');
+            sd.x = [ix0,ix0,ixN,ixN];
+            sd.y = [iyN,iy0,iy0,iyN];
         end
     end
 %%
     methods (Static, Access=private)
          function skill = skillStruct()
             %return an empty struct for the Taylor skill input parameters
-            skill = struct('Inc',false,'Ro',1,'n',1,'W',0,'iter',false,'SD',[]);
-        end          
+            skill = struct('Inc',false,'Ro',1,'n',1,'W',0,'iter',false,...
+                           'subdomain',[],'SD',[]);
+         end  
+%%
+        function dsp = setVariableDSP(dsp,statops)
+            %assign the variable dsproperties based on user selection
+            nvar = length(statops);
+            varnames = cell(1,nvar); vardesc = varnames; varlabels = varnames;
+            for i=1:nvar
+                varnames{i} = sprintf('%s%s',statops{i},dsp.Variables.Name{1});
+                vardesc{i} = sprintf('%s %s',statops{i},dsp.Variables.Description{1});
+                varlabel{i} = sprintf('%s %s',statops{i},dsp.Variables.Label{1});
+            end
+            instruct = struct(...                       
+                'Name',varnames,...
+                'Description',vardesc,...
+                'Unit',repmat(dsp.Variables.Unit,1,nvar),...
+                'Label',varlabel,...
+                'QCflag',repmat(dsp.Variables.QCflag,1,nvar));
+            dsp.Variables = instruct;
+        end
     end
 end

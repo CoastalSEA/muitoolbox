@@ -263,9 +263,9 @@ classdef muiStatsUI < muiDataUI
             
             %Header size and text
             S.HeadPos = [0.8,0.14]; %vertical position and height of header
-            txt1 = 'Select the variables to be used and assign to buttons.';
-            txt2 = '?';
-            txt3 = '';
+            txt1 = 'Select the Case/Dataset to define the Reference time intervals (any Variable as only time used)';
+            txt2 = 'Select the Case/Dataset and Variable to Sample for statistcs over the Reference time intervals';
+            txt3 = 'Run the analysis with the Select button and you will be prompted to specify the statistic to use';
             S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  

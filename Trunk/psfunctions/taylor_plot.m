@@ -9,12 +9,12 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 % USAGE
 %   taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 % INPUTS
-%   refvar  - reference dataset or timeseries
-%   testvar - test dataset or timeseries
+%   refvar  - reference dataset or a time series (timeseries or dstable)
+%   testvar - test dataset or a time series (timeseries or dstable)
 %   metatxt - cell array for data set and variable descriptions of the 
 %             reference and test data (order is {reference, test})
-%   option  - New, Add, Delete; 
-%   rLim    - radial limit
+%   option  - character vector to set New, Add, Delete; 
+%   rLim    - radial limit (e.g. rLim=2)
 %   skill   - structure with:
 %             inc - flag to include skill score + parameters if true
 %             Ro - Reference correlation, 
@@ -39,8 +39,14 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-    cfstats = getDifferenceStats(refvar,testvar);
-
+    if isa(refvar,'timeseries') || istimeseriesdst(refvar)
+        %sort data type and interpolate if vars are timeseries datasets
+        [refvar,testvar,ok] = sortTSdata(refvar,testvar);
+        if ok<1, return; end   %user cancelled or wrong data type
+        cfstats = TS_DifferenceStatistics(refvar,testvar);
+    else
+        cfstats = DS_DifferenceStatistics(refvar,testvar);
+    end
     %get skill score if required
     if skill.Inc
         skill = getSkillScores(skill,cfstats,refvar,testvar,metatxt);
@@ -56,12 +62,58 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
     plotTaylor(metatxt,cfstats,option,skill);                                                    
 end
 %%
-function cfstats = getDifferenceStats(refvar,testvar)
-    if isa(refvar,'timeseries')
-        cfstats = TS_DifferenceStatistics(refvar,testvar);
+function [refvar,testvar,ok] = sortTSdata(ts1,ts2)
+    %sort data type and interpolate if vars are timeseries datasets
+    ok = 1;
+    if isa(ts1,'timeseries')
+        refvar = ts1; testvar = ts2; 
+        if length(ts1.Data(~isnan(ts1.Data)))~=length(ts2.Data(~isnan(ts2.Data)))
+            answer = questdlg('Need to interpolate. Select which time series to interpolate:',...
+                'Taylor plot','Test','Reference','Quit','Test');
+            switch answer
+                case 'Reference'
+                    refvar =  resample(ts1,getabstime(ts2));
+                    testvar = ts2;
+                case 'Test'
+                    refvar = ts1;
+                    testvar =  resample(ts2,getabstime(ts1));
+                case 'Quit'
+                    ok = 0;
+                    return;
+            end
+        end    
+    elseif isa(ts1,'dstable')
+        ts1.DataTable = rmmissing(ts1.DataTable);         
+        ts2.DataTable = rmmissing(ts2.DataTable);       
+        if height(ts1)~=height(ts2)
+            answer = questdlg('Need to interpolate. Select which time series to interpolate:',...
+                'Taylor plot','Test','Reference','Quit','Test');
+            switch answer
+                case 'Reference'
+                    time = ts2.RowNames;
+                    ts1data = ts1.(ts1.VariableNames{1});  
+                    refvar.Data = interp1(ts1.RowNames,ts1data,time,'linear');
+                    testvar.Data = ts2.(ts2.VariableNames{1});
+                case 'Test'
+                    time = ts1.RowNames;
+                    refvar.Data = ts1.(ts1.VariableNames{1}); 
+                    ts2data = ts2.(ts2.VariableNames{1});
+                    testvar.Data = interp1(ts2.RowNames,ts2data,time,'linear');
+                case 'Quit'
+                    ok = 0;
+                    return;
+            end 
+            refvar.time = time;
+        else
+            refvar.Data = ts1.(ts1.VariableNames{1}); 
+            refvar.time = ts1.RowNames;
+            testvar.Data = ts2.(ts2.VariableNames{1});            
+        end
     else
-        cfstats = DS_DifferenceStatistics(refvar,testvar);
-    end
+        warndlg('Data format not recognised in taylor_plot')
+        ok = 0;
+        return;
+    end    
 end
 %%
 function cfstats = TS_DifferenceStatistics(ts1,ts2)
@@ -71,22 +123,6 @@ function cfstats = TS_DifferenceStatistics(ts1,ts2)
     %cfstats - descriptive statistics for both data sets
     %timeseries must be for the sameperiod and have the same number
     %of data points
-    if length(ts1.Data(~isnan(ts1.Data)))~=length(ts2.Data(~isnan(ts2.Data)))
-        answer = questdlg('Need to interpolate. Select which time series to interpolate:',...
-            'Difference stats','Test','Reference','Quit','Test');
-        switch answer
-            case 'Reference'
-                time = getabstime(ts2);
-                ts1 =  resample(ts1,time);
-            case 'Test'
-                time = getabstime(ts1);
-                ts2 =  resample(ts2,time);
-            case 'Quit'
-                cfstats = [];
-                return;
-        end
-    end
-    %
     cfstats.refstd = std(ts1.Data,'omitnan');
     cfstats.teststd = std(ts2.Data,'omitnan');
     cfstats.refmean = mean(ts1.Data,'omitnan');            
@@ -110,6 +146,10 @@ end
 %%
 function cfstats = DS_DifferenceStatistics(ds1,ds2)
     %compute the difference between two vectors or arrays of the same size
+    if isa(ds1,'dstable')
+        ds1 = ds1.DataTable{:,1};
+        ds2 = ds2.DataTable{:,1};
+    end
     if numel(ds1)~=numel(ds2)
         warndlg('Data sets must be of the same size');
         return
@@ -374,12 +414,20 @@ function score = getLocalSkill(skill,refvar,testvar,metatxt)
     %iterate over data set based on interval W defined in skill struct
     %iter =  true iterates for i=1:m-2W,
     %iter = false avoids overlaps and iterates over i=1:2W:m--2W
-    if isa(refvar,'timeseries')
-        tt = getabstime(refvar);
-        refvar = refvar.Data;
+     ists = false;
+     tt = [];
+    if isa(refvar,'timeseries') || isfield(refvar,'time')
+        ists = true;
+        if isa(refvar,'timeseries')
+            tt = datetme(getabstime(refvar));
+        else
+            tt = refvar.time;
+        end
+        refvar = refvar.Data;        
         testvar = testvar.Data;
-    else
-        tt = [];
+    elseif isa(refvar,'dstable')
+        refvar = squeeze(refvar.DataTable{:,1});
+        testvar = squeeze(testvar.DataTable{:,1});
     end
 
     W = skill.W;
@@ -397,35 +445,33 @@ function score = getLocalSkill(skill,refvar,testvar,metatxt)
     %generate title
     titletxt = sprintf('Reference: %s\nTest: %s',metatxt{1},metatxt{2});
     
-    %check with data is a vector or matrix and iterate over dimensions
-    ss = zeros(length(indx),length(indy));
-    ts = cell(length(indx),1);
+    %check whether data is a vector or matrix and iterate over dimensions  
     ni = 1; nj = 1; 
     if n==1    %data is a column vector
         ss = zeros(length(indx),1);
+        ts(length(indx),1) = datetime(1,1,1);
         ni = 1;
         for i=indx
-            subref = refvar(i:i+2*W,1);
-            subtest = testvar(i:i+2*W,1);
-            cfstats = getDifferenceStats(subref,subtest);
+            subref.Data = refvar(i:i+2*W,1);
+            subtest.Data = testvar(i:i+2*W,1);
+            cfstats = getDifferenceStats(subref,subtest,ists);
             ss(ni) = getSkill(skill,cfstats);            
             if ~isempty(tt)
-                ts{ni} = tt{i};
+                ts(ni) = tt(i);
             end
             ni = ni+1;
         end
         if isempty(tt)
             ts = 1:ni-1;
-        else
-            ts = datetime(ts);
         end
         plotSkillGraph(ts,ss,titletxt)
     else       %data is a 2-D array
+        ss = zeros(length(indx),length(indy));
         for i=indx
             for j=indy
                 subref = refvar(i:i+2*W,j:j+2*W);
                 subtest = testvar(i:i+2*W,j:j+2*W);
-                cfstats = getDifferenceStats(subref,subtest);
+                cfstats = getDifferenceStats(subref,subtest,ists);
                 ss(ni,nj) = getSkill(skill,cfstats);
                 nj = nj+1;
             end
@@ -457,6 +503,15 @@ function score = getLocalSkill(skill,refvar,testvar,metatxt)
         score = mean(ss,'All','omitnan');
     end
 end
+%%
+function cfstats = getDifferenceStats(refvar,testvar,ists)
+    if ists
+        cfstats = TS_DifferenceStatistics(refvar,testvar);
+    else
+        cfstats = DS_DifferenceStatistics(refvar,testvar);
+    end
+end
+
 %%
 function plotSkillMap(ss,skill,titletxt)
     %plot a figure showing the local skill scores as a map

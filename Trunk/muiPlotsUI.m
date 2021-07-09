@@ -137,18 +137,12 @@ classdef muiPlotsUI < muiDataUI
 %%
         function saveAnimation(~,~,mobj)
             %save an animation plot created by PlotFig.newAnimation    
-            
-            ModelMovie = mobj.mUI.Plots.GuiChild.ModelMovie;
-            if isempty(ModelMovie)
+            ModelMovie = mobj.mUI.Plots.ModelMovie;
+            if isempty(mobj.mUI.Plots) || isempty(ModelMovie)
                 warndlg('No movie has been created. Create movie first');
-                return;
+            else
+                saveAnimation2File(mobj.mUI.Plots);
             end
-            [file,path] = uiputfile('*.mp4','Save file as','moviefile.mp4');
-            if file==0, return; end
-            v = VideoWriter([path,file],'MPEG-4');
-            open(v);
-            writeVideo(v,ModelMovie);
-            close(v);
         end    
     end
 %%
@@ -161,15 +155,14 @@ classdef muiPlotsUI < muiDataUI
             %overload defaults defined in muiDataUI.defaultTabContent
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
-            S.HeadPos = [0.9,0.06];    %header vertical position and height
-            S.HeadText = {'For a 1D plot (line, bar, etc) select variable and property to use for X and Y axes'};
+            S.HeadPos = [0.86,0.1];    %header vertical position and height
+            txt1 = 'For a cartesian plot (line, bar, etc) select variable and dimension to use for X and Y axes';
+            txt2 = 'For a Polar or Rose plot, switch the + button to O and set X to a direction variable';
+            txt3 = 'Use the XY button to swap the X and Y variables without needing to reassign them';
+            S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  
-%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-%             S.Order = {'Case','Dataset','Variable','Type'};
-            %Use default Scaling list
-            %Use default Type list
+            %Use default lists
             
             %Tab control button options
             S.TabButText = {'New','Add','Delete','Clear'}; %labels for tab button definition
@@ -179,22 +172,23 @@ classdef muiPlotsUI < muiDataUI
             S.XYZnset = 2;                           %minimum number of buttons to use
             S.XYZmxvar = [1,1];                      %maximum number of dimensions per selection
             S.XYZpanel = [0.04,0.25,0.91,0.2];       %position for XYZ button panel
-            S.XYZlabels = {'Dep','Ind'};             %default button labels
+            S.XYZlabels = {'Var','X'};               %default button labels
             
             %Action button specifications
-            S.ActButNames = {'Refresh','Polar','Swap'}; %names assigned selection struct
-            S.ActButText = {char(174),'+','XY'};     %labels for additional action buttons
+            S.ActButNames = {'Refresh','Swap','Polar'}; %names assigned selection struct
+            S.ActButText = {char(174),'XY','+'};     %labels for additional action buttons
             % Negative values in ActButPos indicate that a
             % button is alligned with a selection option numbered in the 
             % order given by S.Titles
             S.ActButPos = [0.86,-1;0.895,0.37;0.895,0.28];%positions for action buttons   
             % action button callback function names
             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-                            '@(src,evt)setPolar(src,evt)',...
-                            '@(src,evt)setXYorder(src,evt)'};
+                            '@(src,evt)setXYorder(src,evt)',...
+                            '@(src,evt)setPolar(src,evt)'};
             % tool tips for buttons             
-            S.ActButTip = {'Refresh data list','Swap from X-Y to Y-X axes',...
-                            'XY to Polar; X data in degrees or radians'};         
+            S.ActButTip = {'Refresh data list',...
+                           'Swap from X-Y to Y-X axes',...
+                           'XY to Polar; X data in degrees or radians'};           
             obj.TabContent(itab) = S;                %update object
         end
 %%
@@ -205,19 +199,17 @@ classdef muiPlotsUI < muiDataUI
             S = obj.TabContent(itab);
             
             %Header size and text
-            S.HeadPos = [0.9,0.06];    %header vertical position and height
-            S.HeadText = {'For a contour or surface plot, select variable with 2 or more dimensions and properties to use for the X-Y axes'};
+            S.HeadPos = [0.86,0.1];    %header vertical position and height
+            txt1 = 'For a contour or surface plot, select a variable with at least 2 dimensions';
+            txt2 = 'If the variable has more than 2 dimensions you will be prompted to select a sub-set';
+            txt3 = 'Select dimensions to use for the X-Y axes';
+            S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  
-%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-%             S.Order = {'Case','Dataset','Variable','Type'};
-            %Use default Scaling list
+            %Use default lists except for:
             S.Type = {'surf','contour','contourf','contour3','mesh','User'}; 
             
-            %Tab control button options
-%             S.TabButText = {'Select','Clear'};     %labels for tab button definition
-%             S.TabButPos = [0.1,0.03;0.3,0.03];     %default positions
+            %Tab control button options - use defaults
            
             %XYZ panel definition (if required)
             S.XYZnset = 3;                         %minimum number of buttons to use
@@ -249,20 +241,17 @@ classdef muiPlotsUI < muiDataUI
             S = obj.TabContent(itab);
             
             %Header size and text
-            S.HeadPos = [0.9,0.06];    %header vertical position and height
-            S.HeadText = {'For a scalar or vector volume plot'};
+            S.HeadPos = [0.86,0.1];    %header vertical position and height
+            txt1 = 'For a scalar or vector volume plot, select a variable with at least 3 dimensions';
+            txt2 = 'If the variable has more than 3 dimensions you will be prompted to select a sub-set';
+            txt3 = 'Select dimensions to use for the X-Y-Z axes';
+            S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
-            %Specification of uicontrol for each selection variable  
-%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-%             S.Order = {'Case','Dataset','Variable','Type'};
-            %Use default Scaling list
-            %Tab settings options
+            %Specification of uicontrol for each selection variable 
+            %Use default lists except for:
             S.Type = {'slice','contourslice','isosurface','streamlines','User'};
             
-            %Tab control button options
-%             S.TabButText = {'Select','Clear'};   %labels for tab button definition
-%             S.TabButPos = [0.1,0.03;0.3,0.03];   %default positions
+            %Tab control button options - use defaults
             
             %XYZ panel definition (if required)
             S.XYZnset = 4;                         %minimum number of buttons to use
@@ -271,17 +260,7 @@ classdef muiPlotsUI < muiDataUI
             S.XYZlabels = {'Var','X','Y','Z'};     %button labels
             
             %Action button specifications - use default
-%             S.ActButNames = {'Refresh'};         %names assigned selection struct
-%             S.ActButText = {char(174)};          %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
-%             S.ActButPos = [0.86,-1];             %positions for action buttons   
-%             %action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)'};
-%             %tool tips for buttons             
-%             S.ActButTip = {'Refresh data list'};      
-
+            
             obj.TabContent(itab) = S;              %update object
         end
 %%
@@ -292,15 +271,14 @@ classdef muiPlotsUI < muiDataUI
             S = obj.TabContent(itab);
             
             %Header size and text
-            S.HeadPos = [0.9,0.06];    %header vertical position and height
-            S.HeadText = {'For an animation of a line, surface or volume'};
+            S.HeadPos = [0.86,0.1];    %header vertical position and height
+            txt1 = 'For an animation of a line, surface or volume';
+            txt2 = 'Select the Variable, Time and the property to define the X-axis';
+            txt3 = 'Ensure that Time and X selections are correctly matched to the dimensions of the variable';
+            S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  
-%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-%             S.Order = {'Case','Dataset','Variable','Type'};
-            %Use default Scaling list
-            %Use default Type list
+            %Use default lists 
             
             %Tab control button options
             S.TabButText = {'Run','Save','Clear'};  %labels for tab button definition
@@ -313,16 +291,19 @@ classdef muiPlotsUI < muiDataUI
             S.XYZlabels = {'Var','Time','X'}; %button labels
             
             %Action button specifications
-%             S.ActButNames = {'Refresh'};          %names assigned selection struct
-%             S.ActButText = {char(174)};           %labels for additional action buttons
-%             % Negative values in ActButPos indicate that a
-%             % button is alligned with a selection option numbered in the 
-%             % order given by S.Titles
-%             S.ActButPos = [0.86,-1];              %positions for action buttons   
-%             %action button callback function names
-%             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)'};
-%             %tool tips for buttons             
-%             S.ActButTip = {'Refresh data list'};         
+            S.ActButNames = {'Refresh','Polar'};   %names assigned selection struct
+            S.ActButText = {char(174),'+'};        %labels for additional action buttons
+            % Negative values in ActButPos indicate that a
+            % button is alligned with a selection option numbered in the 
+            % order given by S.Titles
+            S.ActButPos = [0.86,-1;0.895,0.17];    %positions for action buttons   
+            %action button callback function names
+            S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
+                            '@(src,evt)setPolar(src,evt)'};
+            %tool tips for buttons             
+            S.ActButTip = {'Refresh data list',...
+                            'XY to Polar; X data in degrees'};   
+     
             obj.TabContent(itab) = S;               %update object
         end   
 %%
@@ -333,15 +314,13 @@ classdef muiPlotsUI < muiDataUI
             S = obj.TabContent(itab);
             
             %Header size and text
-            S.HeadPos = [0.9,0.06];    %header vertical position and height
-            S.HeadText = {'For an animation of a line, surface or volume'};
-            
+            S.HeadPos = [0.88,0.1];    %header vertical position and height
+            txt1 = 'For an animation of a line, surface or volume, select a variable with at least 2 dimensions';
+            txt2 = 'Select the Time and properties to define the X and Y axes';
+            txt3 = 'Ensure that Time and XY selections are correctly matched to the dimensions of the variable';
+            S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             %Specification of uicontrol for each selection variable  
-%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-%             S.Order = {'Case','Dataset','Variable','Type'};
-            %Use default Scaling list
-            %Use default Type list
+            %Use default lists except for:
             S.Type = {'surf','contour','contourf','contour3','mesh','User'}; 
             
             %Tab control button options
@@ -354,7 +333,19 @@ classdef muiPlotsUI < muiDataUI
             S.XYZpanel = [0.04,0.14,0.91,0.40];     %position for XYZ button panel
             S.XYZlabels = {'Var','Time','X','Y'}; %button labels
             
-            %Action button specifications - use default
+            %Action button specifications
+            S.ActButNames = {'Refresh','Polar'};   %names assigned selection struct
+            S.ActButText = {char(174),'+'};        %labels for additional action buttons
+            % Negative values in ActButPos indicate that a
+            % button is alligned with a selection option numbered in the 
+            % order given by S.Titles
+            S.ActButPos = [0.86,-1;0.895,0.27];    %positions for action buttons   
+            %action button callback function names
+            S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
+                            '@(src,evt)setPolar(src,evt)'};
+            %tool tips for buttons             
+            S.ActButTip = {'Refresh data list',...
+                            'XY to Polar; X data in degrees'}; 
     
             obj.TabContent(itab) = S;               %update object            
         end
@@ -366,15 +357,13 @@ classdef muiPlotsUI < muiDataUI
             S = obj.TabContent(itab);
             
             %Header size and text
-            S.HeadPos = [0.9,0.06];    %header vertical position and height
-            S.HeadText = {'For an animation of a volume'};
-            
+            S.HeadPos = [0.89,0.1];    %header vertical position and height
+            txt1 = 'For an animation of a volume, select a variable with at least 3 dimensions';
+            txt2 = 'Select the Time and properties to define the X Y and Z axes';
+            txt3 = 'Ensure that Time and XYZ selections are correctly matched to the dimensions of the variable';
+            S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             %Specification of uicontrol for each selection variable  
-%             S.Titles = {'Case','Datset','Plot variable','Plot type'};            
-%             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'};
-%             S.Order = {'Case','Dataset','Variable','Type'};
-            %Use default Scaling list
-            %Use default Type list
+            %Use default lists except for:
             S.Type = {'slice','contourslice','isosurface','streamlines','User'}; 
             
             %Tab control button options
@@ -387,7 +376,7 @@ classdef muiPlotsUI < muiDataUI
             S.XYZpanel = [0.04,0.14,0.91,0.48];     %position for XYZ button panel
             S.XYZlabels = {'Var','Time','X','Y','Z'}; %button labels
             
-            %Action button specifications - use default
+            %Action button specifications - use defaults
     
             obj.TabContent(itab) = S;               %update object            
         end        

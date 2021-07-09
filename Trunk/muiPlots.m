@@ -59,13 +59,13 @@ classdef muiPlots < handle
             obj.Order = obj.Plot.Order.(obj.UIset.callTab);
             
             %get the data to be used in the plot
-            ok = getPlotData(obj,mobj.Cases);
+            ok = getPlotData(obj,mobj.Cases,'array');
             if ok<1, return; end %data not found
             isvalid = checkdimensions(obj);
             if ~isvalid, return; end
             
             if strcmp(obj.UIset.Type.String,'User')
-                UserPlot(obj,mobj);  %pass control to user function
+                user_plot(obj,mobj);  %pass control to user function
             else
                 %generate the plot
                 setPlot(obj,mobj);
@@ -74,7 +74,7 @@ classdef muiPlots < handle
     end
 %%   
     methods (Access=protected)
-        function ok = getPlotData(obj,muicat)
+        function ok = getPlotData(obj,muicat,dtype)
             %get the data to be used in the plot
             ok = 1;
             nvar = length(obj.UIsel);
@@ -82,8 +82,10 @@ classdef muiPlots < handle
             props(nvar) = setPropsStruct(muicat);
             for i=1:nvar
                 %get the data and labels for each variable
-                props(i) = getProperty(muicat,obj.UIsel(i),'array');
-                if isempty(props(i).data), ok = ok-1; end
+                if obj.UIsel(i).caserec>0
+                    props(i) = getProperty(muicat,obj.UIsel(i),dtype);
+                    if isempty(props(i).data), ok = ok-1; end
+                end
             end
             xyz = obj.Order;
             if any(strcmp(fieldnames(obj.UIset),'Swap')) && obj.UIset.Swap      
@@ -125,7 +127,9 @@ classdef muiPlots < handle
             callPlotType(obj);
             %assign muiPlots instance to handle
             mobj.mUI.Plots = obj;
-            obj.Plot.CurrentFig.Visible = 'on';
+            if isvalid(obj.Plot.CurrentFig)
+                obj.Plot.CurrentFig.Visible = 'on';
+            end
         end
 %%
         function callPlotType(obj)
@@ -143,38 +147,22 @@ classdef muiPlots < handle
                         case 'Add'              %add variable to 2D plot
                             if strcmp(obj.UIset.Type,'bar')
                                 addBarplot(obj);
+                            elseif obj.UIset.Polar
+                                addPolarPlot(obj)
                             else
                                 add2Dplot(obj);
                             end
-                        case 'Delete'           %delete variable from 2D plot
+                        case 'Delete'           %delete variable from 2D plot                            
                             del2Dplot(obj);
                     end
                 case '3D'
                     new3Dplot(obj);
-%                     switch obj.UIset.callButton       %and Tab Button used
-%                         case 'New'          %create new 3D plot
-%                             new3DZplot(obj);
-%                         otherwise
-%                             if isempty(obj.Data.z) && ~strcmp(hf.Name,'Rose plot')
-%                                 switch obj.UIsel.srcVal
-%                                     case 'Add'
-%                                         add3Dplot(obj);
-%                                     case 'Delete'
-%                                         del3Dplot(obj);
-%                                 end
-%                             else
-%                                 warndlg('Cannot Add or Delete for Rose or 3D plots');
-%                                 return;
-%                             end
-%                     end
                 case '4D'
                     new4Dplot(obj);
-                    warndlg('Under development')
-                    return;
                 case {'2DT','3DT','4DT'}
                     newAnimation(obj);
                 otherwise
-                    warndlg('Could not find plot option in getPlot');
+                    warndlg('Could not find plot option in callPlotType');
             end
         end
 %%
@@ -182,7 +170,7 @@ classdef muiPlots < handle
 % Functions for 2d plots
 %--------------------------------------------------------------------------
         function [x,y,hf,fnum,symb] = plot2Ddata(obj)
-            %information required to create, add or delete 2D plot
+            %information required to create, add or delete 2D plot            
             x = obj.Data.X;
             y = obj.Data.Y;
             idx = obj.Plot.FigNum==obj.Plot.CurrentFig.Number;
@@ -190,6 +178,13 @@ classdef muiPlots < handle
             fnum = num2str(hf.Number); 
             %set up symbol
             symb = {'-','none'};
+            %check x-y variables
+            if length(x)~=length(y)
+               delete(hf)
+               obj.Plot.FigNum(idx)=[];
+               warndlg('Length of X and Y do not match')
+               x = []; y = [];  hf = [];
+            end
         end
 %%
         function [plotfunc,symb] = get2DPlotFunc(obj)
@@ -231,6 +226,7 @@ classdef muiPlots < handle
         function new2Dplot(obj)
             %generate new 2D plot in figure
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
+            if isempty(x), return; end
             figax = axes('Parent',hfig,'Tag','PlotFigAxes'); 
             hold(figax,'on')
             [hptype,symb] = get2DPlotFunc(obj); %function handle for plot type
@@ -302,8 +298,11 @@ classdef muiPlots < handle
             hp = findobj(figax,'Type',obj.UIset.Type.String);
             hl = findobj('Type','legend','Tag',fnum);
             idline = [];
-            
-            if hfig.UserData==1 %XY have been swapped
+
+            if strcmp(obj.Plot.CurrentFig.Name,'Rose plot')
+                warndlg('Cannot delete individual rose plots')
+                return;
+            elseif hfig.UserData==1 %XY have been swapped
                 if isa(figax,'matlab.graphics.axis.PolarAxes')
                     lineData = 'ThetaData'; %plot is polar
                     delVar = deg2rad(x);
@@ -384,6 +383,34 @@ classdef muiPlots < handle
             end
         end
 %%
+        function addPolarPlot(obj)
+            %modify figure to add polar or rose plot
+            if strcmp(obj.Plot.CurrentFig.Name,'Rose plot')
+                addRosePlot(obj)
+            else
+                add2Dplot(obj)
+            end
+        end
+%%       
+        function addRosePlot(obj)
+            %modify figure to subplots and add rose
+            %get an existing figure of create a new one
+            [x,y,hfig,~,~] = plot2Ddata(obj);
+            figax = findobj(hfig,'Type','Axes','-or','Type','PolarAxes');
+            if length(figax)==1
+                %order and interaction with wind_rose is not straightforward
+                s1 = subplot(1,2,1,figax);
+                set(s1,'Position',[0.03 0.1 0.45 0.8] ,'Units', 'normalized');
+                set(groot,'CurrentFigure',hfig)
+                s2 = subplot(1,2,2);
+                set(s2,'Position',[0.5 0.1 0.45 0.8] ,'Units', 'normalized');
+                wind_rose(x,y,'parent',s2,'dtype','meteo',...
+                       'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+            else
+                warndlg('Only one plot can be added using a Rose')
+            end
+        end
+%%
         function addBarplot(obj)
             %check if there are any existing bars, create matrix of y and plot
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
@@ -401,7 +428,7 @@ classdef muiPlots < handle
             legtxt = horzcat(hleg.String,obj.Legend);
             
             delete(hp)
-            [hptype,symb] = getPlotFunc(obj); %function handle for plot type
+            [hptype,symb] = get2DPlotFunc(obj); %function handle for plot type
             %call uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hptype(figax,x,y,symb{1},symb{2},...
                                             obj.Legend,num2str(size(y,2)));                        
@@ -427,6 +454,7 @@ classdef muiPlots < handle
                 idx = obj.Plot.FigNum==obj.idxfig;
                 obj.Plot.FigNum(idx)=[];
                 delete(fig);
+                warndlg('Dimensions are not compatible with variable')
                 return;
             end
 
@@ -450,34 +478,13 @@ classdef muiPlots < handle
             end
         end 
 %%
-        function convertTime(obj)
-            %convert time for plotting
-            fname = fieldnames(obj.Data);
-            nrec = length(fname);
-            for i=1:nrec
-                x = obj.Data.(fname{i});
-                if isdatetime(x) || isduration(x)
-                    obj.Data.(fname{i}) = numericTime(x);
-                end
-            end
-            %
-            function timeout = numericTime(timein)
-                %convert datatime to numeric time
-                if isdatetime(timein)
-                    startyear = year(timein(1));
-                    timeout = startyear+years(timein-datetime(startyear,1,1));
-                else
-                    timeout = cellstr(timein);
-                    timeout = split(timeout);
-                    timeout = cellfun(@str2num,timeout(:,1));
-                end
-            end
-        end
-%%
 %--------------------------------------------------------------------------
 % Functions for 4D plots
 %--------------------------------------------------------------------------
-
+        function new4Dplot(obj)
+            %control and definition of plots that are 4D
+            warndlg('Not yet implemented')
+        end
 %%
 %--------------------------------------------------------------------------
 % Functions for animations
@@ -486,36 +493,56 @@ classdef muiPlots < handle
             %generate an animation for user selection.
             hfig = obj.Plot.CurrentFig;
             hfig.Visible = 'on';
+
+            t = obj.Data.T;  %obj.Data.T is modified by call to converTime in new3Dplot
+            nrec = length(t);
+            
             switch obj.UIset.callTab
                 case '2DT'
                     var = obj.Data.Y;
                     vari = setTimeDependentVariable(obj,var,1);
                     obj.Data.Y = vari;   %first time step
-                    new2Dplot(obj)
+                    if obj.UIset.Polar
+                        newPolarplot(obj);                              
+                    else
+                        new2Dplot(obj);  
+                    end
+                    if ~isvalid(hfig), return; end
                     figax = gca;
                     hp = figax.Children;
-%                     vari = setTimeDependentVariable(obj,var,1); %#ok<NASGU>
                     hp.YDataSource = 'vari';
-                    figax.YLimMode = 'manual';                    
+                    if ~obj.UIset.Polar
+                        figax.YLimMode = 'manual';   
+                        figax.YLim = minmax(var);
+                    end
                 case '3DT'
                     var = obj.Data.Z;
                     vari = setTimeDependentVariable(obj,var,1); 
                     obj.Data.Z = vari;  %first time step
                     new3Dplot(obj)
+                    if ~isvalid(hfig), return; end
                     figax = gca;
                     hp = figax.Children;
-                    hp.ZDataSource = 'vari';
-                    figax.ZLimMode = 'manual';
+                    hp.ZDataSource = 'vari';                    
+                    figax.ZLimMode = 'manual';  %fix limits of z-axis
+                    figax.ZLim = minmax(var);                    
+                    hcb = findobj(hfig,'Type','colorbar');
+                    hcb.LimitsMode = 'manual';  %fix limits of contour bar
+                    hcb.Limits = figax.ZLim;
                 case '4DT'
                     warndlg('Not ready yet')
                     return;
-            end
-            t = obj.Data.T;
-            % checkAxisTicks(obj,figax);
+            end 
+           
+            adjustAxisTicks(obj,figax);  %adjust tick labels  if defined
+            figax.Position = [0.16,0.16,0.65,0.75]; %make space for slider bar
             title(sprintf('%s \nTime = %s',obj.Title,string(t(1))))
+
+            figax.NextPlot = 'replaceChildren';
+            figax.Tag = 'PlotFigAxes';
+            Mframes(nrec) = struct('cdata',[],'colormap',[]);
             Mframes(1) = getframe(gcf); %NB print function allows more control of 
-            hold(figax,'on')
-            for i=2:length(t)
+            for i=2:nrec
                 vari = setTimeDependentVariable(obj,var,i); %#ok<NASGU>
                 refreshdata(hp,'caller')
                 title(sprintf('%s \nTime = %s',obj.Title,string(t(i))))
@@ -523,8 +550,12 @@ classdef muiPlots < handle
                 Mframes(i) = getframe(gcf); 
                 %NB print function allows more control of resolution 
             end
-            hold(figax,'off')
-            obj.ModelMovie = Mframes;                         
+            obj.ModelMovie = Mframes;   %save movie to class property
+            obj.Data.T = t;     %restore datetime values
+            obj.Data.Z = var;   %restore Z values
+            
+            %add replay and slider
+            setControlPanel(obj,hfig,nrec,string(t(1)));  
         end
 %%
         function vari = setTimeDependentVariable(obj,var,idx)
@@ -543,13 +574,15 @@ classdef muiPlots < handle
             end
         end
 %%
-        function checkAxisTicks(obj,figax)
-            %allow axis tick labels to be set       TICKLABELS NOT SET
-            labnames = fieldnames(obj.TickLabels);
-            labels = struct2cell(obj.TickLabels);
-            for i=1:2:length(labels)
-                figax.(labnames{i}) = labels{i};
-                figax.(labnames{i+1}) = labels{i+1};
+        function adjustAxisTicks(obj,figax)
+            %allow axis tick labels to be set 
+            if isstruct(obj.TickLabels)
+                labnames = fieldnames(obj.TickLabels);
+                labels = struct2cell(obj.TickLabels);
+                for i=1:2:length(labels)
+                    figax.(labnames{i}) = labels{i};
+                    figax.(labnames{i+1}) = labels{i+1};
+                end
             end
         end
 %%
@@ -569,10 +602,64 @@ classdef muiPlots < handle
                 warndlg('Dimensions of selected variables do not match')
             end
         end
+%%
+        function hm = setControlPanel(obj,hfig,nrec,t0)
+            %intialise button to re-run animation and slider to scroll through
+            %add playback button
+            buttxt = 'Run';   
+            butpos = [0.05,0.01,0.05,0.05];
+            butcall = @(src,evt)runMovie(obj,src,evt);
+            buttag = 'runMovie';
+            buttip = 'Press to rerun animation';         
+            hm(1) = setactionbutton(hfig,buttxt,butpos,butcall,buttag,buttip);
+            buttxt = 'Save';   
+            butpos = [0.12,0.01,0.05,0.05];
+            butcall = @(src,evt)runMovie(obj,src,evt);
+            buttag = 'saveMovie';
+            buttip = 'Press to save animation';  
+            hm(2) = setactionbutton(hfig,buttxt,butpos,butcall,buttag,buttip);
+            %add slide control            
+            hm(2) = uicontrol('Parent',hfig,...
+                    'Style','slider','Value',1,... 
+                    'Min',1,'Max',nrec,'sliderstep',[1 1]/nrec,...
+                    'Callback', @(src,evt)runMovie(obj,src,evt),...
+                    'HorizontalAlignment', 'center',...
+                    'Units','normalized', 'Position', [0.2,0.01,0.6,0.04],...
+                    'Tag','stepMovie');
+            hm(3) = uicontrol('Parent',hfig,...
+                    'Style','text','String',t0,'Units','normalized',... 
+                    'Position',[0.8,0.01,0.15,0.03],'Tag','FrameTime');
+        end
+%%
+        function runMovie(obj,src,~)
+            %callback function for animation figure buttons and slider
+            if strcmp(src.Tag,'runMovie')       %user pressed run button   
+                implay(obj.ModelMovie);
+            elseif strcmp(src.Tag,'saveMovie')  %user pressed save button 
+                saveAnimation2File(obj);
+            else                                %user moved slider
+                val = ceil(src.Value);          %slider value 
+                time = obj.Data.T(val);         %time slice selected
+                var = obj.Data.Z;  
+                %get figure axis, extract variable and refresh plot
+                hfig = obj.Plot.CurrentFig;
+                figax = findobj(hfig,'Tag','PlotFigAxes');               
+                hp = figax.Children;
+                vari = setTimeDependentVariable(obj,var,val); %#ok<NASGU>
+                refreshdata(hp,'caller')
+                title(sprintf('%s \nTime = %s',obj.Title,string(time)))
+                drawnow;
+                %update slider selection text
+                stxt = findobj(hfig,'Tag','FrameTime');
+                stxt.String = string(time);
+            end
+        end
+    end
 %%    
 %--------------------------------------------------------------------------
 % Get and Set figure and utility functions
 %--------------------------------------------------------------------------
+    methods
         function getFigure(obj)
             %get existing figure or generate a new one as required
             if any(strcmp(obj.UIset.callButton,{'New','Select','Run'}))
@@ -626,7 +713,7 @@ classdef muiPlots < handle
         end    
 %%
         function clearPreviousPlotData(obj)
-            %reset the property values used to create a plot
+            %reset the property values used to create a plot            
             obj.Data = [];            %data to use in plot (x,y,z)
             obj.TickLabels = [];      %struct for XYZ tick labels
             obj.AxisLabels = [];      %struct for XYZ axis labels
@@ -641,7 +728,48 @@ classdef muiPlots < handle
             obj.Plot.FigNum(src.Number==obj.Plot.FigNum)=[];
             delete(src);
         end         
-    end      
+%%
+        function convertTime(obj)
+            %convert time for plotting
+            fname = fieldnames(obj.Data);
+            nrec = length(fname);
+            for i=1:nrec
+                x = obj.Data.(fname{i});
+                if isdatetime(x) || isduration(x)
+                    obj.Data.(fname{i}) = time2num(x);
+                end
+            end
+        end 
+%%
+        function saveAnimation2File(obj)
+            %save animation to file
+            answer = questdlg('Save as which file type?','Save animation',...
+                                                'MPEG-4','AVI','Quit''MPEG-4');
+            if strcmp(answer,'Quit')
+                return;
+            elseif strcmp(answer,'MPEG-4')
+                extension = '*.mp4';
+                ftext = 'muimovie.mp4';
+                profile = answer;
+            else
+                extension = '*.avi';
+                ftext = 'muimovie.avi';
+                profile = 'Uncompressed AVI';
+            end
+            [file,path] = uiputfile(extension,'Save file as',ftext);
+            if file==0, return; end
+            v = VideoWriter([path,file],profile);
+            spec = inputdlg({'Frame rate (fps):','Quality (0-100, MPEG only):'},'Save animations',...
+                              1,{num2str(v.FrameRate),num2str(v.Quality)});
+            if ~isempty(spec)
+                v.FrameRate = str2double(spec{1});
+                v.Quality = str2double(spec{2});
+            end
+            open(v);
+            writeVideo(v,obj.ModelMovie);
+            close(v);
+        end
+    end
 %%
 %--------------------------------------------------------------------------
 % Static muiPlots functions
@@ -711,13 +839,14 @@ classdef muiPlots < handle
             title(titletxt);
             hold off
             cmap = cmap_selection;
+            if isempty(cmap), cmap = 'parula'; end
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext;   
         end
 %%
         function rtSurface(x,y,z,tint,rint,ytext,legendtext,titletxt)
-            %surface plot of R,T,Z polar data            
+            %surface plot of R,T,Z polar data               
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
             radints = linspace(min(y),ceil(max(y)),rint);
             theints = linspace(0,2*pi,tint+1);

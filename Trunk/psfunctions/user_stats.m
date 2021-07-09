@@ -4,7 +4,7 @@ function user_stats(obj,mobj,srcVal) %#ok<INUSL>
 % NAME
 % user_stats.m
 % PURPOSE
-%   Function to allow user to implement own model
+%   Function to allow user to implement own statistical function
 % USAGE
 %   user_stats(obj,mobj,srcVal,ts,metatxt)
 % INPUT

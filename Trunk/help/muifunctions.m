@@ -72,6 +72,9 @@
 % * *isdatdur.m*
 % - identify whether RowNames or a Variable in a dstable are datetime or duration
 % data types  
+%
+% * *istimeseriesdst.m*
+% - check whether the first variable in a dstable is a timeseries
 % 
 % * *isvalidrange.m*
 % - check user input is valid for the data type used and within bounds
@@ -123,6 +126,9 @@
 % 
 % * *test_utilfunctions.m*
 % - functions to test utility functions
+%
+% * * time2num.m*
+% - convert datetime or duration to a numeric value (eg for plotting)
 % 
 % * *ts2_endpoints_in_ts1.m*
 % - return indices in ts1 for end points of ts2 that fall within ts1

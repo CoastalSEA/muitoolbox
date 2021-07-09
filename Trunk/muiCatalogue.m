@@ -532,6 +532,7 @@ classdef muiCatalogue < dscatalogue
             % attnames - field names of attributes {variable,row,dimensions}
             
             idx.var = UIsel.variable;
+            nvar = length(idx.var)+1;   %offset to first dimension
             uidims = UIsel.dims;
             ndim = length(uidims);
             idx.row = 1; 
@@ -552,9 +553,9 @@ classdef muiCatalogue < dscatalogue
                     end
                     %
                     if height(dst.DataTable)>1   %ensure offset is correct
-                        idd = strcmp(attnames(3:end),uidims(i).name);
+                        idd = strcmp(attnames(nvar+1:end),uidims(i).name);
                     else  
-                        idd = strcmp(attnames(2:end),uidims(i).name);
+                        idd = strcmp(attnames(nvar:end),uidims(i).name);
                     end
                     idx.dim{idd} = getIndices(obj,var,uidims(i).value);
                     dimnames.dim{idd} = var(idx.dim{idd});

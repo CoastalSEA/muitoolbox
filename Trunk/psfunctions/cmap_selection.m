@@ -29,7 +29,7 @@ function cmap = cmap_selection(idsel)
         promptxt = 'Select colormap:';
         [idsel,ok] = listdlg('Name','Colormap','SelectionMode','single',...
                         'PromptString',promptxt,'ListString',matlabcmaps);
-        if ok<1, return; end   
+        if ok<1, cmap = []; return; end   
     elseif license('test','MAP_Toolbox') && isvector(idsel)
         %pass zi values as idsel
         [cmap,~] = landsea(idsel);  %requires Mapping toolbox

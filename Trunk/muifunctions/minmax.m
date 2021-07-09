@@ -6,7 +6,7 @@ function mnmx = minmax(data,nanflag)
 % PURPOSE
 %   find max and min of multidimensional numeric or ordinal array
 % USAGE
-%   mxmn = minmax(fun,nanflag)
+%   mxmn = minmax(data,nanflag)
 % INPUTS
 %   data - vector or array of ordinal categorical, or numeric data
 %   nanflag - optional flag to 'includenan', default is 'omitnan'

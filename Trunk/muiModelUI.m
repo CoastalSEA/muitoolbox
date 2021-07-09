@@ -82,7 +82,7 @@ classdef (Abstract = true) muiModelUI < handle
                 'Name',vtxt,'NumberTitle','off',...
                 'ToolBar','none',...
                 'Position',[0.35 0.55 0.3 0.4],'Resize','off',...
-                'Visible','off','Tag','fig0');
+                'Visible','on','Tag','fig0');
             logo = imread(modelLogo);
             a2 = axes('units', 'normalized', 'position', [0 0 1 1], ...
                 'color',[0.8 0.8 0.8], 'Tag','a4');
@@ -90,7 +90,6 @@ classdef (Abstract = true) muiModelUI < handle
             axis equal
             axis off
             set(a2,'XTickLabel','','YTickLabel','')
-            hf.Visible = 'on';
             pause(2);
             fig0  = findobj('Tag', 'fig0');
             delete(fig0);
@@ -891,10 +890,11 @@ classdef (Abstract = true) muiModelUI < handle
             name = class(guiobj);
             %handle subclasses that inherit standard GUI - code below
             %assumes 3 charachter suffix
-            % idx = regexp(name,'_');
-            % if ~isempty(idx)
-            %     name = name(idx+1:end);
-            % end
+            idx = regexp(name,'_');
+            if ~isempty(idx)
+                name = ['mui',name(idx+1:end)];
+            end
+            %
             switch name
                 %define case for each plot/data GUI
                 case 'muiPlotsUI'

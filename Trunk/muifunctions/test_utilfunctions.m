@@ -159,7 +159,7 @@ end
 %%
 function test_getwidget(caseid)
     hfig = figure;
-    hfig.Units = 'normalized';
+    hfig.Unit = 'normalized';
     switch caseid
         case 1  %input datetime
             dstart = datetime('12-Aug-2020');
@@ -237,41 +237,41 @@ end
 %%
 function test_cellstruct2cell(option)
     %create a struct of cell arrays and convert to a cell array
-    fnames = {'Names','Descriptions','Units','Labels','QCflags'};
+    fnames = {'Name','Description','Unit','Label','QCflag'};
     instruct = struct(fnames{1},[],fnames{2},[],fnames{3},[],...
                 fnames{4},[],fnames{5},[]);     
     switch option
         case 1  %struct of {1,3} cell arrays
-            instruct.Names = {'var1','var2','var3'};
-            instruct.Descriptions = {'Variable 1','Variable 2','Variable 3'};
-            instruct.Units = {'m2','m3','m'};
-            instruct.Labels = {'Area','Volume','Length'};
-            instruct.QCflags = {'raw','-','model'};
+            instruct.Name = {'var1','var2','var3'};
+            instruct.Description = {'Variable 1','Variable 2','Variable 3'};
+            instruct.Unit = {'m2','m3','m'};
+            instruct.Label = {'Area','Volume','Length'};
+            instruct.QCflag = {'raw','-','model'};
             %this is the same as:
-                % instruct = struct('Names',{{'var1','var2','var3'}},...
-                %    'Descriptions',{{'Variable 1','Variable 2','Variable 3'}},...
-                %    'Units',{{'m2','m3','m'}},...
-                %    'Labels',{{'Area','Volume','Length'}},...
-                %    'QCflags',{{'raw','-','model'}}); 
+                % instruct = struct('Name',{{'var1','var2','var3'}},...
+                %    'Description',{{'Variable 1','Variable 2','Variable 3'}},...
+                %    'Unit',{{'m2','m3','m'}},...
+                %    'Label',{{'Area','Volume','Length'}},...
+                %    'QCflag',{{'raw','-','model'}}); 
             %however row,column order matters in cellstruct2cell and the
                 %following syntax results in an error:
-                % instruct.Names = {'var1';'var2';'var3'};
-                % instruct.Descriptions = {'Variable 1';'Variable 2';'Variable 3'};
-                % instruct.Units = {'m2';'m3';'m'};
-                % instruct.Labels = {'Area';'Volume';'Length'};
-                % instruct.QCflags = {'raw';'-';'model'};            
+                % instruct.Name = {'var1';'var2';'var3'};
+                % instruct.Description = {'Variable 1';'Variable 2';'Variable 3'};
+                % instruct.Unit = {'m2';'m3';'m'};
+                % instruct.Label = {'Area';'Volume';'Length'};
+                % instruct.QCflag = {'raw';'-';'model'};            
         case 2  %struct with mix of {1,3} cell arrays and [1,3] string arrays
-            instruct.Names = ["var1","var2","var3"];
-            instruct.Descriptions = {'Variable 1','Variable 2','Variable 3'};
-            instruct.Units = ["m2","m3","m"];
-            instruct.Labels = {'Area','Volume','Length'};
-            instruct.QCflags = {'raw','-','model'};
+            instruct.Name = ["var1","var2","var3"];
+            instruct.Description = {'Variable 1','Variable 2','Variable 3'};
+            instruct.Unit = ["m2","m3","m"];
+            instruct.Label = {'Area','Volume','Length'};
+            instruct.QCflag = {'raw','-','model'};
         case 3  %struct of character vectors - defines a struct array directly                             
-            ndimstruct = struct('Names',{'var1','var2','var3'},...
-               'Descriptions',{'Variable 1','Variable 2','Variable 3'},...
-               'Units',{'m2','m3','m'},...
-               'Labels',{'Area','Volume','Length'},...
-               'QCflags',{'raw','-','model'}); 
+            ndimstruct = struct('Name',{'var1','var2','var3'},...
+               'Description',{'Variable 1','Variable 2','Variable 3'},...
+               'Unit',{'m2','m3','m'},...
+               'Label',{'Area','Volume','Length'},...
+               'QCflag',{'raw','-','model'}); 
             %this is the same as: 
                 % incell = {'var1','var2','var3';
                 %          'Variable 1','Variable 2','Variable 3';
@@ -285,64 +285,64 @@ function test_cellstruct2cell(option)
                 instruct.(fnames{i}) = {ndimstruct.(fnames{i})};
             end
         case 4  %incomplete struct definition
-            instruct.Names = {'var1','var2','var3'};
-            instruct.Descriptions = {'Variable 1','Variable 2','Variable 3'};
-            instruct.Units = {'m2','m3','m'};
+            instruct.Name = {'var1','var2','var3'};
+            instruct.Description = {'Variable 1','Variable 2','Variable 3'};
+            instruct.Unit = {'m2','m3','m'};
         case 5  %missing columns in array definition
-            instruct.Names = {'var1','var2','var3'};
-            instruct.Descriptions = {'Variable 1','Variable 2','Variable 3'};
-            instruct.Units = {'m2','m'};   %missing value
-            instruct.Labels = {'Area','Volume','Length'};
-            instruct.QCflags = {'raw','-','model'};
+            instruct.Name = {'var1','var2','var3'};
+            instruct.Description = {'Variable 1','Variable 2','Variable 3'};
+            instruct.Unit = {'m2','m'};   %missing value
+            instruct.Label = {'Area','Volume','Length'};
+            instruct.QCflag = {'raw','-','model'};
         case 6   %incomplete struct array definition 
-            instruct = struct('Names',{'var1','var2','var3'},...
-                'Descriptions',{'Variable 1','Variable 2','Variable 3'},...
-                'Units',{'m2','m3','m'});
+            instruct = struct('Name',{'var1','var2','var3'},...
+                'Description',{'Variable 1','Variable 2','Variable 3'},...
+                'Unit',{'m2','m3','m'});
             fnames = fieldnames(instruct);
         case 7   %missing columns in struct array definition 
                  %error message in Command Window
-            instruct = struct('Names',{'var1','var2','var3'},...
-                'Descriptions',{'Variable 1','Variable 2','Variable 3'},...
-                'Units',{'m2','m'},...      %missing value
-                'Labels',{'Area','Volume','Length'},...
-                'QCflags',{'raw','-','model'}); 
+            instruct = struct('Name',{'var1','var2','var3'},...
+                'Description',{'Variable 1','Variable 2','Variable 3'},...
+                'Unit',{'m2','m'},...      %missing value
+                'Label',{'Area','Volume','Length'},...
+                'QCflag',{'raw','-','model'}); 
         case 8
-            instruct.Names = {'var1'};
-            instruct.Descriptions = {'Variable 1'};
-            instruct.Units = {'m2'};
-            instruct.Labels = {'Area'};
-            instruct.QCflags = {'raw'};
+            instruct.Name = {'var1'};
+            instruct.Description = {'Variable 1'};
+            instruct.Unit = {'m2'};
+            instruct.Label = {'Area'};
+            instruct.QCflag = {'raw'};
          case 9
-            instruct.Names = 'var1';
-            instruct.Descriptions = 'Variable 1';
-            instruct.Units = 'm2';
-            instruct.Labels = 'Area';
-            instruct.QCflags = 'raw';              
+            instruct.Name = 'var1';
+            instruct.Description = 'Variable 1';
+            instruct.Unit = 'm2';
+            instruct.Label = 'Area';
+            instruct.QCflag = 'raw';              
     end
 
-    outcell = cellstruct2cell(instruct)
+%     outcell = cellstruct2cell(instruct)
     
-    if ~isempty(outcell)
-        %convert cell array to struct with 1 x n cell array or string array
-        for i=1:length(fnames)
-            outstruct_ca.(fnames{i}) = outcell(i,:);
-        end
-        
-        %convert cell array to 1 x n struct array
-        %if mix of string array and cell array, a string array is returned    
-        outcell = convertStringsToChars(outcell);     %convert to cell array
-        %convert to n x 1 struct
-        dim = 1;
-        ndim = size(outcell,dim);
-        if ndim==length(fnames)
-            outstruct = cell2struct(outcell,fnames,1)' %#ok<*NOPRT>
-        else
-            warndlg('Number of rows in cell array does not match number of fields');
-        end        
-    end
+%     if ~isempty(outcell)
+%         %convert cell array to struct with 1 x n cell array or string array
+%         for i=1:length(fnames)
+%             outstruct_ca.(fnames{i}) = outcell(i,:);
+%         end
+%         
+%         %convert cell array to 1 x n struct array
+%         %if mix of string array and cell array, a string array is returned    
+%         outcell = convertStringsToChars(outcell);     %convert to cell array
+%         %convert to n x 1 struct
+%         dim = 1;
+%         ndim = size(outcell,dim);
+%         if ndim==length(fnames)
+%             outstruct = cell2struct(outcell,fnames,1)' %#ok<*NOPRT>
+%         else
+%             warndlg('Number of rows in cell array does not match number of fields');
+%         end        
+%     end
     
-    %alternatively call callcellstruct2structarray directly
-%     outstruct = cellstruct2structarray(instruct)   %#ok<NOPRT>
+    %alternatively call cellstruct2structarray directly
+    outstruct = cellstruct2structarray(instruct)   %#ok<NOPRT>
 end
 %%
 function test_mcolor()

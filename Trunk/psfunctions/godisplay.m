@@ -19,7 +19,13 @@ function godisplay(src,~)
 % CoastalSEA, (c) 2020
 %--------------------------------------------------------------------------
 %
-    msgtxt = src.UserData;
+    if ~isempty(src.UserData)
+        msgtxt = src.UserData;
+    elseif ~isempty(src.DisplayName)
+        msgtxt = src.DisplayName;
+    else
+        return;
+    end
 
     delay = 5;
     msgpos = [0.5,0.5,0.15,0.08];

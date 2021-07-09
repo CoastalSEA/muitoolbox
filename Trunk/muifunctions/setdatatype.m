@@ -71,6 +71,7 @@ function datevar = getdatevariable(Vin)
         %recognised by datetime (does accept yyyy-mm-dd)
         fmt = ['dd',matches{1},'MM',matches{2},'yyyy',' HH:mm:ss'];
         datevar = datetime(char(Vin),'InputFormat',fmt);
+        datevar.Format = fmt;
     else
         datevar = datetime(char(Vin),'Format','preserveinput'); 
     end 

@@ -359,7 +359,8 @@ classdef (Abstract = true) muiDataUI < handle
                            'Callback', eval(butdef.call));
             %NB TooltipString changed to Tooltip in 2018b
             %may need to change in the future
-            if isletter(butdef.txt)
+            if all(isstrprop(butdef.txt,'alphanum') + isstrprop(butdef.txt,'wspace'))
+                %include alphanumeric strings and white space characters
                 hb.FontName = 'FixedWidth';
             else
                 hb.FontName = 'Symbol';
@@ -607,10 +608,6 @@ classdef (Abstract = true) muiDataUI < handle
                     end
                     ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
                 end
-                
-                
-                
-                
 %                 if pdim>mdim && usi.property==1                                        
 % %                     mdim = obj.TabContent(itab).XYZmxvar(i); %no. range properties
 %                     ndim = pdim-mdim;                     %no. of index properties

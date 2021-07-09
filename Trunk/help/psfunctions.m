@@ -79,8 +79,11 @@
 % - create plot of Taylor diagram and, optionally, plot compute skill score
 % and a skill map (2 or 3D depending on data)
 %
+% * *user_plot.m*
+% - function to allow user to implement own plotting function
+%
 % * *user_stats.m*
-% - function to allow user to implement own model
+% - function to allow user to implement own statistical function
 %
 % * *wind_rose.m* 
 % - plot wind/wave rose to show direction and intensity of variable. 
