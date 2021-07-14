@@ -53,8 +53,8 @@ classdef muiStats < handle
             ok = getStatsData(obj,mobj.Cases);
             if ok<1, return; end %data not found
 
-            if strcmp(obj.UIset.Type,'User')
-                UserStats(obj,src,mobj);  %pass control to user function
+            if strcmp(obj.UIset.Type.String,'User')
+                user_stats(obj,src,mobj);  %pass control to user function
             else
                 %generate the plot
                 setStats(obj,src,mobj);

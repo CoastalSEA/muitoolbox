@@ -416,21 +416,18 @@ classdef (Abstract = true) muiModelUI < handle
 %%
         function exitprogram(obj,~,~)
             %delete all existing figures and delete UI
-%             choice = questdlg('Do you want to save model before exiting?', ...
-%                 'Exit','Yes','No','Cancel','No');
-%             if strcmp(choice,'Yes')
-%                 savefile(obj,0,0);
-%             elseif strcmp(choice,'Cancel')
-%                 return;
-%             end
+            choice = questdlg('Do you want to save model before exiting?', ...
+                'Exit','Yes','No','Cancel','No');
+            if strcmp(choice,'Yes')
+                savefile(obj,0,0);
+            elseif strcmp(choice,'Cancel')
+                return;
+            end
             %remove any linked UIs
             linkedguis = fieldnames(obj.mUI);
             for i=4:length(linkedguis) %first 3 entries are for main Figure
                 if ~isempty(obj.mUI.(linkedguis{i}))
-                    %original
-%                     exitDataGui(obj.mUI.(linkedguis{i}),[],[],obj);
-                    %try
-                    obj.mUI.(linkedguis{i}) = [];
+                    clearDataUI(obj,obj.mUI.(linkedguis{i}))
                 end
             end   
             delete(obj.mUI.Figure);
@@ -463,8 +460,9 @@ classdef (Abstract = true) muiModelUI < handle
 %%
         function closeMainFig(obj,~,~)
             %callback function for CloseResponseFcn button
-            delete(obj.mUI.Figure);
-            delete(obj);    %delete the class object
+            exitprogram(obj,[],[])
+%             delete(obj.mUI.Figure);
+%             delete(obj);    %delete the class object
         end
 %%
         function saveModel(obj)
@@ -916,6 +914,7 @@ classdef (Abstract = true) muiModelUI < handle
                     deleteFigObj(obj,figObj,'Stats');
             end
             guiobjtxt = name(4:end);
+            delete(obj.mUI.(guiobjtxt).dataUI.Figure);
             delete(obj.mUI.(guiobjtxt))
             obj.mUI.(guiobjtxt) = [];
         end

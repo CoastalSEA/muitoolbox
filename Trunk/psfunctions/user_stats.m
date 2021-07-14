@@ -9,7 +9,7 @@ function user_stats(obj,mobj,srcVal) %#ok<INUSL>
 %   user_stats(obj,mobj,srcVal,ts,metatxt)
 % INPUT
 %   obj - handle for muiStats with user selected options
-%   mobj - handle to CoastalTools to allow access to data
+%   mobj - handle to App UI to allow access to data
 %   srcVal - handle to UI tab to display results (if required - optional)
 % NOTES
 %   No provision to pass results back to CoastalTools at present
@@ -25,7 +25,7 @@ function user_stats(obj,mobj,srcVal) %#ok<INUSL>
 if nargin<3, srcVal = []; end
 
 if strcmp(srcVal,'General')
-    warndlg('MUIfunctions/UserStats called. Nothing implemented for General Stats');
+    warndlg('psfunctions/user_stats.m called. Nothing implemented for General Stats');
     return;
 end
 

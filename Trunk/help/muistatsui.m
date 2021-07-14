@@ -19,15 +19,15 @@
 % given application.
 %%
 % The properties _UIselections_ and _UIsettings_ are initialised and set
-% by the muiDataUI superclass and define the selections made by the user.%
+% by the muiDataUI superclass and define the selections made by the user.
 
 %% muiStatsUI methods
 % *getStatsUI* - static function used to initialise the UI from the main UI
 %%
 % The following methods are required by muiDataUI: 
 %%
-% * *setTabContent* - calls functions that define the layout options for individual tabs. <br> 
-% * *setVariableLists* - initialises the selection variables for each tab in the UI. <br>
+% * *setTabContent* - calls functions that define the layout options for individual tabs. 
+% * *setVariableLists* - initialises the selection variables for each tab in the UI.
 % * *useSelection* - function to do something with selected data.
 
 %% Statistcal analysis options

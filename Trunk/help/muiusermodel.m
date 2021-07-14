@@ -6,7 +6,6 @@
 %%
 %   obj = muiUserModel;
 
-
 %% Description
 % The class is used to evaluate user defined equations or functions and
 % save results if required.
@@ -25,7 +24,8 @@
 
 %% muiUserModel methods
 % The main purpose of _muiUserModel_ is to implement the selections made in
-% <matlab:doc('muimanipui') muiManipUI>. <br>
+% <matlab:doc('muimanipui') muiManipUI>.
+%%
 % *createVar*  evaluate the user defined equation or function and report
 % single valued results or save vector and array results as either a new
 % variable in an existing dataset or as a new dataset.

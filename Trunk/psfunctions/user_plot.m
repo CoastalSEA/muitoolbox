@@ -9,7 +9,7 @@ function user_plot(obj,mobj)
 %   user_plot(obj,mobj)
 % INPUT
 %   obj - handle to instance of calling PlotFig class
-%   mobj - handle to CoastalTools to allow access to data
+%   mobj - handle to App UI to allow access to data
 % OUTPUT
 %   user plot
 % SEE ALSO

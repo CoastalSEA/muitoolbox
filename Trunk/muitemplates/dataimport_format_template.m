@@ -1,4 +1,4 @@
-function output = dataimport_format_template(funcall,varargin)
+function output = dataimport_format_template(funcall,varargin) % <<Edit to identify data type
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -47,10 +47,10 @@ function dst = getData(obj,filename) %#ok<INUSD>
     %set metadata
     dsp = setDSproperties;
 
-    %code to parse input data and assign to varData
-    myDatetime = data{1};
-    varData = data{2};
-
+    %code to parse input data and assign to varData  
+    myDatetime = data{1};                            % <<Edit metadata to data being loaded
+    varData = data{2};                               % <<See files in ..\muiAppCoastalClasses\FormatFiles
+                                                     % <<for examples of usage
     %load the results into a dstable  
     dst = dstable(varData,'RowNames',myDatetime,'DSproperties',dsp); 
 %     dst.Dimensions.Position = [Latitude,Longitude];    
@@ -98,7 +98,7 @@ end
 %--------------------------------------------------------------------------
 % dataQC
 %--------------------------------------------------------------------------
-function output = dataQC(obj)
+function output = dataQC(obj)                        % <<Add any quality control to be applied (optional)
     %quality control a dataset
     % datasetname = getDataSetName(obj); %prompts user to select dataset if more than one
     % dst = obj.Data.(datasetname);      %selected dstable
@@ -109,7 +109,7 @@ end
 %--------------------------------------------------------------------------
 % getPlot
 %--------------------------------------------------------------------------
-function ok = getPlot(obj,src)
+function ok = getPlot(obj,src)                       % <<Add code for bespoke Q-Plot is required (optional)
     %generate a plot on the src graphical object handle    
     ok = 0;  %ok=0 if no plot implemented in getPlot
     %return some other value if a plot is implemented here

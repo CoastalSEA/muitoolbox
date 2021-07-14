@@ -26,8 +26,8 @@
 %%
 % The following methods are required by muiDataUI: 
 %%
-% * *setTabContent* - calls functions that define the layout options for individual tabs. <br> 
-% * *setVariableLists* - initialises the selection variables for each tab in the UI. <br>
+% * *setTabContent* - calls functions that define the layout options for individual tabs.
+% * *setVariableLists* - initialises the selection variables for each tab in the UI.
 % * *useSelection* - function to do something with selected data.
 
 %% Plotting options

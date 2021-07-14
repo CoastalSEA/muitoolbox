@@ -66,6 +66,11 @@ classdef muiUserModel < muiDataSet
                 varout = callfcn_var(obj,XYZT,mobj,inp);
             end
             
+            if isempty(varout)    %quit if no data returned
+                warndlg('No results from function used in Derive output')
+                return; 
+            end
+            
             if inp.isrowvar && ~isempty(XYZT{4})
                 %user specified that rownames should be added to output
                 varout{end+1} = XYZT{4};
@@ -74,6 +79,7 @@ classdef muiUserModel < muiDataSet
             %
             %var is matrix with datenum(time) in first column and variable in column 2
             close(hw)
+            
             setEqnData(obj,mobj,varout,props);            
         end  
 %%
@@ -309,12 +315,28 @@ classdef muiUserModel < muiDataSet
 %%                
         function setdsp2save(obj,mobj,var,props,inputxt)
             %save results in a dstable and add record to catalogue  
-            results = var(1);
-            isrows = length(var)>1 && ~isempty(var{2});            
-            if isrows                         %second variable in output
-                rowdata = var{2};
-            else
+%             results = var(1);
+%             isrows = length(var)>1 && ~isempty(var{2});            
+%             if isrows         %second variable in function output is row dimension
+%                 rowdata = var{2};
+%             else
+%                 rowdata = [];
+%             end
+            %Changed to use first variable only or multple variables with
+            %first variable defining row dimension to enable passing of
+            %multiple variables even though not implemented yet.
+            if length(var)==1
+                isrows = false;
                 rowdata = [];
+                results = var;
+            else
+                isrows = ~isempty(var{1});
+                rowdata = var{1};
+                results = var(2:end);
+                if isrows && length(rowdata)~=length(results{1})
+                    warndlg('Row and variable length not the same. Data not saved')
+                    return;
+                end
             end
             
             %set the metadata for the new variable  
@@ -323,7 +345,7 @@ classdef muiUserModel < muiDataSet
             ndim = sum(sz(2:end));     %number of dimensions excluding rows
             istime = isa(rowdata,'datetime') || isa(rowdata,'duration');
             dspstruct = blank_dsp(obj,ndim,istime);
-            %load empty dsp struct directly, including desctiption
+            %load empty dsp struct directly, including description
             dsp = dsproperties(dspstruct,'Derived data set');             
             
             %assign model output to a dstable using the defined dsproperties 
@@ -334,7 +356,7 @@ classdef muiUserModel < muiDataSet
                 %call ui to edit - repeat description to prevent user prompt
                 setDSproperties(dsp,[],'Derived data set',true); 
                 dst = dstable(results{:},'RowNames',rowdata,'DSproperties',dsp);
-                dst = checkDims(obj,dst,props,ndim,ressze);
+                dst = addDims(obj,dst,props,ndim,ressze);
             else        %only variable returned - prompt user
                 answer = questdlg('Save the results to an existing case or as a new dataset?',...
                                   'Derive output','Existing','New Case','Existing');
@@ -352,7 +374,7 @@ classdef muiUserModel < muiDataSet
                         end
                         dst.RowNames = props(i).data.RowNames;
                     end
-                    dst = checkDims(obj,dst,props,ndim,ressze);
+                    dst = addDims(obj,dst,props,ndim,ressze);
                 else
                     %need to find which dataset to add the new variable to
                     muicat = mobj.Cases;
@@ -374,7 +396,7 @@ classdef muiUserModel < muiDataSet
             save2obj(obj,mobj,dst,inputxt) 
         end
 %%
-        function dst = checkDims(~,dst,props,ndim,ressze)
+        function dst = addDims(~,dst,props,ndim,ressze)
             %add dimensions if there is a match with values in one of the 
             %props.data datasets            
             if ndim>0 

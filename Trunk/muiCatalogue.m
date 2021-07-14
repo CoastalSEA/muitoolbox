@@ -267,6 +267,7 @@ classdef muiCatalogue < dscatalogue
         function [cobj,classrec,catrec] = getCase(obj,caserec)
             %retrieve the class instance, class record and catalogue record
             catrec = getRecord(obj,caserec); 
+            if isempty(catrec), cobj = []; classrec = []; return; end
             lobj = obj.DataSets.(catrec.CaseClass);  
             classrec = [lobj.CaseIndex]==catrec.CaseID;            
             cobj = lobj(classrec);
