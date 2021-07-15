@@ -36,9 +36,9 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
     
     properties (Hidden)
         PropertyType     %defintion of data type for each property
-                         %can be empty if only using numeric values or if
-                         %all non-numeic values are pre-assigned when
-                         %defining the properties        
+                         %can be empty if only using numeric values, or if
+                         %a default value if all non-numeric values are
+                         %pre-assigned when defining the properties        
     end
 %%
     methods 
@@ -52,11 +52,11 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             cwidth = obj.TabDisplay.ColWidth;
             userdata = getInputProps(obj);
 			Table = uitable('Parent',src, ...
-                'ColumnName', colnames, ...
-                'RowName', [], ....
-                'ColumnWidth', cwidth, ...
-                'Data',userdata, ...
-                'Units','normalized');
+                            'ColumnName', colnames, ...
+                            'RowName', [], ....
+                            'ColumnWidth', cwidth, ...
+                            'Data',userdata, ...
+                            'Units','normalized');
             Table.Position(3:4)=Table.Extent(3:4);
             Table.Position(1)=obj.TabDisplay.Position(2)-Table.Extent(3); %left = right - table width
             if Table.Position(1)<0 %restrict table to be on tab (forces scroll bar)
@@ -332,7 +332,10 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             charvals = cell(size(vals)); vtype = charvals; vformat = vtype;
             for k=1:length(vals)
                 [cval,vtype{k},vformat{k}] = var2str(vals{k});
-                charvals{k} = cval{:}; %needs checking for numerical array
+                charvals{k} = cval{:};  %needs checking for numerical array
+                if isempty(vtype{k})
+                    vtype{k} = 'double';%no default value set in subclass properties
+                end                     %assume that they are numeric values
             end                     
         end
     end

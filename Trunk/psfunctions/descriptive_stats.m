@@ -48,8 +48,8 @@ function stats = getTSstats(data,metatxt)
         return; 
     end
     
-    dst = data.DataTable;
-    ts = timeseries(dst{:,1},dst.Properties.RowNames);
+    dst_table = data.DataTable;
+    ts = timeseries(dst_table{:,1},dst_table.Properties.RowNames);
     
     %get statistics for time series as a whole
     stats = time_stats(ts,cthr);
@@ -57,7 +57,7 @@ function stats = getTSstats(data,metatxt)
                                                             metatxt);
     %get statistics for seasons if defined
     seasons = eval(cthr{2});
-%     stats.Properties.UserData  = cellstr(num2str(seasons));
+    stats.Properties.UserData  = data.VariableLabels{1};
     if length(seasons)>1   
         seastr = cellstr(num2str(seasons));
         seastxt = [];
@@ -66,7 +66,14 @@ function stats = getTSstats(data,metatxt)
         for i=2:length(varnames)
             seastxt = sprintf('%s%s - %s;  ',seastxt,varnames{i},seastr{i-1});
         end
-        stats.Properties.Description = sprintf('%s\nSeasons: %s',metatxt,seastxt);
+        stats.Properties.Description = sprintf('Seasons: %s',seastxt);
+        answer = questdlg('Cartesian or Polar plot?','Stats plot',...
+                          'Cartesian','Polar','Cartesian');
+        if strcmp(answer,'Cartesian')              
+            seasonalPlot(stats,metatxt);
+        else
+            polarSeasonPlot(stats,metatxt);
+        end
     end 
 end
 %%
@@ -178,7 +185,6 @@ function stats = season_stats(ts,cthr,stats,seasons)
             stats = time_stats(tsi,cthr,stats,is);
             idx = [];
         end
-        seasonalPlot(stats)
     end
 end
 %%
@@ -215,27 +221,35 @@ function stats = getDSstats(data,metatxt)
                                                             metatxt);                                            
 end   
 %% 
-function seasonalPlot(stats)
+function seasonalPlot(stats,titletxt)
     %plot seasonal variation of mean and standard deviation
     mvals  = stats{'Mean',:};
     stvals = stats{'St.Dev.',:};
-    stext  = stats.Properties.UserData;
-    tsdesc = stats.Properties.Description;
+    stext  = stats.Properties.VariableNames;
+    subtitletxt = stats.Properties.Description;
     ns = length(stext);
-    %
+    
+    
+    %create figure
     hf = figure('Name','Seasonal Plot','Tag','StatFig',...
                 'Units','normalized',...
-                'Resize','on','HandleVisibility','on');
+                'Resize','on','HandleVisibility','on'); 
     %move figure to top right
     hf.Position(1) = 1-hf.Position(3)-0.01;
     hf.Position(2) = 1-hf.Position(4)-0.12;
-    he = errorbar(1:ns,mvals(2:end),stvals(2:end),...
+    %ensrue title is fits on plot
+%     hf.Units = 'pixels';
+    titletxt = wraptext(titletxt,hf,true);  %NB this is not Matlab texwrap
+    subtitletxt = wraptext(subtitletxt,hf,false); 
+    %create plot
+    he = errorbar(2:ns,mvals(2:end),stvals(2:end),...
         '-o','LineWidth',1,'MarkerSize',10,...
         'MarkerEdgeColor','red');
     hold on
     plot([0.1,ns+0.9],[mvals(1),mvals(1)],'-k','LineWidth',0.25);
-    plot([0.1,ns+0.9],[mvals(1)+stvals(1),mvals(1)+stvals(1)],':k','LineWidth',0.25);
-    plot([0.1,ns+0.9],[mvals(1)-stvals(1),mvals(1)-stvals(1)],':k','LineWidth',0.25);
+    plot([0.1,ns+0.9],[mvals(1)+stvals(1),mvals(1)+stvals(1)],'-.k','LineWidth',0.25);
+    h1 = plot([0.1,ns+0.9],[mvals(1)-stvals(1),mvals(1)-stvals(1)],'-.k','LineWidth',0.25);
+    h1.Annotation.LegendInformation.IconDisplayStyle = 'off';  
     xlabel('Season');
     mver = version('-release'); %options added to errorbar in v2017a
     if str2double(mver(1:4))>=2017
@@ -243,7 +257,23 @@ function seasonalPlot(stats)
         xticks(1:ns);
         xticklabels(stext);
     end
-    ylabel('Mean (+/-1 Std.Dev.)');
-    title(tsdesc);
+    ylabel(sprintf('Mean %s +/-1 Std.Dev.',stats.Properties.UserData));
+    legend({'Seasonal means','Annual mean','Annual Std.Dev.'},'Location','northwest');
+    title(titletxt);
+    subtitle(subtitletxt);
     hold off
+end
+%%
+function polarSeasonPlot(stats,titletxt)
+    %order data to pass to annual_polar_plot
+    mvals  = stats{'Mean',2:end};
+    stvals = stats{'St.Dev.',2:end};
+    tint = length(mvals);
+    plotxt = struct('rlabel','','thetalabel','','title','','legend','');
+    plotxt.rlabel = stats.Properties.Description;       %text for radius (magnitude)
+    plotxt.thetalabel = stats.Properties.VariableNames(2:end);%text for radial points
+    plotxt.title = titletxt;       %plot title
+    plotxt.legend = {sprintf('Mean %s +/-1 Std.Dev.',stats.Properties.UserData)}; %legend for each variable
+    
+    annual_polar_plot(mvals,1:tint,tint,plotxt,stvals)
 end

@@ -146,4 +146,7 @@
 % * *var2str.m*
 % - convert the input variable to a cell array of strings and return the 
 % data type and format (for datetime and duration only) 
+%
+% * *wraptext.m*
+% - wrap text to fit within a given graphical object (eg figure,panel,etc)
 
