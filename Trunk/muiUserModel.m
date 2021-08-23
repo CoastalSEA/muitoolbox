@@ -93,23 +93,37 @@ classdef muiUserModel < muiDataSet
 %%
     methods (Access=private)  
         function inp = parseEquation(~,usereqn)
-            %extract variables, user text and instructions from usereqn string
+            %extract variables, user text and instructions from usereqn
+            %string
             inp.utext = [];
-            idstring = regexpi(usereqn,'''');
-            if ~isempty(idstring)
-                utext = usereqn(idstring(1):idstring(2));
-                usereqn = replace(usereqn,utext,'utext');
-                idstring = regexpi(utext,'''');
-                if ~isempty(idstring)
-                    inp.utext = utext(idstring(1)+1:idstring(2)-1);
+            %find whether user is passing 'dst' to the function
+            inp.isdst = contains(usereqn,'dst','IgnoreCase',true);
+            %find whether user is passing 'mobj' to the function
+            inp.idm = contains(usereqn,'mobj','IgnoreCase',true);
+            
+            %find any char in '' or string in ""             
+            idchar = sort([regexpi(usereqn,''''),regexpi(usereqn,'"')]);
+            usertxt = usereqn;
+            count = 1;
+            if ~isempty(idchar)                
+                for i=1:2:length(idchar)
+                    %commented text stores all values in quotes before
+                    %applying mask
+%                     utext = usereqn(idchar(i):idchar(i+1));
+%                     if strcmp(utext(1),'''')    %character verctor
+%                         inp.utext{count} = strip(utext,'''');
+%                     else                        %string
+%                         inp.utext{count} = strip(utext,'"');
+%                     end
+                    %create mask to hide input text so variables can be found 
+                    nchar = idchar(i+1)-idchar(i)+1;
+                    usertxt(idchar(i):idchar(i+1)) = repmat('u',1,nchar);
+                    count = count+1;
                 end
             end
-            TXTeqn = upper(usereqn);
+
             %strip out input variables: x,y,z,t.
-            usertxt = sprintf('(%s)',TXTeqn);
-            
-            %find whether user is passing 'dst' to the function
-            inp.isdst = contains(usertxt,'dst','IgnoreCase',true);
+            usertxt = sprintf('(%s)',upper(usertxt)); 
             if inp.isdst            %dstables to be used
                 inp.varsused = 'dst';
             else                    %xyzt expression defined
@@ -130,10 +144,7 @@ classdef muiUserModel < muiDataSet
             %extract the function name
             posnstvars = regexpi(inp.eqn,'(');
             inp.fcn = inp.eqn(1:posnstvars-1);
-            
-            %find whether user is passing 'mobj' to the function
-            inp.idm = contains(usertxt,'mobj','IgnoreCase',true);
-            
+
             %handle comment strings that give supplementary instructions
             posncom = regexp(inp.eqn,'%', 'once');
             inp.isrowvar = false;              
@@ -250,10 +261,12 @@ classdef muiUserModel < muiDataSet
             dst = props(idx); %to just pass dstables use props(idx).data ***????
             try
                 %handle to anonymous function based on user equation
-                heq = str2func(['@(dst,utext,mobj) ',inp.eqn]);
+%                 heq = str2func(['@(dst,utext,mobj) ',inp.eqn]);
+                heq = str2func(['@(dst,mobj) ',inp.eqn]);
                 maxnargout = nargout(inp.fcn);
                 varout = cell(1, maxnargout);
-                [varout{:}] = heq(dst,inp.utext,mobj);
+%                 [varout{:}] = heq(dst,inp.utext,mobj);
+                [varout{:}] = heq(dst,mobj);
             catch ME
                 errormsg = sprintf('Invalid expression\n%s',ME.message);
                 warndlg(errormsg);
@@ -271,14 +284,16 @@ classdef muiUserModel < muiDataSet
             t = XYZT{4};
             try
                 %handle to anonymous function based on user equation
-                heq = str2func(['@(t,x,y,z,utext,mobj) ',inp.eqn]);
+%                 heq = str2func(['@(t,x,y,z,utext,mobj) ',inp.eqn]);
+                heq = str2func(['@(t,x,y,z,mobj) ',inp.eqn]);
                 if isempty(inp.fcn)
                     maxnargout = 1;
                 else
                     maxnargout = nargout(inp.fcn);
                 end                 
                 varout = cell(1, maxnargout);
-                [varout{:}] = heq(t,x,y,z,inp.utext,mobj);
+%                 [varout{:}] = heq(t,x,y,z,inp.utext,mobj);
+                [varout{:}] = heq(t,x,y,z,mobj);
            catch ME
                 errormsg = sprintf('Invalid expression\n%s',ME.message);
                 warndlg(errormsg);

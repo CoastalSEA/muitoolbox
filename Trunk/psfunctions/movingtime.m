@@ -35,28 +35,39 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
         func = 'mean';
     end
     
-    if ~isduration(tdur) && (ischar(tdur) || isstring(tdur))        
+    tm = []; vm = [];
+    
+    %convert text values to durations
+    if ischar(tdur) || isstring(tdur)      
         tdur = str2duration(tdur);
-    else
-        warndlg('Averaging period, tdur, must be duration or chaacheter data type')
+    elseif ~isduration(tdur)
+        warndlg('Averaging period, tdur, must be duration or character data type')
+        return
     end
     
-    if ~isduration(tstep) && (ischar(tstep) || isstring(tstep))        
+    if ischar(tstep) || isstring(tstep)      
         tstep= str2duration(tstep);
-    else
-        warndlg('Step interval, tstep, must be duration or chaacheter data type')
+    elseif ~isduration(tdur)
+        warndlg('Step interval, tstep, must be duration or character data type')
+        return
+    end
+    txt = sprintf('Edit durations - Cancel to use existing values\nAveraging period (y,d,h,m,s):');
+    promptxt = {txt,'Time step interval (y,d,h,m,s)'};
+    defaults = [cellstr(tdur),cellstr(tstep)];
+    answer = inputdlg(promptxt,'MovingTime',1,defaults);
+    if ~isempty(answer)
+        tdur = str2duration(answer{1});
+        tstep = str2duration(answer{2});
     end
     
+    %create anonymous function (different format for min/max)
     if strcmpi(func,{'min','max'})
         func = str2func(['@(x)', func, '(x,[],''omitnan'')']);
     else
         func = str2func(['@(x)', func, '(x,''omitnan'')']);
     end
-    
+
     startime = tin(1);
-%     endtime = t(end);
-%     recordur = t(end)-t(1);
-    
     stoptime = tin(end)-tdur;
     nint = floor((stoptime-startime)/tstep);
     

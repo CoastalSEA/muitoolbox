@@ -25,7 +25,10 @@ function h = getwidget(handle,settings,widgetpos,idx)
 %   settings.InputFields = {'var1'};   %text prompt for input field to be displayed
 %   settings.Style = {'style'};        %uicontrols for each input field (same no. as input fields)
 %   settings.DefaultInputs = {'test'}; %default text or selection lists
-%   settings.ControlButtons = {'Ev'];  %text for buttons to edit or update selection
+%   settings.Userdata = [];           %data assigned to UserData of uicontrol
+%   settings.ControlButtons = {'Ev'};  %text for buttons to edit or update selection
+%   widgetpos.height = 0.9;
+%   widgetpos.pos4 = 0.1;
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2020
@@ -55,6 +58,7 @@ function h = getwidget(handle,settings,widgetpos,idx)
             'ListboxTop',1, ...
             'Tag',sprintf('%s>uic%d',widgetname,idx)); 
     %control button if included
+    %if not visible, check that handle Units are normalized
     if ~isempty(settings.ControlButtons) && ~isempty(settings.ControlButtons{idx})
         butcall = @(src,evt)editrange(src,evt);
         buttxt = settings.ControlButtons{idx};
