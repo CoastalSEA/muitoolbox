@@ -47,9 +47,11 @@ function stats = getTSstats(data,metatxt)
         warndlg(warntxt);
         return; 
     end
-    
-    dst_table = data.DataTable;
-    ts = timeseries(dst_table{:,1},dst_table.Properties.RowNames);
+
+    datatimes = data.RowNames;
+    %force datetime format to one that timeseries recognises
+    datatimes.Format = 'dd-MMM-yyyy HH:mm:ss';
+    ts = timeseries(data.DataTable{:,1},cellstr(datatimes));
     
     %get statistics for time series as a whole
     stats = time_stats(ts,cthr);
@@ -157,8 +159,8 @@ function stats = time_stats(ts,cthr,varargin)
     gaps = (ts.Length-nrec)/ts.Length*100;
     stsum = sum(ts,'Weighting','time');  
     mtime = datetime(getabstime(ts));
-    %eps(0) to avoid divide by zero in linear regression
-    mtime = years(mtime-mtime(1)+eps(0)); 
+    %eps(0) to avoid divide by zero in linear regression 
+    mtime = set_time_units(mtime,eps(0),'years');
     var = ts.Data;
     [slope,intcpt,Rsq] = regression_model(mtime,var,'Linear');
     

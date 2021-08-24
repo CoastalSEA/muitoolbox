@@ -107,6 +107,11 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
     
     %now call regression model
     nint = 10; %number of points in regression line
+    answer = questdlg('Set time origin at 0 or first record?','Regression',...
+                       'Origin','1st record','Origin');
+    if strcmp(answer,'1st record')
+       indat = indat-indat(1);
+    end
     [~,~,~,x,y,res] = regression_model(indat,depdat,model,nint);
     
     %modify the metatxt if time units have been defined

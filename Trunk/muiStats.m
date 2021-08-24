@@ -272,6 +272,8 @@ classdef muiStats < handle
                     obj.DescOut{idx} = results;
                 case 'Regression'
                     obj.Data.Y = obj.Data.X;  %assign variable to Y
+                    obj.Labels.Y = obj.Labels.X;
+                    obj.Labels.X = 'Time';
                     %Assign the RowNames datetime to X as a dstable so that
                     %checkDatDur in getRegressionStats works
                     obj.Data.X = dstable(obj.Data.X.RowNames,'VariableNames',{'Time'});
