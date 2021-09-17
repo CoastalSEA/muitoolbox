@@ -33,7 +33,7 @@ classdef ParamInput_template < muiPropertyUI                 % << Edit to classn
     methods (Access=protected)
         function obj = ParamInput_template(mobj)             % << Edit to classname
             %constructor code:            
-            %values defined in UI function setTabProperties used to assign
+            %TabDisplay values defined in UI function setTabProperties used to assign
             %the tabname and position on tab for the data to be displayed
             obj = setTabProps(obj,mobj);  %muiPropertyUI function
             

@@ -69,16 +69,17 @@ classdef muiStats < handle
             ht = src.Children;   %clear any existing tab content
             delete(ht);
             
-            if strcmp(src.Tag,'Descriptive')
-                idx = selectStatOuput(obj.DescOut);
-                if isempty(idx), return; end
-                metatxt = obj.DescOut{idx}.Properties.Description; 
-                tablefigure(src,metatxt,obj.DescOut{idx});
-            else
-                idx = selectStatOuput(obj.ExtrOut);
-                if isempty(idx), return; end
-                metatxt = obj.ExtrOut{idx}.Properties.Description; 
-                tablefigure(src,metatxt,obj.ExtrOut{idx});
+            switch src.Tag
+                case {'Stats','Descriptive'}
+                    idx = selectStatOuput(obj.DescOut);
+                    if isempty(idx), return; end
+                    metatxt = obj.DescOut{idx}.Properties.Description; 
+                    tablefigure(src,metatxt,obj.DescOut{idx});
+                case 'Extremes'
+                    idx = selectStatOuput(obj.ExtrOut);
+                    if isempty(idx), return; end
+                    metatxt = obj.ExtrOut{idx}.Properties.Description; 
+                    tablefigure(src,metatxt,obj.ExtrOut{idx});
             end
             %-nested function----------------------------------------------
             function idx = selectStatOuput(output)
@@ -517,8 +518,13 @@ classdef muiStats < handle
             %obj - DataStats UI object, mobj - Main UI object
             %idx - index for subtab to use as Tag name or numeric index
             tabobj = findobj(mobj.mUI.Tabs.Children,'-regexp','Tag','Stat');
+            if isempty(tabobj), return; end
             subtabgrp = tabobj(1).Children;  %tabgroup to use
-            statstabs = subtabgrp.Children;
+            if isempty(subtabgrp) %use main tab is no subtab
+                statstabs = tabobj;
+            else
+                statstabs = subtabgrp.Children;
+            end
             if ischar(idx)
                 idx = find(strcmp({statstabs(:).Tag},idx));
             end

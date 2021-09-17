@@ -939,7 +939,7 @@ classdef (Abstract = true) muiModelUI < handle
                             isa(lobj.(classname),classname)                
                 cobj = lobj.(classname);  
             else
-                if nargin>2
+                if nargin>3
                     warndlg(msgtxt);
                 end
                 cobj = []; 

@@ -2,7 +2,7 @@ classdef DataImport_template                                 % << Edit to classn
 %
 %-------class help---------------------------------------------------------
 % NAME
-%   DataImport_temaplate.m
+%   DataImport_template.m
 % PURPOSE
 %   Class to illustrate importing a data set, adding the results to dstable
 %   and a record in a dscatlogue (as a property of muiCatalogue)
@@ -170,7 +170,7 @@ classdef DataImport_template                                 % << Edit to classn
             datasetname = datasetnames{dataset};
         end
 %%
-        function [data,header,filename] = readInputData(~)   % << Edit to file format being used
+        function [data,header,filename] = readInputData(~) 
             %read wind data (read format is file specific).
             [fname,path,~] = getfiles('FileType','*.txt');
             filename = [path fname];
