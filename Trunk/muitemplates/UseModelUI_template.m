@@ -80,7 +80,7 @@ classdef UseModelUI_template < ModelUI                       % << Edit to classn
             %move 3 places to left - note: graphical objects stack is in reverse order
             % uistack(hmenu,'down',3); 
 
-            %demo code to delete change a callback and delete sub-submenus
+            %demo code to change a callback and delete sub-submenus
             % menuname = 'Setup';
             % hm = findSubMenu(obj,menuname,'Import Data');
             % hm.MenuSelectedFcn=@obj.setupMenuOptions; %change menu call fcn

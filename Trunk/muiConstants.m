@@ -40,7 +40,12 @@ classdef muiConstants < muiPropertyUI
         end
     end
 %%
-    methods
+    methods  
+        function obj = setInput(obj)
+            %gui for user to set Parameter Input values
+            obj = editProperties(obj);  
+        end     
+%%  
         function cn = getConstantStruct(obj)
             %contant values as a struct with abbreviated field names
             cn.y2s = obj.y2s;

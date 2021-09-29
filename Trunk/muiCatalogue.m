@@ -276,7 +276,7 @@ classdef muiCatalogue < dscatalogue
         function setCase(obj,cobj,varargin)
             %add a case to the Catalogue and assign to DataSets
             % varargin are as defined for dscatalogue.addRecord with
-            % classname derived from obj, viz:            
+            % classname derived from obj          
             % casetype  - type of data set (e.g. keywords: model, data)
             % casedesc  - description of case (optional)
             % SupressPrompts - logical flag to use casedesc as record 

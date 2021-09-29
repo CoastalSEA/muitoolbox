@@ -6,7 +6,7 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
 % PURPOSE
 %   Computes moving averages for a window of tint duration
 % USAGE
-%   y = movingtime(x,t,tdur,tstep,fun)
+%   [tm,vm] = movingtime(var,tin,tdur,tstep,func)
 % INPUTS
 %   var - is the input vector to be smoothed. 
 %   tin - is the datetime vector (same legnth as x)
@@ -15,12 +15,12 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
 %   func -  custom function (e.g. mean, std etc) passed as character 
 %          string (optional - default is mean)
 % OUTPUT
-%   vm - is output vector of same length as x
 %   tm - time at the beginning of each stepping interval, ie every tstep from
 %        time t0 to the nearest interval that is less than tdur from the
 %        end of the record
+%   vm - is output vector of same length as x
 % EXAMPLE
-%   vm = movingtime(x,t,1 yr,1 m,'std') returns the standard deviation at
+%   [tm,vm] = movingtime(x,t,1 yr,1 m,'std') returns the standard deviation at
 %   monthly intervals and averaged over 1 year.
 %
 % Author: Ian Townend

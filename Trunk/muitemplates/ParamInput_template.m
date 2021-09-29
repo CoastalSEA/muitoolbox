@@ -2,11 +2,11 @@ classdef ParamInput_template < muiPropertyUI                 % << Edit to classn
 %
 %-------class help---------------------------------------------------------
 % NAME
-%   PropsInput_template.m
+%   ParamInput_template.m
 % PURPOSE
 %   Class for input parameters for some component of the UI application
 % USAGE
-%   obj = PamamInput_template.setInput(mobj); %mobj is a handle to Main UI
+%   obj = ParamInput_template.setInput(mobj); %mobj is a handle to Main UI
 % SEE ALSO
 %   inherits muiPropertyUI
 %
@@ -50,19 +50,18 @@ classdef ParamInput_template < muiPropertyUI                 % << Edit to classn
         function obj = setInput(mobj,editflag)
             %gui for user to set Parameter Input values
             classname = 'ParamInput_template';               % <<Edit to classname
-            if isfield(mobj.Inputs,classname) && ...
-                            isa(mobj.Inputs.(classname),classname)
-                obj = mobj.Inputs.(classname);  
-            else
-                obj = ParamInput_template(mobj);             % << Edit to classname
+            obj = getClassObj(mobj,'Inputs',classname);
+            if isempty(obj)
+                obj = ParamInput_template(mobj);             % << Edit to classname  
             end
+            
             %use muiPropertyUI function to generate UI
             if nargin<2 || editflag
                 %add nrec to limit length of props UI (default=12)
                 obj = editProperties(obj);  
                 %add any additional manipulation of the input here
             end
-            mobj.Inputs.(classname) = obj;
+            setClassObj(mobj,'Inputs',classname,obj);
         end     
     end
 %%        

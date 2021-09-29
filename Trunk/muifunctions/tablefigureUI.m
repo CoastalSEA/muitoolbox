@@ -1,4 +1,4 @@
-function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef)
+function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef,figpos)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -20,8 +20,9 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef)
 %               Cancel to abort
 %               Add to add a row to the table
 %               Save, Close or any other text to return the current table
+%   figpos    - position offigure on screen, [left,bottom] in normalized values (optional)
 % OUTPUT
-%   output    - table with same attributes as atable with any changes to
+%   output    - table with same attributes as atable with any changes
 %               made to data
 % SEE ALSO
 %   tablefigure.m and tabtablefigure.m. Used in muiEditUI
@@ -30,16 +31,24 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef)
 % CoastalSEA (c)Jan 2021
 %--------------------------------------------------------------------------
 %
-
+    if nargin<6
+        figpos = [];
+    end
+    
     h_fig = tablefigure(figtitle,headtext,atable);
-    h_fig.CloseRequestFcn= @(src,evt)closeuicallback(src,evt); 
+    h_fig.CloseRequestFcn= @(src,evt)closeuicallback(src,evt);    
+    if ~isempty(figpos)
+        h_fig.Units = 'normalized';
+        h_fig.Position(1:2) = figpos;      %user defined position for figure
+        h_fig.Units = 'pixels';
+    end
     
     ht = findobj(h_fig.Children,'Type','uitable');
     if isedit        
         ht.ColumnEditable = true;
     end
     %
-    if nargin==5 && ~isempty(butdef)
+    if nargin>4 && ~isempty(butdef)
         ok = 0;
         nbut = length(butdef.Text);
         hbut = findobj(h_fig.Children,'Tag','uicopy');
@@ -109,12 +118,16 @@ end
 function addRow(h_fig)
     %
     lobj = findobj(h_fig,'Tag','uitablefigure');
-    [nrow,ncol] = size(lobj.Data);
-    if iscell(lobj.Data)
-        newrow = repmat({''},[1,ncol]);
-    else
-        newrow = zeros(1,ncol);
-    end
-    lobj.Data(nrow+1,:) = newrow;
+    temptable = cell2table(lobj.Data);
+    temptable = [temptable;temptable(1,:)];
+    temptable{end,:} = missing;
+    lobj.Data = table2cell(temptable);
+%     [nrow,ncol] = size(lobj.Data);
+%     if iscell(lobj.Data)
+%         newrow = repmat({''},[1,ncol]);
+%     else
+%         newrow = zeros(1,ncol);
+%     end
+%     lobj.Data(nrow+1,:) = newrow;
     drawnow;
 end

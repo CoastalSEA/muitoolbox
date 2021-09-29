@@ -204,7 +204,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             switch src.Text
                 case 'Load'
                     fname = sprintf('%s.loadData',classname);
-                    callStaticFunction(obj,fname,obj.Cases,classname); 
+                    callStaticFunction(obj,classname,fname); 
                 case 'Add'
                     useCase(obj.Cases,'single',classname,'addData');
                 case 'Delete'

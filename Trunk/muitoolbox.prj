@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration build-checksum="2423897320" file="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\muitoolbox.prj" location="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="591868257" file="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\muitoolbox.prj" location="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>muitoolbox</param.appname>
     <param.authnamewatermark>Ian Towend</param.authnamewatermark>
     <param.email>i.townend@coastalsea.uk</param.email>
@@ -78,7 +78,7 @@ setmuipath.m
     <param.exported.on.package>false</param.exported.on.package>
     <param.required.addons>
       <requiredaddons>
-        <requiredAddOn downloadURL="https://www.coastalsea.uk" earliest="earliest" fromRepository="false" id="3fed2193-17cc-4e12-9a85-874c6bf5fd0d" include="true" latest="latest">dstoolbox</requiredAddOn>
+        <requiredAddOn downloadURL="https://www.coastalsea.uk" earliest="earliest" fromRepository="false" id="3fed2193-17cc-4e12-9a85-874c6bf5fd0d" include="false" latest="latest">dstoolbox</requiredAddOn>
       </requiredaddons>
     </param.required.addons>
     <param.matlab.project.id />
@@ -90,22 +90,12 @@ setmuipath.m
     <param.compatiblity.macos>true</param.compatiblity.macos>
     <param.compatiblity.linux>true</param.compatiblity.linux>
     <param.compatiblity.matlabonline>true</param.compatiblity.matlabonline>
-    <param.installation.map>+muitoolbox\getInstallationLocation.mlx</param.installation.map>
-    <param.additional.sw.names>
-      <item>dstoolbox</item>
-    </param.additional.sw.names>
-    <param.additional.sw.licenses>
-      <item>www.coastalsea.uk</item>
-    </param.additional.sw.licenses>
-    <param.additional.sw.win.url>
-      <item>www.coastalsea.uk</item>
-    </param.additional.sw.win.url>
-    <param.additional.sw.mac.url>
-      <item>www.coastalsea.uk</item>
-    </param.additional.sw.mac.url>
-    <param.additional.sw.linux.url>
-      <item>www.coastalsea.uk</item>
-    </param.additional.sw.linux.url>
+    <param.installation.map />
+    <param.additional.sw.names />
+    <param.additional.sw.licenses />
+    <param.additional.sw.win.url />
+    <param.additional.sw.mac.url />
+    <param.additional.sw.linux.url />
     <unset>
       <param.version />
       <param.output />
@@ -125,6 +115,11 @@ setmuipath.m
       <param.compatiblity.macos />
       <param.compatiblity.linux />
       <param.compatiblity.matlabonline />
+      <param.additional.sw.names />
+      <param.additional.sw.licenses />
+      <param.additional.sw.win.url />
+      <param.additional.sw.mac.url />
+      <param.additional.sw.linux.url />
     </unset>
     <fileset.rootdir>
       <file>${PROJECT_ROOT}</file>

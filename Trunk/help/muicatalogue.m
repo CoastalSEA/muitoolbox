@@ -13,7 +13,7 @@
 % Within UIs developed using the _muitoolbox_, the access syntax is as follows (see 
 % <matlab:doc('muitoolbox') muitoolbox> for details of the main UI structure):
 %%
-%   mobj.Cases = muiCatalogue;  %the main UI holds an instance of muiCataalogue in the Cases property
+%   mobj.Cases = muiCatalogue;  %the main UI holds an instance of muiCatalogue in the Cases property
 %   mobj.Cases.Catalogue = dscatalogue;                   %catalogue table
 %   mobj.Cases.DataSets.(classname)(classrec) = classobj; %an instance of a class
 

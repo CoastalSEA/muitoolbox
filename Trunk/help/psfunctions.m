@@ -25,6 +25,10 @@
 % * *fittedtitle.m*
 % - fit title text to the width of a figure (handles title and sgtitle).
 %
+% * *frequencyanalysis.m*
+% - generate a range of plots of frequency, probability of exceedance and
+%   duration of exceedance for a timeseries of data
+%
 % * *getclusters.m*
 % - identify cluster in a timeseries with options to adjust threshold, 
 % method of selection and interval between clusters
@@ -39,7 +43,7 @@
 % * *mcolor.m*
 % - select a default Matlab(TM) color definition from table
 %
-% * * mgpdfit.m*
+% * *mgpdfit.m*
 % - maximum likelihood estimate of the fit parameters for a GPD and compute return period
 % estimates and confidence intervals (user prompt for plotted output)
 %

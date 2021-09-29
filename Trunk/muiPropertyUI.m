@@ -183,7 +183,7 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             %use updated properties to call inpudlg and return new values
             %small screens can only handle ~12 inputs. For input lists with
             %more than 12 values split the entry into 2 dialogues
-            if length(defaultvalues)>12
+            if length(defaultvalues)>nrec
                 useInp=multiInputdlg(obj,prompt,title,numlines,...
                                                     defaultvalues,nrec);
                 if isempty(useInp), return; end

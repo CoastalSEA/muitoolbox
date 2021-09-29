@@ -924,15 +924,31 @@ classdef (Abstract = true) muiModelUI < handle
             % classtype - Cases, Inputs or mUI field
             % classname - name of class being called
             % msgtxt - message to display if class does not exist (optional)
-            if strcmp(classtype,'Cases')
-                lobj = obj.Cases.DataSets; %map Cases to DataSets property
-            else
-                lobj = obj.(classtype);
+%             if strcmp(classtype,'Cases')
+%                 lobj = obj.Cases.DataSets; %map Cases to DataSets property
+%             else
+%                 lobj = obj.(classtype);
+%                 if strcmp(classtype,'mUI') && ~isempty(lobj.(classname))
+%                     %mUI does not use Class names for field names
+%                     cobj = lobj.(classname);
+%                     return;
+%                 end
+%             end
+            
+            switch classtype
+                %classtype is hard coded so that can change in muiModelUI 
+                %independently of naming in classess that are being saved
+                case 'Inputs'
+                    lobj = obj.Inputs;
+                case 'Cases'
+                    lobj = obj.Cases.DataSets; %map Cases to DataSets property
+                case 'mUI'
+                lobj = obj.mUI;
                 if strcmp(classtype,'mUI') && ~isempty(lobj.(classname))
                     %mUI does not use Class names for field names
                     cobj = lobj.(classname);
-                    return
-                end
+                    return;
+                end                    
             end
             %
             if isfield(lobj,classname) && ...
@@ -945,6 +961,31 @@ classdef (Abstract = true) muiModelUI < handle
                 cobj = []; 
             end
         end
-    
+%%
+        function setClassObj(obj,classtype,classname,cobj,msgtxt)
+            %assign instance to muiModelUI property that hold class instances
+            % classtype - Cases, Inputs or mUI field
+            % classname - name of class being called (or fieldname for mUI)
+            % msgtxt - message to display if class does not exist (optional)
+            switch classtype
+                %classtype is hard coded so that can change in muiModelUI 
+                %independently of naming in classess that are being saved
+                case 'Inputs'
+                    obj.Inputs.(classname) = cobj;
+                case 'Cases'
+                    %use muiCatalogu.setCase to add new records. This call
+                    %updates an existing record, which may contain
+                    %multiple class instances ie cobj can be an array
+                    obj.Cases.DataSets.(classname) = cobj;
+                case 'mUI'
+                    obj.mUI.(classname) = cobj;
+                otherwise
+                    if nargin>4
+                        warndlg(msgtxt);
+                    end
+            end
+        end
+%%
+
     end    
 end
