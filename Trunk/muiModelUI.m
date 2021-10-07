@@ -241,7 +241,7 @@ classdef (Abstract = true) muiModelUI < handle
             for i=1:length(tabtags)
                 vals = tabs.(tabtags{i});
                 uitab(obj.mUI.Tabs,'Title',vals{1}','Tag',tabtags{i},...
-                            'ButtonDownFcn',vals{2});
+                                                'ButtonDownFcn',vals{2});
                 if ~isempty(subtags) && any(strcmp(subtags,tabtags{i}))
                     obj = setSubTab(obj,tabtags{i},subtabs);
                 end
@@ -255,7 +255,7 @@ classdef (Abstract = true) muiModelUI < handle
             for j=1:size(subtabs.(tabtag),1)
                 subvals = subtabs.(tabtag)(j,:);
                 uitab(subtabgrp,'Title',subvals{1}','Tag',strip(subvals{1}),...
-                    'ButtonDownFcn',subvals{2});
+                                               'ButtonDownFcn',subvals{2});
             end
         end   
 %%        
@@ -353,11 +353,10 @@ classdef (Abstract = true) muiModelUI < handle
             if strcmp(ext,'.mat')
                 loadModel(obj);
             end
-%             obj.DrawMap;
-            
+
             %force the initialisation of datasets.
             ht = findobj(obj.mUI.Tabs.Children,'-depth',0,...
-                                         '-not','ButtonDownFcn','gcbo;');
+                                         '-not','ButtonDownFcn','');
             for i=1:length(ht)
                 hs = func2str(ht(i).ButtonDownFcn);
                 if contains(hs,'refresh')

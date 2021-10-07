@@ -157,7 +157,9 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
         function isvalid = isValidInstance(obj)
             %check whether the data in a single class has been added
             %input data is loaded using PropertyInterface
-            localProperties = getCharProperties(obj);
+            localProperties = getProperties(obj);
+            %originally used: localProperties = getCharProperties(obj);
+            %changed to allow structs to be used (eg EqCoeffProps in Asmita)
             checkProps = cellfun(@isempty,localProperties);
             if all(~checkProps)
                 isvalid = true;
