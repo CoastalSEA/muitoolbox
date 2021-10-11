@@ -23,6 +23,10 @@
 % * *cleantable.m*
 % - clean table by checking numeric data are not cells and 
 % replacing non-standard values
+%
+% * *deciyear.m*
+% -  convert datetimes, or date strings, to decimal years
+%
 % 
 % * *editrange.m*
 % - button callback function to edit range and enter in a text uicontrol

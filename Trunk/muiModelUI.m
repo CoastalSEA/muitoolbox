@@ -306,7 +306,6 @@ classdef (Abstract = true) muiModelUI < handle
         function newproject(obj,~,~)
             %clear any existing model and initialise a new project
             obj.clearModel;
-            hInfo = obj.Info;
             Prompt = {'Project Name','Date'};
             Title = 'Project';
             NumLines = 1;
@@ -314,8 +313,8 @@ classdef (Abstract = true) muiModelUI < handle
             %use updated properties to call inpudlg and return new values            
             answer=inputdlg(Prompt,Title,NumLines,DefaultValues);
             if length(answer)>1
-                hInfo.ProjectName = answer{1};
-                hInfo.ProjectDate = answer{2};
+                obj.Info.ProjectName = answer{1};
+                obj.Info.ProjectDate = answer{2};
                 obj.DrawMap;
             end
         end
@@ -499,7 +498,14 @@ classdef (Abstract = true) muiModelUI < handle
             obj.Constants = muiConstants.Evoke;
             obj.Cases = muiCatalogue; %CHECK THAT THIS REMOVES ALL DATA
             obj.Inputs = [];
-            obj.DrawMap;  
+            htabs = findobj(obj.mUI.Tabs,'Type','uitab');
+            for i=1:length(htabs)
+                htabgrp = findobj(htabs(i),'Type','uitabgroup');
+                if isempty(htabgrp)
+                    delete(htabs(i).Children)
+                end
+            end
+            obj.DrawMap;              
         end
 %%        
         function clearFigures(~,~,~)
@@ -811,22 +817,31 @@ classdef (Abstract = true) muiModelUI < handle
             pName = obj.Info.ProjectName;
             pDate = obj.Info.ProjectDate;
             if ~isempty(pName)
-                ProjectNam = ['Project Name: ' pName];
-                ProjectDat = ['Date Created: ' pDate];
+                ProjectName = ['Project Name: ' pName];
+                ProjectDate = ['Date Created: ' pDate];
             else
-                ProjectNam = 'Project Name:              ';
-                ProjectDat = 'Date Created:             ';
+                ProjectName = 'Project Name:              ';
+                ProjectDate = 'Date Created:             ';
             end
-            uicontrol('Parent', hf, 'Style', 'text',...
-                'String', ProjectNam,...
-                'HorizontalAlignment', 'left',...
-                'Units','normalized', ...
-                'Position',[0.07 0.955 0.5 0.04]);
-            uicontrol('Parent', hf, 'Style', 'text',...
-                'String', ProjectDat,...
-                'HorizontalAlignment', 'left',...
-                'Units','normalized', ...
-                'Position',[0.6 0.955 0.3 0.04]);
+            
+            hproj = findobj(hf,'Tag','projtxt');
+            if isempty(hproj)
+                uicontrol('Parent', hf, 'Style', 'text',...
+                    'String', ProjectName,...
+                    'HorizontalAlignment', 'left',...
+                    'Units','normalized', ...
+                    'Position',[0.07 0.955 0.5 0.04],...
+                    'Tag','projtxt');
+                uicontrol('Parent', hf, 'Style', 'text',...
+                    'String', ProjectDate,...
+                    'HorizontalAlignment', 'left',...
+                    'Units','normalized', ...
+                    'Position',[0.6 0.955 0.3 0.04],...
+                    'Tag','projtxt');
+            else
+                hproj(2).String = ProjectName;
+                hproj(1).String = ProjectDate;
+            end
             MapTable(obj,ht);
         end        
 %%
