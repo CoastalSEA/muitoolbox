@@ -636,7 +636,7 @@ classdef muiPlots < handle
             if strcmp(src.Tag,'runMovie')       %user pressed run button   
                 implay(obj.ModelMovie);
             elseif strcmp(src.Tag,'saveMovie')  %user pressed save button 
-                saveAnimation2File(obj);
+                saveanimation2file(obj);
             else                                %user moved slider
                 val = ceil(src.Value);          %slider value 
                 time = obj.Data.T(val);         %time slice selected
@@ -741,34 +741,34 @@ classdef muiPlots < handle
             end
         end 
 %%
-        function saveAnimation2File(obj)
-            %save animation to file
-            answer = questdlg('Save as which file type?','Save animation',...
-                                                'MPEG-4','AVI','Quit''MPEG-4');
-            if strcmp(answer,'Quit')
-                return;
-            elseif strcmp(answer,'MPEG-4')
-                extension = '*.mp4';
-                ftext = 'muimovie.mp4';
-                profile = answer;
-            else
-                extension = '*.avi';
-                ftext = 'muimovie.avi';
-                profile = 'Uncompressed AVI';
-            end
-            [file,path] = uiputfile(extension,'Save file as',ftext);
-            if file==0, return; end
-            v = VideoWriter([path,file],profile);
-            spec = inputdlg({'Frame rate (fps):','Quality (0-100, MPEG only):'},'Save animations',...
-                              1,{num2str(v.FrameRate),num2str(v.Quality)});
-            if ~isempty(spec)
-                v.FrameRate = str2double(spec{1});
-                v.Quality = str2double(spec{2});
-            end
-            open(v);
-            writeVideo(v,obj.ModelMovie);
-            close(v);
-        end
+%         function saveanimation2file(obj)   %now stand alone function
+%             %save animation to file
+%             answer = questdlg('Save as which file type?','Save animation',...
+%                                                 'MPEG-4','AVI','Quit''MPEG-4');
+%             if strcmp(answer,'Quit')
+%                 return;
+%             elseif strcmp(answer,'MPEG-4')
+%                 extension = '*.mp4';
+%                 ftext = 'muimovie.mp4';
+%                 profile = answer;
+%             else
+%                 extension = '*.avi';
+%                 ftext = 'muimovie.avi';
+%                 profile = 'Uncompressed AVI';
+%             end
+%             [file,path] = uiputfile(extension,'Save file as',ftext);
+%             if file==0, return; end
+%             v = VideoWriter([path,file],profile);
+%             spec = inputdlg({'Frame rate (fps):','Quality (0-100, MPEG only):'},'Save animations',...
+%                               1,{num2str(v.FrameRate),num2str(v.Quality)});
+%             if ~isempty(spec)
+%                 v.FrameRate = str2double(spec{1});
+%                 v.Quality = str2double(spec{2});
+%             end
+%             open(v);
+%             writeVideo(v,obj.ModelMovie);
+%             close(v);
+%         end
     end
 %%
 %--------------------------------------------------------------------------

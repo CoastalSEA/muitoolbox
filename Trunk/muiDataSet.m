@@ -73,8 +73,8 @@ classdef (Abstract = true) muiDataSet < handle
             funcname = 'getData';
             [dst,ok] = callFileFormatFcn(obj,funcname,obj,filename);
             if ok<1 || isempty(dst), return; end
-            %assign metadata about data
-            dst.Source{1,1} = filename;
+            %assign metadata about data, Note dst can be a struct
+            dst = updateSource(dst,filename,1);
             
             hw = waitbar(0, 'Loading data. Please wait');
             %now load any other files of the same format
@@ -86,7 +86,7 @@ classdef (Abstract = true) muiDataSet < handle
                     if ~isempty(adn_dst)
                         dst = vertcat(dst,adn_dst); %#ok<AGROW>
                     end
-                    dst.Source{jf,1} = filename;
+                    dst = updateSource(dst,filename,jf);
                     waitbar(jf/nfiles)
                 end                
             end
@@ -94,6 +94,17 @@ classdef (Abstract = true) muiDataSet < handle
             
             setDataSetRecord(obj,muicat,dst,'data');
             getdialog(sprintf('Data loaded in class: %s',classname));
+            %--------------------------------------------------------------
+            function dst = updateSource(dst,filename,jf)
+                if isstruct(dst)
+                    fnames = fieldnames(dst);
+                    for i=1:length(fnames)
+                        dst.(fnames{i}).Source{jf,1} = filename;
+                    end
+                else
+                    dst.Source{jf,1} = filename;
+                end
+            end
         end
     end
 %%    

@@ -38,7 +38,7 @@ classdef (Abstract = true) muiDataUI < handle
 
     methods (Abstract,Access=protected) %methods that all subclasses must define
         setTabContent(obj,src)          %layout options for individual tabs 
-        setVariableLists(obj,src,mobj,crec)  %initialise selection variables
+        setVariableLists(obj,src,mobj)  %initialise selection variables
         useSelection(obj,src,mobj)  %function to do something with selected data
     end
 %--------------------------------------------------------------------------
@@ -88,7 +88,7 @@ classdef (Abstract = true) muiDataUI < handle
                 %now add controls to tab
                 setTabContent(obj,ht);              %defines what controls to use                
                 setDataOptionControls(obj,ht,mobj); %selection controls
-                setVariableLists(obj,ht,mobj,1);    %assign values to variables
+                setVariableLists(obj,ht,mobj);    %assign values to variables
                 setXYZpanel(obj,ht,mobj);           %XYZ button panel
                 setAdditionalButtons(obj,ht,mobj);  %addtional action buttons
                 setTabControlButtons(obj,ht,mobj);  %tab control buttons 
@@ -389,21 +389,28 @@ classdef (Abstract = true) muiDataUI < handle
                 %new tab or clear button selected   
                 itab = strcmp(obj.Tabs2Use,src.Tag);
                 obj.TabContent(itab).Selections{1}.Value = 1;
-                setVariableLists(obj,src,mobj,1)
+                setVariableLists(obj,src,mobj)
             elseif isa(src,'matlab.ui.control.UIControl') && ...
                                                     strcmp(src.Tag,'Case')
                 %case selection has changed                                
                 ht = src.Parent;
                 if src.UserData~=src.Value     
-                    setVariableLists(obj,ht,mobj,src.Value)
+                    setVariableLists(obj,ht,mobj)
                 end
+            elseif isa(src,'matlab.ui.control.UIControl') && ...
+                                                    strcmp(src.Tag,'Dataset')
+                %case selection has changed                                
+                ht = src.Parent;
+                if src.UserData~=src.Value   
+                    setVariableLists(obj,ht,mobj)
+                end    
             elseif isa(src,'matlab.ui.control.UIControl') && ...
                                                     strcmp(src.Tag,'Refresh')
                 %refresh case list button
                 ht = src.Parent;
                 itab = strcmp(obj.Tabs2Use,ht.Tag);
                 obj.TabContent(itab).Selections{1}.Value = 1;
-                setVariableLists(obj,ht,mobj,1)
+                setVariableLists(obj,ht,mobj)
             else
                 %no need to update lists unless Case or Tab changes
             end
@@ -424,7 +431,7 @@ classdef (Abstract = true) muiDataUI < handle
         function XYZselection(obj,src,~,mobj)
             %call inputUI to select a variable to assign to XYZ field
             xyztxt = src.String;                %XYZ button identifier
-            tabobj = src.Parent.Parent;      %parent Tab
+            tabobj = src.Parent.Parent;         %parent Tab
             itab = strcmp(obj.Tabs2Use,tabobj.Tag);
             selected = obj.TabContent(itab).Selections;
             
@@ -438,6 +445,9 @@ classdef (Abstract = true) muiDataUI < handle
                 end
             end
             %get selected Case and dataset (NB caserec must be # in full
+            if ~isfield(desc,'Dataset')
+                desc.Dataset = 'Dataset';
+            end
             %list of Catalogue, not a subset)
             [dst,caserec,idset] = getDataset(mobj.Cases,desc.Case,desc.Dataset);
             %get variable, row and dimension descriptions
@@ -630,6 +640,14 @@ classdef (Abstract = true) muiDataUI < handle
             for k=1:nprop
                 range(k).val = getVarAttRange(dst,dstdesc,inputxt{k});
                 range(k).txt = var2range(range(k).val);
+                if iscellstr(range(k).val)
+                    range(k).val = 1;
+                    if k>1
+                        range(k).txt = dst.Dimensions.(dstnames{k+1});
+                    else
+                        range(k).txt = dst.RowNames;
+                    end
+                end
             end
 
             boxtxt = obj.UIselection(xyz).desc;
@@ -648,11 +666,18 @@ classdef (Abstract = true) muiDataUI < handle
             %
             for i=1:ndim
                 slidervals = selection{2*mdim+i};
-                dimname = dstnames{strcmp(dstdesc,slidervals{1})};
+                if length(slidervals)>1
+                    %slider has been used
+                    dimname = dstnames{strcmp(dstdesc,slidervals{1})};
+                    dimvalue = slidervals{2};                    
+                else %drop down list has been used
+                    dimname = dstnames{2*mdim+i};
+                    dimvalue = range(mdim+i).txt(slidervals);
+                end
                 obj.UIselection(xyz).dims(mdim+i).name = dimname;
-                obj.UIselection(xyz).dims(mdim+i).value = slidervals{2};
-                txtval =  var2str(slidervals{2});
-                boxtxt = sprintf('%s, %s: %s',boxtxt,slidervals{1},txtval{1});
+                obj.UIselection(xyz).dims(mdim+i).value = dimvalue;
+                txtval =  var2str(dimvalue);
+                boxtxt = sprintf('%s, %s: %s',boxtxt,dimname,txtval{1});
             end
 
             %update boxtext description
@@ -670,13 +695,21 @@ classdef (Abstract = true) muiDataUI < handle
             seltext = repmat({'Select:','Range:'},1,mdim);
             uinput.fields   = [seltext(:);dstdesc(mdim+2:end)'];
             style1 = repmat({'linkedpopup','edit'},1,mdim);
-            style2 = repmat({'linkedslider'},1,ndim);
+            if iscell(selrange(end).txt)
+                %assumes only the last ndim dimensions are text lists
+                %introduced to handle elements in Asmita
+                style2 = repmat({'popupmenu'},1,ndim);
+                nvar = 2;
+            else   %default for numeric and datatime/duration dimensions
+                style2 = repmat({'linkedslider'},1,ndim);
+                nvar = 2:length(dstdesc);
+            end
             uinput.style    = [style1(:);style2(:)];
             mcontrol = repmat({'';'Ed'},1,mdim);
             ncontrol = repmat({'Ed'},1,ndim);
             uinput.controls = [mcontrol(:);ncontrol(:)];
             for j=1:2:2*mdim
-                uinput.default{j} = dstdesc(2:end)';  %should this be default(j)?
+                uinput.default{j} = dstdesc(nvar)';  %should this be default(j)?
                 uinput.userdata{j} = {};
                 uinput.default{j+1} = selrange((j+1)/2).txt;
                 uinput.userdata{j+1} = selrange((j+1)/2).val;
@@ -773,8 +806,8 @@ classdef (Abstract = true) muiDataUI < handle
 %%
         function exitDataUI(obj,~,~,mobj)    
             %delete GUI figure and pass control to main GUI to reset obj
-            delete(obj.dataUI.Figure);
-            obj.dataUI.Figure = [];  %clears deleted handle
+%             delete(obj.dataUI.Figure);
+%             obj.dataUI.Figure = [];  %clears deleted handle
             clearDataUI(mobj,obj);
         end            
     end    

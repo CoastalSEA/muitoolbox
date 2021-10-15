@@ -194,7 +194,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
                     tabsrc = findobj(obj.mUI.Tabs,'Tag','Inputs');
                     InputTabSummary(obj,tabsrc);
                 case 'Model Constants'
-                    obj.Constants = editProperties(obj.Constants);
+                    obj.Constants = setInput(obj.Constants);
             end
         end  
 %%
@@ -206,11 +206,11 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
                     fname = sprintf('%s.loadData',classname);
                     callStaticFunction(obj,classname,fname); 
                 case 'Add'
-                    useCase(obj.Cases,'single',classname,'addData');
+                    useCase(obj.Cases,'single',{classname},'addData');
                 case 'Delete'
-                    useCase(obj.Cases,'single',classname,'deleteData');
+                    useCase(obj.Cases,'single',{classname},'deleteData');
                 case 'Quality Control'
-                    useCase(obj.Cases,'single',classname,'qcData');
+                    useCase(obj.Cases,'single',{classname},'qcData');
             end
             DrawMap(obj);
         end   

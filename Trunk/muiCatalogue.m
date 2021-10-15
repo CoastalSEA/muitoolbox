@@ -168,6 +168,15 @@ classdef muiCatalogue < dscatalogue
                     localObj = cobj.RunParam.(inputs{k});
                     if isa(localObj,'muiPropertyUI')
                         propstruct = getPropertiesStruct(localObj);
+                        issubstruct = cellfun(@isstruct,struct2cell(propstruct));
+                        if any(issubstruct)
+                            fnames = fieldnames(propstruct);
+                            idx = find(issubstruct);
+                            for j = 1:length(idx)
+                                propstruct.(fnames{idx(j)}) = ...
+                                    cell2mat(struct2cell(propstruct.(fnames{idx(j)})))';
+                            end
+                        end
                         propdata = vertcat(propdata,struct2cell(propstruct)); %#ok<AGROW>
                         proplabels = vertcat(proplabels,fieldnames(propstruct)); %#ok<AGROW>
                     else
@@ -571,6 +580,8 @@ classdef muiCatalogue < dscatalogue
             % the range of values required
             if ischar(value)
                 indices = getvarindices(var,value);
+            elseif iscell(var) && length(var)>1
+                indices = find(strcmp(var,value));
             elseif length(var)>1
                 indices = interp1(var,1:length(var),value,'nearest'); 
             else
@@ -590,7 +601,12 @@ classdef muiCatalogue < dscatalogue
             dimatt = varatt(2:end);        %attributes excluding variable
             
             %handle single row and empty RowNames
-            dimnames{1} = dimvalues.row;
+            if isfield(dimvalues,'row')
+                dimnames{1} = dimvalues.row;
+            else
+                dimnames{1} = [];
+            end
+            
             if sz(1)==1                    %single row
                 dimnames{1} = 1;
                 dimatt = ['Row1',dimatt];
@@ -611,7 +627,8 @@ classdef muiCatalogue < dscatalogue
             seldim = cell(1,sdim); seldimname = seldim;
             for i=1:sdim
                 idx = cellfun(@length,dimnames)==sz(i);
-                seldim{i} = strip(var2str(dimnames{idx}'));
+                if isrow(dimnames{idx}), dimnames{idx} = dimnames{idx}'; end
+                seldim{i} = strip(var2str(dimnames{idx}));
                 seldimname{i} = dimatt{idx};
             end
             %

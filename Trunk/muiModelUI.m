@@ -424,7 +424,8 @@ classdef (Abstract = true) muiModelUI < handle
             %remove any linked UIs
             linkedguis = fieldnames(obj.mUI);
             for i=4:length(linkedguis) %first 3 entries are for main Figure
-                if ~isempty(obj.mUI.(linkedguis{i}))
+                if ~isempty(obj.mUI.(linkedguis{i})) && ...
+                                        isvalid(obj.mUI.(linkedguis{i}))
                     clearDataUI(obj,obj.mUI.(linkedguis{i}))
                 end
             end   
@@ -708,7 +709,6 @@ classdef (Abstract = true) muiModelUI < handle
                 dst = dstables.(dstnames{i});
                 lastmod = datestr(dst.LastModified);
                 meta = dst.MetaData;
-
                 name = dst.VariableNames';
                 desc = dst.VariableDescriptions';
                 unit = dst.VariableUnits';            

@@ -7,6 +7,7 @@ classdef DataUI_template < muiDataUI                          % << Edit to class
 %   Template for Class that implements the muiDataUI class 
 % SEE ALSO
 %   muiDataUI.m and interfaces for editing, plotting etc
+%   eg muiPLotsUI, muiPlots.m, muiStatsUI, muiStats
 %
 % Author: Ian Townend
 % CoastalSEA (c) Jan 2021

@@ -70,12 +70,15 @@ classdef muiEditUI < muiDataUI
             setEditTab(obj,src)            
         end                
 %%
-        function setVariableLists(obj,src,mobj,caserec)
+        function setVariableLists(obj,src,mobj)
             %Abstract function required by DataGUIinterface
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
+            caserec = sel_uic{strcmp(S.Order,'Case')}.Value;
             cobj = getCase(mobj.Cases,caserec);
+            dsnames = fieldnames(cobj.Data);
+            ids = sel_uic{strcmp(S.Order,'Dataset')}.Value;
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag
                     case 'Case'
@@ -83,11 +86,11 @@ classdef muiEditUI < muiDataUI
                         sel_uic{i}.String = muicat.CaseDescription;
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
-                        sel_uic{i}.String = fieldnames(cobj.Data);
-                        sel_uic{i}.Value = 1;
+                        sel_uic{i}.String = dsnames;
+                        sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Variable'     
                         ds = fieldnames(cobj.Data);
-                        sel_uic{i}.String = cobj.Data.(ds{1}).VariableDescriptions;
+                        sel_uic{i}.String = cobj.Data.(ds{ids}).VariableDescriptions;
                         sel_uic{i}.Value = 1;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
