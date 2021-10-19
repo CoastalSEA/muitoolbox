@@ -10,7 +10,9 @@ function valididx = getvarindices(var,limtxt)
 %   valididx = getvarindices(var,limtxt);
 % INPUT
 %   var - variable for which indices of range are required
-%   limtxt - range text in the form From > XXXX To > YYYY'
+%   limtxt - range text in the form 'From > XXXX To > YYYY'
+%            append range text with xNaN ie 'xNaN From > XXXX To > YYYY'
+%            eg using rangetext = var2range(rangevar,pretext)
 % OUTPUT
 %   validindex - vector of valid indices   
 % SEE ALSO
@@ -44,6 +46,13 @@ function valididx = getvarindices(var,limtxt)
             elseif isduration(var)
                 minB = str2duration(lowerlimit,var.Format);
                 maxB = str2duration(upperlimit,var.Format);
+            elseif iscell(var) && ischar(lowerlimit)
+                %cell array of character vectors with limits being values
+                %in list
+                minV = find(strcmp(var,strip(lowerlimit)));
+                maxV = find(strcmp(var,strip(upperlimit)));
+                valididx = minV:maxV;
+                return;
             elseif iscell(var)  && ischar(var{1})
                 %handle limits for categorical data
                 minV = str2double(lowerlimit);

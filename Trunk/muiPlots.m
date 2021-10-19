@@ -64,7 +64,7 @@ classdef muiPlots < handle
             isvalid = checkdimensions(obj);
             if ~isvalid, return; end
             
-            if strcmp(obj.UIset.Type.String,'User')
+            if ~isempty(obj.UIset.Type) && strcmp(obj.UIset.Type.String,'User')
                 user_plot(obj,mobj);  %pass control to user function
             else
                 %generate the plot
@@ -74,9 +74,28 @@ classdef muiPlots < handle
     end
 %%   
     methods (Access=protected)
-        function ok = getPlotData(obj,muicat,dtype)
+       function setPlot(obj,mobj)    
+            %manage plot generation for different types and add/delete                   
+            %get an existing figure of create a new one
+            getFigure(obj); 
+            %call the specific plot type requested
+            callPlotType(obj);
+            %assign muiPlots instance to handle
+            mobj.mUI.Plots = obj;
+            if isvalid(obj.Plot.CurrentFig)
+                obj.Plot.CurrentFig.Visible = 'on';
+            end
+       end   
+%%
+        function ok = getPlotData(obj,muicat,dtype,legformat)
             %get the data to be used in the plot
+            % dtype - data format to be returned: array, table, dstable,
+            % splittable or timeseries
+            % legtype - format to use for the legend text
             ok = 1;
+            if nargin<4
+                legformat = 'Default';
+            end
             nvar = length(obj.UIsel);
             %initialise struct used in muiCatalogue.getProperty
             props(nvar) = setPropsStruct(muicat);
@@ -97,38 +116,58 @@ classdef muiPlots < handle
             for i=1:length(xyz)
                 %assign the data to the correct axis  
                 data2use = props(i).data;
-                if obj.UIsel(i).scale>1 %apply selected scaling to variable
+                if obj.UIsel(i).scale>1 && obj.UIsel(i).property==1  %apply selected scaling to variable
                     usescale = obj.UIset.scaleList{obj.UIsel(i).scale};
                     dim = 1; %dimension to apply scaling function if matrix
                     data2use = scalevariable(data2use,usescale,dim);
+                    props(i).label = sprintf('%s-%s',usescale,props(i).label);
                 end
                 obj.Data.(xyz{i}) = data2use;
                 obj.AxisLabels.(xyz{i}) = props(i).label;
                 mtxt = sprintf('%s\n%s: %s',mtxt,xyz{i},obj.UIsel(i).desc);
             end
-            obj.Legend = sprintf('%s (%s)',props(1).case,props(1).dset);
             obj.MetaData = mtxt;
-            %description of selection (may need sub-selection if more than
-            %one case/variable used in plot)
-            dimtxt = {props(:).desc};
-            title = sprintf('%s (',dimtxt{1});
+            
+            %generate legend text
+            obj.Legend = setLegendText(obj,props,legformat,1);
+            idplotvar = find([obj.UIsel(:).property]==1);
+            for ivar=2:length(idplotvar)
+                obj.Legend = sprintf('%s\n%s',obj.Legend,...
+                                  setLegendText(obj,props,legformat,ivar));               
+            end
+
+            %description of selection for use as title            
+            dimtxt = {props(:).label};
+            idt = regexp(dimtxt,'('); %remove units from label
+            id0 = cellfun(@isempty,idt);
+            if any(id0)
+                idt{id0} = length(dimtxt{id0})+2;
+            end
+            title = sprintf('%s (',dimtxt{1}(1:idt{1}-2));
             for j=2:length(dimtxt)
-                title = sprintf('%s%s, ',title,dimtxt{j});
+                title = sprintf('%s%s, ',title,dimtxt{j}(1:idt{j}-2));
             end
             obj.Title = sprintf('%s)',title(1:end-2));
         end
-    
-%%
-        function setPlot(obj,mobj)    
-            %manage plot generation for different types and add/delete                   
-            %get an existing figure of create a new one
-            getFigure(obj); 
-            %call the specific plot type requested
-            callPlotType(obj);
-            %assign muiPlots instance to handle
-            mobj.mUI.Plots = obj;
-            if isvalid(obj.Plot.CurrentFig)
-                obj.Plot.CurrentFig.Visible = 'on';
+%%    
+        function legtext = setLegendText(~,props,legformat,ivar)
+            %set the legend text based on the type of plot and selection made
+            if isstruct(legformat(ivar))   %use defined adjustments for legend
+                %legformat is a struct with .idx for the indices of the text
+                %positions to replace (1-3), and .text the replacement text
+                deflegend = {props(ivar).case,props(ivar).dset,props(ivar).desc};
+                idtxt = logical(legformat(ivar).idx);
+                if isempty(legformat(ivar).text)
+                    deflegend = deflegend(idtxt);
+                    legmask = {'%s','%s (%s)'};
+                    legtext = sprintf(legmask{sum(idtxt)},deflegend{:});
+                else
+                    deflegend(idtxt) = legformat(ivar).text;                       
+                    legtext = sprintf('%s (%s) %s',deflegend{:}); 
+                end
+            else                         %use default text for legend
+                legtext = sprintf('%s (%s) %s',props(1).case,...
+                                            props(1).dset,props(1).desc);                     
             end
         end
 %%
@@ -532,6 +571,14 @@ classdef muiPlots < handle
                 case '4DT'
                     warndlg('Not ready yet')
                     return;
+                case 'Digraph'
+                    g = obj.Data.network;     %digraph
+                    y = obj.Data.Y;         %variable used to color nodes 
+                    nsze = obj.Data.nodesize; %size of nodes
+                    obj.Title = obj.AxisLabels.Y;
+                    [hp,hg]  = muiPlots.nodalnetwork(g,y,nsze,obj.Legend,obj.Title);
+                    var.graph = hg; var.plot = hp;
+                    figax = gca;
             end 
            
             adjustAxisTicks(obj,figax);  %adjust tick labels  if defined
@@ -571,6 +618,10 @@ classdef muiPlots < handle
                     end
                 case '4DT'    
                     vari = squeeze(var(idx,:,:,:));
+                case 'Digraph'
+                    g = var.graph;
+                    vari = var;
+                    vari.plot.NodeCData = g.Nodes.NodeColors(:,idx);
             end
         end
 %%
@@ -740,35 +791,6 @@ classdef muiPlots < handle
                 end
             end
         end 
-%%
-%         function saveanimation2file(obj)   %now stand alone function
-%             %save animation to file
-%             answer = questdlg('Save as which file type?','Save animation',...
-%                                                 'MPEG-4','AVI','Quit''MPEG-4');
-%             if strcmp(answer,'Quit')
-%                 return;
-%             elseif strcmp(answer,'MPEG-4')
-%                 extension = '*.mp4';
-%                 ftext = 'muimovie.mp4';
-%                 profile = answer;
-%             else
-%                 extension = '*.avi';
-%                 ftext = 'muimovie.avi';
-%                 profile = 'Uncompressed AVI';
-%             end
-%             [file,path] = uiputfile(extension,'Save file as',ftext);
-%             if file==0, return; end
-%             v = VideoWriter([path,file],profile);
-%             spec = inputdlg({'Frame rate (fps):','Quality (0-100, MPEG only):'},'Save animations',...
-%                               1,{num2str(v.FrameRate),num2str(v.Quality)});
-%             if ~isempty(spec)
-%                 v.FrameRate = str2double(spec{1});
-%                 v.Quality = str2double(spec{2});
-%             end
-%             open(v);
-%             writeVideo(v,obj.ModelMovie);
-%             close(v);
-%         end
     end
 %%
 %--------------------------------------------------------------------------
@@ -863,7 +885,21 @@ classdef muiPlots < handle
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext; 
-        end       
+        end      
+%%
+        function [hp,hg] = nodalnetwork(g,y,nsze,legendtext,titletxt)
+            %nodal network plot using instance of a digraph netwok
+            %g - handle to digraph
+            %y - variable that defines node colors
+            hp = plot(g);
+            hp.MarkerSize = nsze;
+            caxis([min(min(y)),max(max(y))]);
+            hg.Nodes.NodeColors = y';
+            title(sprintf('Network: %s',titletxt));
+            cmap = cmap_selection;
+            colormap(cmap)
+            cb = colorbar;
+            cb.Label.String = legendtext;
+        end               
     end
-    
 end

@@ -140,8 +140,53 @@ classdef (Abstract = true) muiDataUI < handle
         end
 %%
 %--------------------------------------------------------------------------
-% initialise control buttons and header text
+% initialise slider, control buttons and header text
 %--------------------------------------------------------------------------
+        function setSlider(obj,src,idx)
+            %define slider range and value for data selection uicontrol
+            %assign some default slider settings
+            itab = strcmp(obj.TabOptions,src.Tag); 
+            startvalue = 1;
+            endvalue = 100;
+            slidevalue = 50;
+            %
+            S = obj.TabContent(itab).Selections{idx};
+            S.Min = startvalue;
+            S.Max = endvalue;            
+            S.Value = slidevalue;
+            S.SliderStep = [0.1,0.2];
+            S.String = [];
+            S.Callback = @(src,evt)updateSlider(obj,src,evt);
+            obj.TabContent(itab).Selections{idx} = S;
+            %end marker text
+            pos = obj.TabContent(itab).Selections{idx}.Position;
+            pos = [0.2 pos(2) 0.06 0.04];
+            uicontrol('Parent',src,...
+                'Style','text','String',startvalue,...
+                'HorizontalAlignment', 'right',...
+                'Units','normalized', 'Position', pos,...
+                'Tag','SLstart');
+            pos(1) = 0.86;
+            uicontrol('Parent',src,...
+                'Style','text','String',endvalue,...
+                'HorizontalAlignment', 'left',...
+                'Units','normalized', 'Position', pos,...
+                'Tag','SLend');
+            pos(1) = 0.53;
+            pos(2) = pos(2)+0.05;
+            uicontrol('Parent',src,...
+                        'Style','text','String',slidevalue,...                    
+                        'HorizontalAlignment', 'center',...
+                        'Units','normalized', 'Position', pos,...
+                        'Tag',[S.Tag,'value']); 
+        end
+%%
+        function updateSlider(~,src,~)
+            %update the slider text when slider is moved
+            htxt = findobj(src.Parent,'Tag',[src.Tag,'value'],'Style','text');
+            htxt.String = num2str(round(src.Value));
+        end
+%%
         function setTabControlButtons(obj,src,mobj)   
             % GUI control buttons - user defined lables + close
             itab = strcmp(obj.Tabs2Use,src.Tag);  
@@ -435,7 +480,7 @@ classdef (Abstract = true) muiDataUI < handle
             itab = strcmp(obj.Tabs2Use,tabobj.Tag);
             selected = obj.TabContent(itab).Selections;
             
-            order = obj.TabContent(itab).Order;
+            order = obj.TabContent(itab).Order;            
             for i=1:length(order)
                 idx = selected{i}.Value;
                 if iscell(selected{i}.String)
@@ -444,10 +489,12 @@ classdef (Abstract = true) muiDataUI < handle
                     desc.(order{i}) = selected{i}.String;
                 end
             end
-            %get selected Case and dataset (NB caserec must be # in full
+            %If dataset is only dstable being used and the Dataset
+            %selection is omitted from the UI, provide default definition
             if ~isfield(desc,'Dataset')
                 desc.Dataset = 'Dataset';
             end
+            %get selected Case and dataset (NB caserec must be # in full
             %list of Catalogue, not a subset)
             [dst,caserec,idset] = getDataset(mobj.Cases,desc.Case,desc.Dataset);
             %get variable, row and dimension descriptions
@@ -456,11 +503,17 @@ classdef (Abstract = true) muiDataUI < handle
             
             %assign variable selection
             xyz = strcmp(obj.TabContent(itab).XYZlabels,xyztxt);
-%             obj.UIselection(xyz).tab = itab;
             obj.UIselection(xyz).xyz = xyz;
             obj.UIselection(xyz).caserec = caserec;
             obj.UIselection(xyz).dataset = idset;
             obj.UIselection(xyz).variable = idvar;
+            
+            %check whether there any other types of input field defined
+            defaultset= {'Case','Dataset','Variable'};   %Type is held in UIsettings
+            addedinput = find(~contains(order,defaultset));
+            for i=1:length(addedinput)
+                obj.UIselection(xyz).(order{addedinput(i)}) = desc.(order{addedinput(i)});
+            end
             
             %set up call to inputUI
             varRange = dst.VariableRange.(dstnames{1});
@@ -506,29 +559,26 @@ classdef (Abstract = true) muiDataUI < handle
                 end
                 obj.UIselection(xyz).desc = boxtext;
 
-%                 %if variable is to be used on its own or with specified
-%                 %dimensions and needs to be constrained, get sub-sample
-
+                %if variable is to be used on its own or with specified
+                %dimensions and needs to be constrained, get sub-sample
                 pdim = getvariabledimensions(dst,idvar);
-%                 if obj.TabContent(itab).XYZmxvar(xyz)==0
-%                     %dimension depends on Type selection
-%                     setOrderOptionSettings(obj,itab)
-%                     mdim = getUseTypeDim(obj);
-%                 else
-%                     mdim = obj.TabContent(itab).XYZmxvar(xyz);
-%                 end
                 %
                 mdim = obj.TabContent(itab).XYZmxvar(xyz);%no. of range properties
-                if selection{1}==1         %variable selected not dimension
+                if selection{1}==1 && mdim>0 %variable selected not dimension
                     if pdim>mdim
-                        ndim = pdim-mdim;  %no. of index properties  
-%                         subVarSelection(obj,dst,1,xyz,mdim,ndim);  %
-%                     end                                            %
+                        ndim = pdim-mdim;    %no. of index properties  
                     else
                         ndim = 0;
                         mdim = pdim;
                     end
                     subVarSelection(obj,dst,1,xyz,mdim,ndim);
+                else
+                    for j=1:pdim
+                        varRange = getVarAttRange(dst,dstdesc,dstdesc{j+1});
+                        rangetext = var2range(varRange);
+                        obj.UIselection(xyz).dims(j).name = dstnames{j+1};
+                        obj.UIselection(xyz).dims(j).value = rangetext;
+                    end
                 end
 
                 vartxt = sprintf('%stext',src.String); 
@@ -562,7 +612,7 @@ classdef (Abstract = true) muiDataUI < handle
             elseif obj.issetXYZ
                 ok = assignSelection(obj,src,mobj);  %selections in UI
                 if ok<1, return; end
-                assignSettings(obj,src);  %settings in UI                
+                assignSettings(obj,src);       %settings in UI                
                 useSelection(obj,src,mobj);    %do something with selection
             else
                 warndlg('Check that variables have been defined')
@@ -593,23 +643,11 @@ classdef (Abstract = true) muiDataUI < handle
                     setdims = cellfun(@ischar,{usi.dims(:).value});
                     pdim = vdim-sum(1-setdims);
                 end
-                
-%                 if obj.TabContent(itab).XYZmxvar(i)==0
-%                     %dimension depends on Type selection
-%                     setOrderOptionSettings(obj,itab)
-%                     usevardim = getUseTypeDim(obj);
-%                 else
-%                     usevardim = obj.TabContent(itab).XYZmxvar(i);
-%                 end
-%                 %
-%                 if pdim>usevardim && usi.property==1                                       
-%                     mdim = usevardim;    %no. range properties
-%                     ndim = pdim-mdim;    %no. index properties
 
                 %if variable is to be used on its own or with specified
                 %dimensions and needs to be constrained, get sub-sample
                 mdim = obj.TabContent(itab).XYZmxvar(i); %no. of range properties    
-                if usi.property==1 && isempty(usi.dims(1).name)
+                if usi.property==1 && isempty(usi.dims(1).name) && mdim>0
                     if pdim>mdim
                         ndim = pdim-mdim;                     %no. of index properties              
                     else
@@ -617,12 +655,7 @@ classdef (Abstract = true) muiDataUI < handle
                         mdim = pdim;
                     end
                     ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
-                end
-%                 if pdim>mdim && usi.property==1                                        
-% %                     mdim = obj.TabContent(itab).XYZmxvar(i); %no. range properties
-%                     ndim = pdim-mdim;                     %no. of index properties
-%                     ok = subVarSelection(obj,dst,usi.property,i,mdim,ndim);
-%                 end                
+                end        
             end
         end
 %%
@@ -725,6 +758,7 @@ classdef (Abstract = true) muiDataUI < handle
 %%
         function assignSettings(obj,src)
             %update the UIsettings to the current values
+            %These are settings that are not specific to a variable
             
             %get the current button value settings
             itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
@@ -747,6 +781,12 @@ classdef (Abstract = true) muiDataUI < handle
             %get the name of the tab and button used to call setSelection
             obj.UIsettings.callTab = src.Parent.Tag;
             obj.UIsettings.callButton = src.String; 
+
+            if isfield(obj.TabContent(itab),'Type')
+                obj.UIsettings.typeList = obj.TabContent(itab).Type;
+            end
+            %required for selection in getData methods (uses default
+            %listing if user does not set one)
             obj.UIsettings.scaleList = obj.TabContent(itab).Scaling;
         end
 %%
@@ -764,6 +804,8 @@ classdef (Abstract = true) muiDataUI < handle
                     elseif strcmp(S.Style,'popupmenu')
                         obj.UIsettings.(setoptions{i}).Value = S.Value;
                         obj.UIsettings.(setoptions{i}).String = S.String{S.Value};
+                    elseif strcmp(S.Style,'slider')
+                        obj.UIsettings.(setoptions{i}) = S.Value;
                     else
                         warndlg('Option not defined in setOrderOptionsSettings')
                     end
@@ -858,7 +900,8 @@ classdef (Abstract = true) muiDataUI < handle
             
             %XYZ panel definition (if required)
             S.XYZnset = 3;                      %minimum number of buttons to use
-            S.XYZmxvar = [3,3,3];               %maximum number of dimensions per selection
+            S.XYZmxvar = [3,3,3];               %maximum number of dimensions per selection button
+                                                %set to 0 to ignore subselection
             S.XYZpanel = [0.05,0.2,0.9,0.3];    %position for XYZ button panel
             S.XYZlabels = {'X','Y','Z'};        %default button labels
             

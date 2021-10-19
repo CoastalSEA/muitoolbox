@@ -161,33 +161,35 @@ classdef muiCatalogue < dscatalogue
             else
                 casedesc = catrec.CaseDescription;
                 inputs = fieldnames(cobj.RunParam);
-
                 ninp = length(inputs);
                 propdata = {}; proplabels = {};
-                for k=1:ninp         %concatenate the Run Parameters
-                    localObj = cobj.RunParam.(inputs{k});
-                    if isa(localObj,'muiPropertyUI')
-                        propstruct = getPropertiesStruct(localObj);
-                        issubstruct = cellfun(@isstruct,struct2cell(propstruct));
-                        if any(issubstruct)
-                            fnames = fieldnames(propstruct);
-                            idx = find(issubstruct);
-                            for j = 1:length(idx)
-                                propstruct.(fnames{idx(j)}) = ...
-                                    cell2mat(struct2cell(propstruct.(fnames{idx(j)})))';
+                for kk=1:ninp         %concatenate the Run Parameters
+                    localObj = cobj.RunParam.(inputs{kk});
+                        nobj = length(localObj);
+                        if nobj>1
+                            for jj=1:nobj
+                                [pdatajj,plabels] = setPropertyData(obj,...
+                                                            localObj(jj));
+                                %vertically concatenate properties for each instance
+                                %matrix is [nobj,nprop]
+                                pdata(jj,:) =  [pdatajj{:}];  %#ok<AGROW>
                             end
-                        end
-                        propdata = vertcat(propdata,struct2cell(propstruct)); %#ok<AGROW>
-                        proplabels = vertcat(proplabels,fieldnames(propstruct)); %#ok<AGROW>
-                    else
-                        caserec = caseRec(obj,localObj);
-                        propdata = vertcat(propdata,obj.Catalogue.CaseDescription{caserec}); %#ok<AGROW>
-                        proplabels = vertcat(proplabels,obj.Catalogue.CaseClass{caserec}); %#ok<AGROW>
-                    end
+                            %reshape to [nprop,nobj] and then to nprop cell
+                            %array with nobj vecotors for each property
+                            pdata = mat2cell(pdata',ones(1,size(pdata',1)));
+                        else
+                            [pdata,plabels] = setPropertyData(obj,...
+                                                            localObj);
+                        end   
+                        propdata = [propdata;pdata]; %#ok<AGROW>
+                        proplabels = [proplabels;plabels]; %#ok<AGROW>
+                        clear pdata plabels
                 end
                 idx = find(~(cellfun(@isscalar,propdata)));
-                for i=1:length(idx)  %convert any numerical data to strings
-                    propdata{idx(i)} = num2str(propdata{idx(i)}); %#ok<AGROW>
+                for i=1:length(idx)  %convert any numerical data to char vectors
+                    if ~ischar(propdata{idx(i)}) %check not a char vector
+                        propdata{idx(i)} = num2str(propdata{idx(i)}); 
+                    end
                 end
                 propdata = [proplabels,propdata]; %cell array of labels and values
                 figtitle = sprintf('Settings used for %s',casedesc);
@@ -531,7 +533,6 @@ classdef muiCatalogue < dscatalogue
             %clear instance of data set class
             obj.DataSets.(classname)(classrec) = [];
         end  
-
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
             %find the indices for the selected variable, and the row and 
@@ -578,11 +579,14 @@ classdef muiCatalogue < dscatalogue
             % var is the variable to select from and value is a numeric
             % value to select the nearest index, or a text string defining
             % the range of values required
-            if ischar(value)
+            if ischar(value)     
+                %range character vector
                 indices = getvarindices(var,value);
             elseif iscell(var) && length(var)>1
-                indices = find(strcmp(var,value));
+                %cell array of character vectors NB value must be a cell
+                indices = find(contains(var,value));
             elseif length(var)>1
+                %numerical array
                 indices = interp1(var,1:length(var),value,'nearest'); 
             else
                 indices = 1;
@@ -635,6 +639,33 @@ classdef muiCatalogue < dscatalogue
             for j=2:sdim
                 myfun = @(x) sprintf('%s_%s',seldimname{j},x);
                 seldim{j} = cellfun(myfun,seldim{j},'UniformOutput',false);
+            end
+        end
+%%
+        function [propdata,proplabels] = setPropertyData(~,localObj) 
+            %extract the properties from localObj and return data and
+            %labels. Used to display run settings in viewCaseSettings
+            if isa(localObj,'muiPropertyUI')  %mui input data
+                propstruct = getPropertiesStruct(localObj);
+                issubstruct = cellfun(@isstruct,struct2cell(propstruct));
+                if any(issubstruct)
+                    fnames = fieldnames(propstruct);
+                    idx = find(issubstruct);
+                    for j = 1:length(idx)
+                        propstruct.(fnames{idx(j)}) = ...
+                            cell2mat(struct2cell(propstruct.(fnames{idx(j)})))';
+                    end
+                end
+                propdata = struct2cell(propstruct); 
+                proplabels = fieldnames(propstruct); 
+            elseif isstruct(localObj)   %input is an existing Case (model or imported data)
+                propdata = char(localObj.casedesc);
+                proplabels = sprintf('%s (cid=%d)',localObj.caseclass,localObj.caseid);            
+            else %exposed properties for inputs that do not use muiPropertyUI
+                proplabels = properties(localObj);
+                for k=1:length(proplabels)
+                    propdata{k,1} = localObj.(proplabels{k});
+                end
             end
         end
     end

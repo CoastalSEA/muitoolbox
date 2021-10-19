@@ -26,6 +26,8 @@ function test_utilfunctions(func,caseid)
             test_var2range
         case 'range2var'
             test_range2var
+        case 'getvarindices'
+            test_getvarindices
         case 'getdatatype'
             test_getdatatype
         case 'setdatatype'
@@ -58,19 +60,19 @@ end
 function test_var2range
     %   var2range.m
     %   convert start and end variable to a range character array
-    rangevar = [1,100];
+    rangevar = num2cell([1,100]);
     pretext = 'Case1: ';
     rangetext1 = var2range(rangevar,pretext);  %integer values with pretext
     rangetext2 = var2range(rangevar);          %integer values no pretext
     fprintf(' %s\n %s\n',rangetext1,rangetext2);
     
-    rangevar = categorical({'S1','S2'},'Ordinal',true); 
+    rangevar = num2cell(categorical({'S1','S2'},'Ordinal',true)); 
     rangetext = var2range(rangevar);           %categorical values
     fprintf(' %s\n',rangetext);
     
-    rangevar = [datetime('12-Aug-2020'),datetime('18-Aug-2020')];    
+    rangevar = num2cell([datetime('12-Aug-2020'),datetime('18-Aug-2020')]);    
     rangetext1 = var2range(rangevar);          %datetime values
-    rangevar = [years(33.45);years(37.8)];
+    rangevar = num2cell([years(33.45);years(37.8)]);
     rangetext2 = var2range(rangevar);          %duration values
     fprintf(' %s\n %s\n',rangetext1,rangetext2);
 end
@@ -79,21 +81,57 @@ function test_range2var
     %   range2var.m
     %   convert range character array start and end variables
     %Case 1: numeric
-    rangetext = var2range([1,100]);
+    rangetext = var2range(num2cell([1,100]));
     rangevar = range2var(rangetext);
     fprintf(' var1: %g var2: %g\n',rangevar{1},rangevar{2});
     %Case 2: categorical
-    rangetext = var2range(categorical({'S1','S2'},'Ordinal',true));
+    rangevar = num2cell(categorical({'S1','S2'},'Ordinal',true)); 
+    rangetext = var2range(rangevar);
     rangevar = range2var(rangetext);
     fprintf(' var1: %s var2: %s\n',rangevar{1},rangevar{2});
     %Case 3: datetime
-    rangetext = var2range([datetime('12-Aug-2020'),datetime('18-Aug-2020')]);
+    rangevar = num2cell([datetime('12-Aug-2020'),datetime('18-Aug-2020')]);    
+    rangetext = var2range(rangevar);
     rangevar = range2var(rangetext);
     fprintf(' var1: %s var2: %s\n',rangevar{1},rangevar{2});
     %Case 4: duration
-    rangetext = var2range([years(33.45);years(37.8)]);
+    rangevar = num2cell([years(33.45);years(37.8)]);
+    rangetext = var2range(rangevar);
     rangevar = range2var(rangetext);
     fprintf(' var1: %s var2: %s\n',rangevar{1},rangevar{2});    
+end
+%%
+function test_getvarindices
+    %   getvarindices.m
+    %   unpack the limits text and find indices of values that lie 
+    %   within the lower/upper limits defined   
+    %Case 1: numeric
+    rangetext = var2range(num2cell([20,100]));
+    var = 1:200;
+    valididx = getvarindices(var,rangetext);
+    %Case 2: cell array of character vectors
+    rangetext = var2range({'S1','S2'});
+    var = {'S0','S1','S1.5','S2','S3'};
+    valididx = getvarindices(var,rangetext);
+    %Case 3: array of strings
+    rangetext = var2range(num2cell(["S2","S5"]));
+    var = ["S1","S2","S3","S4","S5","S6"];
+    valididx = getvarindices(var,rangetext);
+    %Case 4: categorical
+    rangevar = num2cell(categorical({'S1','S2'},'Ordinal',true));
+    rangetext = var2range(rangevar);
+    var = categorical({'S0','S1','S1.5','S2','S3'},'Ordinal',true);
+    valididx = getvarindices(var,rangetext);
+    %Case 5: datetime
+    rangevar = num2cell([datetime('12-Aug-2020'),datetime('18-Aug-2020')]);    
+    rangetext = var2range(rangevar);
+    var = datetime('10-Aug-2020'):days(1):datetime('20-Aug-2020');
+    valididx = getvarindices(var,rangetext);
+    %Case 6: duration
+    rangevar = num2cell([years(33.45);years(37.8)]);
+    rangetext = var2range(rangevar);
+    var = years(31.4):years(0.2):years(39.8);
+    valididx = getvarindices(var,rangetext);
 end
 %%
 function test_getdatatype()

@@ -31,6 +31,7 @@ classdef (Abstract = true) muiModelUI < handle
         TabProps         %structure to hold TabDisplay and position for each data input
         ModelInputs      %classes required by model used in isValidModel check 
         DataUItabs       %structure to define muiDataUI tabs for each use 
+        SupressPrompts = false %flag for unit testing to supress user promts       
     end
     
     properties 
@@ -58,14 +59,18 @@ classdef (Abstract = true) muiModelUI < handle
     methods (Access = protected)  %methods common to all uses
         function initialiseUI(obj,modelLogo)
             %call functions that intitialise menus and tabs 
-            splashFigure(obj,modelLogo);          
+            if ~obj.SupressPrompts
+                splashFigure(obj,modelLogo); 
+            end
             setGuiFigure(obj);   %initialise figure
             setAppMenus(obj);    %initialise menus                         
             setAppTabs(obj);     %initialise tabs
             TabProperties(obj);  %set locations for data input display
             obj.Info = muiProject;    %initialise project information
             obj.Cases = muiCatalogue; %initialise Catalogue
-            obj.mUI.Figure.Visible = 'on';
+            if ~obj.SupressPrompts
+                obj.mUI.Figure.Visible = 'on';
+            end
         end        
 %%   
 %--------------------------------------------------------------------------
@@ -107,7 +112,7 @@ classdef (Abstract = true) muiModelUI < handle
                 'NumberTitle','off', ...
                 'MenuBar','none', ...
                 'Units','normalized', ...
-                'CloseRequestFcn',@obj.closeMainFig, ...
+                'CloseRequestFcn',@obj.exitprogram, ...
                 'Resize','on','HandleVisibility','on', ...
                 'Visible','off','Tag','MainFig');
             axes('Parent',obj.mUI.Figure, ...
@@ -456,13 +461,6 @@ classdef (Abstract = true) muiModelUI < handle
             %
             clear sobj
         end    
-%%
-        function closeMainFig(obj,~,~)
-            %callback function for CloseResponseFcn button
-            exitprogram(obj,[],[])
-%             delete(obj.mUI.Figure);
-%             delete(obj);    %delete the class object
-        end
 %%
         function saveModel(obj)
             %save model setup and results to a mat file as sobj
@@ -867,8 +865,7 @@ classdef (Abstract = true) muiModelUI < handle
                     localObj = obj.Inputs.(inphandles{isinp(i)}); 
                     %input data is loaded using PropertyInterface
                     isvalidmodel(isinp(i)) = isValidInstance(localObj);
-                end
-                
+                end               
             end
             
             if ~isempty(obj.Cases.DataSets)
@@ -881,20 +878,6 @@ classdef (Abstract = true) muiModelUI < handle
             end
             isvalidmodel = all(isvalidmodel);  
         end 
-%%
-        function callStaticFunction(obj,classname,fncname)
-            %call a class function to load data or run a model
-            muicat = obj.Cases;
-            
-            heq = str2func(['@(mcat,cname) ',[fncname,'(mcat,cname)']]); 
-            try
-               heq(muicat,classname); 
-            catch ME
-                msg = sprintf('Unable to run function %s\nID: ',fncname);
-                disp([msg, ME.identifier])
-                rethrow(ME)                     
-            end
-        end
 %%  
         function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs
@@ -933,22 +916,25 @@ classdef (Abstract = true) muiModelUI < handle
             obj.mUI.(guiobjtxt) = [];
         end
 %%
+        function callStaticFunction(obj,classname,fncname)
+            %call a class function to load data or run a model
+            muicat = obj.Cases;
+            
+            heq = str2func(['@(mcat,cname) ',[fncname,'(mcat,cname)']]); 
+            try
+               heq(muicat,classname); 
+            catch ME
+                msg = sprintf('Unable to run function %s\nID: ',fncname);
+                disp([msg, ME.identifier])
+                rethrow(ME)                     
+            end
+        end        
+%%
         function cobj = getClassObj(obj,classtype,classname,msgtxt)
             %check if class exists and return class handle  
             % classtype - Cases, Inputs or mUI field
             % classname - name of class being called
             % msgtxt - message to display if class does not exist (optional)
-%             if strcmp(classtype,'Cases')
-%                 lobj = obj.Cases.DataSets; %map Cases to DataSets property
-%             else
-%                 lobj = obj.(classtype);
-%                 if strcmp(classtype,'mUI') && ~isempty(lobj.(classname))
-%                     %mUI does not use Class names for field names
-%                     cobj = lobj.(classname);
-%                     return;
-%                 end
-%             end
-            
             switch classtype
                 %classtype is hard coded so that can change in muiModelUI 
                 %independently of naming in classess that are being saved
@@ -1000,6 +986,21 @@ classdef (Abstract = true) muiModelUI < handle
             end
         end
 %%
-
+        function closeMainFig(obj)
+            %accessible function fo delete main UI and any linked UIs
+            %used when modelUIs are run in silent mode (obj.SuppressPrompts=true)
+            classname = metaclass(obj).Name;
+            %remove any linked UIs
+            linkedguis = fieldnames(obj.mUI);            
+            for i=4:length(linkedguis) %first 3 entries are for main Figure
+                if ~isempty(obj.mUI.(linkedguis{i})) && ...
+                                        isvalid(obj.mUI.(linkedguis{i}))
+                    clearDataUI(obj,obj.mUI.(linkedguis{i}))
+                end
+            end   
+            delete(obj.mUI.Figure);
+            delete(obj);    %delete the class object
+            getdialog(sprintf('%s successfuully closed',classname));
+        end
     end    
 end

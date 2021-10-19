@@ -121,7 +121,7 @@ classdef muiPlotsUI < muiDataUI
                         sel_uic{i}.Value = 1;
                     case 'Type'
                         sel_uic{i}.String = S.Type;
-                    case 'Other'
+                    otherwise
                         sel_uic{i}.String = 'Not set';
                 end
             end        

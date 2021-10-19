@@ -258,7 +258,7 @@ classdef (Abstract = true) muiDataSet < handle
             end
             
             if length(obj)~=length(caselist)
-                %find index if full list if subselection used
+                %find index in full list if subselection used
                 select = idx(select);
             end
             
@@ -319,6 +319,8 @@ classdef (Abstract = true) muiDataSet < handle
         function setRunParam(obj,mobj,varargin)
             %assign the run parameters needed for a model (NB data source
             %files are saved to the dstable.Source property)
+            %varargin used to pass additional caserec values of the model
+            %cases used as input (see eg ctTidalAnalysis)
             classname = metaclass(obj).Name;
             minp = mobj.ModelInputs.(classname);
 
@@ -333,29 +335,18 @@ classdef (Abstract = true) muiDataSet < handle
             %
             muicat = mobj.Cases;
             if ~isempty(muicat.DataSets)
-                %classes that define model input datasets (save caseID)
+                %classes that define model input datasets
+                %save caseID, caseDescription and caseClass for use in
+                %viewCasetSettings (because Case may get deleted)
                 for i=1:length(varargin)
-                    lobj = getCase(muicat,varargin{i});
-                    cname = metaclass(lobj).Name;
-                    obj.RunParam.(cname) = lobj.CaseIndex;
+                    [cobj,~,catrec] = getCase(muicat,varargin{i});
+                    cname = metaclass(cobj).Name;
+                    obj.RunParam.(cname).caseid = cobj.CaseIndex;
+                    obj.RunParam.(cname).casedesc = catrec.CaseDescription;
+                    obj.RunParam.(cname).caseclass = cname;
                 end
             end            
-        end
-% %%
-%         function setDataSetRecord(obj,muicat,dataset,varargin)
-%             %assign dataset to class Data property and update catalogue
-%             % muicat - muiCatalogue object
-%             % dataset - the dataset or cell array of data sets to be added
-%             % varargin - input to dscatalogue.addRecord. minimum is
-%             %            datatype but can also include a cell with the case 
-%             %            description and logical flag to supress user prompt
-%             if isstruct(dataset)
-%                 obj.Data = dataset;   %can be struct of multiple tables
-%             else
-%                 obj.Data.Dataset = dataset;  
-%             end
-%             setCase(muicat,obj,varargin{:});
-%         end                  
+        end                 
 %%
         function setCaseIndex(obj,caseid)
             %Assign the CaseIndex property (called by muiCatalogue.setCase)

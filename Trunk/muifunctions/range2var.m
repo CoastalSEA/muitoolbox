@@ -33,10 +33,9 @@ function [rangevar,pretext] = range2var(rangetext,bounds)
         for i=1:2  %could do this without for loop but this traps specific error
             try                                           %datetime  
                 rangevar{i} = getdatevariable(Vin{i});   
-            catch
-                try                                       %duration
-                    rangevar{i} = str2duration(Vin{i});
-                catch
+            catch                                                  
+               rangevar{i} = str2duration(Vin{i});    %duration
+               if isempty(rangevar{1}) 
                     try   
                         if isempty(str2num(Vin{i})) %#ok<ST2NM> %returns empty if not numeric
                             rangevar(i) = Vin(i);         %categorical or text              

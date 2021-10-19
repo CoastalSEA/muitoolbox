@@ -13,7 +13,7 @@ function [timeout,format] = time2num(timein)
 %   timeout - timein values converted to numeric values 
 %   format - format of datatime or duration
 % SEE ALSO
-% called by muiPlots
+%   called by muiPlots and setfigslider
 %   
 % Author: Ian Townend
 % CoastalSEA (c)June 2020

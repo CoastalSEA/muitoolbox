@@ -29,7 +29,7 @@ function hm = setfigslider(hfig,invar)
 %   invar = struct('sval',[],'smin',[],'smax',[],...
 %                  'callback','','userdata',[],'position',[],...
 %                  'stxext','','butxt','','butcback','');
-%          default position = [0.15,0.008,0.58,0.04]; 
+%          default position = [0.15,0.005,0.64,0.04]; 
 % to include graphics on the figure with a slider in the default position
 % reposition the axes using: ax.Position = [0.16,0.18,0.65,0.75]; assuming
 % normalized units are being used
