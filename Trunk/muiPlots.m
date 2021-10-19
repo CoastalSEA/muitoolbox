@@ -162,7 +162,11 @@ classdef muiPlots < handle
                     legmask = {'%s','%s (%s)'};
                     legtext = sprintf(legmask{sum(idtxt)},deflegend{:});
                 else
-                    deflegend(idtxt) = legformat(ivar).text;                       
+                    if ischar(legformat(ivar).text)
+                        deflegend(idtxt) = {legformat(ivar).text}; 
+                    else
+                        deflegend(idtxt) = legformat(ivar).text; 
+                    end
                     legtext = sprintf('%s (%s) %s',deflegend{:}); 
                 end
             else                         %use default text for legend
@@ -575,7 +579,7 @@ classdef muiPlots < handle
                     g = obj.Data.network;     %digraph
                     y = obj.Data.Y;         %variable used to color nodes 
                     nsze = obj.Data.nodesize; %size of nodes
-                    obj.Title = obj.AxisLabels.Y;
+                    obj.Title =sprintf('Network for %s',obj.AxisLabels.Y);
                     [hp,hg]  = muiPlots.nodalnetwork(g,y,nsze,obj.Legend,obj.Title);
                     var.graph = hg; var.plot = hp;
                     figax = gca;
@@ -761,7 +765,14 @@ classdef muiPlots < handle
         function getCurrentFigure(obj,src,~)
             %find index for figure to use to add or delete a component
             obj.idxfig = src.Number;
-        end    
+        end 
+%%
+        function casedef = getRunParams(obj,mobj,idx)
+            %get the run time parameters for the idx property selection
+            caserec = obj.UIsel(idx).caserec;
+            cobj = getCase(mobj.Cases,caserec);
+            casedef = cobj.RunParam;
+        end
 %%
         function clearPreviousPlotData(obj)
             %reset the property values used to create a plot            
@@ -895,7 +906,7 @@ classdef muiPlots < handle
             hp.MarkerSize = nsze;
             caxis([min(min(y)),max(max(y))]);
             hg.Nodes.NodeColors = y';
-            title(sprintf('Network: %s',titletxt));
+            title(titletxt);
             cmap = cmap_selection;
             colormap(cmap)
             cb = colorbar;
