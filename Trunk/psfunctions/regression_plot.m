@@ -73,7 +73,7 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
         %one fo the inputs is duration
         indat = ind_ds;
         depdat = dep_ds; 
-        if isduraion(indat)
+        if isduration(indat)
             istime = indat.Format;
             idx = 1;
         else 
@@ -105,19 +105,20 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
         end
     end
     
+    %modify the metatxt and select origin if time units have been defined
+    if ~isempty(istime)
+        metatxt{idx} = sprintf('%s (%s)',metatxt{idx},istime);   
+        answer = questdlg('Set time origin at 0 or first record?','Regression',...
+                          'Origin','1st record','Origin');
+        if strcmp(answer,'1st record')
+           indat = indat-indat(1);
+        end        
+    end
+
     %now call regression model
     nint = 10; %number of points in regression line
-    answer = questdlg('Set time origin at 0 or first record?','Regression',...
-                       'Origin','1st record','Origin');
-    if strcmp(answer,'1st record')
-       indat = indat-indat(1);
-    end
     [~,~,~,x,y,res] = regression_model(indat,depdat,model,nint);
-    
-    %modify the metatxt if time units have been defined
-    if ~isempty(istime)
-        metatxt{idx} = sprintf('%s (%s)',metatxt{idx},istime);    
-    end
+
     plot_figure(indat,depdat,x,y,res,metatxt);
 end
 %%

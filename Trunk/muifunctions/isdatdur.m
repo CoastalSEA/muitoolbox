@@ -14,7 +14,7 @@ function [isdd,isdt] = isdatdur(varnames,varargin)
 %   varargin - one or more dstables, or an array of dstables
 % OUTPUT
 %   vectors of logical results in order of input dstables
-%   isdd : true - datetime or duration; false - npt either data type
+%   isdd : true - datetime or duration; false - not either data type
 %   isdt : true - datetime; false - duration;
 %          
 % NOTES

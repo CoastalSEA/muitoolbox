@@ -21,7 +21,7 @@ function [timeout,format] = time2num(timein)
 % 
     if isdatetime(timein)
         startyear = year(timein(1));
-        timeout = startyear+years(timein-datetime(startyear,1,1));
+        timeout = startyear+calyears(timein-datetime(startyear,1,1));
         format = timein.Format;
     else
         timeout = cellstr(timein);

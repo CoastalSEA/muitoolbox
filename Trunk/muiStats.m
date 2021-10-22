@@ -314,9 +314,9 @@ classdef muiStats < handle
                 obj.Data.X = obj.Data.X.DataTable{:,1};
                 obj.Data.Y = obj.Data.Y.DataTable{:,1};
                 if any(isdv)
-                    if istv(1) %variable assigned to X is a datetime
+                    if istv(1)       %variable assigned to X is a datetime
                         obj.Data.X = set_time_units(obj.Data.X);
-                    else       %variable assigned to Y is a datetime
+                    elseif istv(2)   %variable assigned to Y is a datetime
                         obj.Data.Y = set_time_units(obj.Data.Y);
                     end
                 end
@@ -520,11 +520,14 @@ classdef muiStats < handle
             tabobj = findobj(mobj.mUI.Tabs.Children,'-regexp','Tag','Stat');
             if isempty(tabobj), return; end
             subtabgrp = tabobj(1).Children;  %tabgroup to use
-            if isempty(subtabgrp) %use main tab is no subtab
-                statstabs = tabobj;
-            else
+            if isa(subtabgrp,'matlab.ui.container.Tab') 
+                %use one of the subtabs defined by idx
                 statstabs = subtabgrp.Children;
+            else
+                %use main tab as there are no subtabs
+                statstabs = tabobj;
             end
+            %
             if ischar(idx)
                 idx = find(strcmp({statstabs(:).Tag},idx));
             end
