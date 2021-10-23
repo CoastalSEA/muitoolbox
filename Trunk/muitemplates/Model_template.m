@@ -51,6 +51,18 @@ classdef Model_template < muiDataSet                         % << Edit to classn
             [results,xy,modeltime] = your_model(inp,run);
             %now assign results to object properties  
             modeltime = seconds(modeltime);  %durataion data for rows 
+            %code for datetime format
+            % modeldate = datetime(rnpobj.StartYear,1,1,0,0,0);
+            % modeltime = modeldate + seconds(modeltime);
+            % modeltime.Format = dsp.Row.Format;
+            %code for duration format
+            % modeltime = years(StartYear)+seconds(modeltime);
+            % modeltime.Format = dsp.Row.Format;
+            %code for calendatDuration format 
+            % modeldate = datetime(StartYear,1,1,0,0,0);
+            % modeltime = modeldate + seconds(modeltime);
+            % modeltime.Format = dsp.Row.Format;
+            % modeltime = calendarDuration(datevec(modeltime));
 %--------------------------------------------------------------------------
 % Assign model output to a dstable using the defined dsproperties meta-data
 %--------------------------------------------------------------------------                   

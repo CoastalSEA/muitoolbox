@@ -71,30 +71,33 @@ classdef muiStats < handle
             
             switch src.Tag
                 case {'Stats','Descriptive'}
-                    idx = selectStatOuput(obj.DescOut);
+                    [idx,rundesc] = selectStatOuput(obj.DescOut);
                     if isempty(idx), return; end
-                    metatxt = obj.DescOut{idx}.Properties.Description; 
+                    txt = obj.DescOut{idx}.Properties.Description; 
+                    metatxt = sprintf('%s\n%s',rundesc,txt);
                     tablefigure(src,metatxt,obj.DescOut{idx});
                 case 'Extremes'
-                    idx = selectStatOuput(obj.ExtrOut);
+                    [idx,rundesc] = selectStatOuput(obj.ExtrOut);
                     if isempty(idx), return; end
-                    metatxt = obj.ExtrOut{idx}.Properties.Description; 
+                    txt = obj.ExtrOut{idx}.Properties.Description; 
+                    metatxt = sprintf('%s\n%s',rundesc,txt);
                     tablefigure(src,metatxt,obj.ExtrOut{idx});
             end
             %-nested function----------------------------------------------
-            function idx = selectStatOuput(output)
+            function [idx,rundesc] = selectStatOuput(output)
                 idx = [];
+                
                 nruns = length(output);
                 if nruns>1
-                    rundesc = cell(nruns,1);
-                    for i=1:nruns
-                        rundesc{i} = output{i}.Properties.UserData;                        
-                    end
+                    rundesc = cellfun(@(x) x.Properties.UserData,output,...
+                                                    'UniformOutput',false);
                     [idx,ok] = listdlg('PromptString','Select a case:',...
                            'SelectionMode','single','ListSize',[500,100],...
                            'ListString',rundesc);
                     if ok<1, idx = 1; end
+                    rundesc = rundesc{idx};
                 elseif nruns==1
+                    rundesc = output{1}.Properties.UserData;
                     idx = 1;
                 end
             end
@@ -195,9 +198,9 @@ classdef muiStats < handle
                 obj.MetaData.X = obj.MetaData.Y;
             end
             dataset = obj.Data.X.DataTable{:,1};
-            if isdatetime(dataset)
-                %adjust datetime to a duration
-                dataset = set_time_units(dataset);
+            if isdatetime(dataset) || isduration(dataset)
+                %adjust datetime or duration to a number
+                dataset = time2num(dataset);
             end
             %to assign to a tab need to define src. If src not defined 
             %(ie [])then a stand-alone figure is used
@@ -302,7 +305,7 @@ classdef muiStats < handle
             [isdd,~] = isdatdur('RowNames',obj.Data.X,obj.Data.Y);
             %isdv true if datetime or duration, istv true if datetime
             varnames = [obj.Data.X.VariableNames,obj.Data.Y.VariableNames];
-            [isdv,istv] = isdatdur(varnames,obj.Data.X,obj.Data.Y);
+%             [isdv,istv] = isdatdur(varnames,obj.Data.X,obj.Data.Y);
             
             %re-assign if one of the variables is datetime or duration, or
             %the RowNames are not datetime or duration
@@ -313,13 +316,13 @@ classdef muiStats < handle
                 %selected datasets do not both have datetime or duration RowNames
                 obj.Data.X = obj.Data.X.DataTable{:,1};
                 obj.Data.Y = obj.Data.Y.DataTable{:,1};
-                if any(isdv)
-                    if istv(1)       %variable assigned to X is a datetime
-                        obj.Data.X = set_time_units(obj.Data.X);
-                    elseif istv(2)   %variable assigned to Y is a datetime
-                        obj.Data.Y = set_time_units(obj.Data.Y);
-                    end
-                end
+%                 if any(isdv)
+%                     if istv(1)       %variable assigned to X is a datetime
+%                         obj.Data.X = date2duration(obj.Data.X);
+%                     elseif istv(2)   %variable assigned to Y is a datetime
+%                         obj.Data.Y = date2duration(obj.Data.Y);
+%                     end
+%                 end
             end
         end
 %%

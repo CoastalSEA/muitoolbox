@@ -138,8 +138,11 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             tabs.Inputs = {'  Inputs  ',@obj.InputTabSummary};
             tabs.Plot   = {'  Q-Plot  ',@obj.getTabData};
             tabs.Stats = {'   Stats   ','gcbo;'};
-            subtabs.Stats(1,:) = {' General ',@obj.getTabData};
-            subtabs.Stats(2,:) = {' Extremes ',@obj.getTabData};
+            subtabs.Stats(1,:) = {' General ',@obj.setTabAction};
+            subtabs.Stats(2,:) = {' Extremes ',@obj.setTabAction};
+            %if subtabs are not required eg for Stats
+            % tabs.Stats = {'   Stats   ',@obj.setTabAction};
+            % subtabs = [];
         end
        
 %%
@@ -163,8 +166,10 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             switch src.Tag                                    % << Edit match tab requirements
                 case 'Plot' 
                      tabPlot(cobj,src);
-                case 'Stats'
-                     tabStats(cobj,src);    
+                case {'Descriptive','Extremes'} %or 'Stats' if no subtabs
+                    cobj = getClassObj(obj,'mUI','Stats',msg);
+                    if isempty(cobj), return; end
+                    tabStats(cobj,src);      
             end
         end      
 %% ------------------------------------------------------------------------

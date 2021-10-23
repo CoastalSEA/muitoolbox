@@ -46,6 +46,11 @@ function valididx = getvarindices(var,limtxt)
             elseif isduration(var)
                 minB = str2duration(lowerlimit,var.Format);
                 maxB = str2duration(upperlimit,var.Format);
+            elseif iscalendarduration(var)
+                startyear = datetime(0,1,1,0,0,0);
+                var = startyear+var;
+                minB = startyear+str2caldur(lowerlimit);
+                maxB = startyear+str2caldur(upperlimit);
             elseif iscell(var) && ischar(lowerlimit)
                 %cell array of character vectors with limits being values
                 %in list

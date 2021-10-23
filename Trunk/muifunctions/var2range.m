@@ -27,6 +27,7 @@ function rangetext = var2range(rangevar,pretext)
         elseif isnumeric(var1)
             rangetext = sprintf('From > %g To > %g',var1,var2);
         elseif isdatetime(var1) || isduration(var1) || ...
+               iscalendarduration(var1) || ...
                ischar(var1) || isstring(var1) || iscategorical(var1)
             rangetext = sprintf('From > %s To > %s',var1,var2);
         else

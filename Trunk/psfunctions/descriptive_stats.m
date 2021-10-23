@@ -49,6 +49,9 @@ function stats = getTSstats(data,metatxt)
     end
 
     datatimes = data.RowNames;
+    if iscalendarduration(datatimes)
+        datatimes = datetime(0,1,1,0,0,0)+datatimes;
+    end
     %force datetime format to one that timeseries recognises
     datatimes.Format = 'dd-MMM-yyyy HH:mm:ss';
     ts = timeseries(data.DataTable{:,1},cellstr(datatimes));
@@ -159,10 +162,17 @@ function stats = time_stats(ts,cthr,varargin)
     gaps = (ts.Length-nrec)/ts.Length*100;
     stsum = sum(ts,'Weighting','time');  
     mtime = datetime(getabstime(ts));
-    %eps(0) to avoid divide by zero in linear regression 
-    mtime = set_time_units(mtime,eps(0),'years');
+    %modify the metatxt and select origin if time units have been defined  
+    answer = questdlg('Set time origin at 0 or first record?','Regression',...
+                      'Origin','1st record','Origin');
+    if strcmp(answer,'1st record')     %elapsed years from 1st record
+       mtime = time2num(mtime,eps(0)); %add small offset to zero to
+    else                               %avoid divide by zero
+       mtime = time2num(mtime);        %elapsed years from 1-Jan-01
+    end        
+
     var = ts.Data;
-    [slope,intcpt,Rsq] = regression_model(mtime,var,'Linear');
+    [intcpt,slope,Rsq] = regression_model(mtime,var,'Linear');
     
     %create results vector and assign to table
     vals = [nrec;calms;gaps;mean(ts);std(ts);min(ts);max(ts);stsum;...
@@ -191,11 +201,12 @@ function stats = season_stats(ts,cthr,stats,seasons)
 end
 %%
 function stats = getDSstats(data,metatxt) 
-    %generate descriptive stats for numeric data
+    %generate descriptive stats for data that is not passes as a dstable
 %     data = squeeze(data{:,1});
     if iscell(data) && ischar(data{1})
         data = categorical(data,'Ordinal',true);
         data = double(data);
+        
     end
     dummy = zeros(9,1);
     stats = table(dummy);
@@ -209,7 +220,7 @@ function stats = getDSstats(data,metatxt)
     x = 1:nrec;    
     if isvector(data) && ~iscategorical(data)
         if isrow(data), data = data'; end
-        [slope,intcpt,Rsq] = regression_model(x',data,'Linear');
+        [intcpt,slope,Rsq] = regression_model(x',data,'Linear');
     else
         slope = NaN; intcpt = NaN; Rsq = NaN;
     end

@@ -61,19 +61,20 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
     if isdatetime(ind_ds) || isdatetime(dep_ds)
         %one of the inputs is time (assume both are not time)    
         if isdatetime(ind_ds)
-            [indat,istime] = set_time_units(ind_ds);  
+            [indat,istime] = date2duration(ind_ds);  %returns calendar duration
             depdat = dep_ds; 
             idx = 1;
         else 
             indat = ind_ds;
-            [depdat,istime] = set_time_units(dep_ds); 
+            [depdat,istime] = date2duration(dep_ds); 
             idx = 2;
         end
-    elseif isduration(ind_ds) || isduration(dep_ds)
-        %one fo the inputs is duration
+    elseif isduration(ind_ds) || isduration(dep_ds) || ...
+           iscalendarduration(ind_ds) || iscalendarduration(dep_ds)
+        %one of the inputs is duration
         indat = ind_ds;
         depdat = dep_ds; 
-        if isduration(indat)
+        if isduration(indat) || iscalendarduration(ind_ds)
             istime = indat.Format;
             idx = 1;
         else 
@@ -110,8 +111,10 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
         metatxt{idx} = sprintf('%s (%s)',metatxt{idx},istime);   
         answer = questdlg('Set time origin at 0 or first record?','Regression',...
                           'Origin','1st record','Origin');
-        if strcmp(answer,'1st record')
-           indat = indat-indat(1);
+        if strcmp(answer,'1st record')     %elapsed years from 1st record
+           indat = time2num(indat,eps(0)); %add small offset to zero to
+        else                               %avoid divide by zero
+           indat = time2num(indat);        %elapsed years from 1-Jan-01
         end        
     end
 
