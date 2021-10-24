@@ -137,7 +137,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             tabs.Cases  = {'   Cases  ',@obj.refresh};        % << Edit tabs to suit model 
             tabs.Inputs = {'  Inputs  ',@obj.InputTabSummary};
             tabs.Plot   = {'  Q-Plot  ',@obj.getTabData};
-            tabs.Stats = {'   Stats   ','gcbo;'};
+            tabs.Stats = {'   Stats   ',''};
             subtabs.Stats(1,:) = {' General ',@obj.setTabAction};
             subtabs.Stats(2,:) = {' Extremes ',@obj.setTabAction};
             %if subtabs are not required eg for Stats

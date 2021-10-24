@@ -85,7 +85,7 @@ classdef muiStats < handle
             end
             %-nested function----------------------------------------------
             function [idx,rundesc] = selectStatOuput(output)
-                idx = [];
+                idx = []; rundesc = '';
                 
                 nruns = length(output);
                 if nruns>1
@@ -192,6 +192,7 @@ classdef muiStats < handle
 %--------------------------------------------------------------------------
         function getDescriptiveStats(obj,mobj)
             %call descriptive_stats based on user selection  
+            hw = waitbar(0,'Checking data');
             if isempty(obj.Data.X) && ~isempty(obj.Data.Y)
                 %move Y to X if defined and no X defined
                 obj.Data.X = obj.Data.Y;
@@ -205,12 +206,16 @@ classdef muiStats < handle
             %to assign to a tab need to define src. If src not defined 
             %(ie [])then a stand-alone figure is used
             src = getTabHandle(obj,mobj,1);
+            
+            waitbar(0.2,hw,'Processing')
             results = descriptive_stats(dataset,obj.MetaData.X,src);
             [idx,casedesc] = setcase(obj.DescOut,false);
             results.Properties.UserData = casedesc;
             obj.DescOut{idx} = results;
             msgtxt = sprintf('Results are displayed on the Stats>%s tab',strip(src.Title));
             getdialog(msgtxt);
+            waitbar(1,hw)
+            close(hw)
         end
 %%
         function getRegressionStats(obj)
@@ -223,21 +228,25 @@ classdef muiStats < handle
             if ok<1, return, end
             model = regression_models{indx}; %selected model type
             
+            hw = waitbar(0,'Checking data');
             %check that user has correctly defined X and Y
             isvalid = isValidSelection(obj,'Regression',false);
             if ~isvalid, return; end            
             metadata = setMetaData(obj);
             
             %handle time formats
-            checkDatDur(obj)
-
+            checkDatDur(obj);
+            
+            waitbar(0.2,hw,'Processing')
             regression_plot(obj.Data.X,obj.Data.Y,metadata,model);
+            waitbar(1,hw)
+            close(hw)
         end
 %%
         function getCrossCorrelationStats(obj)
             %call xcorrelation_plot based on user selection
             % X taken as reference variable and Y as the lag variable
-            
+            hw = waitbar(0,'Checking data');
             %check that user has correctly defined X and Y
             isvalid = isValidSelection(obj,'Cross-correlation',false);
             if ~isvalid, return; end
@@ -245,8 +254,11 @@ classdef muiStats < handle
             
             %handle time formats
             checkDatDur(obj)
-
+            
+            waitbar(0.2,hw,'Processing')
             xcorrelation_plot(obj.Data.X,obj.Data.Y,metadata);
+            waitbar(1,hw)
+            close(hw)
         end
 %%
 %--------------------------------------------------------------------------
@@ -255,16 +267,6 @@ classdef muiStats < handle
          function getTimeseriesStats(obj,mobj,srcVal) 
             %retrieve selected dataset and call relevant functions 
             %based on user selection
-%             statoption = obj.DataSelection.C{9,1};
-%             [ts,metatxt,dataObj] = getDatasetVars(obj,mobj,{},'C',1,1);
-%             %if dataset comes back as a table convert to timeseries
-%             if isempty(ts)
-%                 return;
-%             elseif isa(ts,'table')  %1=table. 0=timeseries
-%                 %convert table to a vector timeseries
-%                 ts = table2ts(dataObj,ts);
-%             end   
-            %
             switch obj.UIset.Type.String
                 case 'Descriptive'
                     %to assign to a tab need to define src. If src not defined 
@@ -304,7 +306,7 @@ classdef muiStats < handle
             %isdd true if datetime or duration, isdt true if datetime
             [isdd,~] = isdatdur('RowNames',obj.Data.X,obj.Data.Y);
             %isdv true if datetime or duration, istv true if datetime
-            varnames = [obj.Data.X.VariableNames,obj.Data.Y.VariableNames];
+%             varnames = [obj.Data.X.VariableNames,obj.Data.Y.VariableNames];
 %             [isdv,istv] = isdatdur(varnames,obj.Data.X,obj.Data.Y);
             
             %re-assign if one of the variables is datetime or duration, or
@@ -436,8 +438,8 @@ classdef muiStats < handle
                 elseif ismember(selstat{1},statoptions)
                     statxt = sprintf('@(x) %s(x)',selstat{1});
                     statfunc = str2func(statxt);         
-                    [statval{1,count},numts] = getintervaldata(ds1,ds2,statfunc); 
-                    stext{1,count} = selstat{1};            
+                    [statval{1,count},numts] = getintervaldata(ds1,ds2,statfunc);  %#ok<AGROW>
+                    stext{1,count} = selstat{1};             %#ok<AGROW>
                     count = count+1;
 
                     %
@@ -521,9 +523,10 @@ classdef muiStats < handle
             %obj - DataStats UI object, mobj - Main UI object
             %idx - index for subtab to use as Tag name or numeric index
             tabobj = findobj(mobj.mUI.Tabs.Children,'-regexp','Tag','Stat');
+            %can return tab and tabgroup if both present
             if isempty(tabobj), return; end
             subtabgrp = tabobj(1).Children;  %tabgroup to use
-            if isa(subtabgrp,'matlab.ui.container.Tab') 
+            if isa(subtabgrp,'matlab.ui.container.TabGroup') 
                 %use one of the subtabs defined by idx
                 statstabs = subtabgrp.Children;
             else
@@ -616,7 +619,7 @@ classdef muiStats < handle
         function dsp = setVariableDSP(dsp,statops)
             %assign the variable dsproperties based on user selection
             nvar = length(statops);
-            varnames = cell(1,nvar); vardesc = varnames; varlabels = varnames;
+            varnames = cell(1,nvar); vardesc = varnames; varlabel = varnames;
             for i=1:nvar
                 varnames{i} = sprintf('%s%s',statops{i},dsp.Variables.Name{1});
                 vardesc{i} = sprintf('%s %s',statops{i},dsp.Variables.Description{1});

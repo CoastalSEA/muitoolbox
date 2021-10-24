@@ -78,10 +78,6 @@
 % - initialise a slider on a figure with the option to include text 
 % displaying the current slider value and an action button
 %
-% * *set_time_units.m*
-% - convert datetimes to durations with selected time units and an
-% optional offset from zero
-%
 % * *stderror.m*
 % - compute the standard error of a data set relative to a fitted
 % regression line

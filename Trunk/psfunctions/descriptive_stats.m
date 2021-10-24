@@ -138,6 +138,7 @@ function stats = time_stats(ts,cthr,varargin)
     %cthr - calms threshold
     %varagin{1} = stats - table for results (empty on first call)
     %varagin{2} = index for season number
+    persistent originselected
     dummy = zeros(11,1);
     if isempty(varargin)
         varname = 'All';
@@ -163,13 +164,17 @@ function stats = time_stats(ts,cthr,varargin)
     stsum = sum(ts,'Weighting','time');  
     mtime = datetime(getabstime(ts));
     %modify the metatxt and select origin if time units have been defined  
-    answer = questdlg('Set time origin at 0 or first record?','Regression',...
-                      'Origin','1st record','Origin');
-    if strcmp(answer,'1st record')     %elapsed years from 1st record
-       mtime = time2num(mtime,eps(0)); %add small offset to zero to
-    else                               %avoid divide by zero
-       mtime = time2num(mtime);        %elapsed years from 1-Jan-01
-    end        
+    if nargin<3 %ie not a seasonal call
+        %persistent - called for annual case and then used for seasonal 
+        originselected = questdlg('Set time origin at 0 or first record?','Regression',...
+                      'Origin','1st record','Origin');                  
+    end
+    %
+    if strcmp(originselected,'1st record')%elapsed years from 1st record
+       mtime = time2num(mtime,eps(0));    %add small offset to zero to
+    else                                  %avoid divide by zero
+       mtime = time2num(mtime);           %elapsed years from 1-Jan-01
+    end   
 
     var = ts.Data;
     [intcpt,slope,Rsq] = regression_model(mtime,var,'Linear');

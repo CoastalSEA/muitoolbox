@@ -360,7 +360,7 @@ classdef (Abstract = true) muiModelUI < handle
 
             %force the initialisation of datasets.
             ht = findobj(obj.mUI.Tabs.Children,'-depth',0,...
-                                         '-not','ButtonDownFcn','');
+                                    '-not','ButtonDownFcn','');
             for i=1:length(ht)
                 hs = func2str(ht(i).ButtonDownFcn);
                 if contains(hs,'refresh')
