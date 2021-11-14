@@ -14,8 +14,10 @@ classdef muiEditUI < muiDataUI
 % 
     properties (Transient)
         %Abstract variables for muiDataUI----------------------------------       
-        %names of tabs providing different data accces options
-        TabOptions = {'Edit'};       
+        % names of tabs providing different data accces options
+        TabOptions = {'Edit'};   
+        % selections that force a call to setVariableLists
+        updateSelections = {'Case','Dataset'};
         %Additional variables for application------------------------------
         Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  

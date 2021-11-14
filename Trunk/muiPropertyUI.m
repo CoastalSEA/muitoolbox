@@ -56,7 +56,8 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
                             'RowName', [], ....
                             'ColumnWidth', cwidth, ...
                             'Data',userdata, ...
-                            'Units','normalized');
+                            'Units','normalized',...
+                            'Visible','off');
             Table.Position(3:4)=Table.Extent(3:4);
             Table.Position(1)=obj.TabDisplay.Position(2)-Table.Extent(3); %left = right - table width
             if Table.Position(1)<0 %restrict table to be on tab (forces scroll bar)
@@ -80,6 +81,7 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
                 Table.Position(2) = margin;
                 Table.Position(4) = obj.TabDisplay.Position(1)-margin;
             end 
+            Table.Visible = 'on';
             
             %add title if defined
             if ~isempty(obj.TabDisplay.TableTitle)

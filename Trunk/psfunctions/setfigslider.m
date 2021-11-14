@@ -14,6 +14,7 @@ function hm = setfigslider(hfig,invar)
 %           invar.sval = ;     %initial value for slider 
 %           invar.smin = ;     %minimum slider value
 %           invar.smax = ;     %maximum slider value
+%           invar.size = ;     %stepsize for slider eg[0.1,0.1] (optional)
 %           invar.callback = ; %callback function for slider to use
 %           invar.userdata = ; %pass userdata if required
 %           invar.position = ; %position of slider
@@ -26,7 +27,7 @@ function hm = setfigslider(hfig,invar)
 % NOTES
 %   deleted any existing figslider when called
 %   defaults struct is
-%   invar = struct('sval',[],'smin',[],'smax',[],...
+%   invar = struct('sval',[],'smin',[],'smax',[],'size', [],...
 %                  'callback','','userdata',[],'position',[],...
 %                  'stxext','','butxt','','butcback','');
 %          default position = [0.15,0.005,0.64,0.04]; 
@@ -34,7 +35,7 @@ function hm = setfigslider(hfig,invar)
 % reposition the axes using: ax.Position = [0.16,0.18,0.65,0.75]; assuming
 % normalized units are being used
 % SEE ALSO
-%   used in CSTrunmodel, CSTdataimport and CSThydraulics
+%   used in CSTrunmodel, CSTdataimport, CSThydraulics, River
 %
 % Author: Ian Townend
 % CoastalSEA (c) Jan 2021
@@ -56,9 +57,14 @@ function hm = setfigslider(hfig,invar)
         invar = convertTime(invar);
     end   
     
-    %add slider
-%     range = split(var2str(invar.smax-invar.smin));
-    stepsize = [1 1]/(invar.smax-invar.smin);
+    %add stepsize if not defined
+    if isempty(invar.size)
+        stepsize = [1 1]/(invar.smax-invar.smin);
+    else
+        stepsize = invar.size;
+    end
+    
+    %add slider to figure
     hm(1) = uicontrol('Parent',hfig,...
             'Style','slider','Value',invar.sval,... 
             'Min',invar.smin,'Max',invar.smax,'sliderstep',stepsize,...
@@ -113,7 +119,7 @@ end
 %%
 %         function hm = setSlideControl(obj,hfig,qmin,qmax,qin)
 %             %intialise slider to set different values   
-%             invar = struct('sval',[],'smin',[],'smax',[],...
+%             invar = struct('sval',[],'smin',[],'smax',[],'size', [],...
 %                            'callback','','userdata',[],'position',[],...
 %                            'stxext','','butxt','','butcback','');            
 %             invar.sval = qin;      %initial value for slider 

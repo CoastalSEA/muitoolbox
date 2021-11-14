@@ -15,8 +15,10 @@ classdef muiPlotsUI < muiDataUI
 % 
     properties (Transient)
         %Abstract variables for muiDataUI---------------------------        
-        %names of tabs providing different data accces options
-        TabOptions = {'2D','3D','4D','2DT','3DT','4DT'};       
+        % names of tabs providing different data accces options
+        TabOptions = {'2D','3D','4D','2DT','3DT','4DT'}; 
+        % selections that force a call to setVariableLists
+        updateSelections = {'Case','Dataset'};
         %Additional variables for application------------------------------
         Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  

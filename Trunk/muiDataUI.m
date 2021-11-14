@@ -34,6 +34,7 @@ classdef (Abstract = true) muiDataUI < handle
 
     properties (Abstract)  %properties that all subclasses must include
         TabOptions         %names of tabs providing different data accces options
+        updateSelections   %selections that force a call to setVariableLists
     end
 
     methods (Abstract,Access=protected) %methods that all subclasses must define
@@ -426,40 +427,36 @@ classdef (Abstract = true) muiDataUI < handle
                 end
             end
         end
-%%    
+%% 
         function updateCaseList(obj,src,~,mobj)
             %callback function from uicontrols keeps track of currrent selection            
-            
             if isa(src,'matlab.ui.container.Tab') 
                 %new tab or clear button selected   
                 itab = strcmp(obj.Tabs2Use,src.Tag);
                 obj.TabContent(itab).Selections{1}.Value = 1;
                 setVariableLists(obj,src,mobj)
             elseif isa(src,'matlab.ui.control.UIControl') && ...
-                                                    strcmp(src.Tag,'Case')
-                %case selection has changed                                
-                ht = src.Parent;
-                if src.UserData~=src.Value     
-                    setVariableLists(obj,ht,mobj)
-                end
-            elseif isa(src,'matlab.ui.control.UIControl') && ...
-                                                    strcmp(src.Tag,'Dataset')
-                %case selection has changed                                
-                ht = src.Parent;
-                if src.UserData~=src.Value   
-                    setVariableLists(obj,ht,mobj)
-                end    
-            elseif isa(src,'matlab.ui.control.UIControl') && ...
-                                                    strcmp(src.Tag,'Refresh')
+                                              strcmp(src.Tag,'Refresh')
                 %refresh case list button
                 ht = src.Parent;
                 itab = strcmp(obj.Tabs2Use,ht.Tag);
                 obj.TabContent(itab).Selections{1}.Value = 1;
-                setVariableLists(obj,ht,mobj)
+                setVariableLists(obj,ht,mobj)    
             else
-                %no need to update lists unless Case or Tab changes
+                for i=1:length(obj.updateSelections)
+                    %updateSelection lists the selection options that can
+                    %force a call to setVariableLists (eg Case, Dataset)
+                    upsel = obj.updateSelections{i};
+                    if isa(src,'matlab.ui.control.UIControl') && ...
+                                              strcmp(src.Tag,upsel)
+                        ht = src.Parent;
+                        if src.UserData~=src.Value     
+                            setVariableLists(obj,ht,mobj)
+                        end
+                    end
+                end
             end
-        end      
+        end     
 %%       
         function setTabActions(obj,src,evt,mobj) 
             %actions needed when activating a tab

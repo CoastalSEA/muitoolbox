@@ -481,7 +481,7 @@ classdef (Abstract = true) muiModelUI < handle
         function toolsMenuOptions(obj,src,~)
             %callback function for Tools menu options
             switch src.Text
-                case 'Project'
+                case {'Project','Model'}
                     obj.clearModel;
                 case 'Figures'
                     obj.clearFigures;
@@ -495,7 +495,7 @@ classdef (Abstract = true) muiModelUI < handle
             %called when closing and when opening or creating a new project             
             obj.Info = muiProject;
             obj.Constants = muiConstants.Evoke;
-            obj.Cases = muiCatalogue; %CHECK THAT THIS REMOVES ALL DATA
+            obj.Cases = muiCatalogue; 
             obj.Inputs = [];
             htabs = findobj(obj.mUI.Tabs,'Type','uitab');
             for i=1:length(htabs)
@@ -911,7 +911,12 @@ classdef (Abstract = true) muiModelUI < handle
                     deleteFigObj(obj,figObj,'Stats');
             end
             guiobjtxt = name(4:end);
-            delete(obj.mUI.(guiobjtxt).dataUI.Figure);
+            if ~isempty(obj.mUI.(guiobjtxt))                
+                delete(obj.mUI.(guiobjtxt).dataUI.Figure);
+            else
+                %close DataUI called but obj.mui.(guiobject) already deleted
+%                 ht = findobj('Tag','DataUI'); delete(ht);
+            end
             delete(obj.mUI.(guiobjtxt))
             obj.mUI.(guiobjtxt) = [];
         end

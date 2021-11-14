@@ -567,17 +567,17 @@ classdef muiPlots < handle
                     figax = gca;
                     hp = figax.Children;
                     hp.ZDataSource = 'vari';                    
-                    figax.ZLimMode = 'manual';  %fix limits of z-axis
+                    figax.ZLimMode = 'manual'; %fix limits of z-axis
                     figax.ZLim = minmax(var);                    
                     hcb = findobj(hfig,'Type','colorbar');
-                    hcb.LimitsMode = 'manual';  %fix limits of contour bar
+                    hcb.LimitsMode = 'manual'; %fix limits of contour bar
                     hcb.Limits = figax.ZLim;
                 case '4DT'
                     warndlg('Not ready yet')
                     return;
                 case 'Digraph'
                     g = obj.Data.network;     %digraph
-                    y = obj.Data.Y;         %variable used to color nodes 
+                    y = obj.Data.Y;           %variable used to color nodes 
                     nsze = obj.Data.nodesize; %size of nodes
                     obj.Title =sprintf('Network for %s',obj.AxisLabels.Y);
                     [hp,hg]  = muiPlots.nodalnetwork(g,y,nsze,obj.Legend,obj.Title);
@@ -633,10 +633,17 @@ classdef muiPlots < handle
             %allow axis tick labels to be set 
             if isstruct(obj.TickLabels)
                 labnames = fieldnames(obj.TickLabels);
-                labels = struct2cell(obj.TickLabels);
+                labels = struct2cell(obj.TickLabels);                
                 for i=1:2:length(labels)
                     figax.(labnames{i}) = labels{i};
                     figax.(labnames{i+1}) = labels{i+1};
+                    if strcmp(labnames{i},'XTick')
+                        nlab = length(labels{i+1});
+                        mxlen = max(cellfun(@length,labels{i+1}));
+                        if nlab*mxlen>100
+                            figax.XTickLabelRotation = 45;
+                        end
+                    end
                 end
             end
         end
@@ -787,7 +794,9 @@ classdef muiPlots < handle
 %%        
         function closeFigure(obj,src,~)
             %clear a selected figure and update figure number index
-            obj.Plot.FigNum(src.Number==obj.Plot.FigNum)=[];
+            if  isvalid(obj)
+                obj.Plot.FigNum(src.Number==obj.Plot.FigNum)=[];
+            end
             delete(src);
         end         
 %%

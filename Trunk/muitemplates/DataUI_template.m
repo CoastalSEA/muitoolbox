@@ -15,8 +15,10 @@ classdef DataUI_template < muiDataUI                          % << Edit to class
 % 
     properties (Transient)
         %Abstract variables for muiDataUI----------------------------------        
-        %names of tabs providing different data accces options
-        TabOptions = {'Calc'};       
+        % names of tabs providing different data accces options
+        TabOptions = {'Calc'}; 
+        % selections that force a call to setVariableLists
+        updateSelections = {'Case','Dataset'};
         %Additional variables for application------------------------------
         Tabs2Use         %number of tabs to include  (set in getPlotGui)     
     end  
@@ -75,6 +77,9 @@ classdef DataUI_template < muiDataUI                          % << Edit to class
             %Abstract function required by muiDataUI
             %called during initialisation by muiDataUI.setDataUItabs and 
             %whenever muiDataUI.updateCaseList is called
+            %The property updateSelection is used to force a call for
+            %dependent variable lists (eg when Variables change if a
+            %different Casce or Dataset is selected)
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;

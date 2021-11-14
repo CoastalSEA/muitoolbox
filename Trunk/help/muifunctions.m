@@ -14,6 +14,10 @@
 % - function to add the same header to batch of user selected files (eg to
 % add a format definition to the top of a data file)
 % 
+% * *check_unique_names.m*
+% - check that names in list are unique and if required replace suplicates
+% with a unique name
+%
 % * *check_vector_lengths.m*
 % - check that all input values are either scalar or vectors of the same length 
 % 
@@ -69,9 +73,16 @@
 % * *inputUI.m*
 % - creates a multi-field UI
 %
+% * *ismatch.m*
+% - finds the occurence of matches between two sets of character vectors,
+% cell arrays or string arrays (from v2019b can use Matlab(TM) matches function)
+%
 % * *isvalidrange.m*
 % - check user input is valid for the data type used and within bounds
 % 
+% * *matrixtableUI.m*
+% - generate UI to edit a matrix using tablefigureUI
+%
 % * *minmax.m*
 % - find min and max of multidimensional numeric or ordinal array
 %

@@ -548,7 +548,7 @@ classdef muiCatalogue < dscatalogue
             ndim = length(uidims);
             idx.row = 1; 
 %             dimnames.row = dst.RowNames;
-            idx.dim = cell(1,ndim-1);
+            idx.dim = cell(1,ndim-1); %use cell because can be multiple dimensions of different length
             for i=1:ndim
                 %assign to dimension or row                    
                 if strcmp(uidims(i).name,'RowNames') %this is a row                    
@@ -584,7 +584,7 @@ classdef muiCatalogue < dscatalogue
                 indices = getvarindices(var,value);
             elseif iscell(var) && length(var)>1
                 %cell array of character vectors NB value must be a cell
-                indices = find(contains(var,value));
+                indices = find(ismatch(var,value));
             elseif length(var)>1
                 %numerical array
                 indices = interp1(var,1:length(var),value,'nearest'); 
