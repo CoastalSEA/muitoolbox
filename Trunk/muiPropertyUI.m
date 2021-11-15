@@ -188,9 +188,17 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             %small screens can only handle ~12 inputs. For input lists with
             %more than 12 values split the entry into 2 dialogues
             if length(defaultvalues)>nrec
-                useInp=multiInputdlg(obj,prompt,title,numlines,...
+                [useInp,isok] = multiInputdlg(obj,prompt,title,numlines,...
                                                     defaultvalues,nrec);
-                if isempty(useInp), return; end
+                if isempty(useInp), return; end %user has cancelled on both pages
+                %
+                if any(~isok) %user has cancelled on one of the pages
+                    if ~isok(1)
+                        useInp = [defaultvalues(1:nrec);useInp];
+                    elseif ~isok(2)
+                        useInp = [useInp;defaultvalues(nrec+1:end)];
+                    end
+                end
             else
                 useInp=inputdlg(prompt,title,numlines,defaultvalues);
                 if isempty(useInp), return; end
@@ -277,16 +285,19 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             end
         end
 %%
-        function useInp = multiInputdlg(~,prompt,title,numlines,defaultvalues,nrec)
+        function [useInp,isok] = multiInputdlg(~,prompt,title,numlines,...
+                                                        defaultvalues,nrec)
             %split entry into two dialogues when there is more than nrec
             %entries and this becomes too long to fit on screen
             defaults1 = defaultvalues(1:nrec);
             prompt1 = prompt(1:nrec);
             useInp1 = inputdlg(prompt1,title,numlines,defaults1);
+            isok = ~isempty(useInp1); %user cancelled
             %
             defaults2 = defaultvalues(nrec+1:end);
             prompt2 = prompt(nrec+1:end);
             useInp2 = inputdlg(prompt2,title,numlines,defaults2);
+            isok(2) = ~isempty(useInp2); %user cancelled
             %
             useInp = [useInp1;useInp2];
         end
