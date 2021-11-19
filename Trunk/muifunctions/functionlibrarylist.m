@@ -88,14 +88,12 @@ classname = classmeta.Name;
 
 %now define any subselection so that only valid functions are displayed
 switch classname
-    case 'InWave'
-        idinc = [1:12,17:20];
-    case 'CoastalTools'
-        idinc = [1:15,17:20];
-    case 'SpitDeltaSEM'
+    case 'Asmita'
+        idinc = [1:8,17:20];
+    case {'CoastalTools','SpitDeltaSEM'}
         idinc = [1:15,17:20];
     case 'Diffusion'
-        idinc = [1,15:20];
+        idinc = [1,15:20];    
     otherwise
         idinc = [1,17:20];
 end

@@ -444,6 +444,8 @@ classdef (Abstract = true) muiModelUI < handle
             ifile = obj.Info.FileName;
             load([ipath,ifile],'sobj');
             obj.Info = sobj.Info;
+            obj.Info.PathName =  ipath;  %path and file name may change
+            obj.Info.FileName = ifile;   %reset to current values
             obj.Constants = sobj.Constants; 
             obj.Inputs = sobj.Inputs;
             obj.Cases = sobj.Cases;
@@ -911,11 +913,10 @@ classdef (Abstract = true) muiModelUI < handle
                     deleteFigObj(obj,figObj,'Stats');
             end
             guiobjtxt = name(4:end);
-            if ~isempty(obj.mUI.(guiobjtxt))                
+            if ~isempty(obj.mUI.(guiobjtxt)) && isprop(obj.mUI.(guiobjtxt),'dataUI')               
                 delete(obj.mUI.(guiobjtxt).dataUI.Figure);
             else
-                %close DataUI called but obj.mui.(guiobject) already deleted
-%                 ht = findobj('Tag','DataUI'); delete(ht);
+
             end
             delete(obj.mUI.(guiobjtxt))
             obj.mUI.(guiobjtxt) = [];
