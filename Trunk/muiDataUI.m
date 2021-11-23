@@ -89,7 +89,7 @@ classdef (Abstract = true) muiDataUI < handle
                 %now add controls to tab
                 setTabContent(obj,ht);              %defines what controls to use                
                 setDataOptionControls(obj,ht,mobj); %selection controls
-                setVariableLists(obj,ht,mobj);    %assign values to variables
+                setVariableLists(obj,ht,mobj);      %assign values to variables
                 setXYZpanel(obj,ht,mobj);           %XYZ button panel
                 setAdditionalButtons(obj,ht,mobj);  %addtional action buttons
                 setTabControlButtons(obj,ht,mobj);  %tab control buttons 

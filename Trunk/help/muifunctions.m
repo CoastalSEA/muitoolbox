@@ -99,6 +99,10 @@
 % * *scalevariable.m*
 % - rescale a variable (vector or matrix) based on user selection
 %
+% * *setAnimate.m*
+% - callback function for button to set plot to be an animation instead
+% of a snap shot at selected time
+%
 % * *setcase.m*
 % - set case number and prompt user to provide a description
 % 

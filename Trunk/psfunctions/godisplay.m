@@ -28,6 +28,9 @@ function godisplay(src,~)
     end
 
     delay = 5;
-    msgpos = [0.5,0.5,0.15,0.08];
+    [~,colwidth] = getcolumnwidths({msgtxt});
+    screendata = get(0,'ScreenSize');
+    txtwidth = colwidth/screendata(3)*1.15;
+    msgpos = [0.5,0.5,txtwidth,0.08];
     getdialog(msgtxt,msgpos,delay)
 end

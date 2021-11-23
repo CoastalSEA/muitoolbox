@@ -896,7 +896,7 @@ classdef (Abstract = true) muiModelUI < handle
                 %define case for each plot/data GUI
                 case 'muiPlotsUI'
                     figObj = [];
-                    if ~isempty(obj.mUI.Plots) && ...
+                    if isvalid(obj.mUI.Plots) && ...
                             isfield(obj.mUI.Plots.Plot,'FigNum') && ...
                                 ~isempty(obj.mUI.Plots.Plot.FigNum)
                         localObj = obj.mUI.Plots.Plot.FigNum;
@@ -913,7 +913,7 @@ classdef (Abstract = true) muiModelUI < handle
                     deleteFigObj(obj,figObj,'Stats');
             end
             guiobjtxt = name(4:end);
-            if ~isempty(obj.mUI.(guiobjtxt)) && isprop(obj.mUI.(guiobjtxt),'dataUI')               
+            if isvalid(obj.mUI.(guiobjtxt)) && isprop(obj.mUI.(guiobjtxt),'dataUI')               
                 delete(obj.mUI.(guiobjtxt).dataUI.Figure);
             else
 

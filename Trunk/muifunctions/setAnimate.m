@@ -1,13 +1,13 @@
-function setPolar(src,~) 
+function setAnimate(src,~) 
 %
 %-------function help------------------------------------------------------
 % NAME
-%   setPolar.m
+%   setAnimate.m
 % PURPOSE
-%   callback function for button to set XY plot to be polar 
-%   instead of cartesian
+%   callback function for button to set plot to be an animation instead
+%   of a snap shot at selected time
 % USAGE
-%   callback function: @(src,evt)setPolar(src,evt)
+%   callback function: @(src,evt)setAnimate(src,evt)
 % INPUT
 %   src - handle to calling object (eg graphical button)
 % OUTPUT
@@ -20,13 +20,13 @@ function setPolar(src,~)
 %--------------------------------------------------------------------------
 %
     %
-    if strcmp(src.String,'+')
-        src.String = 'O';
+    if strcmp(src.String,'Ti')
+        src.String = 'Mv';
         src.UserData = 1;
-        src. Tooltip = 'Switch Polar to XY';
-    elseif strcmp(src.String,'O')
-        src.String = '+';
+        src. Tooltip = 'Animate. Press to use Snap shot';
+    elseif strcmp(src.String,'Mv')
+        src.String = 'Ti';
         src.UserData = 0;
-        src. Tooltip = 'Switch XY to Polar; X data in degrees or radians';
+        src. Tooltip = 'Snap shot. Press to use animate';
     end
 end
