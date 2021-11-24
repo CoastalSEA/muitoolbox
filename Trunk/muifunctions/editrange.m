@@ -27,10 +27,13 @@ function editrange(src,~)
     uic = findobj(src.Parent,'Tag',uicoption);
     rangetext = uic.String;
     bounds = uic.UserData;
+    if length(bounds)>2
+        bounds = [bounds(1),bounds(end)];
+    end
 
     [rangevar,pretext] = range2var(rangetext,bounds);
 
-    newrange = editrange_ui(rangevar);
+    newrange = editrange_ui(rangevar,uic.UserData);
 
     if isvalidrange(newrange,bounds)
         astring = var2range(newrange,pretext);

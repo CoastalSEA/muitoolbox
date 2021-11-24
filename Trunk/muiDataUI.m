@@ -569,7 +569,7 @@ classdef (Abstract = true) muiDataUI < handle
                         mdim = pdim;
                     end
                     subVarSelection(obj,dst,1,xyz,mdim,ndim);
-                else
+                else                         %dimension selected
                     for j=1:pdim
                         varRange = getVarAttRange(dst,dstdesc,dstdesc{j+1});
                         rangetext = var2range(varRange);
@@ -666,16 +666,18 @@ classdef (Abstract = true) muiDataUI < handle
             %find attributes that have not yet been defined
             inputxt = dstdesc(~ismember(dstdesc,dstdesc(propsused)));
             nprop = length(inputxt);
-            range = struct('val',{},'txt',{});
+            range = struct('val',{},'txt',{},'lst',{});
             for k=1:nprop
                 range(k).val = getVarAttRange(dst,dstdesc,inputxt{k});
                 range(k).txt = var2range(range(k).val);
                 if iscellstr(range(k).val)
-                    range(k).val = 1;
+                    %if text list is being used set var to the list
+                    %val sets userdata which is used in editrange to check 
+                    %data type in range2var and switch to list selection
                     if k>1
-                        range(k).txt = dst.Dimensions.(dstnames{k+1});
+                        range(k).val = dst.Dimensions.(dstnames{k+1});
                     else
-                        range(k).txt = dst.RowNames;
+                        range(k).val = dst.RowNames;
                     end
                 end
             end
@@ -725,21 +727,28 @@ classdef (Abstract = true) muiDataUI < handle
             seltext = repmat({'Select:','Range:'},1,mdim);
             uinput.fields   = [seltext(:);dstdesc(mdim+2:end)'];
             style1 = repmat({'linkedpopup','edit'},1,mdim);
-            if iscell(selrange(end).txt)
-                %assumes only the last ndim dimensions are text lists
+            %check for selections that use text lists
+            islist = cellfun(@iscellstr,{selrange(:).val});
+            if any(islist) && mdim==1
+                %assumes only the last dimension ia a text list
                 %introduced to handle elements in Asmita
                 style2 = repmat({'popupmenu'},1,ndim);
                 nvar = 2;
+                selrange(2).txt = selrange(2).val; %swap range for list(*)
+                mcontrol = {'','Ed','',''};
             else   %default for numeric and datatime/duration dimensions
                 style2 = repmat({'linkedslider'},1,ndim);
                 nvar = 2:length(dstdesc);
+                mcontrol = repmat({'';'Ed'},1,mdim);
             end
-            uinput.style    = [style1(:);style2(:)];
-            mcontrol = repmat({'';'Ed'},1,mdim);
+            uinput.style    = [style1(:);style2(:)];            
             ncontrol = repmat({'Ed'},1,ndim);
             uinput.controls = [mcontrol(:);ncontrol(:)];
+
+            %assign default range text and values - passes text list if
+            %switched above (*).
             for j=1:2:2*mdim
-                uinput.default{j} = dstdesc(nvar)';  %should this be default(j)?
+                uinput.default{j} = dstdesc(nvar)'; 
                 uinput.userdata{j} = {};
                 uinput.default{j+1} = selrange((j+1)/2).txt;
                 uinput.userdata{j+1} = selrange((j+1)/2).val;

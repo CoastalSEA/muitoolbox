@@ -1,4 +1,4 @@
-function Vout = editrange_ui(Vin)
+function Vout = editrange_ui(Vin,selist)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -7,9 +7,10 @@ function Vout = editrange_ui(Vin)
 %   test whether Vin is datetime and if so use datepicker otherwise use  
 %   inputdlg to let user edit range values
 % USAGE
-%   Vout = editrange_ui(Vin)
+%   Vout = editrange_ui(Vin,selist)
 % INPUT
 %   Vin - cell array of start and end values of range
+%   selist - cell array of text vectors to select from (optional)
 % OUTPUT
 %   Vout - cell array of start and end values of range
 % NOTES
@@ -28,6 +29,18 @@ function Vout = editrange_ui(Vin)
             ti.Format = Vin{i}.Format;
             Vout{i} = ti;
         end
+    elseif nargin>1 && (iscellstr(selist) || isstring(selist))
+        h_inp = inputUI('FigureTitle', 'Edit range',...
+                        'PromptText','Select start and end of range:',...
+                        'InputFields',{'From: ','To: '},...
+                        'Style',{'popupmenu','popupmenu'},...
+                        'ControlButtons',{'',''},...                            
+                        'DefaultInputs',{selist,selist},...
+                        'ActionButtons',{'Select','Cancel'});  
+
+            waitfor(h_inp,'Action')
+            Vout = selist([h_inp.UIselection{:}]);
+            delete(h_inp.UIfig)
     else                 %otherwise use input dialogue
         dtype = getdatatype(Vin);
         if isnumeric(Vin{1}) || islogical(Vin{1})
