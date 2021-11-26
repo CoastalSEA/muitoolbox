@@ -305,10 +305,8 @@ classdef muiStats < handle
             %check whether inputs are datetime or duration
             %isdd true if datetime or duration, isdt true if datetime
             [isdd,~] = isdatdur('RowNames',obj.Data.X,obj.Data.Y);
-            %isdv true if datetime or duration, istv true if datetime
-%             varnames = [obj.Data.X.VariableNames,obj.Data.Y.VariableNames];
-%             [isdv,istv] = isdatdur(varnames,obj.Data.X,obj.Data.Y);
-            
+            %isdd true if datetime or duration, isdt true if datetime
+
             %re-assign if one of the variables is datetime or duration, or
             %the RowNames are not datetime or duration
             %pass dstables if the RowNames are datetime or duration to 
@@ -318,13 +316,6 @@ classdef muiStats < handle
                 %selected datasets do not both have datetime or duration RowNames
                 obj.Data.X = obj.Data.X.DataTable{:,1};
                 obj.Data.Y = obj.Data.Y.DataTable{:,1};
-%                 if any(isdv)
-%                     if istv(1)       %variable assigned to X is a datetime
-%                         obj.Data.X = date2duration(obj.Data.X);
-%                     elseif istv(2)   %variable assigned to Y is a datetime
-%                         obj.Data.Y = date2duration(obj.Data.Y);
-%                     end
-%                 end
             end
         end
 %%

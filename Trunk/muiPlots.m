@@ -153,11 +153,17 @@ classdef muiPlots < handle
         function legtext = setLegendText(~,props,legformat,ivar)
             %set the legend text based on the type of plot and selection made
             if isstruct(legformat(ivar))   %use defined adjustments for legend
-                %legformat is a struct with .idx for the indices of the text
-                %positions to replace (1-3), and .text the replacement text
+                %legformat is a struct with:
+                % idx - logical array of the text positions to replace (1-3)
+                % text - replacement text - array size must match sum(idx)
+                % eg [0,1,0] replaces the central value with string in text
+                % to give Case(text)Variable
                 deflegend = {props(ivar).case,props(ivar).dset,props(ivar).desc};
                 idtxt = logical(legformat(ivar).idx);
-                if isempty(legformat(ivar).text)
+                if isempty(legformat(ivar).text) %no alternative text provided
+                    %apply idx as a mask to use just one or two of
+                    %the default descriptions, Case,Dataset,Variable
+                    % eg idx = [1,0,1] gives Case(Variable) 
                     deflegend = deflegend(idtxt);
                     legmask = {'%s','%s (%s)'};
                     legtext = sprintf(legmask{sum(idtxt)},deflegend{:});
@@ -169,7 +175,7 @@ classdef muiPlots < handle
                     end
                     legtext = sprintf('%s (%s) %s',deflegend{:}); 
                 end
-            else                         %use default text for legend
+            else  %use default text for legend based on Case(Dataset)Variable
                 legtext = sprintf('%s (%s) %s',props(1).case,...
                                             props(1).dset,props(1).desc);                     
             end
