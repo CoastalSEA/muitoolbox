@@ -12,7 +12,7 @@
 % <matlab:doc('muidatadet') muiDataSet> bstract class.
 
 %% muiDataSet properties
-% The class inherirs the <matlab:doc('muidataset') muiDataSet> properties 
+% The class inherits the <matlab:doc('muidataset') muiDataSet> properties 
 % for Data, RunParam, MetaData and CaseIndex. Importing data requires 
 % muiDataSet properties _DataFormats_ and _FileSpec_, which are defined in 
 % the class constructor by prompting the user to select a format file.

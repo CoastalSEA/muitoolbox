@@ -62,8 +62,10 @@
 % * *getwidget.m*
 % - widget for text,input uicontrol and control buttons (eg edit) 
 % 
-% * *inpaint_nans.m* from Matlab(TM) Forum
-% - in-paints over nans in an array (Copyright  John D'Errico)
+% * *inpaint_nans.m* 
+% - in-paints over nans in an array. From Matlab(TM) Forum by John
+% D'Errico, (c) 2012,
+% https://www.mathworks.com/matlabcentral/fileexchange/4551-inpaint_nans.
 % 
 % * *inputgui.m*
 % - provides access to the inputUI class to generate a mutli control input
@@ -142,8 +144,9 @@
 % * *ts_interval.m*
 % - find the time interval of a time vector based on selected method
 % 
-% * *uigetdate.m* from Matlab(TM) Forum
-% - date selection dialog box
+% * *uigetdate.m* 
+% - date selection dialog box. From Matlab(TM) Forum, Elmar Tarajan (2021)
+% https://www.mathworks.com/matlabcentral/fileexchange/8313-uigetdate.
 % 
 % * *var2range.m*
 % - convert start and end variable to a range character array

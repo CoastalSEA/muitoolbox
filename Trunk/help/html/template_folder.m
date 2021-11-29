@@ -3,4 +3,9 @@ function template_folder()
 fname = 'muiModelUI.m';
 toolboxpath = which(fname);
 fpath = [toolboxpath(1:end-length(fname)),'muitemplates'];
-open(fpath)
+try
+    winopen(fpath)
+catch
+    msg = sprintf('The examples can be found here:\n%s',fpath);
+    msgbox(msg)
+end

@@ -1,4 +1,4 @@
-%% muiMProject
+%% muiProject
 % Class to hold project details
 
 %% Syntax

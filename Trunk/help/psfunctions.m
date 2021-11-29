@@ -18,6 +18,10 @@
 % * *descriptive_stats.m*
 % - generate descriptive stats table for timeseries or table of a variable
 %
+% * *downsample.m*
+% - wrapper to put downsample_ts, output into an array. From Matlab(TM) Forum, 
+% by Chad A. Greene (c) 2014, 
+%
 % * *extreme_stats.m*
 % - compute extreme values for a range of return periods using the GPD
 % method (General Pareto Distrtibution)

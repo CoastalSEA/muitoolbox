@@ -14,7 +14,7 @@
 % or <matlab:doc('muidataui') muiDataUI>.
 
 %% muiUserModel properties
-% The class inherirs the <matlab:doc('muidataset') muiDataSet> properties 
+% The class inherits the <matlab:doc('muidataset') muiDataSet> properties 
 % for Data, RunParam, MetaData and CaseIndex. In addition, the selection 
 % from a <matlab:doc('muidataui') muiDataUI> derived UI are held as 
 % transient properties.

@@ -1,7 +1,8 @@
 %% muitoolbox utility classes
 % The muitoolbox comprises a number of classes that collectively allow
 % bespoke User Interfaces (UIs) to be rapidly built and customised.
-%%
+
+%% Utility Classes
 % muitoolbox contains the following utility classes:
 %%
 % * <matlab:doc('muicatalogue') muiCatalogue>: implements the data catalogue to hold access imported data and model outputs. 
@@ -16,8 +17,7 @@
 % * <matlab:doc('muimanipui') muiManipUI>: data selection UI to define an equation or function call.
 % * <matlab:doc('muiusermodel') muiUserModel>: methods to evaluate functions based on UI selection.  
 
-%% 
-% *See Also* 
-%%
+%% See Also 
+
 % See <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('dstoolbox') dstoolbox>
 % and documentation for the <matlab:doc('modelui') ModelUI> App.
