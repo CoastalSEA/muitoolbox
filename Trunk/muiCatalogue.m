@@ -284,14 +284,16 @@ classdef muiCatalogue < dscatalogue
             cobj = lobj(classrec);
         end
 %%
-        function setCase(obj,cobj,varargin)
+        function caseid = setCase(obj,cobj,varargin)
             %add a case to the Catalogue and assign to DataSets
+            % cobj - instance of class to be saved
             % varargin are as defined for dscatalogue.addRecord with
             % classname derived from obj          
             % casetype  - type of data set (e.g. keywords: model, data)
             % casedesc  - description of case (optional)
             % SupressPrompts - logical flag to use casedesc as record 
             %                  description without prompting user (optional
+            %returns caseid to allow user to retrieve new record
             classname = metaclass(cobj).Name;            
             %add record to the catalogue and update mui.Cases.DataSets
             caserec = addRecord(obj,classname,varargin{:});
@@ -306,6 +308,7 @@ classdef muiCatalogue < dscatalogue
             %assign dataset to class record
             id_class = setDataClassID(obj,classname);              
             obj.DataSets.(classname)(id_class) = cobj;
+            caseid = casedef.CaseID;
         end
 %%
         function [dst,caserec,idset,dstxt] = getDataset(obj,caserec,idset)

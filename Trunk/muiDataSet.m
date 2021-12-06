@@ -296,19 +296,20 @@ classdef (Abstract = true) muiDataSet < handle
             data = rmmissing(data,'DataVariables',1);
         end   
 %%
-        function setDataSetRecord(obj,muicat,dataset,varargin)
+        function caseid = setDataSetRecord(obj,muicat,dataset,varargin)
             %assign dataset to class Data property and update catalogue
             % muicat - muiCatalogue object
             % dataset - the dataset or cell array of data sets to be added
             % varargin - input to dscatalogue.addRecord. minimum is
             %            datatype but can also include a cell with the case 
             %            description and logical flag to supress user prompt
+            %returns caseid to allow user to retrieve new record
             if isstruct(dataset)
                 obj.Data = dataset;   %can be struct of multiple tables
             else
                 obj.Data.Dataset = dataset;  
             end
-            setCase(muicat,obj,varargin{:});
+            caseid = setCase(muicat,obj,varargin{:});
         end           
         
     end
