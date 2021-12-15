@@ -716,8 +716,9 @@ classdef (Abstract = true) muiModelUI < handle
                 %output summary to tablefigure
                 tabtxts{i,1} = sprintf('Metadata for %s dated: %s\n%s',...
                                                 casedesc,lastmod,meta);
+                clear dst 
             end
-
+              
             h_fig = tabtablefigure('Case Metadata',dstnames,tabtxts,tables);
             
             %add button to access DSproperties of each table displayed
@@ -726,16 +727,23 @@ classdef (Abstract = true) muiModelUI < handle
             position = h_but.Position;
             position(1) = 10;            
             sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-25, 60, 20];
+            sourcetxt = cell(ntables,1);
             for j=1:ntables
                 itab = h_tab.Children(j);  %NEEDS TO CHECK THIS WORKS WITH MUTLIPLE DATASETS
-                dst = dstables.(dstnames{i});
+                dst = dstables.(dstnames{j});
                 setactionbutton(itab,'DSproperties',position,...
                     @(src,evt)getDSProps(obj,src,evt),...
                    'getDSP','View the dstables DSproperties',dst);
-                setactionbutton(h_fig,'Source',sourcepos,...
-                   @(src,evt)getSource(obj,src,evt),'getSource',...
-                   'View data source details',dst.Source);
+                if iscell(dst.Source)
+                    sourcetxt = dst.Source;
+                else
+                    sourcetxt{j} = sprintf('%s: %s',dstnames{j},dst.Source);
+                end
+                clear dst
             end
+            setactionbutton(h_fig,'Source',sourcepos,...
+                   @(src,evt)getSource(obj,src,evt),'getSource',...
+                   'View data source details',sourcetxt);
             %adjust position on screen            
             h_fig.Position(1)=  h_fig.Position(3)*3/2; 
 %             screendata = get(0,'ScreenSize');
@@ -951,12 +959,15 @@ classdef (Abstract = true) muiModelUI < handle
                 case 'Cases'
                     lobj = obj.Cases.DataSets; %map Cases to DataSets property
                 case 'mUI'
-                lobj = obj.mUI;
-                if strcmp(classtype,'mUI') && ~isempty(lobj.(classname))
-                    %mUI does not use Class names for field names
-                    cobj = lobj.(classname);
+                    lobj = obj.mUI;
+                    if strcmp(classtype,'mUI') && ~isempty(lobj.(classname))
+                        %mUI does not use Class names for field names
+                        cobj = lobj.(classname);
+                        return;
+                    end 
+                otherwise
+                    cobj = [];
                     return;
-                end                    
             end
             %
             if isfield(lobj,classname) && ...

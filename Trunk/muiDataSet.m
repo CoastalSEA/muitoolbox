@@ -338,7 +338,7 @@ classdef (Abstract = true) muiDataSet < handle
             if ~isempty(muicat.DataSets)
                 %classes that define model input datasets
                 %save caseID, caseDescription and caseClass for use in
-                %viewCasetSettings (because Case may get deleted)
+                %muiCatalogue-viewCaseSettings (because Case may get deleted)
                 for i=1:length(varargin)
                     [cobj,~,catrec] = getCase(muicat,varargin{i});
                     cname = metaclass(cobj).Name;

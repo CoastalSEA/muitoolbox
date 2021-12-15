@@ -42,7 +42,13 @@ classdef Model_template < muiDataSet                         % << Edit to classn
             muicat = mobj.Cases;
             %assign the run parameters to the model instance
             %may need to be after input data selection to capture caserecs
+            %of any existing Case datasets used as inputs to the model. The
+            %classes loaded are defined in the main model UI class:
+            %obj.ModelInputs.<model classname> = {'Param_class1',Param_class2',etc}
+            %if fully defined RunParam property should contain all the
+            %input parameters and dataset links needed to run the model.
             setRunParam(obj,mobj); 
+            
 %--------------------------------------------------------------------------
 % Model code  <<INSERT MODEL CODE or CALL MODEL>>
 %--------------------------------------------------------------------------

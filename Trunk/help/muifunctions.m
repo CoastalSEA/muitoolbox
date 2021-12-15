@@ -61,6 +61,9 @@
 % 
 % * *getwidget.m*
 % - widget for text,input uicontrol and control buttons (eg edit) 
+%
+% * *initialise_mui_app.m*
+% - intiailise paths for  a mui App and supporting functions
 % 
 % * *inpaint_nans.m* 
 % - in-paints over nans in an array. From Matlab(TM) Forum by John
@@ -87,6 +90,9 @@
 %
 % * *minmax.m*
 % - find min and max of multidimensional numeric or ordinal array
+%
+% * *model_catch.m*
+% - display warning dialogue if model fails to find a solution in try-catch
 %
 % * *paste_text.m*
 % - callback function to paste the contents of the clipboard

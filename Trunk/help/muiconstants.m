@@ -17,6 +17,19 @@
 % Class inherits muiPropertyUI. Properties are set on initialisation and
 % can be edited using the default dialog. This is called from
 % Setup>Model Constants menu in the <matlab:doc('modelui') ModelUI> App.
+%%
+% To access the values that have been modified in the model UI use:
+%%
+%   obj.Constants.<property>;     %where obj is the mui model UI instance
+%%
+% To access the default values use:
+%%
+%   muiConstants.Evoke.<property>; 
+%%
+% Note that some Apps use dependent properties in their respective get 
+% methods (e.g. to allow concentration to be derived from density values) 
+% and these use the default values obtained by using the constant Evoke property.
+% 
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox><matlab:doc('muicatalogue') muiCatalogue>,
