@@ -942,7 +942,8 @@ classdef muiPlots < handle
             %a dimension are a function of another dimension (eg elevation
             %and chainage are both a function of time so that one dimension 
             %is a nx1 vector and the other dimension and variable are nxm
-            if isvector(x) && isvector(y)
+            isallmat = ismatrix(x) && ismatrix(y) && ismatrix(z);
+            if (isvector(x) && isvector(y)) || isallmat
                 %x and y are vectors so use griddata to get arrays
                 minX = min(min(x)); maxX = max(max(x));
                 minY = min(min(y)); maxY = max(max(y));

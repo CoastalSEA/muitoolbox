@@ -609,7 +609,6 @@ classdef muiCatalogue < dscatalogue
                     %
                     isrowdim = ~isempty(dst.RowNames) && height(dst)==1; 
                     if height(dst.DataTable)>1 || isrowdim  %ensure offset is correct 
-%                     if height(dst.DataTable)>1  
                         idd = strcmp(attnames(nvar+1:end),uidims(i).name);
                     else  
                         idd = strcmp(attnames(nvar:end),uidims(i).name);

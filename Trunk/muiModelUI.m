@@ -913,9 +913,14 @@ classdef (Abstract = true) muiModelUI < handle
                         localObj = obj.mUI.Plots.Plot.FigNum;
                         nfig = length(localObj);
                         figObj = gobjects(1,nfig);
+                        count = 1;
                         for i=1:nfig
-                            figObj(i) = findobj('tag','PlotFig',...
+                            hfig = findobj('tag','PlotFig',...
                                                 'Number',localObj(i));
+                            if ~isempty(hfig)
+                                figObj(count) = hfig;
+                                count = count+1;
+                            end               
                         end
                     end
                     deleteFigObj(obj,figObj,'Plots');

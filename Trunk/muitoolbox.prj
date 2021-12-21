@@ -7,7 +7,7 @@
     <param.summary>muitoolbox is used to create bespoke interfaces for modelling applications.</param.summary>
     <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
     <param.screenshot>${PROJECT_ROOT}\help\html\muitoolbox_logo.png</param.screenshot>
-    <param.version>1.0</param.version>
+    <param.version>1.01</param.version>
     <param.output>${PROJECT_ROOT}\muitoolbox.mltbx</param.output>
     <param.products.name />
     <param.products.id />
@@ -28,6 +28,9 @@ setmuipath.m
 remmuipath.m
 Log.txt
 %
+% Multiple files in the toolbox folder
+*.asv
+%
 % A single file in a subfolder of the toolbox folder:
 % example/.svn
 %
@@ -43,6 +46,7 @@ Log.txt
 % All files matching a pattern in all subfolders of the toolbox folder:
 **/*.docx
 **/run*.m
+**/*.asv
 %</param.exclude.filters>
     <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
     <param.examples>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -232,7 +236,6 @@ Log.txt
     <param.additional.sw.mac.url />
     <param.additional.sw.linux.url />
     <unset>
-      <param.version />
       <param.output />
       <param.products.name />
       <param.products.id />
