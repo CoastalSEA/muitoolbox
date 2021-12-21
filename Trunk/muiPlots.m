@@ -106,6 +106,7 @@ classdef muiPlots < handle
                     if isempty(props(i).data), ok = ok-1; end
                 end
             end
+            if ok<=0, return; end
             xyz = obj.Order;
             if any(strcmp(fieldnames(obj.UIset),'Swap')) && obj.UIset.Swap      
                 %flip order of variables if selected
@@ -132,12 +133,14 @@ classdef muiPlots < handle
             obj.Legend = setLegendText(obj,props,legformat,1);
             idplotvar = find([obj.UIsel(:).property]==1);
             for ivar=2:length(idplotvar)
-                obj.Legend = sprintf('%s\n%s',obj.Legend,...
-                                  setLegendText(obj,props,legformat,ivar));               
+                legtxt = setLegendText(obj,props,legformat,ivar);
+                obj.Legend = sprintf('%s\n%s',obj.Legend,legtxt);               
             end
 
             %description of selection for use as title            
             dimtxt = {props(:).label};
+            islbl = ~cellfun(@isempty,dimtxt); %remove undefined dimensions
+            dimtxt = dimtxt(islbl);
             idt = regexp(dimtxt,'('); %remove units from label
             id0 = cellfun(@isempty,idt);
             if any(id0)
@@ -530,7 +533,7 @@ classdef muiPlots < handle
 %--------------------------------------------------------------------------
 % Functions for 4D plots
 %--------------------------------------------------------------------------
-        function new4Dplot(obj)
+        function new4Dplot(~)
             %control and definition of plots that are 4D
             warndlg('Not yet implemented')
         end
@@ -659,9 +662,12 @@ classdef muiPlots < handle
             data = struct2cell(obj.Data);
             vecdim = cellfun(@isvector,data);
             dimlen = cellfun(@length,data(vecdim));
-            if all(vecdim) %all data are vectors
+            matsze = cellfun(@numel,data(~vecdim))/dimlen;
+            if all(vecdim)          %all data are vectors
                 isvalid = true;
-            else
+            elseif diff(matsze)==0  %a vector + arrays of same size
+                isvalid = true;
+            else                    %vectors that match array size
                 varsz = size(data{~vecdim});
                 isvalid = all(ismember(varsz(varsz>1),dimlen));
             end
@@ -872,13 +878,15 @@ classdef muiPlots < handle
                                                       titletxt,ptype)
             %surface plot of X,Y,Z data            
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
-            minX = min(min(x)); maxX = max(max(x));
-            minY = min(min(y)); maxY = max(max(y));
-            xint = (minX:(maxX-minX)/xint:maxX);
-            yint = (minY:(maxY-minY)/yint:maxY);
-            [xq,yq] = meshgrid(xint,yint);
+%             minX = min(min(x)); maxX = max(max(x));
+%             minY = min(min(y)); maxY = max(max(y));
+%             xint = (minX:(maxX-minX)/xint:maxX);
+%             yint = (minY:(maxY-minY)/yint:maxY);
+%             [xq,yq] = meshgrid(xint,yint);
+%             warning('off',wid)
+%              zq = griddata(x,y,z,xq,yq);
             warning('off',wid)
-             zq = griddata(x,y,z,xq,yq);
+             [xq,yq,zq] = muiPlots.reshapeXYZ(x,y,z,xint,yint);
              muiPlots.get3DPlotType(xq,yq,zq,ptype);
             warning('on',wid)
             hold on
@@ -926,6 +934,35 @@ classdef muiPlots < handle
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext;
-        end               
+        end     
+%%
+        function [xq,yq,zq] = reshapeXYZ(x,y,z,xint,yint)
+            %ensure that XYZ are arrays of the same dimension. Additional
+            %check required when plotting variables where the variable and
+            %a dimension are a function of another dimension (eg elevation
+            %and chainage are both a function of time so that one dimension 
+            %is a nx1 vector and the other dimension and variable are nxm
+            if isvector(x) && isvector(y)
+                %x and y are vectors so use griddata to get arrays
+                minX = min(min(x)); maxX = max(max(x));
+                minY = min(min(y)); maxY = max(max(y));
+                xint = (minX:(maxX-minX)/xint:maxX);
+                yint = (minY:(maxY-minY)/yint:maxY);
+                [xq,yq] = meshgrid(xint,yint);
+                zq = griddata(x,y,z,xq,yq);
+            elseif isvector(x) && ismatrix(y)
+                %x is vector and y is array with same dimensions as z
+                xq = repmat(x,1,size(z,1))';
+                yq = y';
+                zq = z;
+            elseif isvector(y) && ismatrix(x)
+                %y is vector and x is array with same dimensions as z
+                xq = x;
+                yq = repmat(y,1,size(z,2));
+                zq = z;
+            else
+                xq = []; yq = []; zq = [];
+            end
+        end
     end
 end

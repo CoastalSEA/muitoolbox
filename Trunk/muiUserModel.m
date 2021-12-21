@@ -218,6 +218,7 @@ classdef muiUserModel < muiDataSet
                     end
                 end
             end 
+            if ok<=0, return; end
             %handle inc/exc NaNs
             if obj.UIset.ExcNaN
                 [XYZT,props] = removeNaNs(obj,XYZT,props);

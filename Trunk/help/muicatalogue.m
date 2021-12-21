@@ -16,6 +16,22 @@
 %   mobj.Cases = muiCatalogue;  %the main UI holds an instance of muiCatalogue in the Cases property
 %   mobj.Cases.Catalogue = dscatalogue;                   %catalogue table
 %   mobj.Cases.DataSets.(classname)(classrec) = classobj; %an instance of a class
+%%
+% Note: _classrec_ is not the same as _caserec_. The former, _classrec_, is 
+% an instance of a class where there can be multiple instances, whereas 
+% _caserec_ is the current index in the Catalogue (which may change if
+% cases are deleted). For models and data that are based on the muiDataSet
+% abstract class, the CaseIndex property provides a unique identifier. The
+% _case id_, _case record_ and _class record_ can be found from each other 
+% using the following methods:
+%%
+%   caserec = caseRec(muicat,cobj.CaseIndex); %cobj is the instance of a Case
+%   caseid = caseID(muicat,caserec);
+%   classrec = classRec(muicat,caserec);
+
+%%
+% For further details on *caseRec* and *caseID* see the <matlab:doc('dscatalogue')
+% dscatalogue> documentation. For *classRec* see below.
 
 %% muiCatalogue properties
 % * *Catalogue* inherited property from <matlab:doc('dscatalogue') dscatalogue>
@@ -74,17 +90,34 @@
 %   [caserec,ok] = selectCase(muicat,promptxt,mode,selopt);
 
 %%
+% *selectCaseObj* select a single case and return the class instance and
+% the case record id, where _casetype_ and _classname_ can be used to 
+% control the Case selection. They can be empty, or cell arrays of
+% types/classes, e.g. [], or {'type1','type2'} and {class1'}. The _promptxt_
+% input overides the default prompt of 'Select Case'. 
+%%
+%   [cobj,classrec] = selectCaseObj(muicat,casetype,classname,promptxt)  
+%%
+% Inputs for _casetype_, _classname_ and _promptxt_ are optional, or 
+% empty, but must be included in order, e.g.:
+%%
+%   [cobj,classrec] = selectCaseObj(muicat);                %no sub-selection and default prompt
+%   [cobj,classrec] = selectCaseObj(muicat,[],{'c1','c2'}); %selection uses classes c1 and c2 and default prompt
+
+%%
 % *useCase* select which existing data set to use and pass to another
-% method, where _caserec_ is the case record, _mode_ is 'single' or 'multiple'
+% method, where _mode_ is 'none', 'single' or 'multiple'
 % selection mode, _classname_ is the name of the class object to be used to
-% call the method defined by the character vector in _action_. The method
-% prompts the user to select a case and uses the Matlab function <matlab:doc('str2func') str2func> 
-% to call function defined by _action_.
+% call the method defined by the character vector in _action_. If the
+% _mode_ is 'single' or 'multiple', the user selects a case from a list. If
+% the _mode_ is 'none' the _action_ is assumed to be a static method and is
+% called using (_classname_).(_action_). The method uses the Matlab function
+% <matlab:doc('str2func') str2func> to call function defined by _action_.
 %%
 %   useCase(muicat,mode,classname,action);
 
 %%
-% *updateCase* %update the saved record with a new version of the class 
+% *updateCase* update the saved record with a new version of the class 
 % instance, where _cobj_ is the new class instance, _classrec_ is the id of
 % the instance to be updated and _ismsg_ is a logical flag which true if a
 % message is to be displayed upon completion.
@@ -110,6 +143,12 @@
 % a file. It is used by the _loadModel_ function in <matlab:doc('muimodelui') muiModelUI>.
 %%
 %   activateTables(muicat)
+
+%%
+% *classRec* find the class record number using the case record  in the
+% Catalogue Case list, where _caserec_ is the existing record to use.
+%%
+%   classrec = classRec(muicat,caserec);
 
 %%
 % *setDataClassID* get the index for a new instance of class held in
@@ -171,7 +210,7 @@
 % *exportCase* save selected case to a mat file. The _caserec_ input is 
 % optional and if it is not defined the user is prompted to select a case.
 %%
-%   exportCase(muicat,caserec);
+%   exportCase(muicat,caserec);        %caserec is optonal
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muidataset') muiDataSet>,

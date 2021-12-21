@@ -120,6 +120,7 @@ classdef muiStats < handle
                     if isempty(props(i).data), ok = ok-1; end
                 end
             end  
+            if ok<=0, return; end
             props(xyzset) = [];  %remove unused selections
             %
             xyz = {'X','Y','Z'};

@@ -500,6 +500,7 @@ classdef (Abstract = true) muiDataUI < handle
             
             %assign variable selection
             xyz = strcmp(obj.TabContent(itab).XYZlabels,xyztxt);
+            clearUIselection(obj,xyz); %clear any previous selection 
             obj.UIselection(xyz).xyz = xyz;
             obj.UIselection(xyz).caserec = caserec;
             obj.UIselection(xyz).dataset = idset;
@@ -562,8 +563,10 @@ classdef (Abstract = true) muiDataUI < handle
                 %
                 mdim = obj.TabContent(itab).XYZmxvar(xyz);%no. of range properties
                 if selection{1}==1 && mdim>0 %variable selected not dimension
-                    if pdim>mdim
-                        ndim = pdim-mdim;    %no. of index properties  
+                    %if no. variable dimensions > max no. required for selection
+                    if pdim>mdim 
+                        %no. of selections needing single index rather than range
+                        ndim = pdim-mdim; 
                     else
                         ndim = 0;
                         mdim = pdim;
@@ -704,7 +707,7 @@ classdef (Abstract = true) muiDataUI < handle
                     dimvalue = slidervals{2};                    
                 else %drop down list has been used
                     dimname = dstnames{2*mdim+i};
-                    dimvalue = range(mdim+i).txt(slidervals);
+                    dimvalue = range(mdim+i).val(slidervals);
                 end
                 obj.UIselection(xyz).dims(mdim+i).name = dimname;
                 obj.UIselection(xyz).dims(mdim+i).value = dimvalue;
@@ -725,12 +728,12 @@ classdef (Abstract = true) muiDataUI < handle
             %inputs for fields,style,controls,default and userdata have one value per
             %control even if empty (not required)
             seltext = repmat({'Select:','Range:'},1,mdim);
-            uinput.fields   = [seltext(:);dstdesc(mdim+2:end)'];
+            uinput.fields   = [seltext(:);dstdesc((mdim+2):end)'];
             style1 = repmat({'linkedpopup','edit'},1,mdim);
             %check for selections that use text lists
             islist = cellfun(@iscellstr,{selrange(:).val});
             if any(islist) && mdim==1
-                %assumes only the last dimension ia a text list
+                %assumes only the last dimension is a text list
                 %introduced to handle elements in Asmita
                 style2 = repmat({'popupmenu'},1,ndim);
                 nvar = 2;
@@ -851,6 +854,15 @@ classdef (Abstract = true) muiDataUI < handle
                 h_eqnbox.String = '';
             end
         end
+%%
+        function clearUIselection(obj,xyz)
+            %clear the UIselection from a previous call to XYZselection
+            newstruct = muiDataUI.uisel;
+            fnames = fieldnames(newstruct);
+            for i=1:length(fnames)
+                obj.UIselection(xyz).(fnames{i}) = newstruct.(fnames{i});
+            end
+        end        
 %%
         function exitDataUI(obj,~,~,mobj)    
             %delete GUI figure and pass control to main GUI to reset obj

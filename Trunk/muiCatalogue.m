@@ -188,7 +188,7 @@ classdef muiCatalogue < dscatalogue
                 idx = find(~(cellfun(@isscalar,propdata)));
                 for i=1:length(idx)  %convert any numerical data to char vectors
                     if ~ischar(propdata{idx(i)}) %check not a char vector
-                        propdata{idx(i)} = num2str(propdata{idx(i)}); 
+                        propdata{idx(i)} = num2str(propdata{idx(i)});  %#ok<AGROW>
                     end
                 end
                 propdata = [proplabels,propdata]; %cell array of labels and values
@@ -366,6 +366,7 @@ classdef muiCatalogue < dscatalogue
                     case 'array'
                         %extracts array for selected variable
                         data = getData(dst,id.row,id.var,id.dim); 
+                        if isempty(data), return; end
                         data = squeeze(data{1}); %getData returns a cell array
                     case 'table'
                         data = getDataTable(dst,id.row,id.var,id.dim);
@@ -383,6 +384,7 @@ classdef muiCatalogue < dscatalogue
                         userdst = getDSTable(dst,id.row,id.var,id.dim);
                         data = dst2tsc(userdst);
                 end
+                if isempty(data), return; end
                 istable = true;
             elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
                 %return selected row values 
@@ -416,7 +418,7 @@ classdef muiCatalogue < dscatalogue
 %%
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt)
             %select a case to use for something with options to subselect
-            %the selection list based on class or type
+            %the selection list based on class or type (used in muiModelUI)
             % promptxt - text to use to prompt user
             % mode - single or multiple selection mode            
             % selopt - selection options:
@@ -424,6 +426,7 @@ classdef muiCatalogue < dscatalogue
             %          1 = subselect using class, 
             %          2 = subselect using type, 
             %          3 = subselect using both
+            % Note: to select and return a class instance use selectCaseObj
             classops = cellstr(unique(obj.Catalogue.CaseClass));
             typeops  = cellstr(unique(obj.Catalogue.CaseType));
             classel = []; typesel = []; ok = 1;
@@ -443,12 +446,42 @@ classdef muiCatalogue < dscatalogue
                                 'SelectionMode',mode,'ListSize',[250,200]);
         end
 %%
+        function [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt)
+            %prompt user to select a Case and return instance (eg used in
+            %GDinterface)
+            % obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            % casetype - can be empty, or cell array of one or more case
+            %            types
+            % classname - can be empty, or cell array of one or more
+            %             class names 
+            % promptxt - alternative text to use as a prompt (optional) 
+            % [e.g. [cobj,crec] = selectCaseObj(obj,[],{'c1','c2'},'Select Case:');
+            
+            if nargin<2
+                promptxt = 'Select Case:'; 
+                classname = []; 
+                casetype = [];
+            elseif nargin<3
+                promptxt = 'Select Case:';
+                classname = [];
+            elseif nargin<4
+                promptxt = 'Select Case:';                
+            end
+                     
+            [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
+                              'CaseType',casetype,'CaseClass',classname,...
+                              'SelectionMode','single','ListSize',[250,200]);
+            if ok<1, cobj = []; classrec = []; return; end
+            [cobj,classrec] = getCase(obj,caserec);    
+        end
+%%
         function useCase(obj,mode,classname,action)
             %select which existing data set to use and pass to action method
             % mode - none, single or multiple selection mode  
             % classname - cell array of class name(s) to select cases for
-            % action - method of class to pass class object to (eg addData 
-            %          in muiDataSet) 
+            % action - method of class to pass class object to,
+            %          e.g. 'addData' in muiDataSet abstract class.
             if strcmp(mode,'none')
                 heq = str2func(['@(muicat,classname) ',...
                             [classname,'.',action,'(muicat,classname)']]); 
@@ -512,6 +545,15 @@ classdef muiCatalogue < dscatalogue
             obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;
         end
 %%
+        function classrec = classRec(obj,caserec)
+            %find the class record number using the case record number in the
+            %Catalogue case list
+            catrec = getRecord(obj,caserec); 
+            if isempty(catrec), classrec = []; return; end
+            lobj = obj.DataSets.(catrec.CaseClass);  
+            classrec = [lobj.CaseIndex]==catrec.CaseID; 
+        end
+%%
         function id_class = setDataClassID(obj,classname)                                                          
             %get the index for a new instance of class held in DataSets
             if isfield(obj.DataSets,classname) && ...
@@ -550,7 +592,6 @@ classdef muiCatalogue < dscatalogue
             uidims = UIsel.dims;
             ndim = length(uidims);
             idx.row = 1; 
-%             dimnames.row = dst.RowNames;
             idx.dim = cell(1,ndim-1); %use cell because can be multiple dimensions of different length
             for i=1:ndim
                 %assign to dimension or row                    
@@ -566,7 +607,9 @@ classdef muiCatalogue < dscatalogue
                         var = int16(rvals{1}):int16(rvals{2});
                     end
                     %
-                    if height(dst.DataTable)>1   %ensure offset is correct
+                    isrowdim = ~isempty(dst.RowNames) && height(dst)==1; 
+                    if height(dst.DataTable)>1 || isrowdim  %ensure offset is correct 
+%                     if height(dst.DataTable)>1  
                         idd = strcmp(attnames(nvar+1:end),uidims(i).name);
                     else  
                         idd = strcmp(attnames(nvar:end),uidims(i).name);

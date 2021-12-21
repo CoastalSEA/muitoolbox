@@ -729,7 +729,7 @@ classdef (Abstract = true) muiModelUI < handle
             sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-25, 60, 20];
             sourcetxt = cell(ntables,1);
             for j=1:ntables
-                itab = h_tab.Children(j);  %NEEDS TO CHECK THIS WORKS WITH MUTLIPLE DATASETS
+                itab = h_tab.Children(j); 
                 dst = dstables.(dstnames{j});
                 setactionbutton(itab,'DSproperties',position,...
                     @(src,evt)getDSProps(obj,src,evt),...
@@ -746,8 +746,8 @@ classdef (Abstract = true) muiModelUI < handle
                    'View data source details',sourcetxt);
             %adjust position on screen            
             h_fig.Position(1)=  h_fig.Position(3)*3/2; 
-%             screendata = get(0,'ScreenSize');
-%             h_fig.Position(2)=  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
+            % screendata = get(0,'ScreenSize');
+            % h_fig.Position(2)=  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
             h_fig.Visible = 'on';
         end
 %%
@@ -760,12 +760,15 @@ classdef (Abstract = true) muiModelUI < handle
         function getSource(~,src,~)
             if~isempty(src.UserData)
                 if iscell(src.UserData) && length(src.UserData)>1
+                    %cell with multiple cells (eg several filenames)
                     stable = cell2table(src.UserData,'VariableNames',{'Sources'});
                     headtext = 'The following sources were used for the selected data set';
                     tablefigure('Sources',headtext,stable);
                 elseif iscell(src.UserData)
+                    %single cell containting character vector or string
                     msgbox(sprintf('Source: %s',src.UserData{1}));
                 else
+                    %character vector or string
                     msgbox(sprintf('Source: %s',src.UserData));
                 end
             end
