@@ -603,8 +603,12 @@ classdef muiCatalogue < dscatalogue
                     if isfield(dst.Dimensions,uidims(i).name)
                         var = dst.Dimensions.(uidims(i).name);
                     else                             %dimension not defined
-                        rvals = range2var(UIsel.dims(i).value);
-                        var = int16(rvals{1}):int16(rvals{2});
+                        if isinteger(UIsel.dims(i).value)
+                            var = int16(1:UIsel.dims(i).value);
+                        else
+                            rvals = range2var(UIsel.dims(i).value);
+                            var = int16(rvals{1}):int16(rvals{2});
+                        end
                     end
                     %
                     isrowdim = ~isempty(dst.RowNames) && height(dst)==1; 
@@ -630,6 +634,8 @@ classdef muiCatalogue < dscatalogue
             elseif iscell(var) && length(var)>1
                 %cell array of character vectors NB value must be a cell
                 indices = find(ismatch(var,value));
+            elseif isinteger(var) && var(end)==value
+                indices = value;   
             elseif length(var)>1
                 %numerical array
                 indices = interp1(var,1:length(var),value,'nearest'); 

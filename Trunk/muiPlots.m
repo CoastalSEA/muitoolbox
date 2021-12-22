@@ -878,13 +878,6 @@ classdef muiPlots < handle
                                                       titletxt,ptype)
             %surface plot of X,Y,Z data            
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
-%             minX = min(min(x)); maxX = max(max(x));
-%             minY = min(min(y)); maxY = max(max(y));
-%             xint = (minX:(maxX-minX)/xint:maxX);
-%             yint = (minY:(maxY-minY)/yint:maxY);
-%             [xq,yq] = meshgrid(xint,yint);
-%             warning('off',wid)
-%              zq = griddata(x,y,z,xq,yq);
             warning('off',wid)
              [xq,yq,zq] = muiPlots.reshapeXYZ(x,y,z,xint,yint);
              muiPlots.get3DPlotType(xq,yq,zq,ptype);
@@ -942,7 +935,7 @@ classdef muiPlots < handle
             %a dimension are a function of another dimension (eg elevation
             %and chainage are both a function of time so that one dimension 
             %is a nx1 vector and the other dimension and variable are nxm
-            isallmat = ismatrix(x) && ismatrix(y) && ismatrix(z);
+            isallmat = ~isvector(x) && ~isvector(y);
             if (isvector(x) && isvector(y)) || isallmat
                 %x and y are vectors so use griddata to get arrays
                 minX = min(min(x)); maxX = max(max(x));
@@ -951,12 +944,12 @@ classdef muiPlots < handle
                 yint = (minY:(maxY-minY)/yint:maxY);
                 [xq,yq] = meshgrid(xint,yint);
                 zq = griddata(x,y,z,xq,yq);
-            elseif isvector(x) && ismatrix(y)
+            elseif isvector(x) && ~isvector(y)
                 %x is vector and y is array with same dimensions as z
                 xq = repmat(x,1,size(z,1))';
                 yq = y';
                 zq = z;
-            elseif isvector(y) && ismatrix(x)
+            elseif isvector(y) && ~isvector(x)
                 %y is vector and x is array with same dimensions as z
                 xq = x;
                 yq = repmat(y,1,size(z,2));
