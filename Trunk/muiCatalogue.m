@@ -427,6 +427,8 @@ classdef muiCatalogue < dscatalogue
             %          2 = subselect using type, 
             %          3 = subselect using both
             % Note: to select and return a class instance use selectCaseObj
+            % to get a class object array (no Case/Record selection) use
+            % getClassObj in muiModelUI.
             classops = cellstr(unique(obj.Catalogue.CaseClass));
             typeops  = cellstr(unique(obj.Catalogue.CaseType));
             classel = []; typesel = []; ok = 1;
@@ -457,7 +459,9 @@ classdef muiCatalogue < dscatalogue
             %             class names 
             % promptxt - alternative text to use as a prompt (optional) 
             % [e.g. [cobj,crec] = selectCaseObj(obj,[],{'c1','c2'},'Select Case:');
-            
+            % Note: to select a Case when only caserec is required use 
+            % selectCase (above). To get a class object array (no Case/Record 
+            % selection) use getClassObj in muiModelUI.
             if nargin<2
                 promptxt = 'Select Case:'; 
                 classname = []; 

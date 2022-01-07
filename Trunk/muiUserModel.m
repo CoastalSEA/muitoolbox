@@ -109,12 +109,12 @@ classdef muiUserModel < muiDataSet
                 for i=1:2:length(idchar)
                     %commented text stores all values in quotes before
                     %applying mask
-%                     utext = usereqn(idchar(i):idchar(i+1));
-%                     if strcmp(utext(1),'''')    %character verctor
-%                         inp.utext{count} = strip(utext,'''');
-%                     else                        %string
-%                         inp.utext{count} = strip(utext,'"');
-%                     end
+                    % utext = usereqn(idchar(i):idchar(i+1));
+                    % if strcmp(utext(1),'''')    %character vector
+                    %     inp.utext{count} = strip(utext,'''');
+                    % else                        %string
+                    %     inp.utext{count} = strip(utext,'"');
+                    % end
                     %create mask to hide input text so variables can be found 
                     nchar = idchar(i+1)-idchar(i)+1;
                     usertxt(idchar(i):idchar(i+1)) = repmat('u',1,nchar);
@@ -331,16 +331,9 @@ classdef muiUserModel < muiDataSet
 %%                
         function setdsp2save(obj,mobj,var,props,inputxt)
             %save results in a dstable and add record to catalogue  
-%             results = var(1);
-%             isrows = length(var)>1 && ~isempty(var{2});            
-%             if isrows         %second variable in function output is row dimension
-%                 rowdata = var{2};
-%             else
-%                 rowdata = [];
-%             end
-            %Changed to use first variable only or multple variables with
+            %Uses first variable only, or multple variables with
             %first variable defining row dimension to enable passing of
-            %multiple variables even though not implemented yet.
+            %multiple variables (not implemented in current version).
             if length(var)==1
                 isrows = false;
                 rowdata = [];

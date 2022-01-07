@@ -303,7 +303,7 @@ classdef (Abstract = true) muiDataSet < handle
             % varargin - input to dscatalogue.addRecord. minimum is
             %            datatype but can also include a cell with the case 
             %            description and logical flag to supress user prompt
-            %returns caseid to allow user to retrieve new record
+            %returns caseid to enable retrieval of newly created record
             if isstruct(dataset)
                 obj.Data = dataset;   %can be struct of multiple tables
             else

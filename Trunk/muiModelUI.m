@@ -959,6 +959,9 @@ classdef (Abstract = true) muiModelUI < handle
             % classtype - Cases, Inputs or mUI field
             % classname - name of class being called
             % msgtxt - message to display if class does not exist (optional)
+            %NB returns the class object array. Use selectCase to get the
+            %caserec id and selectCase obj to get the class instance for
+            %the Case and the classrec id (both in muiCatalogue).
             switch classtype
                 %classtype is hard coded so that can change in muiModelUI 
                 %independently of naming in classess that are being saved

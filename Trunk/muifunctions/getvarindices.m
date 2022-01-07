@@ -101,7 +101,7 @@ function valididx = getvarindices(var,limtxt)
                     minB = floor(var(1));   %avoid rounding error in text
                     maxB = ceil(var(1));    %string
                 else
-                    warndlg('Could not find limits in getVarIndices')
+                    warndlg('Could not find limits in getvarindices')
                     valididx =[];
                     return;
                 end
