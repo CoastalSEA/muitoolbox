@@ -20,7 +20,7 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef,figpos)
 %               Cancel to abort
 %               Add to add a row to the table
 %               Save, Close or any other text to return the current table
-%   figpos    - position offigure on screen, [left,bottom] in normalized values (optional)
+%   figpos    - position of figure on screen, [left,bottom] in normalized values (optional)
 % OUTPUT
 %   output    - table with same attributes as atable with any changes
 %               made to data
@@ -46,6 +46,7 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef,figpos)
     ht = findobj(h_fig.Children,'Type','uitable');
     if isedit        
         ht.ColumnEditable = true;
+        ht.ButtonDownFcn =  @(src,evt)delRow(src,evt);
     end
     %
     if nargin>4 && ~isempty(butdef)
@@ -66,7 +67,8 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef,figpos)
         %match buttons to size and position of Copy to Cliboard button       
         bpos(3) = bpos(3)*0.8;  %make width of additional buttons smaller
         offset = bpos(3)+pos1;
-
+        
+        %add control buttons to tablefigureUI
         hb = gobjects(1,nbut);
         for i=1:nbut
             bpos(1) = pos1+(i-1)*offset;
@@ -77,8 +79,22 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef,figpos)
                 'UserData',ok,...
                 'Callback', @(src,evt)setSelection(h_fig,src,evt)); 
         end
-
+        
+        %resize panel text if panel wider than table
+        htxt = findobj('Parent',h_fig,'Tag','statictextbox');
+        hpan = findobj('Parent',h_fig,'Tag','TableFig_panel');
+        if hpan.Position(3)>htxt.Position(3)
+            htxt.Position(3)=hpan.Position(3);
+            boxpos = htxt.Position;
+            boxtext = sprintf('%s ',htxt.String{:});
+            boxunits = htxt.Units;
+            delete(htxt);
+            statictextbox(h_fig,3,boxpos,boxtext,boxunits);
+        end
+        
         uiwait(h_fig)  
+         
+        %assign data from tablefigture to output table
         if any([hb(:).UserData]==1)
             rownames = atable.Properties.RowNames;
             varnames = atable.Properties.VariableNames;
@@ -116,18 +132,40 @@ function closeuicallback(src,~)
 end
 %%
 function addRow(h_fig)
-    %
+    %add blank row to the table
     lobj = findobj(h_fig,'Tag','uitablefigure');
     temptable = cell2table(lobj.Data);
     temptable = [temptable;temptable(1,:)];
-    temptable{end,:} = missing;
+
+    for i=1:width(temptable)
+        if iscell(temptable{end,i})
+            %if cell, should be a character vector
+            temptable{end,i}{1} = '';
+        else
+            %missing only works for numeric, datetime, categorical, string
+            temptable{end,i} = missing;
+        end
+    end
     lobj.Data = table2cell(temptable);
-%     [nrow,ncol] = size(lobj.Data);
-%     if iscell(lobj.Data)
-%         newrow = repmat({''},[1,ncol]);
-%     else
-%         newrow = zeros(1,ncol);
-%     end
-%     lobj.Data(nrow+1,:) = newrow;
     drawnow;
+end
+%%
+function delRow(src,~)
+    %delete row in tablefigureUI when mouse right button is clicked on
+    %table. Make cell callback active to select row and call deleteRow
+    src.CellSelectionCallback =  @(src,evt)deleteRow(src,evt);
+    getdialog('Select row in table');
+end
+%%
+function deleteRow(src,evt)
+    %delete row selected using left mouse click to select a cell
+    %then make cell selection call back inactive so that new right button
+    %click required to re-activate
+    selrow = evt.Indices(1);
+    questxt = sprintf('Delete row %d',selrow);
+    answer = questdlg(questxt,'Delete','Yes','No','No');
+    if strcmp(answer,'Yes')
+        src.Data(selrow,:) = [];
+    end
+    src.CellSelectionCallback = '';
 end
