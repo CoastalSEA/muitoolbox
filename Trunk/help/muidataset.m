@@ -102,7 +102,7 @@
 
 %% muiUserData format file
 % Data import into a _muitoolbox_ UI using _muiUserData_ and classes that
-% inherit <matlab:doc('muidatadet') muiDataSet> requires a format file to
+% inherit <matlab:doc('muidataset') muiDataSet> requires a format file to
 % be created. A template is provided in the <matlab:template_folder muitemplates folder>. 
 % and sets out the code for each of the functions requied, with comments to
 % highlight where the files need to be edited to adapt the templates to 

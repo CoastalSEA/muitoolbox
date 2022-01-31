@@ -30,22 +30,22 @@ function cmap = cmap_selection(idsel)
         [idsel,ok] = listdlg('Name','Colormap','SelectionMode','single',...
                         'PromptString',promptxt,'ListString',matlabcmaps);
         if ok<1, cmap = []; return; end   
-    elseif license('test','MAP_Toolbox') && isvector(idsel)
+    elseif license('test','MAP_Toolbox') && length(idsel)>1
         %pass zi values as idsel
-        [cmap,~] = landsea(idsel);  %requires Mapping toolbox
+        [cmap,~] = landsea(idsel);                 %requires Mapping toolbox
         return;
-    elseif isvector(idsel)
+    elseif length(idsel)>1
         warndlg('Mapping toolbox not found');
         cmap = []; return;
     end
     %
     switch matlabcmaps{idsel}
-        case 'YlGnBu'
+        case 'YlGnBu'                              %idsel = 19
             cmap = YlGnBu();
-        case 'anomalie'
+        case 'anomalie'                            %idsel = 20
             cstruct = load('cmapanomalie','-mat');
             cmap = cstruct.cmapanomalie;
-        otherwise
+        otherwise                                  %idsel = 1-18 Matlab defaults
             cmap = colormap(matlabcmaps{idsel});
     end
 end

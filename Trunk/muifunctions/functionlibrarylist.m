@@ -92,6 +92,8 @@ switch classname
         idinc = [1:8,17:20];
     case {'CoastalTools','SpitDeltaSEM'}
         idinc = [1:15,17:20];
+    case 'ChannelForm'
+        idinc = [1,7,8,17:20];
     case 'Diffusion'
         idinc = [1,15:20];    
     otherwise
