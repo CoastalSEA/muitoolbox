@@ -336,6 +336,7 @@ classdef muiPlots < handle
             %call uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hp(idline) = hptype(figax,x,y,symb{1},symb{2},...
                                             obj.Legend,num2str(idline));
+            hp(idline).UserData = obj.MetaData;                             
             hp =sortplots(hp);
             hl = legend(figax,hp,'Location','best');
             hl.Tag = fnum;

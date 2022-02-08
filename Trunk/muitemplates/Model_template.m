@@ -34,7 +34,7 @@ classdef Model_template < muiDataSet                         % << Edit to classn
             dsp = modelDSproperties(obj);
             
             %now check that the input data has been entered
-            %isValidModel checks the InputHandles defined in ModelUI
+            %isValidModel checks the InputHandles defined in XXXMainUI <<%Edit to UI
             if ~isValidModel(mobj, metaclass(obj).Name)  
                 warndlg('Use Setup to define model input parameters');
                 return;
