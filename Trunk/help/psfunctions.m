@@ -78,6 +78,10 @@
 % * *saveanimation2file.m*
 % - saves movie to selected file type
 %
+% * *setaxis_yearsbp.m*
+% - adjust the x-axis to display years Before Present (BP), reverse
+% the axis tick labels and add new axis label
+%
 % * *setfigslider.m*
 % - initialise a slider on a figure with the option to include text 
 % displaying the current slider value and an action button

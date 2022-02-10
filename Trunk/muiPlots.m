@@ -711,7 +711,7 @@ classdef muiPlots < handle
             if strcmp(src.Tag,'runMovie')       %user pressed run button   
                 implay(obj.ModelMovie);
             elseif strcmp(src.Tag,'saveMovie')  %user pressed save button 
-                saveanimation2file(obj);
+                saveanimation2file(obj.ModelMovie);
             else                                %user moved slider
                 val = ceil(src.Value);          %slider value 
                 time = obj.Data.T(val);         %time slice selected
