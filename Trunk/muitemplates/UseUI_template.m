@@ -243,7 +243,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
 
         %% Help menu ------------------------------------------------------
         function Help(~,~,~)
-            docsearch UseUI_template                               % << Edit to documentation name if available
+            doc UseUI_template                               % << Edit to documentation name if available
         end
 %% ------------------------------------------------------------------------
 % Overload muiModelUI.MapTable to customise Tab display of records (if required)
