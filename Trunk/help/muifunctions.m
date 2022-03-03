@@ -50,10 +50,6 @@
 % - compute  the mean values of the input dst, inpdst, for the 
 % interval preceeding each occurrence in the reference timeseries,
 % refdst, using the duration defined by prevint in days 
-%
-% * *getsubgrid.m*
-% - extract a subdomain from a grid (xi,yi,zi) and return the extracted
-% grid and the source grid indices of the bounding rectangle 
 % 
 % * *getvarindices.m*
 % - unpack the limits text and find indices of values that lie 

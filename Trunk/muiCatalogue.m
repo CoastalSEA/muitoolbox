@@ -417,7 +417,7 @@ classdef muiCatalogue < dscatalogue
         end
 %%
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt)
-            %select a case to use for something with options to subselect
+            %select a case record to use with options to subselect
             %the selection list based on class or type (used in muiModelUI)
             % promptxt - text to use to prompt user
             % mode - single or multiple selection mode            
@@ -479,6 +479,69 @@ classdef muiCatalogue < dscatalogue
             if ok<1, cobj = []; classrec = []; return; end
             [cobj,classrec] = getCase(obj,caserec);    
         end
+%%
+        function [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,...
+                                                classname,promptxt,itable)
+            %prompt user to select a Case, Dataset (if not specified) and 
+            %a row, return instance and row no.
+            % obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            % casetype - can be empty, or cell array of one or more case
+            %            types
+            % classname - can be empty, or cell array of one or more
+            %             class names 
+            % promptxt - alternative text to use as a prompt
+            %            cell array for (1) case and (2) row
+            % itable - id of dataset table to use
+            %uses selectCaseObj above. Used in getInletTools.
+            if nargin<2
+                itable = [];
+                promptxt = {'Select Case:','Select Row:'}; 
+                classname = []; 
+                casetype = [];
+            elseif nargin<3
+                itable = [];
+                promptxt = {'Select Case:','Select Row:'};
+                classname = [];
+            elseif nargin<4
+                itable = [];
+                promptxt = {'Select Case:','Select Row:'};    
+            elseif nargin<5
+                itable = [];
+            end
+            
+            if isempty(promptxt) || ~iscell(promptxt) || length(promptxt)<2
+                promptxt = {'Select Case:','Select Row:'}; 
+            end
+            
+            %select the Case to use
+            [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt{1});
+            if isempty(cobj), irow = []; return; end
+            %select a dataset table to use if not specified
+            dsnames = fieldnames(cobj.Data);
+            if isempty(itable)                
+                if length(dsnames)>1
+                    itable = listdlg('PromptString','Select dataset',...
+                                       'Name','Tab plot','SelectionMode','single',...
+                                       'ListSize',[200,200],'ListString',dsnames);
+                    if isempty(itable), itable = 1; end
+                else
+                    itable = 1;
+                end
+            end
+            %select the Row to use
+            dst = cobj.Data.(dsnames{itable});
+            if height(dst)>1
+                %propmpt user to select timestep
+                list = dst.DataTable.Properties.RowNames;
+                irow = listdlg('PromptString',promptxt{2},...
+                               'Name','Tab plot','SelectionMode','single',...
+                               'ListSize',[200,200],'ListString',list);
+                if isempty(irow), irow = 1; end
+            else
+                irow = 1;
+            end
+        end        
 %%
         function useCase(obj,mode,classname,action)
             %select which existing data set to use and pass to action method

@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration build-checksum="334638852" file="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\muitoolbox.prj" location="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="1712062141" file="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox\muitoolbox.prj" location="D:\Work\Tools\MATLAB\MUImodels2\muitoolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>muitoolbox</param.appname>
     <param.authnamewatermark>Ian Towend</param.authnamewatermark>
     <param.email>i.townend@coastalsea.uk</param.email>
@@ -7,7 +7,7 @@
     <param.summary>muitoolbox is used to create bespoke interfaces for modelling applications.</param.summary>
     <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
     <param.screenshot>${PROJECT_ROOT}\help\html\muitoolbox_logo.png</param.screenshot>
-    <param.version>1.03</param.version>
+    <param.version>1.04</param.version>
     <param.output>${PROJECT_ROOT}\muitoolbox.mltbx</param.output>
     <param.products.name />
     <param.products.id />

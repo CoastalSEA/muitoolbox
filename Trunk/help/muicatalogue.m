@@ -91,7 +91,7 @@
 
 %%
 % *selectCaseObj* select a single case and return the class instance and
-% the case record id, where _casetype_ and _classname_ can be used to 
+% the class record id, where _casetype_ and _classname_ can be used to 
 % control the Case selection. They can be empty, or cell arrays of
 % types/classes, e.g. [], or {'type1','type2'} and {class1'}. The _promptxt_
 % input overides the default prompt of 'Select Case'. 
@@ -104,6 +104,15 @@
 %   [cobj,classrec] = selectCaseObj(muicat);                %no sub-selection and default prompt
 %   [cobj,classrec] = selectCaseObj(muicat,[],{'c1','c2'}); %selection uses classes c1 and c2 and default prompt
 
+%%
+% *selectCaseDatasetRow* select a row from a Dataset of a Case and return
+% the class instance and class record id and the row id. The call is
+% similar to *selectCaseObj* above, with the optional addition of the id of
+% the dataset in the Data struct. If this is omitted and there is more than
+% one dataset the user is prompted to select a dataset.
+%%
+%   [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,classname,promptxt,itable);
+                                                
 %%
 % *useCase* select which existing data set to use and pass to another
 % method, where _mode_ is 'none', 'single' or 'multiple'
@@ -161,9 +170,10 @@
 %%
 %   props = setPropsStruct(muicat)
 
-%% muiCatalogue methods used in ModelUI Project menu
+%% muiCatalogue methods used in the default Project menu
 % The example interface provided in <matlab:doc('modelui') ModelUI>
-% includes a number of tools that manipulate Cases held in muiCatalogue.
+% uses a number of tools that manipulate Cases held in muiCatalogue. These
+% are accessed from the Project>Cases menu, which is standard for most Apps.
 
 %%
 % *editCase* edit Case description of the selected case. Calls _editRecord_
@@ -174,7 +184,9 @@
 %   editCase(muicat,caserec);          %caserec is optonal
 
 %%
-% *saveCase* writes the results for a selected case to an Excel file.
+% *saveCase* writes the results for a selected case to an Excel file, or as 
+% dstable or table in a mat file. The Excel option is only available if the
+% variables are column vectors (e.g. function of time).
 % The _caserec_ input is optional and if it is not defined the user 
 % is prompted to select a case.
 %%

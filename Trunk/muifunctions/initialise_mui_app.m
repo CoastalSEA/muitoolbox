@@ -13,6 +13,7 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
 %   varargin - additional sub-folders to include (eg for functions)
 % NOTES
 %   only handles sub-folders so cannot include generic class or function folders
+%   uses filesep to set file separator for current platform
 % SEE ALSO
 %   used in Asmita and ChannelForm
 %
@@ -25,11 +26,11 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
 
     idx = find(strcmp({appinfo.name},appname));
     path{1} = appinfo(idx(1)).location;
-    path{2} = [path{1},'/doc'];
-    path{3} = [path{1},'/help/html'];
-    path{4} = [path{1},'/example'];
+    path{2} = [path{1},filesep,'doc'];
+    path{3} = [path{1},filesep,'help',filesep,'html'];
+    path{4} = [path{1},filesep,'example'];
     for i=1:length(varargin)
-        path{4+i} = [path{1},'/',varargin{i}];
+        path{4+i} = [path{1},filesep,varargin{i}];
     end
 
     addpath(path{:});
