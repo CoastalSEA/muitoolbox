@@ -112,10 +112,12 @@ classdef (Abstract = true) muiDataSet < handle
         function addData(obj,classrec,catrec,muicat) 
             %add additional data to an existing user dataset
             datasetname = getDataSetName(obj);
+            if isempty(datasetname), return; end
             dst = obj.Data.(datasetname);
 
-            [fname,path] = getfiles('MultiSelect','off',...
+            [fname,path,nfiles] = getfiles('MultiSelect','off',...
                 'FileType',obj.FileSpec{2},'PromptText','Select file:');
+            if nfiles==0, return; end
             filename = [path fname];
             %get data
             funcname = 'getData';
