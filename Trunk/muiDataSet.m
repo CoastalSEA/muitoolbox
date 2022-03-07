@@ -343,6 +343,7 @@ classdef (Abstract = true) muiDataSet < handle
                 %muiCatalogue-viewCaseSettings (because Case may get deleted)
                 for i=1:length(varargin)
                     [cobj,~,catrec] = getCase(muicat,varargin{i});
+                    if isempty(cobj), continue; end
                     cname = metaclass(cobj).Name;
                     obj.RunParam.(cname).caseid = cobj.CaseIndex;
                     obj.RunParam.(cname).casedesc = catrec.CaseDescription;
@@ -428,7 +429,8 @@ classdef (Abstract = true) muiDataSet < handle
 %--------------------------------------------------------------------------    
         function tabDefaultPlot(obj,src)
             %default plotting function for Q-Plot tab
-
+            tabcb  = @(src,evdat)tabPlot(obj,src);
+            ax = tabfigureplot(obj,src,tabcb,false);
             %get data for variable
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
@@ -478,10 +480,10 @@ classdef (Abstract = true) muiDataSet < handle
                 labs.X = labs.T;
             end
 
-            %generate plot for display on Q-Plot tab
-            ht = findobj(src,'Type','axes');
-            delete(ht);
-            ax = axes('Parent',src,'Tag','Qplot');
+%             %generate plot for display on Q-Plot tab
+%             ht = findobj(src,'Type','axes');
+%             delete(ht);
+%             ax = axes('Parent',src,'Tag','Qplot');
 
             if vsze(1)==1            %no rowa
                 if cdim==1           %line plot

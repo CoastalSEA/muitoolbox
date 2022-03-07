@@ -90,6 +90,10 @@
 % - compute the standard error of a data set relative to a fitted
 % regression line
 %
+% * *tabfigureplot*
+% - generate axes on Q-Plot tab including '>Figure' and 'Rotate'
+% buttons (Rotate is optional), or as a standalone figure.
+%
 % * *taylor_plot.m*
 % - create plot of Taylor diagram and, optionally, plot compute skill score
 % and a skill map (2 or 3D depending on data)
