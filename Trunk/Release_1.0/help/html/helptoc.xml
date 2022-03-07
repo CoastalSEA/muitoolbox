@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding="utf-8"?>
+
+<toc version="2.0">
+<!-- First tocitem specifies top level in Help browser Contents pane -->
+<!-- This can be a roadmap page, as shown below, or a content page -->
+    <tocitem target="muitoolbox.html">muitoolbox
+        <!-- Nest tocitems to create hierarchical entries in  Contents-->
+        <!-- To include icons, use the following syntax for tocitems: -->
+        <!-- <tocitem target="foo.html" image="HelpIcon.NAME"> -->
+        <!-- Title-of-Section </tocitem> -->
+        <!-- where NAME is one of the following (use capital letters): -->
+        <!-- FUNCTION, USER_GUIDE, EXAMPLES, BLOCK, GETTING_STARTED, -->
+        <!-- DEMOS, RELEASE_NOTES --> 
+        <!-- Icon images used for these entries are also stored in -->
+        <!-- matlabroot/toolbox/matlab/icons -->
+        <!-- A Getting Started Guide usually comes first -->
+        <!-- Function reference next -->
+        <!-- First item is page describing function categories, if any -->
+        <!-- First category, with link to anchor in above page -->
+        <!-- Inside category, list its functions alphabetically -->
+
+        <!-- User Guide comes next -->
+        <tocitem target="muitbx_abstractclasses.html" 
+            image="HelpIcon.USER_GUIDE">Abstract Classes
+            <tocitem target="muimodelui.html">muiModelUI</tocitem>
+            <tocitem target="muipropertyui.html">muiPropertyUI</tocitem>
+            <tocitem target="muidataui.html">muiDataUI</tocitem> 
+            <tocitem target="muidataset.html">muiDataSet</tocitem>
+        </tocitem>
+
+        <!-- User Guide comes next -->
+        <tocitem target="muitbx_utilityclasses.html" 
+            image="HelpIcon.USER_GUIDE">Utility Classes
+            <tocitem target="muicatalogue.html">muiCatalogue</tocitem>
+            <tocitem target="muiproject.html">muiProject</tocitem>
+            <tocitem target="muiconstants.html">muiConstants</tocitem> 
+            <tocitem target="muiuserdata.html">muiUserData</tocitem>
+            <tocitem target="muieditui.html">muiEditUI</tocitem>
+            <tocitem target="muiplotsui.html">muiPlotsUI</tocitem>
+            <tocitem target="muiplots.html">muiPlots</tocitem>
+            <tocitem target="muistatsui.html">muiStatsUI</tocitem>
+            <tocitem target="muistats.html">muiStats</tocitem>
+            <tocitem target="muimanipui.html">muiManipUI</tocitem>
+            <tocitem target="muiusermodel.html">muiUserModel</tocitem>
+            <tocitem target="muitemplates.html">List of templates</tocitem>
+        </tocitem>
+
+         <!-- Function reference next -->
+        <!-- First item is page describing function categories, if any -->
+        <tocitem target="mui_func_ref.html" 
+            image="HelpIcon.FUNCTION">Function Reference 
+            <tocitem target="muifunctions.html">Utility functions</tocitem> 
+            <tocitem target="psfunctions.html">Plot and statistical functions</tocitem>       
+        </tocitem>      
+
+        <!-- Getting started -->
+        <tocitem target="muitbx_gettingstarted.html" 
+                 image="HelpIcon.GETTING_STARTED">Getting Started   
+        </tocitem>        
+
+        <!-- Optional List of Examples, with hyperlinks to examples in other files -->
+        <tocitem target="muitbx_exampleslist.html" 
+                 image="HelpIcon.EXAMPLE">Examples 
+                <tocitem target="muitbx_example.html">Simple model</tocitem>
+                <tocitem target="muitbx_modelui.html">ModelUI</tocitem>
+        </tocitem>
+
+        <!-- Optional link or links to your or other Web sites -->
+        <tocitem target="muitbx_dstoolbox.html"
+                 image="HelpIcon.USER_GUIDE">dstoolbox
+        </tocitem>       
+    </tocitem>
+</toc>
