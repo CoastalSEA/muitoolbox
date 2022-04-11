@@ -67,25 +67,6 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
     h_plt = uipanel(h_fig,'Tag','PlotPanel',...
                     'Units','normalized','Position',[0.005 0.005 0.99 0.9]);       
                 
-    %add panel for buttons         
-    h_but = uipanel(h_fig,'Tag','ButtonPanel',...
-                    'Title',promptxt,'TitlePosition','centertop',...
-                    'Units','normalized','Position',[0.005 0.904 0.99 0.098]);
-
-    nbut = length(butnames);
-    pos0 = 0.5-(0.1*nbut/2+(nbut-1)*0.01/2);
-    for i=1:nbut
-        pos1 = pos0+(i-1)*0.11;
-        uicontrol('Parent',h_but,'Tag','YesNo',...
-        'Style','pushbutton',...
-        'String', butnames{i},...
-        'Units','normalized', ...
-        'Position', [pos1 0.08 0.1 0.9], ...
-        'Callback', @panelButton);  
-    end
-end
-%%        
-function panelButton(src,~)
-    %callback for acceptPanel
-    src.Parent.Tag = src.String;
-end   
+    %add panel for buttons  
+    h_but = acceptpanel(h_fig,promptxt,butnames,[0.005 0.904 0.99 0.098]);
+end 

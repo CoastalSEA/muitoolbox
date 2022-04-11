@@ -807,7 +807,7 @@ classdef muiPlots < handle
 %%        
         function closeFigure(obj,src,~)
             %clear a selected figure and update figure number index
-            if  isvalid(obj)
+            if isvalid(obj) && isfield(obj.Plot,'FigNum')
                 obj.Plot.FigNum(src.Number==obj.Plot.FigNum)=[];
             end
             delete(src);

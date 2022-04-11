@@ -25,6 +25,8 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
     if isempty(appinfo), ok = 0; warndlg(msgtxt); return; end
 
     idx = find(strcmp({appinfo.name},appname));
+    if isempty(idx), ok = 0; warndlg(msgtxt); return; end
+    
     path{1} = appinfo(idx(1)).location;
     path{2} = [path{1},filesep,'doc'];
     path{3} = [path{1},filesep,'help',filesep,'html'];

@@ -11,7 +11,7 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position)
 %   h1 - handle to figure or tab to position panel within
 %   promptxt - text used in panel to prompt user on selection to be made
 %   butnames - names on buttons; optional, default is {'Yes','No'};
-%   position - figure position; optional, default is [0.372,0.576,0.255,0.34]         
+%   position - panel position; optional, default is [0.005 0.92 0.99 0.08]        
 % OUTPUT
 %   h_pnl - handle to panel
 % EXAMPLE
@@ -33,29 +33,27 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position)
 %
     if nargin<3
         butnames = {'Yes','No'};
-        position = [0.372, 0.576, 0.255,0.34];
+        position = [0.005 0.92 0.99 0.08];
     elseif nargin<4        
-        position = [0.372, 0.576, 0.255,0.34];
+        position = [0.005 0.92 0.99 0.08];
     end
     
     h_pnl = uipanel(h1,'Tag','ButtonPanel',...
         'Title',promptxt,'TitlePosition','centertop',...
         'Units','normalized','Position',position);
 
-    % Create push button to accept
-    uicontrol('Parent',h_pnl,...
-        'Style', 'pushbutton', 'String', butnames{1},...
-        'Units','normalized', ...
-        'Position', [0.25 0.08 0.2 0.8],...
-        'Callback', @panelButton);
-
-    %Create push button to reject
-    uicontrol('Parent',h_pnl,...
+    % Create push buttons
+    nbut = length(butnames);
+    pos0 = 0.5-(0.1*nbut/2+(nbut-1)*0.01/2);
+    for i=1:nbut
+        pos1 = pos0+(i-1)*0.11;
+        uicontrol('Parent',h_pnl,'Tag','YesNo',...
         'Style','pushbutton',...
-        'String', butnames{2},...
+        'String', butnames{i},...
         'Units','normalized', ...
-        'Position', [0.55 0.08 0.2 0.8], ...
-        'Callback', @panelButton);
+        'Position', [pos1 0.08 0.1 0.8], ...
+        'Callback', @panelButton);  
+    end    
 end
         
 %%        
