@@ -611,10 +611,13 @@ classdef muiPlots < handle
                 Mframes(i) = getframe(gcf); 
                 %NB print function allows more control of resolution 
             end
-            obj.ModelMovie = Mframes;   %save movie to class property
+            idm = size(obj.ModelMovie,1);            
+            obj.ModelMovie{idm+1,1} = hfig.Number;
+            obj.ModelMovie{idm+1,2} = Mframes;   %save movie to class property
             obj.Data.T = t;     %restore datetime values
             obj.Data.Z = var;   %restore Z values
-            
+            figax.UserData = obj.Data;  %store data set in UserData to
+                                        %allow user to switch between plots
             %add replay and slider
             setControlPanel(obj,hfig,nrec,string(t(1)));  
         end
@@ -708,21 +711,23 @@ classdef muiPlots < handle
 %%
         function runMovie(obj,src,~)
             %callback function for animation figure buttons and slider
+            hfig = src.Parent;
+            idm = hfig.Number==[obj.ModelMovie{:,1}];
             if strcmp(src.Tag,'runMovie')       %user pressed run button   
-                implay(obj.ModelMovie);
+                implay(obj.ModelMovie{idm,2});
             elseif strcmp(src.Tag,'saveMovie')  %user pressed save button 
-                saveanimation2file(obj.ModelMovie);
+                saveanimation2file(obj.ModelMovie{idm,2});
             else                                %user moved slider
                 val = ceil(src.Value);          %slider value 
-                time = obj.Data.T(val);         %time slice selected
-                var = obj.Data.Z;  
-                %get figure axis, extract variable and refresh plot
-                hfig = obj.Plot.CurrentFig;
-                figax = findobj(hfig,'Tag','PlotFigAxes');               
+                %get figure axis, extract variable and refresh plot                
+                figax = findobj(hfig,'Tag','PlotFigAxes'); 
+                time = figax.UserData.T(val);   %time slice selected
+                var = figax.UserData.Z;
+                              
                 hp = figax.Children;
                 vari = setTimeDependentVariable(obj,var,val); %#ok<NASGU>
                 refreshdata(hp,'caller')
-                title(sprintf('%s \nTime = %s',obj.Title,string(time)))
+                title(sprintf('%s \nTime = %s',figax.Title.String{1},string(time)))
                 drawnow;
                 %update slider selection text
                 stxt = findobj(hfig,'Tag','FrameTime');
@@ -809,6 +814,10 @@ classdef muiPlots < handle
             %clear a selected figure and update figure number index
             if isvalid(obj) && isfield(obj.Plot,'FigNum')
                 obj.Plot.FigNum(src.Number==obj.Plot.FigNum)=[];
+                if ~isempty(obj.ModelMovie)
+                    idm = src.Number==[obj.ModelMovie{:,1}];
+                    obj.ModelMovie(idm,:) = [];
+                end
             end
             delete(src);
         end         
