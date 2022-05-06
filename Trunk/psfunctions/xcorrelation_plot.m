@@ -89,10 +89,12 @@ function xcorrelation_plot(ds1,ds2,metatxt)
         if istable(ds1)
             ds1 = squeeze(ds1{:,1}); 
             if iscell(ds1) && ischar(ds1{1})
+                %categories for ds1 will reordered sequentially
                 ds1 = double(categorical(ds1,'Ordinal',true));
             end
             ds2 = squeeze(ds2{:,1}); 
             if iscell(ds2) && ischar(ds2{1})
+                %categories for ds2 will reordered sequentially
                 ds2 = double(categorical(ds2,'Ordinal',true));
             end
         end

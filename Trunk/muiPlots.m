@@ -144,7 +144,7 @@ classdef muiPlots < handle
             idt = regexp(dimtxt,'('); %remove units from label
             id0 = cellfun(@isempty,idt);
             if any(id0)
-                idt{id0} = length(dimtxt{id0})+2;
+                idt(id0) = num2cell(cellfun(@length,dimtxt(id0))+2);
             end
             title = sprintf('%s (',dimtxt{1}(1:idt{1}-2));
             for j=2:length(dimtxt)
@@ -223,8 +223,12 @@ classdef muiPlots < handle
 %--------------------------------------------------------------------------
         function [x,y,hf,fnum,symb] = plot2Ddata(obj)
             %information required to create, add or delete 2D plot            
-            x = obj.Data.X;
-            y = obj.Data.Y;
+            x = checkcharcat(obj.Data.X);
+            y = checkcharcat(obj.Data.Y);
+%             x = obj.Data.X;
+%             if iscell(x), x = categorical(x); end %assumes cell is char vector of unique values
+%             y = obj.Data.Y;
+%             if iscell(y), y = categorical(y); end %assumes cell is char vector of unique values        
             idx = obj.Plot.FigNum==obj.Plot.CurrentFig.Number;
             hf = findobj('Number',obj.Plot.FigNum(idx));
             fnum = num2str(hf.Number); 
@@ -236,6 +240,24 @@ classdef muiPlots < handle
                obj.Plot.FigNum(idx)=[];
                warndlg('Length of X and Y do not match')
                x = []; y = [];  hf = [];
+            end
+            
+            %nested function ----------------------------------------------
+            function var = checkcharcat(invar)
+				%check for categorical data and if unique set as an ordered data set
+                if iscell(invar)
+                    if isunique(invar)
+                        %retain order of var by specifying categories
+                        var = categorical(invar,invar,'Ordinal',true); %retains order of invar
+                    else
+                        %var has multiple occurrences of a category
+                        var = categorical(invar,'Ordinal',true);
+                    end
+                elseif iscategorical(invar) && isunique(invar)
+                    var = categorical(invar,invar,'Ordinal',true); %retains order of invar
+                else
+                    var = invar;
+                end
             end
         end
 %%
@@ -600,7 +622,7 @@ classdef muiPlots < handle
             title(sprintf('%s \nTime = %s',obj.Title,string(t(1))))
 
             figax.NextPlot = 'replaceChildren';
-            figax.Tag = 'PlotFigAxes';
+            figax.Tag = 'PlotFigAxes';            
             Mframes(nrec) = struct('cdata',[],'colormap',[]);
             Mframes(1) = getframe(gcf); %NB print function allows more control of 
             for i=2:nrec

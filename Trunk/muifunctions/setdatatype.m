@@ -12,7 +12,7 @@ function var = setdatatype(vtext,dtype)
 %   vtext - char array or strings to be converted to a data type
 %   dtype - data type of variable
 % OUTPUT
-%   var - input variable to be tested
+%   var - variable converted from text string to date type defined by dtype
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2020
@@ -48,9 +48,9 @@ function var = setdatatype(vtext,dtype)
             case 'string'
                 var{i} = string(vtext{i});
             case 'categorical'
-                var{i} = vtext{i};
+                var{i} = vtext{i}; %return as text string (need valueset to assign as category)
             case 'ordinal'
-                var{i} = vtext{i};
+                var{i} = vtext{i}; %return as text string (need valueset to assign as ordinal)
             case 'datetime'
                 var{i} = getdatevariable(vtext{i});
             case 'duration'

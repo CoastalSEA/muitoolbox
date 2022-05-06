@@ -172,7 +172,9 @@ classdef inputUI < handle
             %check that selection does not duplicate another popupmenu selection
             alllnkpops = find(strcmp(obj.UIfig.UserData.Style,'linkedpopup'));
             allpops = findobj(obj.UIfig,'Style','popupmenu'); %all popupmenu uic
-            for i=1:length(alllnkpops)
+            nprops = length(alllnkpops);
+            lkpval = zeros(1,nprops);
+            for i=1:nprops
                 lkptag = sprintf('uic%d',alllnkpops(i));
                 hlkp = findobj(allpops,'-regexp','Tag',lkptag);
                 lkpval(i) = hlkp.Value;
@@ -191,6 +193,11 @@ classdef inputUI < handle
             selectedvar = obj.UIfig.UserData.SelectedVar; %id for [case,dataset,variable]
             range = getVarAttRange(dst,selectedvar(3),selected);%selectedvar(3)==variable
             rangetext = var2range(range);
+            if iscategorical(range{1})
+                [attnames,attdescs] = getVarAttributes(dst,selectedvar(3));
+                attused = strcmp(attdescs,selected);
+                range = dst.Dimensions.(attnames{attused});
+            end            
             
             %update the range widget  
             src.UserData = selid;           %current selection
@@ -202,7 +209,7 @@ classdef inputUI < handle
             hslide = findobj(hpan,'Style','slider');  %all sliders
             if ~isempty(hslide)
                 aslide = findobj(hslide,'-regexp','Tag',selected);
-                dimtext = src.String{oldselid};
+                dimtext = src.String{oldselid};                
                 resetSliderWidget(obj,aslide,oldrange,dimtext);
             end
             

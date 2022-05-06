@@ -209,9 +209,8 @@ function stats = getDSstats(data,metatxt)
     %generate descriptive stats for data that is not passes as a dstable
 %     data = squeeze(data{:,1});
     if iscell(data) && ischar(data{1})
-        data = categorical(data,'Ordinal',true);
-        data = double(data);
-        
+        data = categorical(data,'Ordinal',true); %includes duplicates
+        data = double(data);        
     end
     dummy = zeros(9,1);
     stats = table(dummy);

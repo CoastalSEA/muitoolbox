@@ -397,6 +397,10 @@ classdef muiCatalogue < dscatalogue
                 iddim = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
                 data = dst.Dimensions.(useprop)(iddim);               
                 label = attriblabel{UIsel.property}; 
+            elseif any(contains(useprop,'noDim'))
+                rvals = range2var(UIsel.range);
+                data = rvals{1}:rvals{2};
+                label = 'Undefined dimension';
             else
                 errordlg('Incorrect property selection in getProperty') 
             end

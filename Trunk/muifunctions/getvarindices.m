@@ -72,7 +72,13 @@ function valididx = getvarindices(var,limtxt)
                     maxV = str2double(lowerlimit);
                 elseif isnan(minV) && ischar(lowerlimit)
                     %handle limits for categorical data
-                    var = categorical(var,'Ordinal',true);
+                    if isunique(var)
+                        %retain order of var by specifying categories
+                        var = categorical(var,var,'Ordinal',true);
+                    else
+                        %var has multiple occurrences of a category
+                        var = categorical(var,'Ordinal',true);
+                    end
                     cats = categories(var);
                     minV = categorical({lowerlimit},cats,'Ordinal',true);
                     maxV = categorical({upperlimit},cats,'Ordinal',true);
