@@ -243,8 +243,14 @@ classdef inputUI < handle
                 answer = inputdlg(promptxt,'inputUI',1,defaults);
                 if isempty(answer), return; end
                 
-                svalue = slideobj.UserData{1};
-                evalue = slideobj.UserData{2};
+                if iscell(slideobj.UserData)
+                    svalue = slideobj.UserData{1};
+                    evalue = slideobj.UserData{2};
+                else %categorical data passes array of values as UserData
+                    svalue = slideobj.UserData(1);
+                    evalue = slideobj.UserData(end);
+                end
+                %
                 if isdatetime(svalue) || isduration(svalue)
                     format = svalue.Format;
                     %if user corrupts input format then str2var cannot read input
@@ -252,14 +258,24 @@ classdef inputUI < handle
                     if isduration(svalue) && length(checkstr)<2
                         answer{1} = sprintf('%s %s',answer{1},format);
                     end
+                elseif iscategorical(svalue)
+                    format = cellstr(slideobj.UserData);
                 else
                     format = [];
                 end
                 
                 newpos = str2var(answer{1},getdatatype(svalue),format);
-                isvalid  = isvalidrange({newpos,oldpos},{svalue,evalue});
+                isvalid  = isvalidrange({newpos,evalue},{svalue,evalue});
                 if ~isvalid, return; end
-                relpos = newpos/(evalue-svalue)*100;
+
+                if iscategorical(newpos)
+                    pos = find(newpos==slideobj.UserData);
+                    relpos = pos/length(slideobj.UserData)*100; 
+                elseif isinteger(newpos)
+                    relpos = double(newpos-svalue)/double(evalue-svalue)*100;
+                else     %numeric and datetime handled by differences                     
+                    relpos = (newpos-svalue)/(evalue-svalue)*100;
+                end
                 slideobj.Value = relpos;                
             end
             %assign new position as text string
@@ -282,24 +298,41 @@ classdef inputUI < handle
             %update range in slider
             src.UserData = range;
             
-            %update slider text
-            value{1} = var2str(range{1});
-            value{2} = var2str(range{2});
-            average = (range{2}-range{1})/2;
-            value{3} = var2str(average);            
+            %update slider text            
+            if iscategorical(range)
+                value{1} = var2str(range(1));
+                value{2} = var2str(range(end));
+                npt = round(length(range)/2);
+                midpoint = range(npt);
+            else
+                value{1} = var2str(range{1});
+                value{2} = var2str(range{2});
+                midpoint = (range{2}-range{1})/2;
+                if isdatetime(range{1}) %reset duration as a datetime
+                    midpoint = range{1}+midpoint;
+                end
+            end
+            value{3} = var2str(midpoint);            
             tagname = {'slide-start','slide-end','slide-val'};
             for i=1:3
                 uislidetext = findobj(src.Parent,'-regexp','Tag',[tagname{i},uinum]);
                 uislidetext.String = value{i};
             end
-
+            
+            %update slider position
+            src.Value = 50;
         end
 %%
         function [pos,startvalue,endvalue] = getPosition(~,src)
-            startvalue = src.UserData{1};
-            endvalue = src.UserData{2};
-            relpos = src.Value/100;
-            pos = startvalue+(endvalue-startvalue)*relpos;
+            if iscategorical(src.UserData)
+                nrec = round((length(src.UserData)-1)*src.Value/100)+1;
+                pos = src.UserData(nrec);
+            else
+                startvalue = src.UserData{1};
+                endvalue = src.UserData{2};
+                relpos = src.Value/100;
+                pos = startvalue+(endvalue-startvalue)*relpos;
+            end
         end
 %%
         function closeuicallback(obj,~,~)

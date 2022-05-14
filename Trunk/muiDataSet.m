@@ -126,7 +126,12 @@ classdef (Abstract = true) muiDataSet < handle
             
             [~,~,ndim] = getvariabledimensions(dst,1);
             if strcmp(dst.RowType,'datetime')  %insert data in existing record
-                dst = mergerows(dst,adn_dst);  
+                if width(dst)==width(adn_dst)
+                    dst = mergerows(dst,adn_dst); 
+                else
+                    warndlg('Data set being added has a different number of variables')
+                    return
+                end
             elseif ndim(1)==1 && ndim(2)>1
                 warndlg('Vertical concatenation of X-arrays not possible')
                 return
@@ -140,7 +145,7 @@ classdef (Abstract = true) muiDataSet < handle
             dst.Source{nfile+1} = filename;
             
             obj.Data.(datasetname) = dst;  
-            updateCase(muicat,obj,classrec);
+            updateCase(muicat,obj,classrec,false);
             getdialog(sprintf('Data added to: %s',catrec.CaseDescription));
         end        
 %%
@@ -200,7 +205,7 @@ classdef (Abstract = true) muiDataSet < handle
             end
             
             obj.Data.(datasetname) = dst;            
-            updateCase(muicat,obj,classrec);
+            updateCase(muicat,obj,classrec,false);
             getdialog(sprintf('Data deleted from: %s',catrec.CaseDescription));
         end
 %%
@@ -435,6 +440,7 @@ classdef (Abstract = true) muiDataSet < handle
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
             [varname,varidx] = selectAttribute(dst,1);    %1=select variable
+            if isempty(varname), delete(ax); return; end  %user cancelled
             [~,cdim,vsze] = getvariabledimensions(dst,varname);
             [attnames,~,attlabels] = getVarAttributes(dst,varidx);
 

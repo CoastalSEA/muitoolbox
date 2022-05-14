@@ -375,6 +375,7 @@ classdef muiCatalogue < dscatalogue
                     case 'splittable'
                         %split array variable into multiple variables
                         array = getData(dst,id.row,id.var,id.dim);
+                        if isempty(array), return; end
                         array = squeeze(array{1});
                         %get dimension name and indices
                         dimnames = setDimNames(obj,array,dvals,attribnames);                        
@@ -385,6 +386,10 @@ classdef muiCatalogue < dscatalogue
                         data = dst2tsc(userdst);
                 end
                 if isempty(data), return; end
+                %apply any subselection to the range of the variable
+                varange = dst.VariableRange.(useprop);
+                subrange = UIsel.range;
+                data = getVariableSubSelection(obj,data,varange,subrange,outopt);
                 istable = true;
             elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
                 %return selected row values 
@@ -550,10 +555,11 @@ classdef muiCatalogue < dscatalogue
         function useCase(obj,mode,classname,action)
             %select which existing data set to use and pass to action method
             % mode - none, single or multiple selection mode  
-            % classname - cell array of class name(s) to select cases for
+            % classname - character vector or cell array of class name(s) to select cases for
             % action - method of class to pass class object to,
             %          e.g. 'addData' in muiDataSet abstract class.
             if strcmp(mode,'none')
+                if iscell(classname), classname = classname{1}; end
                 heq = str2func(['@(muicat,classname) ',...
                             [classname,'.',action,'(muicat,classname)']]); 
                 heq(obj,classname);  %instance of class object   
@@ -707,6 +713,8 @@ classdef muiCatalogue < dscatalogue
                 indices = find(ismatch(var,value));
             elseif isinteger(var) && var(end)==value
                 indices = value;   
+            elseif iscategorical(var)
+                indices = find(value==var);
             elseif length(var)>1
                 %numerical array
                 indices = interp1(var,1:length(var),value,'nearest'); 
@@ -785,10 +793,45 @@ classdef muiCatalogue < dscatalogue
                 proplabels = sprintf('%s (cid=%d)',localObj.caseclass,localObj.caseid);            
             else %exposed properties for inputs that do not use muiPropertyUI
                 proplabels = properties(localObj);
-                for k=1:length(proplabels)
+                nlabels = length(proplabels);
+                propdata = cell(nlabels,1);
+                for k=1:nlabels
                     propdata{k,1} = localObj.(proplabels{k});
                 end
             end
+        end
+        %%
+        function data = getVariableSubSelection(~,data,range,selrange,outopt)
+            %if the range of a variable has been subselected, assign the
+            %values outside the range as NaNs
+            %NB - limited testing with real data ***
+            subrange = range2var(selrange);
+            if all(cellfun(@isequal,range,subrange)), return; end
+            
+            switch outopt
+                case 'array'
+                    data = applyrange(data,range,subrange);
+                case 'table'
+                    varname = data.Properties.VariableNames{1};
+                    data.(varname) = applyrange(data.(varname),range,subrange);
+                case 'dstable'
+                    varname = data.VariableNames{1};
+                    data.(varname) = applyrange(data.(varname),range,subrange);
+                case 'splittable'
+                    data{:,:} = applyrange(data{:,:},range,subrange); %assumes can only be 2D table
+                case 'timeseries'
+                    data.Data = applyrange(data.Data,range,subrange);                    
+            end
+            % Nested function----------------------------------------------
+            function data = applyrange(data,range,subrange)
+                if range{1}~=subrange{1}
+                    data(data<subrange{1}) = NaN;
+                end
+                %
+                if range{2}~=subrange{2}
+                    data(data>subrange{2}) = NaN;
+                end
+            end            
         end
     end
 end

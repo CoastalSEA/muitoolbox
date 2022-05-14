@@ -5,7 +5,10 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
 %   nuiPropertyUI.m
 % PURPOSE
 %   Abstract class for creating graphic user interface to get and set class 
-%   properties and display them on a tab
+%   properties and display them on a tab 
+% NOTE
+%   call to str2var in setProperties does not handle categorical data
+%   because the valueset is unknown.
 % SEE ALSO
 %   muiConstants.m for example of usage
 %

@@ -8,7 +8,7 @@ function isvalid  = isvalidrange(testvar,bounds)
 % USAGE
 %   isvalid  = isvalidrange(testvar,bounds)
 % INPUT
-%   testvar - cell array with upper and lower values of range to be checked
+%   testvar - cell array with lower and upper values of range to be checked
 %   bounds - cell array for user defined lower and upper limits to the 
 %            range (optional)
 % OUTPUT
@@ -76,6 +76,17 @@ function isvalid  = isvalidrange(testvar,bounds)
             msgbox(setmsgtext(bounds{2},2));
             return;
         end
+        
+        if iscategorical(testvar{1})
+            %catch user entering a value that is not in category list
+            if isundefined(testvar{1})
+                isvalid = false;
+                msgbox(setmsgtext(1,3));
+            elseif isundefined(testvar{2})
+                isvalid = false;
+                msgbox(setmsgtext(2,3));
+            end
+        end
     end
     %check that range is in correct order (From->To)
     if ~ischar(testvar{1}) && testvar{2}<testvar{1}
@@ -86,10 +97,13 @@ end
 %%
 function msgtxt = setmsgtext(var,idx)
     %set the message text depending on data type
-    if idx==1   %upper or lower limit
-        msgtxt = 'Invald data. Value below lower limit of';
-    else
-        msgtxt = 'Invald data. Value above upper limit of';
+    switch idx
+        case 1
+            msgtxt = 'Invald data. Value below lower limit of';
+        case 2
+            msgtxt = 'Invald data. Value above upper limit of';
+        case 3
+            msgtxt = 'Invald data. Undefined limit';
     end
     
     if isnumeric(var)   %numeric or sting data format required
