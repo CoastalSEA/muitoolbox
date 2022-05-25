@@ -57,7 +57,8 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
     h_fig = figure('Name',figtitle,'Tag',tag,...
                    'Units','normalized','Position',position,...
                    'NextPlot','add');  
-    h_fig.MenuBar = 'none';
+    h_fig.MenuBar = 'none';   %reduce clutter but
+    h_fig.ToolBar = 'figure'; %allow access to data tips and save tools
     
     %move figure    
     h_fig.Position(1) = 1-h_fig.Position(3)-0.01;  %top right

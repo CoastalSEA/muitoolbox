@@ -158,23 +158,28 @@ function [idpks,threshold] = ExtrPeakSelect(tsData,mdate,guinp,ax1,h_but)
         returnflag = 0; %0:returns indices of peaks; 1:returns values
         idpks = peaksoverthreshold(tsData,threshold,method,...
             mdate,hours(tint),returnflag);
-        delete(h2)
-        delete(h3)
-        subplot(ax1);
-        hold on
-        h2 = plot(ax1,[stdat,endat],[threshold,threshold],'--r');
-        h3 = plot(ax1,mdate(idpks),tsData(idpks),'xr');
-        hold off              
-        waitfor(h_but,'Tag');
-        if strcmp(h_but.Tag,'Yes')
-            ok=1;
-            npeaks = length(idpks);
-            panelText(h_but,threshold,npeaks,method,tint);
+        if isempty(idpks)
+            warndlg('No peaks selected. Try lower threshold');
+            pause(3);
         else
-            guinp.default{1} = num2str(threshold);
-            guinp.default{2} = num2str(method);
-            guinp.default{3} = num2str(tint);
-            h_but.Tag = '';
+            delete(h2)
+            delete(h3)
+            subplot(ax1);
+            hold on
+            h2 = plot(ax1,[stdat,endat],[threshold,threshold],'--r');
+            h3 = plot(ax1,mdate(idpks),tsData(idpks),'xr');
+            hold off              
+            waitfor(h_but,'Tag');
+            if strcmp(h_but.Tag,'Yes')
+                ok=1;
+                npeaks = length(idpks);
+                panelText(h_but,threshold,npeaks,method,tint);
+            else
+                guinp.default{1} = num2str(threshold);
+                guinp.default{2} = num2str(method);
+                guinp.default{3} = num2str(tint);
+                h_but.Tag = '';
+            end
         end
     end            
 end

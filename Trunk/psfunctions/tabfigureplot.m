@@ -51,7 +51,7 @@ function ax = tabfigureplot(obj,src,tabcb,isrotate) %#ok<INUSL>
         else
             hb.Callback = tabcb;
         end
-        %add roate button if specified
+        %add rotate button if specified
         if isrotate
             hr = findobj(src,'Tag','RotateButton');
             delete(hr) %delete button so that new axes is assigned to callback
