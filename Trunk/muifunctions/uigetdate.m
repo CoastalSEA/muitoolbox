@@ -180,8 +180,13 @@ switch varargin{2}
       return
       %
 end% switch
-setday(['1-' get(findobj(gcbf,'Tag','months'),'String') '-' ...
-             get(findobj(gcbf,'Tag','year'),'String')])
+
+try %added 'try' to stop crash when user misses right/left arrows for month and year (iht, 8/6/22)
+    setday(['1-' get(findobj(gcbf,'Tag','months'),'String') '-' ...
+                 get(findobj(gcbf,'Tag','year'),'String')])
+catch
+    tic
+end
   %
   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
