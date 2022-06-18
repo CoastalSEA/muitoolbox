@@ -53,7 +53,7 @@ classdef muiStats < handle
             ok = getStatsData(obj,mobj.Cases);
             if ok<1, return; end %data not found
 
-            if strcmp(obj.UIset.Type.String,'User')
+            if ~isempty(obj.UIset.Type) && strcmp(obj.UIset.Type.String,'User')
                 user_stats(obj,src,mobj);  %pass control to user function
             else
                 %generate the plot
@@ -396,7 +396,8 @@ classdef muiStats < handle
             metadata{2} = sprintf('%s: %s',tests.Description,tests.VariableDescriptions{1});
             rLim = obj.UIset.Other;
             %see if user wants to include skill score
-            ok = setTaylorParams(obj);
+%             ok = setTaylorParams(obj);
+            [obj.Taylor,ok] = setskillparameters(obj.Taylor,obj.Data.X);
             if ok<1, return; end
             
             taylor_plot(refts,tests,metadata,src.String,...
@@ -544,69 +545,73 @@ classdef muiStats < handle
             %to include skill score and then set parameters if included
             %persists until muiStats is deleted
             %obj - muiStats object
-            skill = obj.Taylor;
-            if isempty(skill)
-                skill = muiStats.skillStruct();
-                answer = questdlg('Plot skill score?',...
-                                     'Skill score','Yes','No','Yes');
-                if strcmp(answer,'Yes'), skill.Inc = true; end                 
-            end
-            %
-            if skill.Inc      %flag to include skill score
-                default = {num2str(skill.Ro),num2str(skill.n),...
-                    num2str(skill.W),num2str(skill.iter),num2str(skill.subdomain)};
-                promptxt = {'Reference correlation, Ro','Exponent,n ',...
-                            'Local skill window','Iteration option (0 or 1)',...
-                            'Skill score averaging window (grids only)'};
-                titletxt = 'Define skill score parameters:';
-                answer = inputdlg(promptxt,titletxt,1,default);
-                if isempty(answer), ok = 0; return; end
-                
-                skill.Ro = str2double(answer{1});     %reference correlation coefficient
-                skill.n = str2double(answer{2});      %skill exponent
-                skill.W = str2double(answer{3});      %local skill sampling window
-                skill.iter = logical(str2double(answer{4})); %local skill iteration method
-                skill.subdomain = str2num(answer{5}); %#ok<ST2NM> %subdomain sampling (use str2num to handle vector)
-                [vdim,~,vsze] = getvariabledimensions(obj.Data.X,1);
-                if vdim==2
-                    skill.SD = getSubDomain(obj,skill.subdomain,vsze);
-                end
-            end
-            obj.Taylor = skill;
-            ok = 1;
+            
+            % Replace method with call to function:
+            % obj.Taylor,ok] = setskillparameters(obj.Taylor);
+            
+%             skill = obj.Taylor;
+%             if isempty(skill)
+%                 skill = muiStats.skillStruct();
+%                 answer = questdlg('Plot skill score?',...
+%                                      'Skill score','Yes','No','Yes');
+%                 if strcmp(answer,'Yes'), skill.Inc = true; end                 
+%             end
+%             %
+%             if skill.Inc      %flag to include skill score
+%                 default = {num2str(skill.Ro),num2str(skill.n),...
+%                     num2str(skill.W),num2str(skill.iter),num2str(skill.subdomain)};
+%                 promptxt = {'Reference correlation, Ro','Exponent,n ',...
+%                             'Local skill window','Iteration option (0 or 1)',...
+%                             'Skill score averaging window (grids only)'};
+%                 titletxt = 'Define skill score parameters:';
+%                 answer = inputdlg(promptxt,titletxt,1,default);
+%                 if isempty(answer), ok = 0; return; end
+%                 
+%                 skill.Ro = str2double(answer{1});     %reference correlation coefficient
+%                 skill.n = str2double(answer{2});      %skill exponent
+%                 skill.W = str2double(answer{3});      %local skill sampling window
+%                 skill.iter = logical(str2double(answer{4})); %local skill iteration method
+%                 skill.subdomain = str2num(answer{5}); %#ok<ST2NM> %subdomain sampling (use str2num to handle vector)
+%                 [vdim,~,vsze] = getvariabledimensions(obj.Data.X,1);
+%                 if vdim==2
+%                     skill.SD = getSubDomain(obj,skill.subdomain,vsze);
+%                 end
+%             end
+%             obj.Taylor = skill;
+%             ok = 1;
         end
-%%
-        function sd = getSubDomain(obj,subdomain,vsze)
-            %find the subdomain in integer grid indices defined by x,y range
-            %subdomain defined as [x0,xN,y0,yN];
-            dst = obj.Data.X;
-            if ~isempty(dst.Dimensions)
-                dnames = dst.DimensionNames;
-                x = dst.Dimensions.(dnames{1});
-                y = dst.Dimensions.(dnames{2});
-            else
-                x = 1:vsze(2);
-                y = 1:vsze(3);
-            end
-
-            if isempty(subdomain) || length(subdomain)~=4
-                subdomain = [min(x),max(x),min(y),max(y)];
-            end
-            ix0 = find(x<=subdomain(1),1,'last');
-            ixN = find(x>=subdomain(2),1,'first');
-            iy0 = find(y<=subdomain(3),1,'last');
-            iyN = find(y>=subdomain(4),1,'first');
-            sd.x = [ix0,ix0,ixN,ixN];
-            sd.y = [iyN,iy0,iy0,iyN];
-        end
+% %%
+%         function sd = getSubDomain(obj,subdomain,vsze)
+%             %find the subdomain in integer grid indices defined by x,y range
+%             %subdomain defined as [x0,xN,y0,yN];
+%             dst = obj.Data.X;
+%             if ~isempty(dst.Dimensions)
+%                 dnames = dst.DimensionNames;
+%                 x = dst.Dimensions.(dnames{1});
+%                 y = dst.Dimensions.(dnames{2});
+%             else
+%                 x = 1:vsze(2);
+%                 y = 1:vsze(3);
+%             end
+% 
+%             if isempty(subdomain) || length(subdomain)~=4
+%                 subdomain = [min(x),max(x),min(y),max(y)];
+%             end
+%             ix0 = find(x<=subdomain(1),1,'last');
+%             ixN = find(x>=subdomain(2),1,'first');
+%             iy0 = find(y<=subdomain(3),1,'last');
+%             iyN = find(y>=subdomain(4),1,'first');
+%             sd.x = [ix0,ix0,ixN,ixN];
+%             sd.y = [iyN,iy0,iy0,iyN];
+%         end
     end
 %%
     methods (Static, Access=private)
-         function skill = skillStruct()
-            %return an empty struct for the Taylor skill input parameters
-            skill = struct('Inc',false,'Ro',1,'n',1,'W',0,'iter',false,...
-                           'subdomain',[],'SD',[]);
-         end  
+%          function skill = skillStruct()
+%             %return an empty struct for the Taylor skill input parameters
+%             skill = struct('Inc',false,'Ro',1,'n',1,'W',0,'iter',false,...
+%                            'subdomain',[],'SD',[]);
+%          end  
 %%
         function dsp = setVariableDSP(dsp,statops)
             %assign the variable dsproperties based on user selection
