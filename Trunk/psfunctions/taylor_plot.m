@@ -457,8 +457,8 @@ function score = getLocalSkill(skill,refvar,testvar,metatxt)
         ts(length(indx),1) = datetime(1,1,1);
         ni = 1;
         for i=indx
-            subref = refvar(i:i+2*W,1);
-            subtest = testvar(i:i+2*W,1);
+            subref.Data = refvar(i:i+2*W,1);
+            subtest.Data = testvar(i:i+2*W,1);
             cfstats = getDifferenceStats(subref,subtest,ists);
             ss(ni) = getSkill(skill,cfstats);            
             if ~isempty(tt)

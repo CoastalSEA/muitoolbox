@@ -65,7 +65,7 @@
         skill.subdomain = str2num(answer{5}); %#ok<ST2NM> %subdomain sampling (use str2num to handle vector)
         if ~isempty(dst)
             [vdim,~,vsze] = getvariabledimensions(dst,1);
-            if vdim==2 && isa(dst,'dstable')
+            if vdim==3 && isa(dst,'dstable')
                 skill.SD = getSubDomain(dst,skill.subdomain,vsze);
             end
         else
