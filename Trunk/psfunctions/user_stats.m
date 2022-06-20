@@ -25,7 +25,7 @@ function user_stats(obj,mobj,srcVal) %#ok<INUSL>
 if nargin<3, srcVal = []; end
 
 if strcmp(srcVal,'General')
-    warndlg('psfunctions/user_stats.m called. Nothing implemented for General Stats');
+    warndlg('../muitoolbox/psfunctions/user_stats.m called. Nothing implemented for General Stats');
     return;
 end
 
@@ -47,7 +47,7 @@ else
     return;
 end
 
-%--CODE TO USE TIME SERIES ts ---------------------------------------------
+%--SAMPLE CODE TO USE DATA EXTRACTED FROM TIME SERIES ts ------------------
 
 %prompt user to select threshold and peak selection definition
 prompt = {'Threshold for peaks:','Selection method', ...

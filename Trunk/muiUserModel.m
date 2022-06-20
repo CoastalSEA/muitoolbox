@@ -24,7 +24,7 @@ classdef muiUserModel < muiDataSet
         UIset           %structure for the settings made in the UI        
     end
     
-    methods (Access={?muiDataSet,?muiDataUI,?muiManipUI})
+    methods
         function obj = muiUserModel()                    
             %class constructor
         end
@@ -396,7 +396,7 @@ classdef muiUserModel < muiDataSet
                                    'SelectionMode','single',...
                                    'ListSize',[300,100],'ListString',casedesc);                    
                         if ok<1, return; end
-                        caserec = casered(idx);
+                        caserec = caserec(idx);
                     end
                     addVariable2CaseDS(muicat,caserec,results,dsp);
                     return;

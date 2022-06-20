@@ -83,8 +83,8 @@ if ~ishandle(varargin{1})
                'min',-2000,'max',2000,'Value',datvec(2), ...
                'callback','uigetdate(gcbo,''months'')')
    uicontrol(h,'position',pos+[112 2 74 20],'sliderstep',[0.00025 1], ...
-               'min',0,'max',4000,'value',datvec(1), ...
-               'callback','uigetdate(gcbo,''year'')')
+               'min',-1,'max',4001,'value',datvec(1), ...
+               'callback','uigetdate(gcbo,''year'')','UserData',2000)
    %
    h.style           = 'edit';
    h.enable          = 'inactive';
@@ -109,18 +109,22 @@ if ~ishandle(varargin{1})
    set(findobj(gcf,'string',num2str(datvec(3))),'CData',geticon)
    %
    uiwait
+   %need to ensure that user has not closed figure(iht, 17/06/22)
+   hd = findobj(0,'Tag','uigetdate');
+   if isempty(hd), out = []; return; end
    try
       out = datenum([num2str( ...
-               get(findobj(gcf,'Tag','cday'),'UserData')) '-' ...
-               get(findobj(gcf,'Tag','months'),'String') '-' ...
-               get(findobj(gcf,'Tag','year'),'String') ' ' ...
-               get(findobj(gcf,'Tag','time'),'String') ':00']);
-      delete(findobj(0,'Tag','uigetdate'))                       
+               get(findobj(hd,'Tag','cday'),'UserData')) '-' ...
+               get(findobj(hd,'Tag','months'),'String') '-' ...
+               get(findobj(hd,'Tag','year'),'String') ' ' ...
+               get(findobj(hd,'Tag','time'),'String') ':00']...
+                                    , 'dd-MMM-yyyy HH:mm:ss' );
+      %delete(findobj(0,'Tag','uigetdate'))                       
    catch
       out = [];
-      closereq
+      %closereq  if uigtdate already deleted this closed whatever becomes current figure
    end% try
-   
+   delete(hd)  %moved to avoid closing other figures when close figure x is used 
    return
 end% if
 
@@ -132,6 +136,13 @@ switch varargin{2}
       set(findobj(gcbf,'Tag','ok'),'Enable','off')      
       %
    case 'year'
+      %added to stop resetting to 0 or 4000 (a long way to scroll) (iht,17/6/22)
+      step = get(gcbo,'Value');
+      if step<0 || step>4000
+          set(gcbo,'Value',get(gcbo,'UserData'))
+      end
+      %added check to avoid decimal years (iht, 17/6/22)
+      set(gcbo,'Value',round(get(gcbo,'Value')))
       set(findobj(gcbf,'Tag','year'),'String',get(gcbo,'Value'))
       set(findobj(gcbf,'Tag','ok'),'Enable','off')
       %
@@ -142,7 +153,7 @@ switch varargin{2}
       set(varargin{1},'CData',geticon)
       set(findobj(gcbf,'Tag','cday'),'Userdata',get(varargin{1},'String'))
       set(findobj(gcbf,'Tag','ok'),'Enable','on')
-      try uicontrol(h(3)) ; end% try
+      try uicontrol(h(3)), catch, end% try
       return
       %
    case 'time'

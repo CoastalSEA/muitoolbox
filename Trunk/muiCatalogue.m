@@ -212,7 +212,7 @@ classdef muiCatalogue < dscatalogue
                 return;
             end 
             
-            prompt = {'Data type:'};
+            prompt = {'Data type (e.g. data/model/derived:'};
             title = 'Import case';
             datatype = inputdlg(prompt,title,1,{'data'});
             if isempty(datatype), return; end

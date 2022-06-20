@@ -86,13 +86,18 @@
 % - initialise a slider on a figure with the option to include text 
 % displaying the current slider value and an action button
 %
+% * *setskillparameters.m*
+% - initialise the skill properties used for Taylor plot and local skill
+% score plots. Skill score requires correlation coefficient and exponent.
+% Other parameters relate to local skill score
+%
 % * *stderror.m*
 % - compute the standard error of a data set relative to a fitted
 % regression line
 %
 % * *tabfigureplot*
 % - generate axes on Q-Plot tab including '>Figure' and 'Rotate'
-% buttons (Rotate is optional), or as a standalone figure.
+% buttons (Rotate is optional), or as a standalone figure
 %
 % * *taylor_plot.m*
 % - create plot of Taylor diagram and, optionally, plot compute skill score

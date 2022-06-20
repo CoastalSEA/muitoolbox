@@ -31,6 +31,11 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 % NOTES
 %   Taylor, K, 2001, Summarizing multiple aspects of model performance 
 %   in a single diagram, JGR-Atmospheres, V106, D7. 
+%   Bosboom J and Reniers A J H M, 2014, Displacement-based error metrics 
+%   for morphodynamic models. Advances in Geosciences, 39, 37-43, 10.5194/adgeo-39-37-2014.
+%   Bosboom J, Reniers A J H M and Luijendijk A P, 2014, On the perception 
+%   of morphodynamic model skill. Coastal Engineering, 94, 112-125, 
+%   https://doi.org/10.1016/j.coastaleng.2014.08.008.
 % SEE ALSO
 %   Function getTaylorStats in DataStats.m and getTaylorPlot.m used in
 %   ModelSkill
@@ -452,8 +457,8 @@ function score = getLocalSkill(skill,refvar,testvar,metatxt)
         ts(length(indx),1) = datetime(1,1,1);
         ni = 1;
         for i=indx
-            subref.Data = refvar(i:i+2*W,1);
-            subtest.Data = testvar(i:i+2*W,1);
+            subref = refvar(i:i+2*W,1);
+            subtest = testvar(i:i+2*W,1);
             cfstats = getDifferenceStats(subref,subtest,ists);
             ss(ni) = getSkill(skill,cfstats);            
             if ~isempty(tt)

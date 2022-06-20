@@ -816,7 +816,7 @@ classdef (Abstract = true) muiDataUI < handle
                     elseif strcmp(S.Style,'slider')
                         obj.UIsettings.(setoptions{i}) = S.Value;
                     else
-                        warndlg('Option not defined in setOrderOptionsSettings')
+                        warndlg('Option not defined in setOrderOptionSettings')
                     end
                 end
             end
