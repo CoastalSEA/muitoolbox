@@ -117,12 +117,9 @@ if ~ishandle(varargin{1})
                get(findobj(hd,'Tag','cday'),'UserData')) '-' ...
                get(findobj(hd,'Tag','months'),'String') '-' ...
                get(findobj(hd,'Tag','year'),'String') ' ' ...
-               get(findobj(hd,'Tag','time'),'String') ':00']...
-                                    , 'dd-MMM-yyyy HH:mm:ss' );
-      %delete(findobj(0,'Tag','uigetdate'))                       
+               get(findobj(hd,'Tag','time'),'String') ':00']);                   
    catch
       out = [];
-      %closereq  if uigtdate already deleted this closed whatever becomes current figure
    end% try
    delete(hd)  %moved to avoid closing other figures when close figure x is used 
    return

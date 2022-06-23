@@ -689,6 +689,7 @@ classdef (Abstract = true) muiModelUI < handle
 %--------------------------------------------------------------------------    
         function caseCallback(obj,src,evt)
             %called from tabs listing cases by clicking on a tab row
+            if evt.Indices(2)~=1, return; end %only selection of column 1 used to access metadata
             selrow = evt.Indices(1);
             idx = find(tabSubset(obj,src.Parent.Tag)); 
             if isempty(idx), return; end
