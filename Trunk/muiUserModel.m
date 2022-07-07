@@ -142,8 +142,13 @@ classdef muiUserModel < muiDataSet
             %equations so all Matlab functions can be called.
             inp.eqn = lower(usereqn);
             %extract the function name
-            posnstvars = regexpi(inp.eqn,'(');
-            inp.fcn = inp.eqn(1:posnstvars-1);
+            if strcmp(inp.eqn(1),'[') && strcmp(inp.eqn(end),']')
+                %matlab expresions with a single output ar wrapped in [...]
+                inp.fcn = [];
+            else
+                posnstvars = regexpi(inp.eqn,'(');
+                inp.fcn = inp.eqn(1:posnstvars-1);
+            end
 
             %handle comment strings that give supplementary instructions
             posncom = regexp(inp.eqn,'%', 'once');
@@ -259,14 +264,16 @@ classdef muiUserModel < muiDataSet
             %array, any user text, handle to main UI and the inp selection
             %struct with both the user equation and the function name
             idx = ~cellfun(@isempty,{props(:).case});  %index for used XYZ variables
-            dst = props(idx); %to just pass dstables use props(idx).data ***????
+            dst = props(idx); %to just pass dstables use props(idx).data
             try
                 %handle to anonymous function based on user equation
-%                 heq = str2func(['@(dst,utext,mobj) ',inp.eqn]);
                 heq = str2func(['@(dst,mobj) ',inp.eqn]);
-                maxnargout = nargout(inp.fcn);
+                if isempty(inp.fcn)
+                    maxnargout = 1;
+                else
+                    maxnargout = nargout(inp.fcn);
+                end
                 varout = cell(1, maxnargout);
-%                 [varout{:}] = heq(dst,inp.utext,mobj);
                 [varout{:}] = heq(dst,mobj);
             catch ME
                 errormsg = sprintf('Invalid expression\n%s',ME.message);
@@ -285,15 +292,13 @@ classdef muiUserModel < muiDataSet
             t = XYZT{4};
             try
                 %handle to anonymous function based on user equation
-%                 heq = str2func(['@(t,x,y,z,utext,mobj) ',inp.eqn]);
                 heq = str2func(['@(t,x,y,z,mobj) ',inp.eqn]);
                 if isempty(inp.fcn)
                     maxnargout = 1;
                 else
                     maxnargout = nargout(inp.fcn);
                 end                 
-                varout = cell(1, maxnargout);
-%                 [varout{:}] = heq(t,x,y,z,inp.utext,mobj);
+                varout = cell(1, maxnargout);;
                 [varout{:}] = heq(t,x,y,z,mobj);
            catch ME
                 errormsg = sprintf('Invalid expression\n%s',ME.message);

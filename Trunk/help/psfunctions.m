@@ -18,6 +18,10 @@
 % * *descriptive_stats.m*
 % - generate descriptive stats table for timeseries or table of a variable
 %
+% * *diffpadded.m*
+% - differences and approximate derivatives, padded to be same length as
+% input variable
+%
 % * *downsample.m*
 % - wrapper to put downsample_ts, output into an array. From Matlab(TM) Forum, 
 % by Chad A. Greene (c) 2014, 
