@@ -11,7 +11,7 @@ function ax = tabfigureplot(obj,src,tabcb,isrotate) %#ok<INUSL>
 % INPUTS
 %   obj - instance of a class derived from muiDataSet that uses tabPlot
 %   src - handle to tab or button that calls tabPlot
-%   tabcb - 
+%   tabcb - tab callback e.g. tabcb = @(src,evdat)tabPlot(obj,src)
 %   isrotate - logical true to include button to allow plot on tab to be 
 %              rotated (optional)
 % OUTPUT

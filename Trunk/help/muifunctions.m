@@ -14,6 +14,9 @@
 % - function to add the same header to batch of user selected files (eg to
 % add a format definition to the top of a data file)
 % 
+% * *add_copy_button.m*
+% - add a 'Copy to Clipboard' button to a figure or tab
+%
 % * *check_unique_names.m*
 % - check that names in list are unique and if required replace suplicates
 % with a unique name
