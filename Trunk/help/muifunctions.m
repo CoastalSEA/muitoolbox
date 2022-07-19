@@ -7,7 +7,7 @@
 % * *acceptfigure.m*
 % - generate plot figure with buttons to accept/reject selection
 % 
-% * *acceptpanel.m**
+% * *acceptpanel.m*
 % - create a yes/no panel within a figure
 % 
 % * *add_file_header.m*
