@@ -511,7 +511,7 @@ classdef (Abstract = true) muiModelUI < handle
 %%        
         function clearFigures(~,~,~)
             hpf = findobj('tag','PlotFig');
-            hsf = findobj('tag','SummaryTable');
+            hsf = findobj('tag','StatFig');
             if ~isempty(hpf) && ~isempty(hsf)
                 quest = 'Delete plot figures, stats figures or both?';                
                 answer = questdlg(quest,'Clear','Plots','Stats','Both','Both');

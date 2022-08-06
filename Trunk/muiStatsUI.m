@@ -207,7 +207,7 @@ classdef muiStatsUI < muiDataUI
             S.Style = repmat({'popupmenu'},1,4);
             S.Order = {'Case','Dataset','Variable','Type'};
             S.Type = {'Descriptive','Regression','Peaks','Clusters','Extremes',...
-                        'Poisson Stats','User'};
+                      'Poisson Stats','Hurst Exponent','User'};
            
             %Tab control button options
 %             S.TabButText = {'Select','Clear'};    %labels for tab button definition

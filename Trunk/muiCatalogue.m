@@ -546,7 +546,6 @@ classdef muiCatalogue < dscatalogue
                 irow = listdlg('PromptString',promptxt{2},...
                                'Name','Tab plot','SelectionMode','single',...
                                'ListSize',[200,200],'ListString',list);
-                if isempty(irow), irow = 1; end
             else
                 irow = 1;
             end

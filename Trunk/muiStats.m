@@ -294,6 +294,8 @@ classdef muiStats < handle
                     getExtremeStats(obj,mobj);
                 case 'Poisson Stats'
                     poisson_stats(obj.Data.X,obj.MetaData.X);
+                case 'Hurst Exponent'
+                    hurst_exponent(obj.Data.X,obj.MetaData.X);
                 case 'User'
                     user_stats(obj,mobj,srcVal);
             end

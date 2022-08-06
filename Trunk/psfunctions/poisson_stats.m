@@ -24,13 +24,6 @@ function poisson_stats(ts,metatxt)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-%     if contains(ts.Name,'Peaks')
-%         warndlg('Place holder - code not written yet')
-%         return;
-%         %recover options
-%     else
-%         
-%     end
     [idpks,options] = getpeaks(ts);
     if isempty(idpks), return; end
     
@@ -65,11 +58,6 @@ function poisson_stats(ts,metatxt)
     end
     nrec = length(pksize);
     nbins =floor(nrec/2);
-%             if nrec>30
-%                 nbins = 20;
-%             else
-%                 nbins = 10;
-%             end
     pkszefit = fitExp(pksize,nbins);
     pkintfit = fitExp(pkdiff,nbins);     
     pkdurfit = fitExp(pkdura,nbins);
@@ -87,7 +75,7 @@ function poisson_stats(ts,metatxt)
     ttxt = 'Peak duration above threshold';
     xtxt = 'Time (hours)';
     plotPoisson(pkdura,pkdurfit,0,nbins,ttxt,xtxt);
-    fittedtitle(hf,metatxt,true,0.68);
+    fittedtitle(hf,metatxt,false,0.68);
 end
 %%
 function fit = fitExp(var,nbins)
