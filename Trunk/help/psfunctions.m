@@ -35,7 +35,13 @@
 %
 % * *frequencyanalysis.m*
 % - generate a range of plots of frequency, probability of exceedance and
-%   duration of exceedance for a timeseries of data
+% duration of exceedance for a timeseries of data
+%
+% * *genhurstw.m*
+% - calculates the weighted generalized Hurst exponent H(q) from 
+% the scaling of the renormalized q-moments of the distribution 
+% From Matlab(TM) Forum (c) Tomaso Aste (2022). Weighted generalized Hurst 
+% exponent (https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent)
 %
 % * *getclusters.m*
 % - identify cluster in a timeseries with options to adjust threshold, 
@@ -47,7 +53,19 @@
 % 
 % * *godisplay.m*
 % - display the legend name or DisplayName of the selected graphical object
-% 
+%
+% * *hurst_aalok_ihlen.m*
+% - estimate the Hurst exponent of a timeseries, using the method proposed
+% by Aalok based on method proposed by Ihlen
+%
+% * *hurst_exponent.m*
+% - estimate the Hurst exponent of a timeseries, using one of a a number of
+% methods available from the Matlab Forum, including:
+% https://www.mathworks.com/matlabcentral/fileexchange/70192-hurst-exponent   
+% https://www.mathworks.com/matlabcentral/fileexchange/39069-hurst-exponent-estimation 
+% https://www.mathworks.com/matlabcentral/fileexchange/100988-hurst-exponent
+% https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent
+%
 % * *mcolor.m*
 % - select a default Matlab(TM) color definition from table
 %
