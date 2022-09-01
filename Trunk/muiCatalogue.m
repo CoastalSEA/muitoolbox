@@ -33,6 +33,7 @@ classdef muiCatalogue < dscatalogue
             %Description property in any dstables held in DataSets
             if nargin<2, caserec = []; end
             [caserec,newdesc] = editRecord(obj,caserec);
+            if isempty(caserec), return; end %user cancelled
      
             [cobj,~,~] = getCase(obj,caserec);
             if isprop(cobj,'Data') && ~isempty(cobj.Data)
