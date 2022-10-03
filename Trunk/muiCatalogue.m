@@ -173,17 +173,17 @@ classdef muiCatalogue < dscatalogue
                                                             localObj(jj));
                                 %vertically concatenate properties for each instance
                                 %matrix is [nobj,nprop]
-                                pdata(jj,:) =  [pdatajj{:}];  %#ok<AGROW>
+                                pdata(jj,:) =  [pdatajj{:}]; %#ok<AGROW>
                             end
                             %reshape to [nprop,nobj] and then to nprop cell
-                            %array with nobj vecotors for each property
+                            %array with nobj vectors for each property
                             pdata = mat2cell(pdata',ones(1,size(pdata',1)));
                         else
                             [pdata,plabels] = setPropertyData(obj,...
                                                             localObj);
                         end   
-                        propdata = [propdata;pdata]; %#ok<AGROW>
-                        proplabels = [proplabels;plabels]; %#ok<AGROW>
+                        propdata = [propdata;pdata];         %#ok<AGROW>
+                        proplabels = [proplabels;plabels];   %#ok<AGROW>
                         clear pdata plabels
                 end
                 idx = find(~(cellfun(@isscalar,propdata)));
