@@ -51,12 +51,16 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
 
     %convert ordinal categorical data to numeric values
     if iscell(ind_ds) && ischar(ind_ds{1})
-        if isunique(ind_ds)
-            %independent variable may be an ordered set of unique values
-            ind_ds = double(categorical(ind_ds,ind_ds'Ordinal',true));
-        else
-            ind_ds = double(categorical(ind_ds,'Ordinal',true));
-        end
+    if iscell(ind_ds) && ischar(ind_ds{1})
+        ind_ds = double(categorical(ind_ds,'Ordinal',true));
+        % a use case introduced a check that ind_ds values are unque
+        % but the code below is the same whether unique or not???
+        % if isunique(ind_ds)
+        %    %independent variable may be an ordered set of unique values
+        %    ind_ds = double(categorical(ind_ds,'Ordinal',true));
+        % else
+        %     ind_ds = double(categorical(ind_ds,'Ordinal',true));
+        % end
     end
     %
     if iscell(dep_ds) && ischar(dep_ds{1})
