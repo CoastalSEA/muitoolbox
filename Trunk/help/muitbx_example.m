@@ -1,7 +1,7 @@
 %% muitoolbox - simple model examples
 % A number of examples are provided to illustrate a range of uses. The 
 % files for the example use case can be found in the example folder 
-% <matlab:example_folder here>. 
+% <matlab:mui_example_folder here>. 
 
 %%
 % The example folder includes the following options:

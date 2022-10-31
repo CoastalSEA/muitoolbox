@@ -78,7 +78,7 @@
 %% Usage
 % The <matlab:doc('muitbx_example') muitoolbox example> provides details
 % of a simple implementation. The files for the example use case can be 
-% found in the example folder <matlab:example_folder here>. A full 
+% found in the example folder <matlab:mui_example_folder here>. A full 
 % implementation of the suite of muitoolbox utilities is provided in the 
 % <matlab:doc('modelui') ModelUI> App, which also illustrates how to
 % customise the default UI, or define a bespoke UI.
