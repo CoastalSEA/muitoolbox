@@ -7,10 +7,10 @@ function cmap = cmap_selection(idsel)
 %   select a color map definition from Matlab default list and cbrewer
 %   generated mat files
 % USAGE
-%   cmap = cmap_selection()
+%   cmap = cmap_selection(idsel)
 % INPUTS
-%   idsel - index to row selection in color table (integer value)
-%           values of zi if useing landsea color map
+%   idsel - index to row selection in color table (integer value), or
+%           values of zi if using landsea color map
 % OUTPUT
 %   cmap - RGB values for selected color map
 % NOTES
@@ -23,12 +23,14 @@ function cmap = cmap_selection(idsel)
 %
     matlabcmaps = {'parula','turbo	','hsv','hot','cool','spring','summer',...
                    'autumn','winter','gray','bone','copper','pink','jet',...
-                   'lines','colorcube','prism','flag','YlGnBu','anomalie'};
+                   'lines','colorcube','prism','flag','BuGnYl','YlGnBu',...
+                   'anomalie B-R','anomalie R-B'};
                
     if nargin<1
         promptxt = 'Select colormap:';
         [idsel,ok] = listdlg('Name','Colormap','SelectionMode','single',...
-                        'PromptString',promptxt,'ListString',matlabcmaps);
+                        'PromptString',promptxt,'ListString',matlabcmaps,...
+                         'ListSize',[160,320]);                    
         if ok<1, cmap = []; return; end   
     elseif license('test','MAP_Toolbox') && length(idsel)>1
         %pass zi values as idsel
@@ -40,11 +42,17 @@ function cmap = cmap_selection(idsel)
     end
     %
     switch matlabcmaps{idsel}
-        case 'YlGnBu'                              %idsel = 19
+        case 'BuGnYl'                              %idsel = 19
             cmap = YlGnBu();
-        case 'anomalie'                            %idsel = 20
+        case 'YlGnBu'                              %idsel = 20
+            cmap = YlGnBu();
+            cmap = flipud(cmap);
+        case 'anomalie B-R'                        %idsel = 21
             cstruct = load('cmapanomalie','-mat');
             cmap = cstruct.cmapanomalie;
+        case 'anomalie R-B'                        %idsel = 22
+            cstruct = load('cmapanomalie','-mat');
+            cmap = flipud(cstruct.cmapanomalie);   
         otherwise                                  %idsel = 1-18 Matlab defaults
             cmap = colormap(matlabcmaps{idsel});
     end
@@ -74,9 +82,10 @@ function cmap = YlGnBu()
             0.0313725490196078,0.113725490196078,0.345098039215686];
 end
 %%
-function [cmap,climits] = landsea(zi)
+function [cmap,climits] = landsea(zi,range)
     %definition of land-sea cmap - requires Mapping toolbox
+    if nargin<2, range = [min(zi,[],'All'),max(zi,[],'All')]; end
     cmapsea = [0,0,0.2;  0,0,1;  0,0.45,0.74;  0.30,0.75,0.93; 0.1,1,1];
     cmapland = [0.95,0.95,0.0;  0.1,0.7,0.2; 0,0.4,0.2; 0.8,0.9,0.7;  0.4,0.2,0];
-    [cmap,climits] = demcmap([min(zi,[],'All'),10],128,cmapsea,cmapland);
+    [cmap,climits] = demcmap(range,128,cmapsea,cmapland);
 end

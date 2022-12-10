@@ -33,7 +33,12 @@
 % * *idxfig* - figure number of the current figure.
 
 %% muiPlots methods
-% *getPlot* is a static function called from muiPlotsUI.
+% * *getPlot* is a static function called from muiPlotsUI.
+% * *get_muiPlots* is a static function to create an instance of the class 
+% for use by other functions or methods.
+% * *getAplot* is used in external functions to call a muiPlots plot by first
+% creating an instance of muiPlots using _get_muiPlots_ and populating the
+% muiPlots properties needed for the plot required.
 
 %% Statistcal analysis options
 % muiStats implements the following options:

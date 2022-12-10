@@ -105,7 +105,7 @@ classdef muiCatalogue < dscatalogue
             %and class instances
             if nargin<2  %if case to delete has not been specified
                 [caserec,ok] = selectCase(obj,'Select cases to delete:',...
-                                                       'multiple',2);                                      
+                                                       'multiple',2,true);                                      
                 if ok<1, return; end  
             end 
             
@@ -220,6 +220,7 @@ classdef muiCatalogue < dscatalogue
             
 %             addCaseRecord(cobj,obj,datatype);
             setCase(obj,cobj,datatype);
+            activateTables(obj);
         end
 %%
         function exportCase(obj,caserec)
@@ -426,7 +427,7 @@ classdef muiCatalogue < dscatalogue
             props.data = data;                    
         end
 %%
-        function [caserec,ok] = selectCase(obj,promptxt,mode,selopt)
+        function [caserec,ok] = selectCase(obj,promptxt,mode,selopt,ischeck)
             %select a case record to use with options to subselect
             %the selection list based on class or type (used in muiModelUI)
             % promptxt - text to use to prompt user
@@ -439,6 +440,7 @@ classdef muiCatalogue < dscatalogue
             % Note: to select and return a class instance use selectCaseObj
             % to get a class object array (no Case/Record selection) use
             % getClassObj in muiModelUI.
+            if nargin<5, ischeck = false; end
             classops = cellstr(unique(obj.Catalogue.CaseClass));
             typeops  = cellstr(unique(obj.Catalogue.CaseType));
             classel = []; typesel = []; ok = 1;
@@ -455,7 +457,8 @@ classdef muiCatalogue < dscatalogue
         
             [caserec,ok] = selectRecord(obj,'PromptText',promptxt,...
                                 'CaseType',typesel,'CaseClass',classel,...
-                                'SelectionMode',mode,'ListSize',[250,200]);
+                                'SelectionMode',mode,'ListSize',[250,200],...
+                                'CheckSingle',ischeck);
         end
 %%
         function [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt)

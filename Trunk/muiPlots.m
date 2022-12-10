@@ -71,6 +71,12 @@ classdef muiPlots < handle
                 setPlot(obj,mobj);
             end
         end
+%%
+        function obj = get_muiPlots()
+            %get an instance of muiPlots for a stand along function that is
+            %not useing muiPlotsUI
+            obj = muiPlots;                   %create new instance
+        end        
     end
 %%   
     methods (Access=protected)
@@ -538,10 +544,15 @@ classdef muiPlots < handle
                 z = z';
             end
 
+            %retrospective addition of iscmap to allow user to select color map
+            iscmap = true;
+            if isfield(obj.UIset,'iscmap')
+                iscmap = obj.UIset.iscmap;
+            end
             %
             if isfield(obj.UIset,'Polar') && obj.UIset.Polar
                 muiPlots.rtSurface(x,y,z,24,yint,obj.AxisLabels.Y,...
-                                               obj.Legend,obj.Title);
+                                               obj.Legend,obj.Title,iscmap);
             else
                 if isempty(obj.UIset.Type.String)
                     ptype = 'surf';
@@ -549,7 +560,8 @@ classdef muiPlots < handle
                     ptype = obj.UIset.Type.String;
                 end
                 muiPlots.xySurface(x,y,z,xint,yint,obj.AxisLabels.X,...
-                              obj.AxisLabels.Y,obj.Legend,obj.Title,ptype);
+                              obj.AxisLabels.Y,obj.Legend,obj.Title,...
+                              ptype,iscmap);
             end
         end 
 %%
@@ -643,7 +655,9 @@ classdef muiPlots < handle
             %add replay and slider
             setControlPanel(obj,hfig,nrec,string(t(1)));  
         end
+    end
 %%
+    methods
         function vari = setTimeDependentVariable(obj,var,idx)
             %adjust shape of dynamic variable depending on no. of dimensions
             switch obj.UIset.callTab
@@ -756,12 +770,10 @@ classdef muiPlots < handle
                 stxt.String = string(time);
             end
         end
-    end
 %%    
 %--------------------------------------------------------------------------
 % Get and Set figure and utility functions
 %--------------------------------------------------------------------------
-    methods
         function getFigure(obj)
             %get existing figure or generate a new one as required
             if any(strcmp(obj.UIset.callButton,{'New','Select','Run'}))
@@ -855,6 +867,12 @@ classdef muiPlots < handle
                 end
             end
         end 
+%%
+        function getAplot(obj)
+            %allow external function to call muiPlots plot
+            %see cf_animation in the ChannelForm model for example of usage
+            callPlotType(obj)
+        end
     end
 %%
 %--------------------------------------------------------------------------
@@ -907,8 +925,9 @@ classdef muiPlots < handle
         end        
 %%
         function xySurface(x,y,z,xint,yint,xtext,ytext,legendtext,...
-                                                      titletxt,ptype)
-            %surface plot of X,Y,Z data            
+                                                  titletxt,ptype,iscmap)
+            %surface plot of X,Y,Z data  
+            if nargin<11, iscmap=true; end
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
             warning('off',wid)
              [xq,yq,zq] = muiPlots.reshapeXYZ(x,y,z,xint,yint);
@@ -919,15 +938,16 @@ classdef muiPlots < handle
             ylabel(ytext);
             title(titletxt);
             hold off
-            cmap = cmap_selection;
+            if iscmap, cmap = cmap_selection; else, cmap = []; end
             if isempty(cmap), cmap = 'parula'; end
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext;   
         end
 %%
-        function rtSurface(x,y,z,tint,rint,ytext,legendtext,titletxt)
-            %surface plot of R,T,Z polar data               
+        function rtSurface(x,y,z,tint,rint,ytext,legendtext,titletxt,iscmap)
+            %surface plot of R,T,Z polar data   
+            if nargin<11, iscmap=true; end
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
             radints = linspace(min(y),ceil(max(y)),rint);
             theints = linspace(0,2*pi,tint+1);
@@ -940,7 +960,8 @@ classdef muiPlots < handle
                 'RadLabels',4,'RadLabelLocation',{20 'top'},...
                 'RadialRange',radrange,'polardirection','cw');
             title(sprintf('Radial axis: %s\n%s',ytext,titletxt));
-            cmap = cmap_selection;
+            if iscmap, cmap = cmap_selection; else, cmap = []; end
+            if isempty(cmap), cmap = 'parula'; end
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext; 

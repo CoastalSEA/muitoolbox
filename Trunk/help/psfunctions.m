@@ -73,6 +73,10 @@
 % - maximum likelihood estimate of the fit parameters for a GPD and compute return period
 % estimates and confidence intervals (user prompt for plotted output)
 %
+% * *my_mui_plot.m*
+% - generate a plot by calling muiPlots. Example produces an animation 
+% from a 3D dstable passed as a class object that inherits DGinterface 
+%
 % * *peakseek.m* 
 % - alternative to the findpeaks function. From Matlab(TM) Forum, 
 % Peter O'Connor, (c) 2010.
