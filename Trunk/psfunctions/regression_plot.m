@@ -51,7 +51,6 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
 
     %convert ordinal categorical data to numeric values
     if iscell(ind_ds) && ischar(ind_ds{1})
-    if iscell(ind_ds) && ischar(ind_ds{1})
         ind_ds = double(categorical(ind_ds,'Ordinal',true));
         % a use case introduced a check that ind_ds values are unque
         % but the code below is the same whether unique or not???

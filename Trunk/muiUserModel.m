@@ -61,9 +61,9 @@ classdef muiUserModel < muiDataSet
             %use t,x,y,z variables to evaluate user equation
             %NB: any Scaling selected will have been applied      ??????????????
             if inp.isdst
-                varout = callfcn_dst(obj,props,mobj,inp);
+                varout = callfcn_dst(obj,props,mobj,inp,hw);
             else
-                varout = callfcn_var(obj,XYZT,mobj,inp);
+                varout = callfcn_var(obj,XYZT,mobj,inp,hw);
             end
             
             if isempty(varout)    %quit if no data returned
@@ -259,7 +259,7 @@ classdef muiUserModel < muiDataSet
             end            
         end
 %%
-        function varout = callfcn_dst(~,props,mobj,inp)
+        function varout = callfcn_dst(~,props,mobj,inp,hw)
             %call function passing dstables of selected variables as a cell 
             %array, any user text, handle to main UI and the inp selection
             %struct with both the user equation and the function name
@@ -278,11 +278,12 @@ classdef muiUserModel < muiDataSet
             catch ME
                 errormsg = sprintf('Invalid expression\n%s',ME.message);
                 warndlg(errormsg);
+                delete(hw)
                 rethrow(ME)      %return;          
             end
         end
 %%
-        function varout = callfcn_var(~,XYZT,mobj,inp)
+        function varout = callfcn_var(~,XYZT,mobj,inp,hw)
             %call function passing selected variables, any user text,
             %handle to main UI and the inp selection struct with both
             %the user equation and the function name
@@ -298,11 +299,12 @@ classdef muiUserModel < muiDataSet
                 else
                     maxnargout = nargout(inp.fcn);
                 end                 
-                varout = cell(1, maxnargout);;
+                varout = cell(1, maxnargout);
                 [varout{:}] = heq(t,x,y,z,mobj);
            catch ME
                 errormsg = sprintf('Invalid expression\n%s',ME.message);
                 warndlg(errormsg);
+                delete(hw)
                 rethrow(ME)      %return;          
             end
         end
