@@ -1,4 +1,6 @@
-%% muitoolbox - simple model examples
+%% muitoolbox - example
+
+%% Simple model examples
 % A number of examples are provided to illustrate a range of uses. The 
 % files for the example use case can be found in the example folder 
 % <matlab:mui_example_folder here>. 
@@ -12,7 +14,7 @@
 % <matlab:doc('muitoolbox') muitoolbox>,
 % illustrated using the calling function _mui_usage.m_ and the
 % *mui_demoData* amd *mui_demoModel* classes that inherit from the 
-% <matlab:doc('dmuidataset') muiDataSet> abstract class;  
+% <matlab:doc('muidataset') muiDataSet> abstract class;  
 % # A demonstration UI, provided by the *mui_demoUI* class that inherits
 % from the <matlab:doc('muimodelui') muiModelUI> abstract class. 
 

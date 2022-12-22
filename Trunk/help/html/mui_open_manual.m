@@ -1,4 +1,4 @@
-function open_manual()
+function mui_open_manual()
 %find the location of the asmita app and open the manual
 fname = 'muiModelUI.m';
 toolboxpath = which(fname);

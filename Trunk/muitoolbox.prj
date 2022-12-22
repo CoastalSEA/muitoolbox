@@ -287,7 +287,6 @@ Log.txt
       <file>${PROJECT_ROOT}\muiUserData.m</file>
       <file>${PROJECT_ROOT}\muiUserModel.m</file>
       <file>${PROJECT_ROOT}\psfunctions</file>
-      <file>${PROJECT_ROOT}\Release_1.0</file>
     </fileset.rootfiles>
     <fileset.depfun.included />
     <fileset.depfun.excluded />
