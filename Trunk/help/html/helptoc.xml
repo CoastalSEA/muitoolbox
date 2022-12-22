@@ -63,6 +63,7 @@
                  image="HelpIcon.EXAMPLE">Examples 
                 <tocitem target="muitbx_example.html">Simple model</tocitem>
                 <tocitem target="muitbx_modelui.html">ModelUI</tocitem>
+                <tocitem target="muitemplates.html">Templates</tocitem>
         </tocitem>
 
         <!-- Optional link or links to your or other Web sites -->

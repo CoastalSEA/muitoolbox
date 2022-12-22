@@ -1,6 +1,6 @@
 %% muitoolbox templates
 % Templates for the main components (classes) are provided in the _muitemplates_ 
-% folder, which can be found <matlab:template_folder here>. The templates 
+% folder, which can be found <matlab:mui_template_folder here>. The templates 
 % provide the code for each component and the comments highlight where the 
 % files need to be edited to adapt the templates to a different application.
 %%

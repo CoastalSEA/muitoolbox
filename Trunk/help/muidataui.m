@@ -57,7 +57,7 @@
 
 %% Creating a class using muiDataUI
 % A template to create a class that uses muiDataSet can be found in the
-% <matlab:template_folder muitemplates folder>. The template provides the code for a subclass
+% <matlab:mui_template_folder muitemplates folder>. The template provides the code for a subclass
 % and the comments highlight where the file needs to be edited to adapt 
 % the template to a new application, as explained further in the 
 % <matlab:doc('muitbx_gettingstarted') Getting Started> documentation. 

@@ -1,4 +1,4 @@
-function template_folder()
+function mui_template_folder()
 %find the location of the example folder and open it
 fname = 'muiModelUI.m';
 toolboxpath = which(fname);
