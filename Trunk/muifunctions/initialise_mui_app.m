@@ -24,7 +24,7 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
     appinfo = matlab.apputil.getInstalledAppInfo;
     if isempty(appinfo), ok = 0; warndlg(msgtxt); return; end
 
-    idx = find(strcmp({appinfo.name},appname));
+    idx = find(strcmp({appinfo(:).name},appname));
     if isempty(idx), ok = 0; warndlg(msgtxt); return; end
     
     path{1} = appinfo(idx(1)).location;

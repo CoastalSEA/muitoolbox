@@ -749,8 +749,13 @@ classdef muiPlots < handle
             %callback function for animation figure buttons and slider
             hfig = src.Parent;
             idm = hfig.Number==[obj.ModelMovie{:,1}];
-            if strcmp(src.Tag,'runMovie')       %user pressed run button   
-                implay(obj.ModelMovie{idm,2});
+            if strcmp(src.Tag,'runMovie')       %user pressed run button
+                if license('test', 'Image_Processing_Toolbox')   %tests whether product is licensed (returns 1 if it is)
+                    implay(obj.ModelMovie{idm,2});
+                else
+                    hmf = figure;
+                    movie(hmf,obj.ModelMovie{idm,2});
+                end
             elseif strcmp(src.Tag,'saveMovie')  %user pressed save button 
                 saveanimation2file(obj.ModelMovie{idm,2});
             else                                %user moved slider
@@ -973,7 +978,7 @@ classdef muiPlots < handle
             %y - variable that defines node colors
             hp = plot(g);
             hp.MarkerSize = nsze;
-            caxis([min(min(y)),max(max(y))]);
+            clim([min(min(y)),max(max(y))]);
             hg.Nodes.NodeColors = y';
             title(titletxt);
             cmap = cmap_selection;
