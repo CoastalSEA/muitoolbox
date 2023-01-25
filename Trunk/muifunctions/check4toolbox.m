@@ -2,7 +2,7 @@ function isok = check4toolbox(feature_name)
 %
 %-------function help------------------------------------------------------===
 % NAME
-%   check4addon.m
+%   check4toolbox.m
 % PURPOSE
 %   Check whether a toolbox is available
 % USAGE

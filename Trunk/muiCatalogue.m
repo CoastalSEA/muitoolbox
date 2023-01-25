@@ -186,12 +186,30 @@ classdef muiCatalogue < dscatalogue
                         proplabels = [proplabels;plabels];   %#ok<AGROW>
                         clear pdata plabels
                 end
-                idx = find(~(cellfun(@isscalar,propdata)));
-                for i=1:length(idx)  %convert any numerical data to char vectors
-                    if ~ischar(propdata{idx(i)}) %check not a char vector
-                        propdata{idx(i)} = num2str(propdata{idx(i)});  %#ok<AGROW>
+
+                %check for scalar values 
+                ids = find(~(cellfun(@isscalar,propdata)));
+                for i=1:length(ids)  %convert any numerical data to char vectors
+                    if iscell(propdata{ids(i)})
+                        propdata{ids(i)} = char(join(string(propdata{ids(i)}),','));  %#ok<AGROW>
+                    elseif ~ischar(propdata{ids(i)}) %check not a char vector
+                        propdata{ids(i)} = num2str(propdata{ids(i)});  %#ok<AGROW>
                     end
                 end
+
+                %check for matlab objects (graphs, tables, etc)
+                test = {'graph','digraph','table'};
+                idg = [];
+                for j=1:3
+                        htest = @(x) isa(x,test{j});
+                        idg = [idg;find(cellfun(htest,propdata))]; %#ok<AGROW> 
+                end
+                %
+                for i=1:length(idg)  %convert any numerical data to char vectors
+                    objtype = class(propdata{idg(i)});
+                    propdata{idg(i)} = sprintf('%s object',objtype); %#ok<AGROW> 
+                end
+
                 propdata = [proplabels,propdata]; %cell array of labels and values
                 figtitle = sprintf('Settings used for %s',casedesc);
                 varnames = {'Variable','Values'};                                
