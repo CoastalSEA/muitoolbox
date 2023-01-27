@@ -30,7 +30,6 @@ function editrange(src,~)
     if length(bounds)>2
         bounds = [bounds(1),bounds(end)];
     end
-
     [rangevar,pretext] = range2var(rangetext,bounds);
 
     newrange = editrange_ui(rangevar,uic.UserData);
@@ -39,4 +38,4 @@ function editrange(src,~)
         astring = var2range(newrange,pretext);
         uic.String = astring;   %update string in text uicontrol
     end
-end       
+end

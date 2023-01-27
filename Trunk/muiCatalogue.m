@@ -827,8 +827,9 @@ classdef muiCatalogue < dscatalogue
             %values outside the range as NaNs
             %NB - limited testing with real data ***
             subrange = range2var(selrange);
+            range = check_bounds(range);
             if all(cellfun(@isequal,range,subrange)), return; end
-            
+
             switch outopt
                 case 'array'
                     data = applyrange(data,range,subrange);
@@ -845,6 +846,7 @@ classdef muiCatalogue < dscatalogue
             end
             % Nested function----------------------------------------------
             function data = applyrange(data,range,subrange)
+                %set values outside subrange to NaN
                 if range{1}~=subrange{1}
                     data(data<subrange{1}) = NaN;
                 end
@@ -852,7 +854,20 @@ classdef muiCatalogue < dscatalogue
                 if range{2}~=subrange{2}
                     data(data>subrange{2}) = NaN;
                 end
-            end            
+            end     
+            % Nested function----------------------------------------------
+            function outrange = check_bounds(inrange)
+                %check for rounding errors when converting between numeric 
+                %ranges and the displayed text strings
+                outrange = inrange;
+                if str2double(sprintf('%g',inrange{1}))~=inrange{1}
+                    outrange{1} = str2double(sprintf('%g',inrange{1}));
+                end
+                %
+                if str2double(sprintf('%g',inrange{2}))~=inrange{2}
+                    outrange{2} = str2double(sprintf('%g',inrange{2}));
+                end
+            end
         end
     end
 end

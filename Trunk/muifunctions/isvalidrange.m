@@ -63,6 +63,7 @@ function isvalid  = isvalidrange(testvar,bounds)
             end
         end
     elseif ~ischar(testvar{1}) && ~isempty(bounds)
+        bounds = check_bounds(bounds);
         islower = testvar{1}<bounds{1} || testvar{2}<bounds{1};
         if islower
             isvalid = false;
@@ -112,4 +113,17 @@ function msgtxt = setmsgtext(var,idx)
         msgtxt = sprintf('%s %s',msgtxt,var);
     end
         
+end
+%%
+function outbounds = check_bounds(inbounds)
+    %check for rounding errors when converting between numeric ranges and
+    %the displayed text strings
+    outbounds = inbounds;
+    if str2double(sprintf('%g',inbounds{1}))~=inbounds{1}
+        outbounds{1} = str2double(sprintf('%g',inbounds{1}));
+    end
+    %
+    if str2double(sprintf('%g',inbounds{2}))~=inbounds{2}
+        outbounds{2} = str2double(sprintf('%g',inbounds{2}));
+    end
 end
