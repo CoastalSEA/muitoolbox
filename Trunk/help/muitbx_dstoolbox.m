@@ -1,4 +1,4 @@
-%% dstoobox
+%% dstoolbox
 % dstoolbox is a collection of classes used to store and manage access to
 % multi-dimensional data sets. 
 %%
