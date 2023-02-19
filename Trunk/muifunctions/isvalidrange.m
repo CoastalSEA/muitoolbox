@@ -63,7 +63,9 @@ function isvalid  = isvalidrange(testvar,bounds)
             end
         end
     elseif ~ischar(testvar{1}) && ~isempty(bounds)
-        bounds = check_bounds(bounds);
+        if isnumeric(bounds{1})
+            bounds = check_bounds(bounds);
+        end
         islower = testvar{1}<bounds{1} || testvar{2}<bounds{1};
         if islower
             isvalid = false;
