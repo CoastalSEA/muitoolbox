@@ -83,7 +83,7 @@ classdef (Abstract = true) muiModelUI < handle
             end
             vtxt = sprintf('%s  Version: %s;  Copyright: %s',...
                                      obj.modelName,obj.vNumber,obj.vDate);
-            hf = figure('Units','normalized','MenuBar','none',...
+            figure('Units','normalized','MenuBar','none',...
                 'Name',vtxt,'NumberTitle','off',...
                 'ToolBar','none',...
                 'Position',[0.35 0.55 0.3 0.4],'Resize','off',...
@@ -314,7 +314,7 @@ classdef (Abstract = true) muiModelUI < handle
             Prompt = {'Project Name','Date'};
             Title = 'Project';
             NumLines = 1;
-            DefaultValues = {'',datestr(clock,1)};
+            DefaultValues = {'',char(datetime,"dd-MMM-yyyy")};
             %use updated properties to call inpudlg and return new values            
             answer=inputdlg(Prompt,Title,NumLines,DefaultValues);
             if length(answer)>1
@@ -469,7 +469,7 @@ classdef (Abstract = true) muiModelUI < handle
             spath = obj.Info.PathName;
             sfile = obj.Info.FileName;
             sobj = obj; 
-            save([spath,sfile],'sobj');
+            save([spath,sfile],'sobj','-v7.3');
             clear sobj
         end
 %%
@@ -708,7 +708,7 @@ classdef (Abstract = true) muiModelUI < handle
             tabtxts = cell(ntables,1);
             for i=1:ntables
                 dst = dstables.(dstnames{i});
-                lastmod = datestr(dst.LastModified);
+                lastmod = char(dst.LastModified);
                 meta = dst.MetaData;
                 name = dst.VariableNames';
                 desc = dst.VariableDescriptions';
