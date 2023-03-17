@@ -84,7 +84,16 @@ classdef (Abstract = true) muiDataSet < handle
                     filename = [path jf_file];
                     adn_dst = callFileFormatFcn(obj,funcname,obj,filename);
                     if ~isempty(adn_dst)
-                        dst = vertcat(dst,adn_dst); %#ok<AGROW>
+                        if isa(adn_dst,'dstable')
+                            dst = vertcat(dst,adn_dst); %#ok<AGROW>
+                        elseif isstruct(adn_dst)
+                            %multiple tables so concatenate each one
+                            fnames = fieldnames(adn_dst);
+                            for j=1:length(fnames)
+                                dst.(fnames{j}) = vertcat(dst.(fnames{j}),...
+                                                      adn_dst.(fnames{j}));
+                            end
+                        end
                     end
                     dst = updateSource(dst,filename,jf);
                     waitbar(jf/nfiles)
@@ -481,26 +490,24 @@ classdef (Abstract = true) muiDataSet < handle
             end
             
             %merge row and dimension selection
-            if istime && cdim<1    %row and no dimensions
+            if istime && cdim<1       %row and no dimensions
                 pdat.X = pdat.T; 
                 labs.X = labs.T;
+            elseif istime && cdim==1  %row and 1 dimension
+                pdat.Y = pdat.X; 
+                labs.Y = labs.X;                
+                pdat.X = pdat.T; 
+                labs.X = labs.T;             
             end
 
-%             %generate plot for display on Q-Plot tab
-%             ht = findobj(src,'Type','axes');
-%             delete(ht);
-%             ax = axes('Parent',src,'Tag','Qplot');
-
-            if vsze(1)==1            %no rowa
+            if vsze(1)==1            %no rows
                 if cdim==1           %line plot
                     DSplot(obj,ax,pdat,labs);  
                 elseif cdim==2       %surface plot
                     DSsurface(obj,ax,pdat,labs);
-%                     title(dst.Description);
                     DSrotatebutton(obj,ax,src);
                 elseif cdim==3       %volume plot
                     DSvolume(obj,ax,pdat,labs);
-%                     title(dst.Description);
                     DSrotatebutton(obj,ax,src);
                 end
             elseif istime            %rows that are time or ordered
@@ -508,7 +515,6 @@ classdef (Abstract = true) muiDataSet < handle
                     DSplot(obj,ax,pdat,labs);     
                 elseif cdim==1
                     DSsurface(obj,ax,pdat,labs);
-%                     title(dst.Description);
                     DSrotatebutton(obj,ax,src);
                 elseif cdim<4
                     DSanimation(obj,ax,pdat,labs,dst.Description,cdim);
@@ -518,11 +524,9 @@ classdef (Abstract = true) muiDataSet < handle
                         DSbar(obj,ax,pdat,labs); 
                 elseif cdim==1
                     DSsurface(obj,ax,pdat,labs);
-%                     title(dst.Description);
                     DSrotatebutton(obj,ax,src);
                 elseif cdim==2
                     DSvolume(obj,ax,pdat,labs);
-%                     title(dst.Description);
                     DSrotatebutton(obj,ax,src);
                 end                  
             end
