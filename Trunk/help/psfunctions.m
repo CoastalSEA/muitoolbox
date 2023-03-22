@@ -54,6 +54,11 @@
 % * *godisplay.m*
 % - display the legend name or DisplayName of the selected graphical object
 %
+% * *gram_charlier_pdf.m*
+% - estimates the Probability Density Function of the Gram Charlier Distribution 
+% for a series of x values, given the mean, variance, skewness and kurtosis 
+% parameters (or a timeseries of values).
+%
 % * *hurst_aalok_ihlen.m*
 % - estimate the Hurst exponent of a timeseries, using the method proposed
 % by Aalok based on method proposed by Ihlen
@@ -93,6 +98,11 @@
 % - compute the inter-arrival time, magnitude and duration of
 % events assuming that they are a Poisson process
 % fitting an exponential pdf and plotting 
+%
+% * *polarplot3D.m*
+% - plot a 3D surface from polar coordinate data. Function from Matlab(TM)
+% Forum by Ken Garrard:
+% https://www.mathworks.com/matlabcentral/fileexchange/13200-3d-polar-plot.
 %
 % * *regression_model.m*
 % - transform data for selected regression model and return regression

@@ -929,14 +929,14 @@ classdef muiPlots < handle
             end
         end        
 %%
-        function xySurface(x,y,z,xint,yint,xtext,ytext,legendtext,...
+        function h = xySurface(x,y,z,xint,yint,xtext,ytext,legendtext,...
                                                   titletxt,ptype,iscmap)
             %surface plot of X,Y,Z data  
             if nargin<11, iscmap=true; end
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
             warning('off',wid)
              [xq,yq,zq] = muiPlots.reshapeXYZ(x,y,z,xint,yint);
-             muiPlots.get3DPlotType(xq,yq,zq,ptype);
+             h = muiPlots.get3DPlotType(xq,yq,zq,ptype);
             warning('on',wid)
             hold on
             xlabel(xtext);
@@ -950,9 +950,9 @@ classdef muiPlots < handle
             cb.Label.String = legendtext;   
         end
 %%
-        function rtSurface(x,y,z,tint,rint,ytext,legendtext,titletxt,iscmap)
+        function h = rtSurface(x,y,z,tint,rint,ytext,legendtext,titletxt,iscmap)
             %surface plot of R,T,Z polar data   
-            if nargin<11, iscmap=true; end
+            if nargin<9, iscmap=true; end
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
             radints = linspace(min(y),ceil(max(y)),rint);
             theints = linspace(0,2*pi,tint+1);
@@ -961,15 +961,17 @@ classdef muiPlots < handle
             warning('off',wid)
             vq = griddata(deg2rad(x),y,z,tq,rq);
             warning('on',wid)
-            polarplot3d(vq,'plottype','contour','TickSpacing',360/tint,...
+            polarplot3d(vq,'plottype','surfcn','TickSpacing',360/tint,...
                 'RadLabels',4,'RadLabelLocation',{20 'top'},...
                 'RadialRange',radrange,'polardirection','cw');
             title(sprintf('Radial axis: %s\n%s',ytext,titletxt));
+            axis(gca,'off')
             if iscmap, cmap = cmap_selection; else, cmap = []; end
             if isempty(cmap), cmap = 'parula'; end
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = legendtext; 
+            h = gca;
         end      
 %%
         function [hp,hg] = nodalnetwork(g,y,nsze,legendtext,titletxt)
