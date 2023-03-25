@@ -244,8 +244,8 @@ classdef muiCatalogue < dscatalogue
         function exportCase(obj,caserec)
             %save selected case to a mat file
             if nargin<2  %if case to delete has not been specified
-                [caserec,ok] = selectCase(obj,'Select cases to delete:',...
-                                                       'multiple',2);                                      
+                [caserec,ok] = selectCase(obj,'Select case to ecport:',...
+                                                       'single',2);                                      
                 if ok<1, return; end  
             end 
             [cobj,~,catrec] = getCase(obj,caserec);

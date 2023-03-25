@@ -459,7 +459,7 @@ classdef (Abstract = true) muiDataSet < handle
                 pdat.V = squeeze(pdat.V);
             end
             labs.V = attlabels{1};
-            
+
             %find if there are rows and if they are monotonic            
             if vsze(1)>1 || ...  %multiple rows
                     (vsze(1)==1 && ~isempty(dst.RowNames))
@@ -478,7 +478,22 @@ classdef (Abstract = true) muiDataSet < handle
                 nr = 2;           %dimension offset if no rows 
                 istime = true;    %ensures correct dimension assignment
             end
-            
+
+            if vsze(1)>1000 && cdim>=2 && istime
+                %check users want to run a long animation
+                questxt = sprintf('Long sequence of %d frames\nDo you want to run full sequence?',vsze(1));
+                answer = questdlg(questxt,'Plot','Yes','No','No');
+                if strcmp(answer,'No')
+                    t = dst.RowNames;  
+                    idx = listdlg('PromptString','Select date range to use',...
+                                 'Name','Animation','SelectionMode','multiple',...
+                                 'ListSize',[150,450],'ListString',cellstr(t));
+                    if isempty(idx), return; end
+                    pdat.T = pdat.T(idx);
+                    pdat.V = pdat.V(idx,:,:);
+                end
+            end
+
             %get the dimension names and unpack if used   
             dimnames = attnames(nr:end);
             dimlab = attlabels(nr:end);
@@ -615,17 +630,19 @@ classdef (Abstract = true) muiDataSet < handle
         end
 %%
         function DSanimation(obj,ax,data,labels,titletxt,cdim)
-            %aninmate surface for time+2D data
-            
+            %aninmate surface for time+2D data            
             data1 = data;
             if cdim==2
                 data1.V = squeeze(data.V(1,:,:));
                 h = DSsurface(obj,ax,data1,labels);
-                ax.XLim = [min(data.X),max(data.X)];
-                ax.YLim = [min(data.Y),max(data.Y)];
-                ax.ZLim = [min(data.V,[],'all'),max(data.V,[],'all')];
-                hold(ax,'on')
+                ax.XLim = minmax(data.X);
+                ax.YLim = minmax(data.Y);
+                ax.ZLim = minmax(data.V);
                 ax.ZLimMode = 'manual';
+                cb = findobj(ax.Parent.Children,'Type','colorbar');
+                cb.LimitsMode = 'manual'; %fix limits of contour bar
+                cb.Limits = ax.ZLim;
+                hold(ax,'on')                
                 for i=2:length(data.T)
                     vi = squeeze(data.V(i,:,:))'; %#ok<NASGU>
                     refreshdata(h,'caller')
@@ -636,9 +653,9 @@ classdef (Abstract = true) muiDataSet < handle
             else
                 data1.V = squeeze(data.V(1,:,:,:));
                 h = DSvolume(obj,ax,data1,labels);
-                ax.XLim = [min(data.Y),max(data.Y)];
-                ax.YLim = [min(data.X),max(data.X)];
-                ax.ZLim = [min(data.Z),max(data.Z)];
+                ax.XLim = minmax(data.X);
+                ax.YLim = minmax(data.Y);
+                ax.ZLim = minmax(data.Z);
                 grid on
                 hold(ax,'on')
                 for i=2:length(data.T)
