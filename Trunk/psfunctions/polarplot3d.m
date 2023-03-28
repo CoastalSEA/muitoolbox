@@ -252,8 +252,8 @@ p.plottype = lower(p.plottype);
 % Choose default polar axis location
 if isequal(p.axislocation,'')            
    if ~isempty(matchstr2lst(p.plottype,{'meshc','surfc','surfcn'}))
-        p.axislocation = 'bottom';       % plot box bottom for contour plots
-   else p.axislocation = 'surf';         % along perimeter of surface otherwise
+         p.axislocation = 'bottom';       % plot box bottom for contour plots
+   else, p.axislocation = 'surf';         % along perimeter of surface otherwise
    end
 end
 
@@ -408,7 +408,7 @@ p.contourlines = p.contourlines(:);
 % Check grid line style property value, default depends on plottype
 if isempty(p.gridstyle)
    if isequal(p.plottype,'contour'), p.gridstyle = ':';    % dotted line
-   else                              p.gridstyle = '-';    % solid  line
+   else,                             p.gridstyle = '-';    % solid  line
    end
 end
 if ~ischar(p.gridstyle) || isempty(matchstr2lst(lower(p.gridstyle),glst))
@@ -528,7 +528,8 @@ if ~isequal(p.axislocation,'off')
    % Z values for polar axis
    if isequal(p.axislocation,'surf')
         za = Zi(end,:);                      % vary along edge of surface
-   else za = zeros(size(xa)) + polax;        % constant location
+   else 
+        za = zeros(size(xa)) + polax;        % constant location
    end
 
    % Swap x,y for clockwise polar plot
@@ -551,7 +552,8 @@ if ~isequal(p.axislocation,'off')
       % Z values for polar tick marks
       if isequal(p.axislocation,'surf')
            zt = interp1(angl,za,ta,'linear');    % vary along edge of surface
-      else zt = zeros(1,length(ta)) + polax;     % constant location
+      else 
+           zt = zeros(1,length(ta)) + polax;     % constant location
       end
 
       % Label every other tick mark
@@ -724,7 +726,8 @@ for k = 1:length(fname)
          % Recursively process the substructure
          T.(fname{k}) = structrecon(S.(fname{k}),T.(fname{k}));
       % Not a substructure, copy field value from S
-      else T.(fname{k}) = S.(fname{k});
+      else 
+          T.(fname{k}) = S.(fname{k});
       end
       S = rmfield(S,fname{k});
    end
@@ -784,7 +787,7 @@ end
 function m = ismono(v)
 
 [r,c] = size(v);       % size of input
-if r == 1,             % row vector
+if r == 1              % row vector
    v = v';             %   transpose
    r = c; c = 1;       %   size
 end

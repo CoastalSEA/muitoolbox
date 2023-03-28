@@ -654,7 +654,7 @@ classdef (Abstract = true) muiModelUI < handle
 
             if height(muicat)>1
                 [caserec,ok] = selectRecord(obj.Cases,'PromptText','Select case',...
-                                           'ListSize',[200,140]);
+                                           'ListSize',[200,240]);
                 if ok<1, return; end
             else
                 caserec = 1;

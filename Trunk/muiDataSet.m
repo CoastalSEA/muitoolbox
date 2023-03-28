@@ -239,7 +239,7 @@ classdef (Abstract = true) muiDataSet < handle
                 title = 'DataSet names';
                 [dataset,ok] = listdlg('PromptString',promptxt,...
                            'SelectionMode','single','Name',title,...
-                           'ListSize',[300,100],'ListString',datasetnames);
+                           'ListSize',[200,100],'ListString',datasetnames);
                 if ok<1,  return; end       
             end
             datasetname = datasetnames{dataset};
@@ -638,10 +638,11 @@ classdef (Abstract = true) muiDataSet < handle
                 ax.XLim = minmax(data.X);
                 ax.YLim = minmax(data.Y);
                 ax.ZLim = minmax(data.V);
-                ax.ZLimMode = 'manual';
-                cb = findobj(ax.Parent.Children,'Type','colorbar');
-                cb.LimitsMode = 'manual'; %fix limits of contour bar
-                cb.Limits = ax.ZLim;
+                ax.CLim = ax.ZLim;
+                % ax.ZLimMode = 'manual';
+                % cb = findobj(ax.Parent.Children,'Type','colorbar');
+                % cb.LimitsMode = 'manual'; %fix limits of contour bar
+                % cb.Limits = ax.ZLim;
                 hold(ax,'on')                
                 for i=2:length(data.T)
                     vi = squeeze(data.V(i,:,:))'; %#ok<NASGU>

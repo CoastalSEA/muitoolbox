@@ -28,6 +28,12 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
     if isempty(idx), ok = 0; warndlg(msgtxt); return; end
     
     path{1} = appinfo(idx(1)).location;
+    if isfolder([path{1},filesep,appname])
+        %Matlab installs the App as a subfolder of the App folder if there
+        %are folders included that are on the same level (ie not subfolders)
+        path{1} = [path{1},filesep,appname];
+    end
+    
     path{2} = [path{1},filesep,'doc'];
     path{3} = [path{1},filesep,'help',filesep,'html'];
     path{4} = [path{1},filesep,'example'];
