@@ -6,12 +6,12 @@ function mnmx = minmax(data,nanflag)
 % PURPOSE
 %   find max and min of multidimensional numeric or ordinal array
 % USAGE
-%   mxmn = minmax(data,nanflag)
+%   mnmx = minmax(data,nanflag)
 % INPUTS
 %   data - vector or array of ordinal categorical, or numeric data
 %   nanflag - optional flag to 'includenan', default is 'omitnan'
 % OUTPUT
-%   mnmx - array of minimum and maximum values across all dimensions
+%   mnmx - [1 x 2] array of minimum and maximum values across all dimensions
 % NOTES
 %   Matlab max and min function now include the 'all' option from R2018b
 %   Function changed from original version in ModelUI to return min and max

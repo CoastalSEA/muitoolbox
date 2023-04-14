@@ -405,7 +405,7 @@ classdef muiPlots < handle
                 if numel(delVar)==numel(hp(i).(lineData))
                     delVar = reshape(delVar,size(hp(i).(lineData)));
                     if isequaln(hp(i).(lineData),delVar)
-                        idline(nline) = i;
+                        idline(nline) = i; %#ok<AGROW> 
                         delete(hp(i));
                         nline = nline+1;
                     end
@@ -500,7 +500,7 @@ classdef muiPlots < handle
             hp = findobj(figax,'Type',obj.UIset.Type.String);
             if ~isempty(hp)
                 for i=1:length(hp)
-                    yexist(:,i) = hp.YData;
+                    yexist(:,i) = hp.YData; %#ok<AGROW> 
                 end
             end
             y = horzcat(yexist,y);
@@ -609,13 +609,23 @@ classdef muiPlots < handle
                     new3Dplot(obj)
                     if ~isvalid(hfig), return; end
                     figax = gca;
-                    hp = figax.Children;
-                    hp.ZDataSource = 'vari';                    
+                    hp = findobj(figax.Children,'Type','surface');
+                    hp.CDataSource = 'vari';   
+
                     figax.ZLimMode = 'manual'; %fix limits of z-axis
-                    figax.ZLim = minmax(var);                    
-                    hcb = findobj(hfig,'Type','colorbar');
-                    hcb.LimitsMode = 'manual'; %fix limits of contour bar
-                    hcb.Limits = figax.ZLim;
+                    figax.ZLim = minmax(var);  
+                    figax.CLim = figax.ZLim;  
+
+                    if isfield(obj.UIset,'Polar') && obj.UIset.Polar
+                        theta = obj.Data.X;
+                        rad = obj.Data.Y;
+                        for i=1:nrec
+                            vari = setTimeDependentVariable(obj,var,i); 
+                            polarvar(i,:,:) = muiPlots.reshapePolarGrid(theta,...
+                                                              rad,vari,24);  %#ok<AGROW> 
+                        end
+                        var = polarvar;
+                    end
                 case '4DT'
                     warndlg('Not ready yet')
                     return;
@@ -768,7 +778,7 @@ classdef muiPlots < handle
                 hp = figax.Children;
                 vari = setTimeDependentVariable(obj,var,val); %#ok<NASGU>
                 refreshdata(hp,'caller')
-                title(sprintf('%s \nTime = %s',figax.Title.String{1},string(time)))
+                title(sprintf('%s \nTime = %s',obj.Title,string(time)))
                 drawnow;
                 %update slider selection text
                 stxt = findobj(hfig,'Tag','FrameTime');
@@ -909,6 +919,7 @@ classdef muiPlots < handle
             xmnmx = minmax(x);
             ymnmx = minmax(y);
             zmnmx = minmax(z);
+            if diff(zmnmx)==0, zmnmx(2) = Inf; end
             range = [xmnmx(:)',ymnmx(:)',zmnmx(:)'];
             switch ptype
                 case 'surf'
@@ -961,9 +972,17 @@ classdef muiPlots < handle
             warning('off',wid)
             vq = griddata(deg2rad(x),y,z,tq,rq);
             warning('on',wid)
-            polarplot3d(vq,'plottype','surfcn','TickSpacing',360/tint,...
+            polarplot3d(vq,'plottype','surfn','TickSpacing',360/tint,...
                 'RadLabels',4,'RadLabelLocation',{20 'top'},...
                 'RadialRange',radrange,'polardirection','cw');
+            ax = gca;
+            ax.XLim = [-1,1];
+            ax.YLim = [-1,1];
+            axis equal
+            axis(gca,'off')
+            view(2)
+            shading interp 
+            
             title(sprintf('Radial axis: %s\n%s',ytext,titletxt));
             axis(gca,'off')
             if iscmap, cmap = cmap_selection; else, cmap = []; end
@@ -1018,5 +1037,20 @@ classdef muiPlots < handle
                 xq = []; yq = []; zq = [];
             end
         end
+%%
+function P = reshapePolarGrid(theta,rad,S,tint)
+            %format spectral array to be in format required by polarplot3d
+            wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
+            %interpolate var(phi,T) onto plot domain defined by tints,rints
+            %intervals match those set to initialise plot in SpectralTransfer.polar_plot
+            rint = length(rad)-1;
+            radints = linspace(min(rad),ceil(max(rad)),rint);
+            theints = linspace(0,2*pi,tint+1);
+            [Tq,Rq] = meshgrid(theints,radints); 
+            warning('off',wid)
+            P = griddata(deg2rad(theta),rad,S,Tq,Rq);
+            P(isnan(P)) = 0;  %fill blank sector so that it plots the period labels
+            warning('on',wid)
+        end        
     end
 end

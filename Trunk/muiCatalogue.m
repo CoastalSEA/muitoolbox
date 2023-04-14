@@ -213,7 +213,7 @@ classdef muiCatalogue < dscatalogue
                 propdata = [proplabels,propdata]; %cell array of labels and values
                 figtitle = sprintf('Settings used for %s',casedesc);
                 varnames = {'Variable','Values'};                                
-                h_fig = tablefigure('Scenario settings',figtitle,{},varnames,propdata); %#ok<NASGU>
+                h_fig = tablefigure('Case settings',figtitle,{},varnames,propdata); %#ok<NASGU>
                 %use h_fig to adjust position on screen if required                
             end            
         end   
