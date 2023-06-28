@@ -81,7 +81,7 @@ classdef (Abstract = true) muiModelUI < handle
             if nargin<2 || isempty(modelLogo)
                 modelLogo = 'muitoolbox_logo.jpg';
             end
-            vtxt = sprintf('%s  Version: %s;  Copyright: %s',...
+            vtxt = sprintf('%s Version: %s; Copyright: %s',...
                                      obj.modelName,obj.vNumber,obj.vDate);
             figure('Units','normalized','MenuBar','none',...
                 'Name',vtxt,'NumberTitle','off',...
@@ -449,12 +449,12 @@ classdef (Abstract = true) muiModelUI < handle
             obj.Constants = sobj.Constants; 
             obj.Inputs = sobj.Inputs;
             obj.Cases = sobj.Cases;
-            if obj.vNumber~=sobj.vNumber 
+            if ~strcmp(obj.vNumber,sobj.vNumber)
                 %preserve vNumber and vDate to version currently running 
                 %overwrites saved values, if the loaded model is saved 
                 msg1 = sprintf('Project file was created with version:%s',sobj.vNumber);
-                msg2 = sprintf('If saved, will be saved as %s',obj.FigTitle);
-                warndlg(sprint('%s\n%s',msg1,msg2))  
+                msg2 = sprintf('If saved, will be saved as %s',obj.mUI.Figure.Name);
+                warndlg(sprintf('%s\n%s',msg1,msg2))  
             end
             %activate variables in dstables
             if isa(obj.Cases,'muiCatalogue')
