@@ -449,7 +449,7 @@ classdef (Abstract = true) muiModelUI < handle
             obj.Constants = sobj.Constants; 
             obj.Inputs = sobj.Inputs;
             obj.Cases = sobj.Cases;
-            if ~strcmp(obj.vNumber,sobj.vNumber)
+            if ~strcmp(obj.vNumber,sobj.vNumber) && ~obj.SupressPrompts  %supress prompts if true
                 %preserve vNumber and vDate to version currently running 
                 %overwrites saved values, if the loaded model is saved 
                 msg1 = sprintf('Project file was created with version:%s',sobj.vNumber);

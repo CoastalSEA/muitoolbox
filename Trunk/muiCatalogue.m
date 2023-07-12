@@ -192,8 +192,12 @@ classdef muiCatalogue < dscatalogue
                 for i=1:length(ids)  %convert any numerical data to char vectors
                     if iscell(propdata{ids(i)})
                         propdata{ids(i)} = char(join(string(propdata{ids(i)}),','));  %#ok<AGROW>
-                    elseif ~ischar(propdata{ids(i)}) %check not a char vector
+                    elseif isnumeric(propdata{ids(i)}) %converet to a char vector
                         propdata{ids(i)} = num2str(propdata{ids(i)});  %#ok<AGROW>
+                    elseif istable(propdata{ids(i)})
+                        propdata{ids(i)} = 'Table data'; %#ok<AGROW> 
+                    elseif isa(propdata{ids(i)},'tscollection')
+                        propdata{ids(i)} = 'Timeseries data'; %#ok<AGROW> 
                     end
                 end
 
