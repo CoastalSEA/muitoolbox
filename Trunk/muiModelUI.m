@@ -336,9 +336,9 @@ classdef (Abstract = true) muiModelUI < handle
                 ansQ = questdlg('Do you want to save the current model file?', ...
                     'Save file','Save','Save as','No','No');
                 if strcmp('Save', ansQ)==1
-                    @obj.savefile;
+                    savefile(obj,0,0);
                 elseif strcmp('Save as', ansQ)==1
-                    @obj.saveasfile;
+                    saveasfile(obj,0,0);
                 end
             end
 
