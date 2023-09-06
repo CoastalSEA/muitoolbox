@@ -359,7 +359,22 @@ classdef muiPlots < handle
                 else
                     x = x+(idline-1)*x/10000;
                 end
-            end            
+            end      
+            %
+            xrange = figax.XLim;
+            dtype = whos('xrange');
+            if isa(x,dtype.class)    
+                if ~(x(end)>xrange(1) && x(1)<xrange(2))
+                    %check that x axis values are of the same type and
+                    %overlapping range
+                    warndlg('X-data range not compatible with existing axis')
+                    return;
+                end
+            else
+                warndlg('X-data type not compatible with existing axis')
+                return;
+            end
+
             [hptype,symb] = get2DPlotFunc(obj); %function handle for plot type
             %call uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hp(idline) = hptype(figax,x,y,symb{1},symb{2},...
@@ -609,8 +624,12 @@ classdef muiPlots < handle
                     new3Dplot(obj)
                     if ~isvalid(hfig), return; end
                     figax = gca;
-                    hp = findobj(figax.Children,'Type','surface');
-                    hp.CDataSource = 'vari';   
+                    stype = 'surface';
+                    if contains(obj.UIset.Type.String,'contour')
+                        stype = 'contour';
+                    end
+                    hp = findobj(figax.Children,'Type',stype);
+                    hp.ZDataSource = 'vari';   %changed from CDataSource to plot contours and surfaces 23Aug23
 
                     figax.ZLimMode = 'manual'; %fix limits of z-axis
                     figax.ZLim = minmax(var);  

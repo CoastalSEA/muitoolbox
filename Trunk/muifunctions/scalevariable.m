@@ -55,6 +55,9 @@ function  var = scalevariable(inputvar,selection,dim)
                 mvar = mean(subvar,'omitnan');
                 svar = std(subvar,'omitnan');
                 var(:,i) = -(subvar-mvar)/svar;
+            case 'Differences'
+                diffs = diff(subvar);
+                var(:,1) = [diffs(1);diffs];
         end 
     end
     %restore matrix if dim=2
