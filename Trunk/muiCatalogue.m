@@ -33,7 +33,8 @@ classdef muiCatalogue < dscatalogue
             %Description property in any dstables held in DataSets
             if nargin<2, caserec = []; end
             [caserec,newdesc] = editRecord(obj,caserec);
-            if isempty(caserec), return; end %user cancelled
+            %user can select a case but cancel editing
+            if isempty(newdesc), return; end %user cancelled
      
             [cobj,~,~] = getCase(obj,caserec);
             if isprop(cobj,'Data') && ~isempty(cobj.Data)
@@ -168,17 +169,28 @@ classdef muiCatalogue < dscatalogue
                     localObj = cobj.RunParam.(inputs{kk});
                         nobj = length(localObj);
                         if nobj>1
+                            %localObj is an array of objects so concatenate
+                            %the properties from each object. Requires
+                            %dimensions of properties to be consistent.
                             for jj=1:nobj
                                 [pdatajj,plabels] = setPropertyData(obj,...
                                                             localObj(jj));
                                 %vertically concatenate properties for each instance
                                 %matrix is [nobj,nprop]
-                                pdata(jj,:) =  [pdatajj{:}]; %#ok<AGROW>
+                                try
+                                    input = [pdatajj{:}];
+                                catch
+                                    %fails if dimensions not consistent
+                                    input = NaN(size(pdatajj)); %multi-object vector
+                                end
+                                pdata(jj,:) =  input; %#ok<AGROW>
                             end
                             %reshape to [nprop,nobj] and then to nprop cell
                             %array with nobj vectors for each property
                             pdata = mat2cell(pdata',ones(1,size(pdata',1)));
                         else
+                            %extract the properties from localObj and 
+                            %return data and labels.
                             [pdata,plabels] = setPropertyData(obj,...
                                                             localObj);
                         end   
@@ -190,14 +202,16 @@ classdef muiCatalogue < dscatalogue
                 %check for scalar values 
                 ids = find(~(cellfun(@isscalar,propdata)));
                 for i=1:length(ids)  %convert any numerical data to char vectors
-                    if iscell(propdata{ids(i)})
-                        propdata{ids(i)} = char(join(string(propdata{ids(i)}),','));  %#ok<AGROW>
-                    elseif isnumeric(propdata{ids(i)}) %converet to a char vector
-                        propdata{ids(i)} = num2str(propdata{ids(i)});  %#ok<AGROW>
+                    if iscell(propdata{ids(i)})     
+                        propdata{ids(i)} = char(join(string(propdata{ids(i)}),','));  %#ok<AGROW>                  
                     elseif istable(propdata{ids(i)})
                         propdata{ids(i)} = 'Table data'; %#ok<AGROW> 
                     elseif isa(propdata{ids(i)},'tscollection')
                         propdata{ids(i)} = 'Timeseries data'; %#ok<AGROW> 
+                    elseif any(isnan(propdata{ids(i)})) %cannot display multi-object vectors in table
+                        propdata{ids(i)} = 'Vector array'; %#ok<AGROW> 
+                    elseif isnumeric(propdata{ids(i)}) %converet to a char vector
+                        propdata{ids(i)} = num2str(propdata{ids(i)});  %#ok<AGROW>    
                     end
                 end
 
@@ -816,7 +830,7 @@ classdef muiCatalogue < dscatalogue
             elseif isstruct(localObj)   %input is an existing Case (model or imported data)
                 propdata = char(localObj.casedesc);
                 proplabels = sprintf('%s (cid=%d)',localObj.caseclass,localObj.caseid);            
-            else %exposed properties for inputs that do not use muiPropertyUI
+            else %expose properties for inputs that do not use muiPropertyUI
                 proplabels = properties(localObj);
                 nlabels = length(proplabels);
                 propdata = cell(nlabels,1);
