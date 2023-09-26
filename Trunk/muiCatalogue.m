@@ -136,8 +136,9 @@ classdef muiCatalogue < dscatalogue
             
             for i=1:length(minp)
                 if ~isnumeric(cobj.RunParam.(minp{i}))
-                    %trap datasets used as inputs which are saved as caseID
-                    mobj.Inputs.(minp{i}) = cobj.RunParam.(minp{i});
+                    %if traps datasets used as inputs which are saved in the 
+                    %Case record as their caseID rather than the source data
+                    mobj.Inputs.(minp{i}) = copy(cobj.RunParam.(minp{i}));
                 end
             end   
             casedesc = obj.Catalogue.CaseDescription(caserec);

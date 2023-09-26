@@ -135,6 +135,16 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             end
         end
 
+        %%
+        function proptable = getPropertiesTable(obj)
+            %get the property values and return as a table of properties
+            %and values as cells to allow for mixed entries (eg array
+            %vectors and doubles)
+            userdata = getInputProps(obj);
+			proptable = cell2table(userdata);
+            proptable.Properties.VariableNames =  {'Property','Value'}; 
+        end
+
 %%
         function obj = editPropertySubset(obj,idx)
             %create inputdlg for a subset of properties and update values
