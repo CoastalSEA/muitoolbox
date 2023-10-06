@@ -209,8 +209,10 @@ classdef muiCatalogue < dscatalogue
                         propdata{ids(i)} = 'Table data'; %#ok<AGROW> 
                     elseif isa(propdata{ids(i)},'tscollection')
                         propdata{ids(i)} = 'Timeseries data'; %#ok<AGROW> 
+                    elseif isstring(propdata{ids(i)})
+                        %do not modify char trap occurrence before nan test
                     elseif any(isnan(propdata{ids(i)})) %cannot display multi-object vectors in table
-                        propdata{ids(i)} = 'Vector array'; %#ok<AGROW> 
+                        propdata{ids(i)} = 'Vector array or empty'; %#ok<AGROW> 
                     elseif isnumeric(propdata{ids(i)}) %converet to a char vector
                         propdata{ids(i)} = num2str(propdata{ids(i)});  %#ok<AGROW>    
                     end
@@ -836,7 +838,11 @@ classdef muiCatalogue < dscatalogue
                 nlabels = length(proplabels);
                 propdata = cell(nlabels,1);
                 for k=1:nlabels
-                    propdata{k,1} = localObj.(proplabels{k});
+                    if isempty(localObj.(proplabels{k}))
+                        propdata{k,1} = NaN;
+                    else
+                        propdata{k,1} = localObj.(proplabels{k});
+                    end
                 end
             end
         end
