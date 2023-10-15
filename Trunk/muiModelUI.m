@@ -454,8 +454,18 @@ classdef (Abstract = true) muiModelUI < handle
                 %preserve vNumber and vDate to version currently running 
                 %overwrites saved values, if the loaded model is saved 
                 msg1 = sprintf('Project file was created with version:%s',sobj.vNumber);
-                msg2 = sprintf('If saved, will be saved as %s',obj.mUI.Figure.Name);
-                warndlg(sprintf('%s\n%s',msg1,msg2))  
+                fname = sprintf('%s_update',lower(class(obj)));
+                if exist([fname,'.m'],'file')==2 
+                    msg2 = sprintf('You are running version: %s',obj.vNumber);
+                    qstxt = sprintf('%s\n%s\nDo you want to update the file?',msg1,msg2);
+                    answer = questdlg(qstxt,fname,'Yes','No','Yes');
+                    if strcmp(answer,'Yes')
+                        feval(fname,obj,sobj.vNumber,obj.vNumber);
+                    end
+                else
+                    msg2 = sprintf('If saved, will be saved as %s',obj.mUI.Figure.Name);
+                    warndlg(sprintf('%s\n%s',msg1,msg2))
+                end
             end
             %activate variables in dstables
             if isa(obj.Cases,'muiCatalogue')
@@ -988,7 +998,7 @@ classdef (Abstract = true) muiModelUI < handle
                 cobj = lobj.(classname);  
             else
                 if nargin>3
-                    warndlg(msgtxt);
+                    getdialog(msgtxt);
                 end
                 cobj = []; 
             end
