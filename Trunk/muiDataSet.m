@@ -473,7 +473,7 @@ classdef (Abstract = true) muiDataSet < handle
                     istime = true;  rdim = 'T';
                 end
                 pdat.(rdim) = t;
-                labs.(rdim) = dst.RowDescription;
+                labs.(rdim) = dst.RowLabel;
             else
                 nr = 2;           %dimension offset if no rows 
                 istime = true;    %ensures correct dimension assignment
