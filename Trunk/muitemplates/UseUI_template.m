@@ -138,7 +138,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             tabs.Inputs = {'  Inputs  ',@obj.InputTabSummary};
             tabs.Plot   = {'  Q-Plot  ',@obj.getTabData};
             tabs.Stats = {'   Stats   ',''};
-            subtabs.Stats(1,:) = {' General ',@obj.setTabAction};
+            subtabs.Stats(1,:) = {' Descriptive ',@obj.setTabAction};
             subtabs.Stats(2,:) = {' Extremes ',@obj.setTabAction};
             %if subtabs are not required eg for Stats
             % tabs.Stats = {'   Stats   ',@obj.setTabAction};
@@ -151,9 +151,9 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
             %props format: {class name, tab tag name, position, ...
             %               column width, table title}
             % position and column widths vary with number of parameters
-            % (rows) and width of input text and values. Inidcative
+            % (rows) and width of input text and values. Inidicative
             % positions:  top left [0.95,0.48];    top right [0.95,0.97]
-            %         bottom left [0.45, 0.48]; bottom rigth [0.45,0.97]
+            %         bottom left [0.45, 0.48]; bottom right [0.45,0.97]
                                                              % << Edit input properties classnames 
             props = {...                                     % << Add additional inputs and adjust layout
                 'ParamInput_template','Inputs',[0.95,0.48],{180,60},'Input parameters:';...
@@ -163,6 +163,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
         function setTabAction(~,src,cobj)
             %function required by muiModelUI and sets action for selected
             %tab (src)
+            msg = 'No results to display';
             switch src.Tag                                    % << Edit match tab requirements
                 case 'Plot' 
                      tabPlot(cobj,src);

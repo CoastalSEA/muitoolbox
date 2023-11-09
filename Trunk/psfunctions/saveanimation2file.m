@@ -87,7 +87,7 @@ function movie2gif(MovieObj)
                      'Save animations',1,{'0.5','1'}); 
     if isempty(spec), return; end                          
     DelayTime = str2double(spec{1});
-    rate = str2double(spec{1});
+    rate = str2double(spec{2});
     
     idx=1;
     for i=1:length(MovieObj)
