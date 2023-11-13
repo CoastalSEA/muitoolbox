@@ -1,7 +1,7 @@
 %% ModelUI - Getting Started
 % The steps below outline how to setup a bespoke application of ModelUI
-% by modifying the default UI. How to develop more complex UIs is explained
-% in the <matlab:mui_open_manual ModelUI manual>.
+% by modifying the default UI. These steps are also set out
+% in the <matlab:mui_open_manual Introduction to muitoolbox slide pack>.
 %%
 % # Decide on what components are needed. These might include: <br>
 %   o UI - the main interface for the application  <br>

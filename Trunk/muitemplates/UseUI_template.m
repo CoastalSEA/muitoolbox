@@ -206,7 +206,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
 %%
         function loadMenuOptions(obj,src,~)
             %callback functions to import data
-            classname = 'UserData';
+            classname = 'muiUserData';
             switch src.Text
                 case 'Load'
                     fname = sprintf('%s.loadData',classname);

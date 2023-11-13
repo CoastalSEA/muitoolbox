@@ -86,3 +86,6 @@
 %% See Also
 % muitoolbox uses <matlab:doc('dstoolbox') dstoolbox> and use of both
 % toolboxes is illustrated in the <matlab:doc('modelui') ModelUI> App.
+% A summary of how to modify the code for a particular application is given 
+% in <matlab:doc('muitbx_gettingstarted') Getting Started> and also set out
+% in the <matlab:mui_open_manual Introduction to muitoolbox slide pack>.

@@ -36,7 +36,7 @@ try
     heq = str2func(callstring);  
     heq(mobj);
 catch ME
-    msttxt = ('Call to class, or class method failed in user_model');
+    msgtxt = ('Call to class, or class method failed in user_model');
     disp([msgtxt, ME.identifier])
     rethrow(ME)  
 end
