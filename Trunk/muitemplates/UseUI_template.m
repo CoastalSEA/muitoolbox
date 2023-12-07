@@ -26,6 +26,9 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
     methods (Static)
         function obj = UseUI_template                         % << Edit to classname
             %constructor function initialises GUI
+            isok = check4muitoolbox(obj);
+            if ~isok, return; end
+            %
             obj = setMUI(obj);             
         end
     end
@@ -246,6 +249,29 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
         function Help(~,~,~)
             doc UseUI_template                               % << Edit to documentation name if available
         end
+
+        %% Check that toolboxes are installed------------------------------
+        function isok = check4muitoolbox(~)
+            %check that dstoolbox and muitoolbox have been installed
+            fname = 'dstable.m';
+            dstbx = which(fname);
+
+            fname = 'muiModelUI.m';
+            muitbx = which(fname);
+
+            if isempty(dstbx) && ~isempty(muitbx)
+                warndlg('dstoolbox has not been installed')
+                isok = false;
+            elseif ~isempty(dstbx) && isempty(muitbx)
+                warndlg('muitoolbox has not been installed')
+                isok = false;
+            elseif isempty(dstbx) && isempty(muitbx)
+                warndlg('dstoolbox and muitoolbox have not been installed')
+                isok = false;
+            else
+                isok = true;
+            end
+        end
 %% ------------------------------------------------------------------------
 % Overload muiModelUI.MapTable to customise Tab display of records (if required)
 %--------------------------------------------------------------------------     
@@ -253,7 +279,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
 %             %create tables for Record display tabs - called by DrawMap
 %             % ht - tab handle
 %         end
-    end
+    end    
 end    
     
     

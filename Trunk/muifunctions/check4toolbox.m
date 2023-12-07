@@ -11,7 +11,7 @@ function isok = check4toolbox(feature_name)
 %   feature_name - feature name of toolbox to be checked (usually name with
 %   underscores).
 % OUTPUT
-%   isok - ture if toolbox is available
+%   isok - true if toolbox is available
 % NOTES
 %   https://uk.mathworks.com/matlabcentral/answers/377731-how-do-features-from-license-correspond-to-names-from-ver#answer_300675
 % SEE ALSO
