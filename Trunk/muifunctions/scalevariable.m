@@ -11,7 +11,8 @@ function  var = scalevariable(inputvar,selection,dim)
 %   inputvar  - the input variable to be scaled
 %   selection - type of scaling to be applied. Any of the following:
 %               'Linear','Log','Relative: V-V(x=0)','Scaled: V/V(x=0)',
-%               'Normalised','Normalised (-ve)'
+%               'Normalised','Normalised (-ve)','Differences','Rolling
+%               mean'
 %   dim       - dimension over which to apply the scaling function to matrix
 %               optional and default is dim = 1. 
 % OUTPUT
@@ -58,6 +59,14 @@ function  var = scalevariable(inputvar,selection,dim)
             case 'Differences'
                 diffs = diff(subvar);
                 var(:,1) = [diffs(1);diffs];
+            case 'Rolling mean'
+                qinp = inputdlg('No of intervals?','Rolling mean');
+                if isempty(qinp)
+                    int = 1;
+                else
+                    int = str2double(qinp{1});
+                end
+                var(:,1) = moving(subvar,int);
         end 
     end
     %restore matrix if dim=2

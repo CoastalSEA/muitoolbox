@@ -688,7 +688,8 @@ classdef (Abstract = true) muiDataUI < handle
             boxtxt = obj.UIselection(xyz).desc;
             
             %sub-sampling of variable based on range and values required
-            uinput = getUIinput(obj,mdim,ndim,dst,dstdesc,range);
+            uinput = getUIinput(obj,mdim,ndim,dst,dstdesc,range);  
+            if ~isfield(uinput,'default'), ok=0; return; end
             selection = setInputUI(obj,uinput,xyz);
             if isempty(selection), ok = 0; return; end            
 
@@ -908,7 +909,7 @@ classdef (Abstract = true) muiDataUI < handle
             S.Style = {'popupmenu','popupmenu','popupmenu','popupmenu'}; 
             S.Order = {'Case','Dataset','Variable','Type'};  %default list of key words
             S.Scaling = {'Linear','Log','Relative: V-V(x=0)','Scaled: V/V(x=0)',...
-                'Normalised','Normalised (-ve)','Differences'};  %options for ScaleVariable
+                'Normalised','Normalised (-ve)','Differences','Rolling mean'};  %options for ScaleVariable
             S.Type = {'line','bar','scatter','stem','stairs','barh','User'};
             S.Other = {'1'};
             

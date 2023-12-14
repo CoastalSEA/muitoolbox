@@ -474,8 +474,15 @@ classdef muiPlots < handle
                     hold(figax,'off')
                 case 'Rose'
                     hfig.Name = 'Rose plot';
-                    wind_rose(x,y,'parent',figax,'dtype','meteo',...
-                       'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                    qinp= inputdlg('To add reference line enter angle to degTN:','Rose plot');
+                    if isempty(qinp)
+                        wind_rose(x,y,'parent',figax,'dtype','meteo',...
+                            'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                    else
+                        theta = str2double(qinp{1});
+                        wind_rose(x,y,'parent',figax,'dtype','meteo','shore',theta,...
+                            'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                    end
             end
         end
 %%
