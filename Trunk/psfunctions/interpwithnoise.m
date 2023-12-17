@@ -6,7 +6,7 @@ function [tpad,vpad] = interpwithnoise(v,t,npad,scale,method,ispos)
 %   Insert additional records into a timeseries interpolating between 
 %   existing values and adding noise to the values added
 % USAGE
-%   ts = interpwithnoise(v,t,npad,scale,method,ispos)
+%   [tpad,vpad] = interpwithnoise(v,t,npad,scale,method,ispos)
 % INPUT
 %   v - data variable
 %   t - time

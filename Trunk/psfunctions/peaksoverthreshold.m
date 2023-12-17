@@ -7,7 +7,7 @@ function [locs,pks] = peaksoverthreshold(var,vthr,method,mdate,tint,outflg)
 %   Function to find the peaks over a threshold, v_thr, and return 
 %   these values, or the index of the these values, for the vector, var. 
 % USAGE
-%   out = peaksoverthreshold(var,vthr,method,mdate,tint,outflg)
+%   [locs,pks] = peaksoverthreshold(var,vthr,method,mdate,tint,outflg)
 % INPUTS
 %   var - variable
 %   vthr - threshold to be used

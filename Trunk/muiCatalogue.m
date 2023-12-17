@@ -649,16 +649,25 @@ classdef muiCatalogue < dscatalogue
             dst = cobj.Data.(datasetname);     %add variable to this dstable
 
             %need to prevent duplication of variable name and description
-            newvarnum = num2str(length(dst.VariableNames)+1);
-            dsp.Variables.Name = [dsp.Variables.Name(1:end-1),newvarnum];
-            dsp.Variables.Description = [dsp.Variables.Description,newvarnum];
-            %might need to warn user that duplications of name and description not allowed
-            editDSproperty(dsp,'Variables'); 
-            %add the vatiable to the dstable and update the Dsproperties
-            dst = addvars(dst,newvar{:},'NewVariableNames',{dsp.Variables.Name});                    
-            nvar = length(dst.DSproperties.Variables);
+            nxvar = length(dst.VariableNames);
+            dstvarnames = [dst.VariableNames];
+            dspvarnames = {dsp.Variables(:).Name};
+            if any(ismatch(dstvarnames,dspvarnames))
+                %idx = find(ismatch(dstvarnames,dspvarnames));
+                for i=1:length(dspvarnames)
+                    newvarnum = num2str(nxvar+i);
+                    dsp.Variables(i).Name = ['Var',newvarnum];
+                    dsp.Variables(i).Description = ['desc',newvarnum];                    
+                end
+                %allow user to edit the modified names and descriptions
+                editDSproperty(dsp,'Variables');
+            end
+
+            %add the variable(s) to the dstable, with variable names but not metadata 
+            dst = addvars(dst,newvar{:},'NewVariableNames',{dsp.Variables(:).Name});
+            %update the DSproperties
             dstdps = dst.DSproperties;
-            dstdps.Variables(nvar) = dsp.Variables;
+            dstdps.Variables(nxvar+1:end) = dsp.Variables;
             dst.DSproperties = dstdps;
             %save dstable to source class record
             obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;

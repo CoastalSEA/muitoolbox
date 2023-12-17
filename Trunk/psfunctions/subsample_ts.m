@@ -6,7 +6,7 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method)
 % PURPOSE
 %   create a timeseries and call interpolateTSdata
 % USAGE
-%   newvar = subsample(var,tvar,mobj)
+%   [newtime,newvar] = subsample(var,tvar,mobj)
 % INPUT
 %   var - variable to be subsampled
 %   tvar - time of var to be subsampled

@@ -33,7 +33,8 @@ function annual_polar_plot(var,tvar,tint,plotxt,stderr)
 %     plotxt.thetalabel = {'Spring','Summer','Autumn','Winter'};
 %     annual_polar_plot(var,tvar,4,plotxt,stderr); 
 % NOTES
-%   alternative to cartesian plot to avoid "end of year gap"
+%   alternative to cartesian plot to avoid "end of year gap", called in
+%   descriptive_stats
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2021

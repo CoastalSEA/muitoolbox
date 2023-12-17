@@ -6,9 +6,9 @@ function [tout,varout] = conditional_subsample(varin,tvar,thr,mobj,method)
 % PURPOSE
 %   Subsample input variable based on a condition set by another variable
 % USAGE
-%   [var,t] = conditional_subsample(var,tvar,thr,mobj)
+%   [tout,varout] = conditional_subsample(varin,tvar,thr,mobj)
 % INPUT
-%   var - variable to be subsampled
+%   varin - variable to be subsampled
 %   tvar - time of var to be subsampled
 %   thr - threshold value used for condition
 %   mobj - handle to CoastalTools to allow access to data

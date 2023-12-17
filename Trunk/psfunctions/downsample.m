@@ -6,7 +6,7 @@ function [tout,var] = downsample(Z,t,varargin)
 % PURPOSE
 %   wrapper to put downsample_ts, by Chad A. Greene, output into an array
 % USAGE
-%   var = downsample(Z,t,varargin)
+%   [tout,var] = downsample(Z,t,varargin)
 % INPUT
 %   Z - variable to downsample
 %   t - time 
