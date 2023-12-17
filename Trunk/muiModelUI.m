@@ -580,6 +580,8 @@ classdef (Abstract = true) muiModelUI < handle
                 case 'Edit Description'            
                     editCase(muicat);
                     obj.DrawMap; 
+                case 'Edit DS properties'
+                    editDSprops(muicat);
                 case 'Edit Data Set'
                     obj.mUI.EditUI = muiEditUI.getEditUI(obj);    
                 case 'Save Data Set'

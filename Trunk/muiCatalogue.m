@@ -574,7 +574,7 @@ classdef muiCatalogue < dscatalogue
             if isempty(itable)                
                 if length(dsnames)>1
                     itable = listdlg('PromptString','Select dataset',...
-                                       'Name','Tab plot','SelectionMode','single',...
+                                       'Name','selectDSR','SelectionMode','single',...
                                        'ListSize',[200,200],'ListString',dsnames);
                     if isempty(itable), itable = 1; end
                 else
@@ -587,7 +587,7 @@ classdef muiCatalogue < dscatalogue
                 %propmpt user to select timestep
                 list = dst.DataTable.Properties.RowNames;
                 irow = listdlg('PromptString',promptxt{2},...
-                               'Name','Tab plot','SelectionMode','single',...
+                               'Name','selectDSR','SelectionMode','single',...
                                'ListSize',[200,200],'ListString',list);
             else
                 irow = 1;
@@ -669,6 +669,25 @@ classdef muiCatalogue < dscatalogue
             dstdps = dst.DSproperties;
             dstdps.Variables(nxvar+1:end) = dsp.Variables;
             dst.DSproperties = dstdps;
+            %save dstable to source class record
+            obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;
+        end
+%%
+        function editDSprops(obj,caserec)
+            %edit the DSproperties of a selected dataset
+            if nargin<2 
+                caserec = [];
+            end
+            [cobj,classrec,catrec] = getCase(obj,caserec);
+            classname = catrec.CaseClass; 
+            datasetname = getDataSetName(cobj);
+            dst = cobj.Data.(datasetname); 
+            %extract DSproperties and edit
+            dsp = dst.DSproperties;
+            editDSproperty(dsp,'Variables');
+            editDSproperty(dsp,'Row');
+            editDSproperty(dsp,'Dimensions');
+            dst.DSproperties = dsp;
             %save dstable to source class record
             obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;
         end
