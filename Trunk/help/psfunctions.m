@@ -4,6 +4,9 @@
 % function.
 
 %%
+% * *annual_polar_plot.m*
+% - plot the monthly or seasonal values of a timeseries variable
+%
 % * *clusters.m*
 % - function to find clusters of peaks over a threshold
 %
@@ -11,9 +14,12 @@
 % - select a color map definition from Matlab(TM) default list and cbrewer
 % generated mat files
 %
-% * *complex_vectors.m*
+% * *complex_vector_plot.m*
 % - creates a polar plot of the movement at each interval from one position
 % to the next
+%
+% * *conditional_subsample.m*
+% - subsample input variable based on a condition set by another variable
 %
 % * *descriptive_stats.m*
 % - generate descriptive stats table for timeseries or table of a variable
@@ -71,12 +77,22 @@
 % https://www.mathworks.com/matlabcentral/fileexchange/100988-hurst-exponent
 % https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent
 %
+% * *interpwithnoise.m*
+% - insert additional records into a timeseries interpolating between 
+% existing values and adding noise to the values added
+%
 % * *mcolor.m*
 % - select a default Matlab(TM) color definition from table
 %
 % * *mgpdfit.m*
 % - maximum likelihood estimate of the fit parameters for a GPD and compute return period
 % estimates and confidence intervals (user prompt for plotted output)
+%
+% * *moving.m*
+% - computes moving averages of order n (best taken as odd)
+%
+% * *movingtime.m*
+% - computes moving averages for a window of tint duration
 %
 % * *my_mui_plot.m*
 % - generate a plot by calling muiPlots. Example produces an animation 
@@ -104,12 +120,21 @@
 % Forum by Ken Garrard:
 % https://www.mathworks.com/matlabcentral/fileexchange/13200-3d-polar-plot.
 %
+% * *recursive_plot.m*
+% - plot a variable against itself with a step interval of nint
+%
 % * *regression_model.m*
 % - transform data for selected regression model and return regression
 % coefficients and sample values
 %
 % * *regression_plot.m*
 % - generate regression plot for 2-D data and fitted regression model
+%
+% * *r_squared.m*
+% - compute the R-squared value a measure of goodness of fit between the 
+% observed data and its estimation (may be from a regression or other
+% model). Function by Shoaibur Rahman:
+% https://www.mathworks.com/matlabcentral/fileexchange/55128-calculate-r-squared-value
 %
 % * *saveanimation2file.m*
 % - saves movie to selected file type
@@ -130,6 +155,10 @@
 % * *stderror.m*
 % - compute the standard error of a data set relative to a fitted
 % regression line
+%
+% * *subsample_ts.m*
+% - create a timeseries by interpolating one time time series to the times
+% of another timeseries
 %
 % * *tabfigureplot*
 % - generate axes on Q-Plot tab including '>Figure' and 'Rotate'

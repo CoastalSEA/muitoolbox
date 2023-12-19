@@ -742,15 +742,22 @@ classdef (Abstract = true) muiModelUI < handle
             h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
             h_but = findobj(h_fig.Children,'Tag','uicopy');
             position = h_but.Position;
-            position(1) = 10;            
+            position(1) = 10;      
             sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-22, 60, 18];
             sourcetxt = cell(ntables,1);
             for j=1:ntables
                 itab = h_tab.Children(j); 
                 dst = dstables.(dstnames{j});
+                %initialise the button to access DSproperties
                 setactionbutton(itab,'DSproperties',position,...
                     @(src,evt)getDSProps(obj,src,evt),...
                    'getDSP','View the dstables DSproperties',dst);
+                %initialise the button to access UserData  
+                setactionbutton(itab,'User data',[h_fig.Position(3)-70, h_fig.Position(4)-60, 60, 18],...
+                    @(src,evt)getUserData(obj,src,evt),...
+                   'getUserData','View User Data',dst);
+                
+                %set text used to define source (button is on figure not tab)
                 if iscell(dst.Source)
                     sourcetxt = dst.Source;
                 else
@@ -762,16 +769,35 @@ classdef (Abstract = true) muiModelUI < handle
                    @(src,evt)getSource(obj,src,evt),'getSource',...
                    'View data source details',sourcetxt);
             %adjust position on screen            
-            h_fig.Position(1)=  h_fig.Position(3)*3/2; 
+            h_fig.Position(1) =  h_fig.Position(3)*3/2;
             % screendata = get(0,'ScreenSize');
             % h_fig.Position(2)=  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
             h_fig.Visible = 'on';
         end
 %%
         function getDSProps(~,src,~)
+            %display the dataset properties
             if istable(src.UserData.DataTable)
                 displayDSproperties(src.UserData.DSproperties);
             end
+        end
+%%
+        function getUserData(~,src,~)
+            %display any UserData held in the table
+            dst = src.UserData;
+            if ~isempty(dst.UserData)     
+                desctext = sprintf('User data for %s',dst.Description);
+                if isstruct(dst.UserData)
+                    outable = struct2table(dst.UserData);
+                elseif iscell(dst.UserData)
+                    outable = cell2table(dst.UserData);
+                elseif istable(dst.UserData)
+                    outable = dst.UserData;
+                else
+                    return;
+                end
+                tablefigure('User data',desctext,outable);
+            end            
         end
 %%
         function getSource(~,src,~)

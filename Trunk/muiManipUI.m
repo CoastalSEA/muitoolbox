@@ -130,7 +130,7 @@ classdef muiManipUI < muiDataUI
             while ok>0
                 [idx,ok] = listdlg('Name','Function options', ...
                         'PromptString','Select a function:', ...
-                        'ListSize',[350,200],...
+                        'ListSize',[450,350],...
                         'SelectionMode','single', ...
                         'ListString',fn.fdesc);
                 if ok<1, return, end
@@ -195,7 +195,7 @@ classdef muiManipUI < muiDataUI
                             '@(src,evt)setExcNaN(src,evt)'};
             % tool tips for buttons             
             S.ActButTip = {'Refresh data list',...%tool tips for buttons
-                           'Switch to exclude NaNs in output'};         
+                           'Include NaNs in output'};         
             obj.TabContent(itab) = S;             %update object
             setEquationBox(obj,src);
         end    

@@ -289,15 +289,15 @@ classdef muiStatsUI < muiDataUI
             S.XYZlabels = {'Reference','Sample'};   %default button labels
             
             %Action button specifications
-            setActionButtonSpec(obj);
+            S = setActionButtonSpec(obj,S);
             S.ActButPos = [0.86,-1;0.895,0.27];     %positions for action buttons   
        
             obj.TabContent(itab) = S;               %update object;
         end 
 %%
-        function setActionButtonSpec(~)
+        function S = setActionButtonSpec(~,S)
             %Default Action button specification for Stats UIs
-            S.ActButNames = {'Refresh','IncNaN'}; %names assigned selection struct
+            S.ActButNames = {'Refresh','ExcNaN'}; %names assigned selection struct
             S.ActButText = {char(174),'+N'};      %labels for additional action buttons
             % Negative values in ActButPos indicate that a
             % button is alligned with a selection option numbered in the 
@@ -305,7 +305,7 @@ classdef muiStatsUI < muiDataUI
             S.ActButPos = [0.86,-1;0.86,-4];   %positions for action buttons   
             % action button callback function names
             S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
-                            '@(src,evt)setIncNaN(src,evt)'};            
+                            '@(src,evt)setExcNaN(src,evt)'};            
             S.ActButTip = {'Refresh data list',...%tool tips for buttons
                            'Include NaNs in output'};            
         end

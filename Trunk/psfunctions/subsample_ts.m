@@ -4,13 +4,14 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method)
 % NAME
 %   subsample_ts.m
 % PURPOSE
-%   create a timeseries and call interpolateTSdata
+%   create a timeseries by interpolating one time time series to the times
+%   of another timeseries
 % USAGE
-%   [newtime,newvar] = subsample(var,tvar,mobj)
+%   [newtime,newvar] = subsample_ts(var,vartime,mobj,method)
 % INPUT
 %   var - variable to be subsampled
-%   tvar - time of var to be subsampled
-%   mobj - handle to CoastalTools to allow access to data
+%   vartime - time of var to be subsampled
+%   mobj - handle to muiModelUI instance to allow access to data
 %   method - interpolation method used in interp1 (optional, default = linear)
 % OUTPUT
 %   newtime - time for the resampled variable

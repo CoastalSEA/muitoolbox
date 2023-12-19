@@ -225,7 +225,7 @@ classdef muiCatalogue < dscatalogue
                         htest = @(x) isa(x,test{j});
                         idg = [idg;find(cellfun(htest,propdata))]; %#ok<AGROW> 
                 end
-                %
+                %char
                 for i=1:length(idg)  %convert any numerical data to char vectors
                     objtype = class(propdata{idg(i)});
                     propdata{idg(i)} = sprintf('%s object',objtype); %#ok<AGROW> 
@@ -476,6 +476,7 @@ classdef muiCatalogue < dscatalogue
             %          1 = subselect using class, 
             %          2 = subselect using type, 
             %          3 = subselect using both
+            % ischeck - flag to check selection if only a single option
             % Note: to select and return a class instance use selectCaseObj
             % to get a class object array (no Case/Record selection) use
             % getClassObj in muiModelUI.
@@ -676,11 +677,14 @@ classdef muiCatalogue < dscatalogue
         function editDSprops(obj,caserec)
             %edit the DSproperties of a selected dataset
             if nargin<2 
-                caserec = [];
+                [caserec,ok] = selectCase(obj,'Select case to edit:','single',0);
+                if ok<1, return; end
             end
             [cobj,classrec,catrec] = getCase(obj,caserec);
+            if isempty(cobj), return; end
             classname = catrec.CaseClass; 
             datasetname = getDataSetName(cobj);
+            if isempty(datasetname), return; end
             dst = cobj.Data.(datasetname); 
             %extract DSproperties and edit
             dsp = dst.DSproperties;
@@ -715,16 +719,6 @@ classdef muiCatalogue < dscatalogue
             %initialise struct used in muiCatalogue.getProperty
             props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[]);
         end 
-    end
-%%
-    methods (Access=private)      
-        function delete_dataset(obj,caserec)
-            %delete selected record from Catalogue and DataSet
-            [~,classrec,catrec] = getCase(obj,caserec);
-            classname = catrec.CaseClass; 
-            %clear instance of data set class
-            obj.DataSets.(classname)(classrec) = [];
-        end  
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
             %find the indices for the selected variable, and the row and 
@@ -768,7 +762,17 @@ classdef muiCatalogue < dscatalogue
                     dimnames.dim{idd} = var(idx.dim{idd});
                 end  
             end
-        end        
+        end   
+    end
+%%
+    methods (Access=private)      
+        function delete_dataset(obj,caserec)
+            %delete selected record from Catalogue and DataSet
+            [~,classrec,catrec] = getCase(obj,caserec);
+            classname = catrec.CaseClass; 
+            %clear instance of data set class
+            obj.DataSets.(classname)(classrec) = [];
+        end          
 %%
         function indices = getIndices(~,var,value)
             %get the index or vector of indices based on selection

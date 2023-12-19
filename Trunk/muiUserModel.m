@@ -325,7 +325,7 @@ classdef muiUserModel < muiDataSet
             %--------------------------------------------------------------
             function inputxt = setMetaData(obj,eqn)
                 %set metadata for output
-                idx = find(~[obj.UIsel.caserec])==0;  %index to used XYZ variables
+                idx = find([obj.UIsel.caserec]~=0);  %index to used XYZ variables
                 inputxt = sprintf('Used: %s with inputs:',eqn);
                 for j=1:length(idx)
                     inputxt = sprintf('%s\n%s',inputxt,(obj.UIsel(idx(j)).desc));

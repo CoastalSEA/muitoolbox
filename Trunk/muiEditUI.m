@@ -104,6 +104,7 @@ classdef muiEditUI < muiDataUI
         function useSelection(obj,~,mobj)  
             %make use of the selection made to create a plot of selected type
             %Abstract function required by DataGUIinterface
+            %NB tested for row vectors but NOT for N-dimensional arrays ***
             muicat = mobj.Cases;
             uisel = obj.UIselection;
             %subtable holds data defined by selection which can be a subset
@@ -115,6 +116,34 @@ classdef muiEditUI < muiDataUI
                 idxrow = getvarindices(subtable{:,:},uisel.range);
                 subtable = subtable(idxrow,:);
             end
+
+            %remove NaN or NaT if ExcNaN button set
+            if obj.UIsettings.ExcNaN   
+                [subtable,idr] = rmmissing(subtable);
+            else
+                %if user has masked range of variable, values are set to
+                %NaN and need to find the indices for these
+                dst = getDataset(muicat,uisel.caserec,uisel.dataset);
+                varname = dst.VariableNames{uisel.variable};
+                range = dst.VariableRange.(varname);
+                selrange = range2var(uisel.range);
+                idx = find(cellfun(@ne,selrange,range));
+                if ~isempty(idx)
+                    data = dst.(varname);
+                    for i=1:length(idx)
+                        idd1 = false(size(data)); idd2 = idd1;
+                        if idx(i)==1            %lower limit changed
+                            idd1 = data<selrange{1};
+                        elseif idx(i)==2        %upper limit changed
+                            idd2 = data>selrange{2};
+                        end
+                    end
+                    idr = logical(idd1+idd2);
+                else
+                    idr = [];
+                end
+            end
+
             %create tablefigure for editing data
             casedesc = muicat.Catalogue.CaseDescription(uisel.caserec);
             title = sprintf('Edit %s',casedesc); 
@@ -129,11 +158,12 @@ classdef muiEditUI < muiDataUI
             varname = split(subtable.Properties.VariableNames{1},'_');
             newtable = mergevars(subtable,idx,'NewVariableName',varname{1});
             %save output to source dataset
-            saveData(obj,mobj,newtable)
+            saveData(obj,mobj,newtable,idr)
         end           
 %%
-        function saveData(obj,mobj,newtable)
+        function saveData(obj,mobj,newtable,idr)
             %update the edited record, var, to array or timeseries
+            %NB tested for row vectors but NOT for N-dimensional arrays ***
             muicat = mobj.Cases;
             UIsel = obj.UIselection; 
 
@@ -145,7 +175,13 @@ classdef muiEditUI < muiDataUI
             %get the sub-sampling indices
             varatt = getVarAttributes(dst,UIsel.variable);
             [id,~] = getSelectedIndices(muicat,UIsel,dst,varatt);
+            if ~isempty(idr)
+                id.row = id.row(~idr);
+            end
             
+            if size(id.row,1)~=height(newtable)
+                newtable = newtable(id.row,:);
+            end
             %assign subsampled data to the selected case object
             dst.DataTable.(id.var)(id.row,id.dim{:}) = newtable{:,:};
             cobj.Data.(ds{UIsel.dataset}) = dst;
@@ -187,8 +223,25 @@ classdef muiEditUI < muiDataUI
             S.XYZlabels = {'Var'};             %default button labels
             
             %Action button specifications - use default
-            
+            S = setActionButtonSpec(obj,S);
+            S.ActButPos = [0.86,-1;0.895,0.27];     %positions for action buttons
+
             obj.TabContent(itab) = S;         %update object
-        end    
+        end  
+ %%
+        function S = setActionButtonSpec(~,S)
+            %Default Action button specification for Stats UIs
+            S.ActButNames = {'Refresh','ExcNaN'}; %names assigned selection struct
+            S.ActButText = {char(174),'+N'};      %labels for additional action buttons
+            % Negative values in ActButPos indicate that a
+            % button is alligned with a selection option numbered in the 
+            % order given by S.Titles
+            S.ActButPos = [0.86,-1;0.86,-3];   %positions for action buttons   
+            % action button callback function names
+            S.ActButCall = {'@(src,evt)updateCaseList(obj,src,evt,mobj)',...
+                            '@(src,evt)setExcNaN(src,evt)'};            
+            S.ActButTip = {'Refresh data list',...%tool tips for buttons
+                           'Include NaNs in edit'};            
+        end       
     end
 end

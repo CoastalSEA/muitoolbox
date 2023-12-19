@@ -4,7 +4,7 @@ function annual_polar_plot(var,tvar,tint,plotxt,stderr)
 % NAME
 %   annual_polar_plot.m
 % PURPOSE
-%   plot the monthly or seasonal values
+%   plot the monthly or seasonal values of a timeseries variable
 % USAGE
 %   annual_polar_plot(var,tvar,tint,plotxt,stderr)
 % INPUTS

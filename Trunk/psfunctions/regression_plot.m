@@ -29,7 +29,7 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
 %--------------------------------------------------------------------------
 %
     istime = []; indat = []; depdat = [];
-    if isa(ind_ds,'dstable') && isa(ind_ds,'dstable')
+    if isa(ind_ds,'dstable') && isa(dep_ds,'dstable')
         %both are timeseries data sets and may need interpolation
         if (isdatetime(ind_ds.RowNames) || isduration(ind_ds.RowNames)) && ...
                 (isdatetime(dep_ds.RowNames) || isduration(dep_ds.RowNames))
