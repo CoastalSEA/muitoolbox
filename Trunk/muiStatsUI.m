@@ -183,8 +183,9 @@ classdef muiStatsUI < muiDataUI
             S.XYZpanel = [0.05,0.20,0.9,0.2];       %position for XYZ button panel
             S.XYZlabels = {'X','Y'};                %default button labels
             
-            %Action button specifications
-            setActionButtonSpec(obj);
+            %Action button specifications - use defaults
+            % S = setActionButtonSpec(obj,S);         
+            % S.ActButPos = [0.86,-1;0.895,0.27];     %positions for action buttons   
         
             obj.TabContent(itab) = S;               %update object          
         end 
@@ -219,8 +220,9 @@ classdef muiStatsUI < muiDataUI
             S.XYZpanel = [0.05,0.20,0.9,0.1];       %position for XYZ button panel
             S.XYZlabels = {'Var'};                  %default button labels
             
-            %Action button specifications
-            setActionButtonSpec(obj);
+            %Action button specifications - use defaults
+            % S = setActionButtonSpec(obj,S);         
+            % S.ActButPos = [0.86,-1;0.895,0.27];     %positions for action buttons  
         
             obj.TabContent(itab) = S;               %update object;
         end 
@@ -254,8 +256,9 @@ classdef muiStatsUI < muiDataUI
             S.XYZpanel = [0.04,0.25,0.91,0.2];      %position for XYZ button panel
             S.XYZlabels = {'Ref','Test'};           %default button labels
            
-            %Action button specifications
-            setActionButtonSpec(obj);
+            %Action button specifications - use defaults
+            % S = setActionButtonSpec(obj,S);         
+            % S.ActButPos = [0.86,-1;0.895,0.27];     %positions for action buttons  
             
             obj.TabContent(itab) = S;               %update object;
         end    
@@ -279,8 +282,8 @@ classdef muiStatsUI < muiDataUI
             S.Order = {'Case','Dataset','Variable'};
             
             %Tab control button options
-%             S.TabButText = {'Select','Clear'};    %labels for tab button definition
-%             S.TabButPos = [0.1,0.03;0.3,0.03];    %default positions
+            % S.TabButText = {'Select','Clear'};    %labels for tab button definition
+            % S.TabButPos = [0.1,0.03;0.3,0.03];    %default positions
             
             %XYZ panel definition (if required) 
             S.XYZnset = 2;                          %minimum number of buttons to use
