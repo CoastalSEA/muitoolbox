@@ -798,6 +798,8 @@ classdef (Abstract = true) muiModelUI < handle
                     return;
                 end
                 tablefigure('User data',desctext,outable);
+            else
+                getdialog('No User Data for selected data set');
             end            
         end
 %%

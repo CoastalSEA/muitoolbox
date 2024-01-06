@@ -349,7 +349,14 @@ classdef (Abstract = true) muiDataSet < handle
                     obj.RunParam.(minp{isinp(i)}) = copy(mobj.Inputs.(minp{isinp(i)}));
                 end
             end
-            %
+            %add any additional models used as inputs
+            if nargin>2
+                setRunParam_InputDataSet(obj,mobj,varargin{:});
+            end
+        end
+%%
+        function setRunParam_InputDataSet(obj,mobj,varargin)
+            %add any input data sets used to run model
             muicat = mobj.Cases;
             if ~isempty(muicat.DataSets)
                 %classes that define model input datasets
