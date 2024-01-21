@@ -1,4 +1,4 @@
-function ok = initialise_mui_app(appname,msgtxt,varargin)
+function isok = initialise_mui_app(appname,msgtxt,varargin)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -6,11 +6,13 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
 % PURPOSE
 %   intiailise paths for a mui App and supporting functions
 % USAGE
-%   initialise_mui_app(appname,msgtxt,varargin)
+%   isok = initialise_mui_app(appname,msgtxt,varargin)
 % INPUTS
 %   modelname - name of mui App to be initialised
 %   msgtxt - message to use if App is not found
 %   varargin - additional sub-folders to include (eg for functions)
+% OUTPUTS
+%   isok - true if App successfully initialised, false otherwise
 % NOTES
 %   only handles sub-folders so cannot include generic class or function folders
 %   uses filesep to set file separator for current platform
@@ -22,10 +24,10 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
 %--------------------------------------------------------------------------
 %
     appinfo = matlab.apputil.getInstalledAppInfo;
-    if isempty(appinfo), ok = 0; warndlg(msgtxt); return; end
+    if isempty(appinfo), isok = false; warndlg(msgtxt); return; end
 
     idx = find(strcmp({appinfo(:).name},appname));
-    if isempty(idx), ok = 0; warndlg(msgtxt); return; end
+    if isempty(idx), isok = false; warndlg(msgtxt); return; end
     
     path{1} = appinfo(idx(1)).location;
     if isfolder([path{1},filesep,appname])
@@ -45,5 +47,5 @@ function ok = initialise_mui_app(appname,msgtxt,varargin)
 
     clear path
 
-    ok = 1;
+    isok = true;
 end
