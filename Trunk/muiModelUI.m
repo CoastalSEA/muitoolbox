@@ -974,14 +974,18 @@ classdef (Abstract = true) muiModelUI < handle
                     figObj = findobj('Tag','StatFig','-or','Tag','StatTable');                   
                     deleteFigObj(obj,figObj,'Stats');
             end
+
             guiobjtxt = name(4:end);
+            if ~isfield(obj.mUI,guiobjtxt) && isfield(obj.mUI,guiobjtxt(1:end-2))
+                %assignment in App does not include 'UI'
+                guiobjtxt = guiobjtxt(1:end-2);
+            end
+            %cehck for figure
             if ~isempty(obj.mUI.(guiobjtxt)) && ...
                             isvalid(obj.mUI.(guiobjtxt)) && ...
                                     isprop(obj.mUI.(guiobjtxt),'dataUI')               
-                delete(obj.mUI.(guiobjtxt).dataUI.Figure);
-            else
-
-            end
+                delete(obj.mUI.(guiobjtxt).dataUI.Figure);                
+            end   
             delete(obj.mUI.(guiobjtxt))
             obj.mUI.(guiobjtxt) = [];
         end
