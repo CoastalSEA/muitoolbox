@@ -247,8 +247,8 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
         end
 
         %% Help menu ------------------------------------------------------
-        function Help(~,~,~)
-            doc                               % << Edit to documentation name if available
+        function Help(~,src,~)                  % << Edit to documentation name if available
+            %menu to access online documentation and manual pdf file           
             switch src.Text
                 case 'Documentation'
                     doc UseUI_template       %must be name of html help file 

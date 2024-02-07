@@ -176,9 +176,15 @@ classdef UseModelUI_template < ModelUI                       % << Edit to classn
                     obj.mUI.Manip = muiManipUI.getManipUI(obj);
             end            
         end  
-                %% Help menu ------------------------------------------------------
-        function Help(~,~,~)
-            docsearch UseModelUI_template                               % << Edit to documentation name if available
-        end
+        %% Help menu ------------------------------------------------------
+        function Help(~,src,~)                               % << Edit to documentation name if available
+            %menu to access online documentation and manual pdf file
+            switch src.Text
+                case 'Documentation'
+                    doc UseModelUI_template  %must be name of html help file  
+                case 'Manual'
+                   XXX_open_manual;
+            end
+        end 
     end
 end
