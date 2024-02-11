@@ -3,7 +3,9 @@
 %% Simple model examples
 % A number of examples are provided to illustrate a range of uses. The 
 % files for the example use case can be found in the example folder 
-% <matlab:mui_example_folder here>. 
+% <matlab:mui_example_folder here>. Some slides
+% providing an introduction to the use of the muitoolbox can be found
+% <matlab:mui_open_manual here>.
 
 %%
 % The example folder includes the following options:
@@ -108,5 +110,7 @@
 %   test_muitoolbox('mui_usage');
 
 %% See Also
-% <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muitbx_gettingstarted') Getting Started>, and
+% Some slides providing an introduction to the use of the muitoolbox can be found
+% <matlab:mui_open_manual here>. In addition, tool specific doucmentation
+% is available for <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muitbx_gettingstarted') Getting Started>, and
 % The demonstration UI provided in the <matlab:doc('modelui') ModelUI> App. 

@@ -84,8 +84,9 @@
 % customise the default UI, or define a bespoke UI.
 
 %% See Also
-% muitoolbox uses <matlab:doc('dstoolbox') dstoolbox> and use of both
+% Some slides providing an introduction to the use of the muitoolbox can be found
+% <matlab:mui_open_manual here>. In addition,muitoolbox uses 
+% <matlab:doc('dstoolbox') dstoolbox> and use of both
 % toolboxes is illustrated in the <matlab:doc('modelui') ModelUI> App.
 % A summary of how to modify the code for a particular application is given 
-% in <matlab:doc('muitbx_gettingstarted') Getting Started> and also set out
-% in the <matlab:mui_open_manual Introduction to muitoolbox slide pack>.
+% in <matlab:doc('muitbx_gettingstarted').
