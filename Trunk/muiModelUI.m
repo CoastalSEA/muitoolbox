@@ -838,7 +838,7 @@ classdef (Abstract = true) muiModelUI < handle
                     delete(obj.mUI.(objtype))
                     obj.mUI.(objtype) = [];
                 end
-            else
+            elseif isfield(obj.mUI,objtype)
                 delete(obj.mUI.(objtype))
                 obj.mUI.(objtype) = [];
             end
@@ -940,10 +940,10 @@ classdef (Abstract = true) muiModelUI < handle
 %%  
         function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs
-            %first input variable is the ModelUI handle (unused)
+            %first input variable is the ModelUI handle to access mUI
             name = class(guiobj);
             %handle subclasses that inherit standard GUI - code below
-            %assumes 3 charachter suffix
+            %assumes 3 character suffix
             idx = regexp(name,'_');
             if ~isempty(idx)
                 name = ['mui',name(idx+1:end)];
@@ -973,6 +973,9 @@ classdef (Abstract = true) muiModelUI < handle
                 case 'muiStatsUI'
                     figObj = findobj('Tag','StatFig','-or','Tag','StatTable');                   
                     deleteFigObj(obj,figObj,'Stats');
+                otherwise
+                    figObj = findobj('Tag',[name(4:end-2),'Fig']);
+                    deleteFigObj(obj,figObj,name(4:end-2));    
             end
 
             guiobjtxt = name(4:end);
@@ -980,7 +983,7 @@ classdef (Abstract = true) muiModelUI < handle
                 %assignment in App does not include 'UI'
                 guiobjtxt = guiobjtxt(1:end-2);
             end
-            %cehck for figure
+            %check for figure
             if ~isempty(obj.mUI.(guiobjtxt)) && ...
                             isvalid(obj.mUI.(guiobjtxt)) && ...
                                     isprop(obj.mUI.(guiobjtxt),'dataUI')               
