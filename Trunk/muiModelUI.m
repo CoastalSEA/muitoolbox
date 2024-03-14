@@ -106,13 +106,14 @@ classdef (Abstract = true) muiModelUI < handle
             if isempty(obj)
                 error('No input')
             end
+            posdims = setGuiSize(obj);
             figTitle = sprintf('%s  Version: %s;  Copyright: %s',...
                                     obj.modelName,obj.vNumber,obj.vDate);
             obj.mUI.Figure = figure('Name',figTitle, ...
                 'NumberTitle','off', ...
                 'MenuBar','none', ...
                 'Units','normalized', ...
-                'Position',[0.3902 0.60 0.24 0.32],...
+                'Position',posdims,...
                 'CloseRequestFcn',@obj.exitprogram, ...
                 'Resize','on','HandleVisibility','on', ...
                 'Visible','off','Tag','MainFig');
@@ -126,7 +127,18 @@ classdef (Abstract = true) muiModelUI < handle
             obj.mUI.Tabs = uitabgroup(obj.mUI.Figure,'Tag','muiTabs');
             obj.mUI.Tabs.Position = [0 0 1 0.96];
         end
-        
+
+        %%
+        function posdims = setGuiSize(~)
+            %determine current screen resolution and set UI dimensions
+            %accordingly
+            screendata = get(0,'ScreenSize');
+            xsze =  0.56 - 1.25e-4*screendata(3);
+            ysze =  0.68 - 2.50e-4*screendata(4);
+            xpos = (1-xsze)/2;            ypos = 1-ysze-0.1;
+            posdims = [xpos,ypos,xsze,ysze];
+        end
+
 %% functions to initialise menus -------------------------------------------
         function obj = setAppMenus(obj)
             %initiale user defined menus and submenus
