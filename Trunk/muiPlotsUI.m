@@ -96,7 +96,7 @@ classdef muiPlotsUI < muiDataUI
             end             
         end                
 %%
-        function setVariableLists(obj,src,mobj) %**
+        function setVariableLists(obj,src,mobj)
             %initialise the variable lists or values
             %Abstract function required by muiDataUI
             %called during initialisation by muiDataUI.setDataUItabs and 
@@ -104,10 +104,13 @@ classdef muiPlotsUI < muiDataUI
             itab = strcmp(obj.Tabs2Use,src.Tag);
             S = obj.TabContent(itab);
             sel_uic = S.Selections;
-            caserec = sel_uic{strcmp(S.Order,'Case')}.Value; %**
+            caserec = sel_uic{strcmp(S.Order,'Case')}.Value; 
             cobj = getCase(mobj.Cases,caserec);
-            dsnames = fieldnames(cobj.Data); %**
-            ids = sel_uic{strcmp(S.Order,'Dataset')}.Value; %**
+            dsnames = fieldnames(cobj.Data); 
+            idd = strcmp(S.Order,'Dataset');
+            ids = sel_uic{idd}.Value; 
+            if ids>length(dsnames), ids = 1; sel_uic{idd}.Value = 1; end
+            
             for i=1:length(sel_uic)                
                 switch sel_uic{i}.Tag
                     case 'Case'
@@ -115,12 +118,12 @@ classdef muiPlotsUI < muiDataUI
                         sel_uic{i}.String = muicat.CaseDescription;
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
-                        sel_uic{i}.String = dsnames; %**
+                        sel_uic{i}.String = dsnames; 
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Variable' 
-                        ds = fieldnames(cobj.Data);
-                        sel_uic{i}.String = cobj.Data.(ds{ids}).VariableDescriptions;
                         sel_uic{i}.Value = 1;
+                        ds = fieldnames(cobj.Data);
+                        sel_uic{i}.String = cobj.Data.(ds{ids}).VariableDescriptions;                        
                     case 'Type'
                         sel_uic{i}.String = S.Type;
                     otherwise
