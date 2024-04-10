@@ -867,6 +867,12 @@ classdef muiPlots < handle
             obj.idxfig = src.Number;
         end 
 %%
+        function hfig = getFigureHandle(obj)
+            %get figure created using muiPlots.setFigure
+            idfig = obj.Plot.FigNum==obj.Plot.CurrentFig.Number;
+            hfig = findobj('Number',obj.Plot.FigNum(idfig));
+        end
+%%
         function casedef = getRunParams(obj,mobj,idx)
             %get the run time parameters for the idx property selection
             caserec = obj.UIsel(idx).caserec;

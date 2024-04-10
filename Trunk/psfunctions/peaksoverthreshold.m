@@ -35,7 +35,8 @@ function [locs,pks] = peaksoverthreshold(var,vthr,method,mdate,tint,outflg)
 % CoastalSEA (c)June 2015
 %--------------------------------------------------------------------------
 %
-
+    if isrow(var), var = var'; end         %force column variables
+    if isrow(mdate), mdate = mdate'; end 
     %minpeakdist =1; minpeakh = 0; %default values in peakseek
     [alocs,apks] = peakseek(var);  %find all peaks and all location indices
     idx = find(apks>=vthr);
@@ -135,20 +136,21 @@ function idpks = findGroupPeaks(pkt,dt,tint,idst,idnd,idpks)
 end
 %%
 function [locs,pks] = separatedMaxima(var,mdate,tint,vthr)
-    idx = find(var>=vthr);               %values above threshold
+    idx = find(var>=vthr);                   %values above threshold
+    if isempty(idx), locs = []; pks = []; return; end
     potvar = [idx,var(idx)];
     tvar = mdate(idx);
     [~,idvar] = sort(potvar(:,2),'descend'); %sort from highest value down
     potvar = potvar(idvar,:);
     tvar = tvar(idvar);
 
-    for i=1:size(potvar,1)+1
+    for i=1:size(potvar,1)
         pks(i) = potvar(1,2);      %select largest values
-        locs(i) = potvar(1,1);     %index of larges value in var
+        locs(i) = potvar(1,1);     %index of largest value in var
 
         %delete values within a tint hours of current largest value
         j = tvar>=tvar(1)-tint & tvar<=tvar(1)+tint;    
-        potvar(j) = [];            %deletes everything between +/-tint
+        potvar(j,:) = [];          %deletes everything between +/-tint
         tvar(j) = [];
         if isempty(tvar)
             break

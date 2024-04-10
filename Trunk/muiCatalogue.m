@@ -368,6 +368,7 @@ classdef muiCatalogue < dscatalogue
             if ~isnumeric(idset) 
                 dstxt = idset; 
                 idset =  find(strcmp(datasetnames,dstxt));
+                if isempty(idset), dst = []; return; end
             else
                 dstxt = datasetnames{idset};
             end

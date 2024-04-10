@@ -494,6 +494,7 @@ classdef (Abstract = true) muiDataUI < handle
             %get selected Case and dataset (NB caserec must be # in full
             %list of Catalogue, not a subset)
             [dst,caserec,idset] = getDataset(mobj.Cases,desc.Case,desc.Dataset);
+            if isempty(dst), getdialog('Selection not found'); return; end
             %get variable, row and dimension descriptions
             idvar = find(strcmp(dst.VariableDescriptions,desc.Variable));           
             [dstnames,dstdesc] = getVarAttributes(dst,idvar);
