@@ -20,6 +20,8 @@
 %
 % * *conditional_subsample.m*
 % - subsample input variable based on a condition set by another variable
+% * *general_logisitic.m*
+% - function to return a curve defined by the generalised logisitc equation
 %
 % * *descriptive_stats.m*
 % - generate descriptive stats table for timeseries or table of a variable
@@ -120,6 +122,12 @@
 % Forum by Ken Garrard:
 % https://www.mathworks.com/matlabcentral/fileexchange/13200-3d-polar-plot.
 %
+% * *r_squared.m*
+% - compute the R-squared value a measure of goodness of fit between the 
+% observed data and its estimation (may be from a regression or other
+% model). Function by Shoaibur Rahman:
+% https://www.mathworks.com/matlabcentral/fileexchange/55128-calculate-r-squared-value
+%
 % * *recursive_plot.m*
 % - plot a variable against itself with a step interval of nint
 %
@@ -129,12 +137,6 @@
 %
 % * *regression_plot.m*
 % - generate regression plot for 2-D data and fitted regression model
-%
-% * *r_squared.m*
-% - compute the R-squared value a measure of goodness of fit between the 
-% observed data and its estimation (may be from a regression or other
-% model). Function by Shoaibur Rahman:
-% https://www.mathworks.com/matlabcentral/fileexchange/55128-calculate-r-squared-value
 %
 % * *saveanimation2file.m*
 % - saves movie to selected file type
@@ -163,6 +165,9 @@
 % * *tabfigureplot*
 % - generate axes on Q-Plot tab including '>Figure' and 'Rotate'
 % buttons (Rotate is optional), or as a standalone figure
+%
+% * *target_marker.m*
+% - add one or more target symbols to a plot
 %
 % * *taylor_plot.m*
 % - create plot of Taylor diagram and, optionally, plot compute skill score

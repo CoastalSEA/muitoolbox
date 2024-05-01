@@ -18,16 +18,19 @@ classdef (Abstract = true) muiModelUI < handle
     properties (Hidden, Transient)
         %struct to handles for UI
         mUI = struct('Figure',[],'Menus',[],'Tabs',[],'EditUI',[],'ManipUI',[],...
-                     'PlotsUI',[],'Plots',[],'StatsUI',[],'Stats',[])                                                       
+                     'PlotsUI',[],'Plots',[],'StatsUI',[],'Stats',[],...
+                     'ProbeUI',[],'Probe',[])                                                       
             % mUI.Figure        %handle for main UI figure
             % mUI.Menus         %handle for drop down menus in main UI
             % mUI.Tabs          %handle for the Tab Group in the main main UI
-            % mUI.PlotsUI       %handle for plotting UI
             % mUI.EditUI        %handle for editing UI
             % mUI.ManipUI       %handle for data manipulation UI
-            % mUI.StatsUI       %handle for statistics UI
+            % mUI.PlotsUI       %handle for plotting UI
             % mUI.Plots         %handle to muiPlots object
+            % mUI.StatsUI       %handle for statistics UI            
             % mUI.Stats         %handle to muiStats object
+            % mui.ProbeUI       %handle to an analysis UI eg EF_ProbeUI
+            % mui.Probe         %handle to analysis object eg EF_Probe
         TabProps         %structure to hold TabDisplay and position for each data input
         ModelInputs      %classes required by model used in isValidModel check 
         DataUItabs       %structure to define muiDataUI tabs for each use 
