@@ -541,13 +541,26 @@ classdef (Abstract = true) muiModelUI < handle
         function clearFigures(~,~,~)
             hpf = findobj('tag','PlotFig');
             hsf = findobj('tag','StatFig');
+            haf = findobj('tag','ProbeFig');
+            idx = 0;
             if ~isempty(hpf) && ~isempty(hsf)
                 quest = 'Delete plot figures, stats figures or both?';                
                 answer = questdlg(quest,'Clear','Plots','Stats','Both','Both');
+                idx = 1;
+            elseif ~isempty(hpf) && ~isempty(haf)
+                quest = 'Delete plot figures, analysis figures or both?';                
+                answer = questdlg(quest,'Clear','Plots','Analysis','Both','Both');
+                idx = 2;
+            elseif ~isempty(hsf) && ~isempty(haf)
+                quest = 'Delete stats figures, analysis figures or both?';                
+                answer = questdlg(quest,'Clear','Stats','Analysis','Both','Both');
+                idx = 3;
             elseif ~isempty(hpf)
                 answer = 'Plots';
             elseif ~isempty(hsf)
                 answer = 'Stats';
+             elseif ~isempty(haf)
+                answer = 'Probe';   
             else
                 return;
             end
@@ -559,10 +572,18 @@ classdef (Abstract = true) muiModelUI < handle
                 case 'Stats'
                     delete(hsf);
                     clear hsf
+                case 'Probe'
+                    delete(haf)
+                    clear haf
                 case 'Both'
-                    delete(hpf);
-                    delete (hsf);
-                    clear hpf hsf
+                    switch idx
+                        case 1
+                            delete(hpf);  delete (hsf);  clear hpf hsf
+                        case 2
+                            delete(hpf);  delete (haf);  clear hpf haf
+                        case 3
+                            delete(hsf);  delete (haf);  clear hsf haf
+                    end                    
             end     
         end      
 %%        
