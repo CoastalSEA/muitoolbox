@@ -109,6 +109,10 @@
 % * *scalevariable.m*
 % - rescale a variable (vector or matrix) based on user selection
 %
+% * *selectui.m*
+% - provides access to an instance of the muiSelectUI class for
+% Case/Dataset/Variable selection and returns the selections made
+%
 % * *setAnimate.m*
 % - callback function for button to set plot to be an animation instead
 % of a snap shot at selected time

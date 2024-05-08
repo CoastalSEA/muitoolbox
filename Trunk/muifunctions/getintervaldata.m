@@ -57,7 +57,9 @@ function  [mnval,numts] = getintervaldata(dst1,dst2,funchandle)
         if ~isempty(ds)
             dsdata = rmmissing(ds.DataTable); %remove missing data          
             numts(i,1) = height(dsdata); %record the length of each interval sample
-            if ~isempty(dsdata{1,1}) && height(dsdata)>1
+            if isempty(dsdata)
+                mnval(i,1) = NaN;             %no values to sample
+            elseif ~isempty(dsdata{1,1}) && height(dsdata)>1
                 mnval(i,1) = funchandle(dsdata{:,1});                            
             elseif ~isempty(dsdata{1,1})
                 mnval(i,1) = dsdata{1,1};

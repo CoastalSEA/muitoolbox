@@ -30,7 +30,7 @@ classdef muiUserData < muiDataSet
             if isempty(formatfile), return; end
             obj.DataFormats = {'muiUserData',formatfile};
             obj.idFormat = 1;
-            defaults= {'off','*.txt;*.csv'};
+            defaults= {'off','*.txt; *.csv; *.xlsx'};
             promptxt = {'MultiSelect (on or off):','File types:'};
             answer = inputdlg(promptxt,'File spec',1,defaults);
             if isempty(answer)
