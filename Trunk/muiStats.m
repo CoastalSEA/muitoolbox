@@ -33,7 +33,7 @@ classdef muiStats < handle
 %%    
     methods (Access=protected)  %allows muiPlot to be used as a superclass
         function obj = muiStats
-            
+            %class constructor
         end      
     end
 %%    
@@ -213,8 +213,9 @@ classdef muiStats < handle
             [idx,casedesc] = setcase(obj.DescOut,false);
             results.Properties.UserData = casedesc;
             obj.DescOut{idx} = results;
-            msgtxt = sprintf('Results are displayed on the Stats>%s tab',strip(src.Title));
-            getdialog(msgtxt);
+            msgtxt = sprintf('Results are displayed on the Stats>%s tab\n\nNB These are NOT saved with with project\nAll Cases of statistical analysis remain available from the Stats tab\nwhile the Statistics UI remains open',...
+                                         strip(src.Title));
+            getdialog(msgtxt,[],3);
             waitbar(1,hw)
             close(hw)
         end
@@ -337,6 +338,7 @@ classdef muiStats < handle
             classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(1).caserec); 
             heq = str2func(classname);
             cobj = heq();  %instance of class object
+            cobj.ModelType = 'stats';
             %save results  
             setDataSetRecord(cobj,mobj.Cases,dst,'stats');
             getdialog('Run complete');
@@ -367,6 +369,7 @@ classdef muiStats < handle
             classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(1).caserec); 
             heq = str2func(classname);
             cobj = heq();  %instance of class object
+            cobj.ModelType = 'stats';
             %save results  
             setDataSetRecord(cobj,mobj.Cases,dst,'stats');
             getdialog('Run complete');
@@ -424,7 +427,7 @@ classdef muiStats < handle
             txt2 = 'Select from: median, mean, std, var, min, max, sum';                                                
             inptxt = sprintf('%s\n%s',txt1,txt2);   
             selstat = {'mean'};
-%             stext = 'Intervals Stats using: ';
+
             ok = 1; count = 1;
             while ok>0
                 selstat = inputdlg(inptxt,'Interval statistics',1,selstat);
@@ -451,7 +454,6 @@ classdef muiStats < handle
             %recordlength of ts2 in each interval and the selected
             %statistical functions.
             dst = dstable(statval{:},numts,'RowNames',ds1.RowNames);
-%             dsp1 = ds1.DSproperties;
             dsp = ds2.DSproperties;
             dsp.Variables = muiStats.setVariableDSP(dsp,stext);
             dst.DSproperties = dsp;
@@ -465,6 +467,7 @@ classdef muiStats < handle
             classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(2).caserec); 
             heq = str2func(classname);
             cobj = heq();  %instance of class object
+            cobj.ModelType = 'stats';
             %save results  
             setDataSetRecord(cobj,mobj.Cases,dst,'stats');
             getdialog('Run complete');
