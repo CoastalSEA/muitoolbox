@@ -43,6 +43,9 @@
 %
 % * *functionlibrarylist.m*
 % - Lists available functions for use in DataManip
+%
+% * *get_variable.m*
+% - retrieve selected variable based on selection made using selectui
 % 
 % * *getintervaldata.m*
 % - compute the mean values of the property values in dst2 between the time
@@ -102,6 +105,10 @@
 % 
 % * *range2var.m*
 % - convert range character array start and end variables
+%
+% * *readspreadsheet.m*
+% - prompt user for selection on what to read from Excel spreadsheet and
+% load selected data as table, or a dstable
 % 
 % * *rotatebutton.m*
 % - callback for the rotate button on a figure or tab plot

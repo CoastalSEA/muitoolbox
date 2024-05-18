@@ -120,15 +120,15 @@ classdef muiSelectUI < muiDataUI
             %Header size and text
             S.HeadPos = [0.8,0.14]; %vertical position and height of header
             txt1 = 'Select Case, Dateset and Variable.';
-            txt2 = 'Use the ''Var'' button to select the attibute of the variable (data or dimension)';
-            txt3 = 'You may be prompted to sub-sample the data if multi-dimensional.';   
+            txt2 = 'Use the ''Var'' button to select the attibute of the variable (data or a dimension)';
+            txt3 = 'There are options to define the attribute range of the variable (if required).';   
             S.HeadText = sprintf('1 %s\n2 %s\n3 %s',txt1,txt2,txt3);
             
             %Specification of uicontrol for each selection variable  
             S.Titles = {'Case','Datset','Variable'};            
             S.Style = {'popupmenu','popupmenu','popupmenu'};
             S.Order = {'Case','Dataset','Variable'};
-            S.Scaling = {};  %options for ScaleVariable - exclude option
+            %S.Scaling %options for ScaleVariable - use default
            
             %Tab control button options
             S.TabButText = {'Select','Clear'}; %labels for tab button definition

@@ -738,9 +738,14 @@ classdef (Abstract = true) muiDataUI < handle
                 %assumes only the last dimension is a text list
                 %introduced to handle elements in Asmita
                 style2 = repmat({'popupmenu'},1,ndim);
-                nvar = 2;
-                selrange(2).txt = selrange(2).val; %swap range for list(*)
-                mcontrol = {'','Ed','',''};
+                mcontrol = {'','','',''};
+                nvar = find(islist);
+                if nvar==1
+                    mcontrol = {'','Ed','',''};
+                else
+                    selrange(islist).txt = selrange(islist).val; %swap range for list(*)
+                    mcontrol{islist} = 'Ed';
+                end
             else   %default for numeric and datatime/duration dimensions
                 style2 = repmat({'linkedslider'},1,ndim);
                 nvar = 2:length(dstdesc);
