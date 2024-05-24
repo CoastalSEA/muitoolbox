@@ -1,4 +1,4 @@
-function [hcr,hrg] = target_marker(varargin)
+function varargout = target_marker(varargin)
 %
 %-------header-------------------------------------------------------------
 % NAME
@@ -17,8 +17,9 @@ function [hcr,hrg] = target_marker(varargin)
 %   varargin: x, y, or axes and x, y,followed by any scatter plot properties 
 %   as Name-Value pairs.
 % OUTPUTS
-%   hcr - handle to cross marker
-%   hrg - handle to circle marker
+%   varargout: user defined output 
+%       hcr - handle to cross marker
+%       hrg - handle to circle marker
 %
 % Author: Ian Townend
 % CoastalSEA (c) Apr 2024
@@ -34,7 +35,7 @@ function [hcr,hrg] = target_marker(varargin)
         ax = gca;
         x = varargin{1};
         y = varargin{2};
-        offset = 2;
+        offset = 2;   
     end
 
     nprop = nvar-offset;
@@ -44,27 +45,37 @@ function [hcr,hrg] = target_marker(varargin)
         end
     elseif nprop>0
         warndlg('Properties should be specified as Name-Value pairs')
-        return;        
+        return;    
+    else
+        prop = [];
     end
 
     hold on
     hcr = scatter(ax,x,y,'+');              %plot cross
     hrg = scatter(ax,x,y,'o');              %plot circle
 
-    propnames = fieldnames(prop);
-    alpi = 1;                            %default transparency
-    for j=1:length(propnames)
-        prop2set = propnames{j};
-        if strcmp(prop2set,'SizeData')
-            hcr.SizeData = prop.SizeData;
-            hrg.SizeData = prop.SizeData/3;
-        elseif strcmpi(prop2set,'alpha')
-            alpi = prop.(prop2set);            
-        else
-            hcr.(prop2set) = prop.(prop2set);
-            hrg.(prop2set) = prop.(prop2set);
+    if isstruct(prop)
+        propnames = fieldnames(prop);
+        alpi = 1;                            %default transparency
+        for j=1:length(propnames)
+            prop2set = propnames{j};
+            if strcmp(prop2set,'SizeData')
+                hcr.SizeData = prop.SizeData;
+                hrg.SizeData = prop.SizeData/3;
+            elseif strcmpi(prop2set,'alpha')
+                alpi = prop.(prop2set);            
+            else
+                hcr.(prop2set) = prop.(prop2set);
+                hrg.(prop2set) = prop.(prop2set);
+            end
         end
+        hold off
+        hrg.MarkerFaceAlpha = alpi;
     end
-    hold off
-    hrg.MarkerFaceAlpha = alpi;
+
+    output = [hcr,hrg]; %handles to cross and and circle
+    nout = max(nargout,1) - 1;
+    for k=1:nout
+        varargout{k} = output(k); %#ok<AGROW> 
+    end
 end

@@ -535,7 +535,7 @@ classdef muiCatalogue < dscatalogue
         end
 %%
         function [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,...
-                                                classname,promptxt,itable)
+                                                classname,promptxt,idd)
             %prompt user to select a Case, Dataset (if not specified) and 
             %a row, return instance and row no.
             % obj - class instance of muiCatalogue (eg using mobj.Cases for
@@ -549,19 +549,19 @@ classdef muiCatalogue < dscatalogue
             % itable - id of dataset table to use
             %uses selectCaseObj above. Used in getInletTools.
             if nargin<2
-                itable = [];
+                idd = [];
                 promptxt = {'Select Case:','Select Row:'}; 
                 classname = []; 
                 casetype = [];
             elseif nargin<3
-                itable = [];
+                idd = [];
                 promptxt = {'Select Case:','Select Row:'};
                 classname = [];
             elseif nargin<4
-                itable = [];
+                idd = [];
                 promptxt = {'Select Case:','Select Row:'};    
             elseif nargin<5
-                itable = [];
+                idd = [];
             end
             
             if isempty(promptxt) || ~iscell(promptxt) || length(promptxt)<2
@@ -572,22 +572,18 @@ classdef muiCatalogue < dscatalogue
             [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt{1});
             if isempty(cobj), irow = []; return; end
             %select a dataset table to use if not specified
-            dsnames = fieldnames(cobj.Data);
-            if isempty(itable)                
-                if length(dsnames)>1
-                    itable = listdlg('PromptString','Select dataset',...
-                                       'Name','selectDSR','SelectionMode','single',...
-                                       'ListSize',[200,200],'ListString',dsnames);
-                    if isempty(itable), itable = 1; end
-                else
-                    itable = 1;
-                end
+            if isempty(idd)
+                [dsname,~] = selectDataset(obj,cobj);
+            else
+                dsnames = fieldnames(cobj.Data);
+                dsname = dsnames{idd};
             end
+
             %select the Row to use
-            dst = cobj.Data.(dsnames{itable});
+            dst = cobj.Data.(dsname);
             if height(dst)>1
                 %propmpt user to select timestep
-                list = dst.DataTable.Properties.RowNames;
+                list = dst.DataTable.Properties.RowNames; %returns char values
                 irow = listdlg('PromptString',promptxt{2},...
                                'Name','selectDSR','SelectionMode','single',...
                                'ListSize',[200,200],'ListString',list);
@@ -595,6 +591,80 @@ classdef muiCatalogue < dscatalogue
                 irow = 1;
             end
         end        
+%%
+function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,...
+                                                        classname,promptxt,idd)
+            %prompt user to select a Case, Dataset (if not specified) and 
+            %a variable, return instance and variable id.
+            % obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            % casetype - can be empty, or cell array of one or more case
+            %            types
+            % classname - can be empty, or cell array of one or more
+            %             class names 
+            % promptxt - alternative text to use as a prompt
+            %            cell array for (1) case and (2) row
+            % itable - id of dataset table to use
+            %uses selectCaseObj above. Used in getInletTools.
+            if nargin<2
+                idd = [];
+                promptxt = {'Select Case:','Select Variable:'}; 
+                classname = []; 
+                casetype = [];
+            elseif nargin<3
+                idd = [];
+                promptxt = {'Select Case:','Select Variabble:'};
+                classname = [];
+            elseif nargin<4
+                idd = [];
+                promptxt = {'Select Case:','Select Variable:'};    
+            elseif nargin<5
+                idd = [];
+            end
+            
+            if isempty(promptxt) || ~iscell(promptxt) || length(promptxt)<2
+                promptxt = {'Select Case:','Select Variable:'}; 
+            end
+
+            %select the Case to use
+            [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt{1});
+            if isempty(cobj), ivar = []; return; end
+
+            %select a dataset table to use if not specified
+            if isempty(idd)
+                [dsname,~] = selectDataset(obj,cobj);
+            else
+                dsnames = fieldnames(cobj.Data);
+                dsname = dsnames{idd};
+            end
+
+            %select the variable to use
+            dst = cobj.Data.(dsname);
+            if height(dst)>1
+                %propmpt user to select timestep
+                list = dst.VariableDescriptions;
+                ivar = listdlg('PromptString',promptxt{2},...
+                               'Name','selectDSV','SelectionMode','single',...
+                               'ListSize',[200,300],'ListString',list);
+            else
+                ivar = 1;
+            end
+        end
+
+%%
+        function [dsname,idd] = selectDataset(~,cobj)
+            %select a dataset table to use
+            dsnames = fieldnames(cobj.Data);             
+            if length(dsnames)>1
+                idd = listdlg('PromptString','Select dataset',...
+                              'Name','selectDSV','SelectionMode','single',...
+                              'ListSize',[200,200],'ListString',dsnames);
+                if isempty(idd), idd = 1; end
+            else
+                idd = 1;
+            end
+            dsname = dsnames{idd};
+        end
 %%
         function useCase(obj,mode,classname,action)
             %select which existing data set to use and pass to action method
@@ -763,7 +833,51 @@ classdef muiCatalogue < dscatalogue
                     dimnames.dim{idd} = var(idx.dim{idd});
                 end  
             end
-        end   
+        end 
+%%
+        function modifyVariableType(obj)
+            %select a variable and modify that data type of the variable
+            %used mainly to make data catagorical or ordinal
+            [cobj,classrec,dsname,ivar]  = selectCaseDatasetVariable(obj);
+            if isepty(ivar), return; end  %user did not slect a variable
+            dst = cobj.Data.(dsname);
+            varnames = dst.VariableNames;
+            var = dst.(varnames{ivar});
+            dtype = getdatatype(var);
+            
+            promptxt = sprintf('Data type is %s\nSelect new data type:',dtype{1});
+            types = {'logical','int8','int16','int32','int64','uint8','uint16',... 
+                 'uint32','uint64''single','double',...
+                 'char','string','categorical','ordinal',...
+                 'datetime','duration','calendarDuration'};
+            idt = listdlg('PromptString',promptxt,'ListString',types,...
+                                'SelectionMode','single','ListSize',[160,260]);
+            if isempty(idt), return; end
+            seltype = types{idt};
+            if strcmp(seltype,'ordinal') || strcmp(seltype,'categorical')
+                prompts = {'Define valueset','Define category names'};
+                classes = unique(var);  %find categories and allow user to edit
+                [catstr,type,format] = var2str(classes);
+                catstr = sprintf('%s, ',catstr{:});
+                catstr = catstr(1:end-2);
+                defaults = {catstr,catstr};
+                opts.Resize = 'on';
+                answers = inputdlg(prompts,'ModVar',1,defaults,opts);
+                if isempty(answers), return; end   
+                valueset = strsplit(answers{1},', ');
+                valueset = str2var(valueset,type,format);
+                catnames = strsplit(answers{2},', ');
+                var = categorical(var,valueset,catnames);
+                if strcmp(seltype,'ordinal')
+                    var.Ordinal = true;
+                end
+                cobj.Data.(dsname).(varnames{ivar}) = var;
+                updateCase(obj,cobj,classrec,true);
+            else
+                warndlg('Only categorial and ordinal currently handled');
+            end
+            %updateCase(obj,cobj,classrec,true);
+        end
     end
 %%
     methods (Access=private)      

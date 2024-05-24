@@ -619,7 +619,9 @@ classdef (Abstract = true) muiModelUI < handle
                 case 'Edit DS properties'
                     editDSprops(muicat);
                 case 'Edit Data Set'
-                    obj.mUI.EditUI = muiEditUI.getEditUI(obj);    
+                    obj.mUI.EditUI = muiEditUI.getEditUI(obj);  
+                case 'Modify Variable Type'
+                    modifyVariableType(muicat);
                 case 'Save Data Set'
                     saveCase(muicat);
                 case 'Delete Case'

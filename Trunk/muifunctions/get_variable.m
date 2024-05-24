@@ -6,13 +6,13 @@ function var = get_variable(mobj,promptxt)
 % PURPOSE
 %   retrieve selected variable based on selection made using selectui
 % USAGE
-%   var = get_variable(mobj)
+%   var = get_variable(mobj,promptxt)
 % INPUTS
 %   mobj - ModelUI instance
 %   promptxt - text used as prompt in selection UI (optional)
 % OUTPUT
 %   var - data and metadata for selected variable. struct with fields:
-%         name, data, label, desc
+%         caserec, classrec, name, data, label, desc
 % NOTES
 %    called from edb_tools and edg_user_plot as part of EstuaryDB App.
 % SEE ALSO
@@ -26,8 +26,9 @@ function var = get_variable(mobj,promptxt)
     
     [UIsel,UIset] = selectui(mobj,promptxt);      %calls UI to make selection
     if isempty(UIsel), var = []; return; end
-
-    cobj = getCase(mobj.Cases,UIsel(1).caserec); %selected class instance
+    
+    var.caserec = UIsel(1).caserec;
+    [cobj,var.classrec] = getCase(mobj.Cases,UIsel(1).caserec); %selected class instance
     dsnames = fieldnames(cobj.Data);
     dst = cobj.Data.(dsnames{UIsel(1).dataset}); %selected dstable
     var.name = dst.VariableNames{UIsel(1).variable};
