@@ -20,8 +20,8 @@ function ax = tabfigureplot(obj,src,tabcb,isrotate) %#ok<INUSL>
 %   used by calling:
 %             tabcb  = @(src,evdat)tabPlot(obj,src);
 %             ax = tabfigureplot(obj,src,tabcb,false);
-%             someOuputPlot(obj,ax);
-%   NB: sets axes Tag to 'Q-Plot'
+%             someOutputPlot(obj,ax);
+%   NB: sets axes Tag to tab name, or PlotFig if stand-alone plot
 % SEE ALSO
 %   used in tabPlot in CSTrunmodel, 
 %
@@ -39,7 +39,7 @@ function ax = tabfigureplot(obj,src,tabcb,isrotate) %#ok<INUSL>
     else
         ht = findobj(src,'Type','axes');
         delete(ht);
-        ax = axes('Parent',src,'Tag','Q-Plot');
+        ax = axes('Parent',src,'Tag',src.Tag);
         hb = findobj(src,'Tag','FigButton');
         if isempty(hb)
             %button to create plot as stand-alone figure
