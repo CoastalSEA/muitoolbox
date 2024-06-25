@@ -160,15 +160,36 @@
 %   classrec = classRec(muicat,caserec);
 
 %%
+% *modifyVariableType* select a variable and modify that data type of the variable
+% used mainly to make data catagorical or ordinal
+%%
+%   modifyVariableType(muicat)
+
+%%
+% *selectCaseDatasetVariable* prompt user to select a Case, Dataset (if not specified) and 
+% a variable, return instance and variable id. All inputs except muicat are
+% optional. if unspecified pass as []
+%%
+%   [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(muicat,casetype,classname,promptxt,idd);
+%   cobj = selectCaseDatasetVariable(muicat);
+%   [cobj,classrec] = selectCaseDatasetVariable(muicat,[],classname);
+
+%%
+% *selectDataset* select a dataset table to use for a given class
+% instance, cobj. Returns dataset name, dsname, and index, idd.
+%%
+%   [dsname,idd] = selectDataset(muicat,cobj);
+
+%%
 % *setDataClassID* get the index for a new instance of class held in
 % DataSets, where _classname_ is the name of the class to use.
 %%
-%   id_class = setDataClassID(muicat,classname)  
+%   id_class = setDataClassID(muicat,classname);
 
 %%
 % *setPropsStruct* initialise struct used in getProperty
 %%
-%   props = setPropsStruct(muicat)
+%   props = setPropsStruct(muicat);
 
 %% muiCatalogue methods used in the default Project menu
 % The example interface provided in <matlab:doc('modelui') ModelUI>

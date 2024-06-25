@@ -53,7 +53,7 @@
 % cell. If the %time or %rows instruction is included in the call, row data
 % are added providing that the length of the input dataset matches the output
 % dataset. If there is no output to be passed back the function should
-% return a cell array containing the string 'no output' to suppress the
+% return the character vector 'no output' to suppress the
 % message box which is used for single value outputs. For expressions that
 % return a result that is the same length as one, or more, of the
 % variables used in the call, there is also the option to add the variable

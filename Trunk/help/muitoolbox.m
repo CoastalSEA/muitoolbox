@@ -7,7 +7,7 @@
 % Public License).
 
 %% Requirements
-% muitoolbox is written in MATLAB(TM) and requires v2016b, or later. In addition, 
+% <matlab:doc('muitoolbox') muitoolbox> is written in MATLAB(TM) and requires v2016b, or later. In addition, 
 % the toolbox makes use of  the <matlab:doc('dstoolbox') dstoolbox>.
 
 %% Abstract classes
@@ -85,7 +85,7 @@
 
 %% See Also
 % Some slides providing an introduction to the use of the muitoolbox can be found
-% <matlab:mui_open_manual here>. In addition,muitoolbox uses 
+% <matlab:mui_open_manual here>. In addition, <matlab:doc('muitoolbox') muitoolbox> uses 
 % <matlab:doc('dstoolbox') dstoolbox> and use of both
 % toolboxes is illustrated in the <matlab:doc('modelui') ModelUI> App.
 % A summary of how to modify the code for a particular application is given 

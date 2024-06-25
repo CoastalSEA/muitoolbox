@@ -653,11 +653,11 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
 
 %%
         function [dsname,idd] = selectDataset(~,cobj)
-            %select a dataset table to use
+            %select a dataset table to use for a given class instance
             dsnames = fieldnames(cobj.Data);             
             if length(dsnames)>1
                 idd = listdlg('PromptString','Select dataset',...
-                              'Name','selectDSV','SelectionMode','single',...
+                              'Name','selectDset','SelectionMode','single',...
                               'ListSize',[200,200],'ListString',dsnames);
                 if isempty(idd), idd = 1; end
             else

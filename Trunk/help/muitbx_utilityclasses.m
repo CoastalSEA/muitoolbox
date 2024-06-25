@@ -19,6 +19,5 @@
 % * <matlab:doc('muiusermodel') muiUserModel>: methods to evaluate functions based on UI selection.  
 
 %% See Also 
-
 % See <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('dstoolbox') dstoolbox>
 % and documentation for the <matlab:doc('modelui') ModelUI> App.
