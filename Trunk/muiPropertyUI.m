@@ -161,7 +161,8 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             %call input dlg
             numlines = 1;
             title = 'Define property values';
-            useInp=inputdlg(prompt,title,numlines,defaultvalues);
+            opts.Resize = 'on';
+            useInp=inputdlg(prompt,title,numlines,defaultvalues,opts);
             if isempty(useInp), return, end
             %update values of defined subset (use str2num to handle vectors)
             for i=1:nvars
@@ -213,7 +214,8 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
                     end
                 end
             else
-                useInp=inputdlg(prompt,title,numlines,defaultvalues);
+                opts.Resize = 'on';
+                useInp=inputdlg(prompt,title,numlines,defaultvalues,opts);
                 if isempty(useInp), return; end
             end
             %now save the updated values
@@ -304,12 +306,13 @@ classdef (Abstract = true) muiPropertyUI  < matlab.mixin.Copyable
             %entries and this becomes too long to fit on screen
             defaults1 = defaultvalues(1:nrec);
             prompt1 = prompt(1:nrec);
-            useInp1 = inputdlg(prompt1,title,numlines,defaults1);
+            opts.Resize = 'on';
+            useInp1 = inputdlg(prompt1,title,numlines,defaults1,opts);
             isok = ~isempty(useInp1); %user cancelled
             %
             defaults2 = defaultvalues(nrec+1:end);
             prompt2 = prompt(nrec+1:end);
-            useInp2 = inputdlg(prompt2,title,numlines,defaults2);
+            useInp2 = inputdlg(prompt2,title,numlines,defaults2,opts);
             isok(2) = ~isempty(useInp2); %user cancelled
             %
             useInp = [useInp1;useInp2];

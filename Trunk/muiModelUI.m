@@ -792,7 +792,7 @@ classdef (Abstract = true) muiModelUI < handle
                    'getDSP','View the dstables DSproperties',dst);
                 %initialise the button to access UserData (use h_fig
                 %because itab may not have updated Position)
-                setactionbutton(itab,'User data',[h_fig.Position(3)-70, h_fig.Position(4)-60, 60, 18],...
+                setactionbutton(itab,'User data',[h_fig.Position(3)-70, h_fig.Position(4)-90, 60, 18],...
                     @(src,evt)getUserData(obj,src,evt),...
                    'getUserData','View User Data',dst);
                 
@@ -835,6 +835,18 @@ classdef (Abstract = true) muiModelUI < handle
                 else
                     return;
                 end
+                temp = varfun(@isstruct,outable);                
+                if any(temp{:,:})
+                    idx = find(temp{:,:});
+                    for i=1:length(idx)
+                        temp = struct2table(outable{:,idx(i)});                         
+                        if ~isempty(temp)
+                            outable = addvars(outable,temp);
+                            outable = splitvars(outable,'temp');
+                        end
+                    end
+                    outable(:,idx) = []; 
+                end              
                 tablefigure('User data',desctext,outable);
             else
                 getdialog('No User Data for selected data set');
