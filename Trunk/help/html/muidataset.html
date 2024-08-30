@@ -1,0 +1,318 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>muiDataSet</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-12-22"><meta name="DC.source" content="muidataset.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>muiDataSet</h1><!--introduction--><p>Abstract class with properties and methods to manipulate datasets for use in applications that import data, or save model ouput.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">muiDataSet properties</a></li><li><a href="#3">muiDataSet abstract methods</a></li><li><a href="#4">muiDataSet methods</a></li><li><a href="#21">Creating a class using muiPropertyUI</a></li><li><a href="#22">muiUserData format file</a></li><li><a href="#23">See Also</a></li></ul></div><h2 id="1">Description</h2><p>muiDataSet is used as a superclass to provide data handling functionality for classes that import different types of data or models that need to store outputs in a consistent and documented format.</p><h2 id="2">muiDataSet properties</h2><div><ul><li><b>Data</b> - struct of datasets. These can be multiple dstables, or a mix of tables and other data types. The data are indexed using the fieldnames of the struct.</li><li><b>RunParam</b> - instance of run parameter classes defining settings used.</li><li><b>MetaData</b> - property for user defined input.</li><li><b>DataFormats</b> - cell array of data formats available.</li><li><b>idFormat</b> - class instance file format index.</li><li><b>FileSpec</b> - cell array of the parameters used to load a file: { <i>MultiSelect</i> (on/off), <i>FileType</i>}. where <i>MultiSelect</i> defines whether single or multiple selection is allowed and <i>FileType</i> determines the fie extensions to be shown in the file selection dialog.</li></ul></div><h2 id="3">muiDataSet abstract methods</h2><p><b>tabPlot</b> is an abstract method that must be implemented in classes that inherit muiDataSet. Used to generate a plot for display on Q-Plot tab. The default version of this method can call <i>tabDefaultPlot</i> in muiDataSet which provides with a basic set of plotting tools to handle 2D and 3D data.</p><h2 id="4">muiDataSet methods</h2><p>Methods for loading, adding, deleting and applying quality to control to datasets.</p><p><b>loadData</b> - set up a new dataset by loading data from a file. The input <i>muicat</i> is a handle to a muiCatalogue instance and classname is the name of the class to use for the dataset being loaded.</p><pre class="language-matlab">loadData(muicat,classname);
+</pre><p><b>addData</b> - add additional data to an existing dataset, where <i>obj</i> is an instance of a class that uses muiDataSet, <i>classrec</i> is the id of the record in the class handle, <i>catrec</i> is the Catalogue record for the selected case and <i>muicat</i> is a handle to a muiCatalogue instance.</p><pre class="language-matlab">addData(obj,classrec,catrec,muicat);
+</pre><p><b>deleteData</b> - delete variable or rows from a dataset, where <i>obj</i> is an instance of a class that uses muiDataSet, <i>classrec</i> is the id of the record in the class handle, <i>catrec</i> is the Catalogue record for the selected case and <i>muicat</i> is a handle to a muiCatalogue instance.</p><pre class="language-matlab">deleteData(obj,classrec,catrec,muicat);
+</pre><p><b>qcData</b> - apply quality control to a dataset, where <i>obj</i> is an instance of a class that uses muiDataSet, <i>classrec</i> is the id of the record in the class handle, <i>catrec</i> is the Catalogue record for the selected case and <i>muicat</i> is a handle to a muiCatalogue instance.</p><pre class="language-matlab">qcData(obj,classrec,catrec,muicat);  <span class="comment">%catrec not used</span>
+</pre><p><b>getDataSetName</b> - check whether there is more than one dstable and select</p><pre class="language-matlab">datasetname = getDataSetName(obj);   <span class="comment">%obj is a class instance</span>
+</pre><p><b>selectClassInstance</b> - Prompt to select a class instance from an array of class instances held in obj. Filter based on a class property is optional, where propname is the class property to test and propvalue is the value to match. Returns class instance and selected dataset. Flag ok=1 if successful and ok =0 if user cancels selection.</p><pre class="language-matlab">[cobj,dst,ok] = selectClassInstance(obj,propname,propvalue);
+</pre><p><b>getClassInstances</b> - get the class indices for the instances in an array of class instances, obj, where the class property name, propname (as a character vector), matches propvalue (propvalue can be a numeric or logical array, or a cell array of character vectors, or a string array - similar to Matlab&#8482; <a href="matlab:doc('ismember')">ismember</a>)</p><pre class="language-matlab">caseidx = getClassInstances(obj,propname,propvalue);
+</pre><p><b>readTSinputFile</b> - uses Matlab detectImportOptions to decipher the header and read the data into a table, where the columns use the variable names in file (if defined). Checks are made to ensure that no times are duplicated and the data are standardised so that missing times are removed and missing data are set to NaN Time MUST be first column in table to use this function.</p><pre class="language-matlab">data = readTSinputFile(obj,filename);  <span class="comment">%returns a table of data read from filename</span>
+</pre><h2 id="21">Creating a class using muiPropertyUI</h2><p>A template to create a class that uses muiPropertyUI can be found in the <a href="matlab:mui_template_folder">muitemplates folder</a>. The template provides the code for a subclass and the comments highlight where the file needs to be edited to adapt the template to a new application, as explained further in the <a href="matlab:doc('muitbx_gettingstarted')">Getting Started</a> documentation.</p><h2 id="22">muiUserData format file</h2><p>Data import into a <i>muitoolbox</i> UI using <i>muiUserData</i> and classes that inherit <a href="matlab:doc('muidataset')">muiDataSet</a> requires a format file to be created. A template is provided in the <a href="matlab:mui_template_folder">muitemplates folder</a>. and sets out the code for each of the functions requied, with comments to highlight where the files need to be edited to adapt the templates to a different application. The format file has the following form:</p><pre class="language-matlab">
+<span class="keyword">function</span> output = dataimport_format_template(funcall,varargin) <span class="comment">% &lt;&lt;Edit to identify data type</span>
+<span class="comment">%</span>
+<span class="comment">%-------function help------------------------------------------------------</span>
+<span class="comment">% NAME</span>
+<span class="comment">%   dataimport_format_template.m</span>
+<span class="comment">% PURPOSE</span>
+<span class="comment">%   Functions to define metadata, read and load data from file for:</span>
+<span class="comment">%   XXXX data format</span>
+<span class="comment">% USAGE</span>
+<span class="comment">%   obj = dataimport_format_template(obj,funcall)</span>
+<span class="comment">% INPUTS</span>
+<span class="comment">%   funcall - function being called</span>
+<span class="comment">%   varargin - function specific input (filename,class instance,dsp,src, etc)</span>
+<span class="comment">% OUTPUT</span>
+<span class="comment">%   output - function specific output</span>
+<span class="comment">% NOTES</span>
+<span class="comment">%   Channel Coastal Observatory (CCO) data</span>
+<span class="comment">%   https://www.channelcoast.org/</span>
+<span class="comment">%</span>
+<span class="comment">% Author: Ian Townend</span>
+<span class="comment">% CoastalSEA (c)Feb 2021</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">%</span>
+    <span class="keyword">switch</span> funcall
+        <span class="comment">%standard calls from muiDataSet - do not change if data class </span>
+        <span class="comment">%inherits from muiDataSet. The function getPlot is called from the</span>
+        <span class="comment">%Abstract method tabPlot. The class definition can use tabDefaultPlot</span>
+        <span class="comment">%define plot function in the class file, or call getPlot</span>
+        <span class="keyword">case</span> <span class="string">'getData'</span>
+          output = getData(varargin{:});
+        <span class="keyword">case</span> <span class="string">'dataQC'</span>
+            output = dataQC(varargin{1});  
+        <span class="keyword">case</span> <span class="string">'getPlot'</span>
+            <span class="comment">%output = 0; if using the default tab plot in muiDataSet, else</span>
+            output = getPlot(varargin{:});
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">%%</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% getData</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="keyword">function</span> dst = getData(obj,filename) <span class="comment">%#ok&lt;INUSD&gt;</span>
+    <span class="comment">%read and load a data set from a file</span>
+    [data,~] = readInputData(filename);             
+    <span class="keyword">if</span> isempty(data), dst = []; <span class="keyword">return</span>; <span class="keyword">end</span>
+    
+    <span class="comment">%set metadata</span>
+    dsp = setDSproperties;
+
+    <span class="comment">%code to parse input data and assign to varData  </span>
+    myDatetime = data{1};                            <span class="comment">% &lt;&lt;Edit metadata to data being loaded</span>
+    varData = data{2};                               <span class="comment">% &lt;&lt;See files in ..\muiAppCoastalClasses\FormatFiles</span>
+                                                     <span class="comment">% &lt;&lt;for examples of usage</span>
+    <span class="comment">%load the results into a dstable  </span>
+    dst = dstable(varData,<span class="string">'RowNames'</span>,myDatetime,<span class="string">'DSproperties'</span>,dsp); 
+<span class="comment">%     dst.Dimensions.Position = [Latitude,Longitude];    </span>
+<span class="keyword">end</span>
+<span class="comment">%%</span>
+<span class="keyword">function</span> [data,header] = readInputData(filename)
+    <span class="comment">%read wind data (read format is file specific).</span>
+    dataSpec = <span class="string">'%f %f'</span>; 
+    nhead = 1;     <span class="comment">%number of header lines</span>
+    [data,header] = readinputfile(filename,nhead,dataSpec); <span class="comment">%see muifunctions</span>
+<span class="keyword">end</span>
+<span class="comment">%%</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% dataDSproperties</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="keyword">function</span> dsp = setDSproperties()
+    <span class="comment">%define the variables in the dataset</span>
+    <span class="comment">%define the metadata properties for the demo data set</span>
+    dsp = struct(<span class="string">'Variables'</span>,[],<span class="string">'Row'</span>,[],<span class="string">'Dimensions'</span>,[]);  
+    <span class="comment">%define each variable to be included in the data table and any</span>
+    <span class="comment">%information about the dimensions. dstable Row and Dimensions can</span>
+    <span class="comment">%accept most data types but the values in each vector must be unique</span>
+
+    <span class="comment">%struct entries are cell arrays and can be column or row vectors</span>
+    dsp.Variables = struct(<span class="keyword">...</span>
+        <span class="string">'Name'</span>,{<span class="string">'Var1'</span>,<span class="string">'Var2'</span>},<span class="keyword">...</span><span class="comment">                   % &lt;&lt;Edit metadata to suit model</span>
+        <span class="string">'Description'</span>,{<span class="string">'Variable 1'</span>,<span class="string">'Variable 2'</span>},<span class="keyword">...</span>
+        <span class="string">'Unit'</span>,{<span class="string">'m/s'</span>,<span class="string">'m/s'</span>},<span class="keyword">...</span>
+        <span class="string">'Label'</span>,{<span class="string">'Plot label 1'</span>,<span class="string">'Plot label 2'</span>},<span class="keyword">...</span>
+        <span class="string">'QCflag'</span>,repmat({<span class="string">'raw'</span>},1,2)); 
+    dsp.Row = struct(<span class="keyword">...</span>
+        <span class="string">'Name'</span>,{<span class="string">'Time'</span>},<span class="keyword">...</span>
+        <span class="string">'Description'</span>,{<span class="string">'Time'</span>},<span class="keyword">...</span>
+        <span class="string">'Unit'</span>,{<span class="string">'h'</span>},<span class="keyword">...</span>
+        <span class="string">'Label'</span>,{<span class="string">'Time'</span>},<span class="keyword">...</span>
+        <span class="string">'Format'</span>,{<span class="string">'dd-MM-yyyy HH:mm:ss'</span>});        
+    dsp.Dimensions = struct(<span class="keyword">...</span><span class="comment">    </span>
+        <span class="string">'Name'</span>,{<span class="string">''</span>},<span class="keyword">...</span>
+        <span class="string">'Description'</span>,{<span class="string">''</span>},<span class="keyword">...</span>
+        <span class="string">'Unit'</span>,{<span class="string">''</span>},<span class="keyword">...</span>
+        <span class="string">'Label'</span>,{<span class="string">''</span>},<span class="keyword">...</span>
+        <span class="string">'Format'</span>,{<span class="string">''</span>});         
+<span class="keyword">end</span>
+<span class="comment">%%</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% dataQC</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="keyword">function</span> output = dataQC(obj)                        <span class="comment">% &lt;&lt;Add any quality control to be applied (optional)</span>
+    <span class="comment">%quality control a dataset</span>
+    <span class="comment">% datasetname = getDataSetName(obj); %prompts user to select dataset if more than one</span>
+    <span class="comment">% dst = obj.Data.(datasetname);      %selected dstable</span>
+    warndlg(<span class="string">'No quality control defined for this format'</span>);
+    output = [];    <span class="comment">%if no QC implemented in dataQC</span>
+<span class="keyword">end</span>
+<span class="comment">%%</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% getPlot</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="keyword">function</span> ok = getPlot(obj,src)                       <span class="comment">% &lt;&lt;Add code for bespoke Q-Plot is required (optional)</span>
+    <span class="comment">%generate a plot on the src graphical object handle    </span>
+    ok = 0;  <span class="comment">%ok=0 if no plot implemented in getPlot</span>
+    <span class="comment">%return some other value if a plot is implemented here</span>
+<span class="keyword">end</span>
+
+
+
+
+</pre><h2 id="23">See Also</h2><p><a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muicatalogue')">muiCatalogue</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% muiDataSet
+% Abstract class with properties and methods to manipulate datasets for use
+% in applications that import data, or save model ouput.
+
+%% Description
+% muiDataSet is used as a superclass to provide data handling 
+% functionality for classes that import different types of data or models
+% that need to store outputs in a consistent and documented format.
+
+%% muiDataSet properties
+% * *Data* - struct of datasets. These can be multiple dstables, or a mix of 
+% tables and other data types. The data are indexed using the fieldnames
+% of the struct.
+% * *RunParam* - instance of run parameter classes defining settings used.
+% * *MetaData* - property for user defined input.               
+% * *DataFormats* - cell array of data formats available.
+% * *idFormat* - class instance file format index.
+% * *FileSpec* - cell array of the parameters used to load a file: { _MultiSelect_ (on/off),
+% _FileType_}. where _MultiSelect_ defines whether single or multiple
+% selection is allowed and _FileType_ determines the fie extensions to be
+% shown in the file selection dialog.
+
+%% muiDataSet abstract methods
+% *tabPlot* is an abstract method that must be implemented in classes that inherit 
+% muiDataSet. Used to generate a plot for display on Q-Plot tab. The default
+% version of this method can call _tabDefaultPlot_ in muiDataSet which
+% provides with a basic set of plotting tools to handle 2D and 3D data.
+
+%% muiDataSet methods
+% Methods for loading, adding, deleting and applying quality to control to
+% datasets.
+%%
+% *loadData* - set up a new dataset by loading data from a file. The input
+% _muicat_ is a handle to a muiCatalogue instance and classname is the name 
+% of the class to use for the dataset being loaded. 
+%%
+%   loadData(muicat,classname);
+
+%%
+% *addData* - add additional data to an existing dataset, where _obj_ is an
+% instance of a class that uses muiDataSet, _classrec_ is the id of the
+% record in the class handle, _catrec_ is the Catalogue record for the
+% selected case and _muicat_ is a handle to a muiCatalogue instance.
+%%
+%   addData(obj,classrec,catrec,muicat); 
+
+%% 
+% *deleteData* - delete variable or rows from a dataset, where _obj_ is an
+% instance of a class that uses muiDataSet, _classrec_ is the id of the
+% record in the class handle, _catrec_ is the Catalogue record for the
+% selected case and _muicat_ is a handle to a muiCatalogue instance.
+%%
+%   deleteData(obj,classrec,catrec,muicat);
+
+%%
+% *qcData* - apply quality control to a dataset, where _obj_ is an
+% instance of a class that uses muiDataSet, _classrec_ is the id of the
+% record in the class handle, _catrec_ is the Catalogue record for the
+% selected case and _muicat_ is a handle to a muiCatalogue instance.
+%%
+%   qcData(obj,classrec,catrec,muicat);  %catrec not used
+
+%%
+% *getDataSetName* - check whether there is more than one dstable and select
+%%
+%   datasetname = getDataSetName(obj);   %obj is a class instance
+
+%%
+% *selectClassInstance* - Prompt to select a class instance from an array 
+% of class instances held in obj. Filter based on a class
+% property is optional, where propname is the class property to test and 
+% propvalue is the value to match. Returns class instance and selected 
+% dataset. Flag ok=1 if successful and ok =0 if user cancels selection.
+% 
+%%
+%   [cobj,dst,ok] = selectClassInstance(obj,propname,propvalue);
+
+%%
+% *getClassInstances* - get the class indices for the instances in an array 
+% of class instances, obj, where the class property name, propname (as a character 
+% vector), matches propvalue (propvalue can be a numeric or logical array,
+% or a cell array of character vectors, or a string array - similar to 
+% Matlab(TM) <matlab:doc('ismember') ismember>)
+%%
+%   caseidx = getClassInstances(obj,propname,propvalue);
+
+%%
+% *readTSinputFile* - uses Matlab detectImportOptions to decipher the header and read the
+% data into a table, where the columns use the variable names in file (if
+% defined). Checks are made to ensure that no times are duplicated and the data
+% are standardised so that missing times are removed and missing data are set to NaN
+% Time MUST be first column in table to use this function.
+%%
+%   data = readTSinputFile(obj,filename);  %returns a table of data read from filename
+
+%% Creating a class using muiPropertyUI
+% A template to create a class that uses muiPropertyUI can be found in the 
+% <matlab:mui_template_folder muitemplates folder>. The template provides the code for a subclass
+% and the comments highlight where the file needs to be edited to adapt 
+% the template to a new application, as explained further in the 
+% <matlab:doc('muitbx_gettingstarted') Getting Started> documentation.
+
+%% muiUserData format file
+% Data import into a _muitoolbox_ UI using _muiUserData_ and classes that
+% inherit <matlab:doc('muidataset') muiDataSet> requires a format file to
+% be created. A template is provided in the <matlab:mui_template_folder muitemplates folder>. 
+% and sets out the code for each of the functions requied, with comments to
+% highlight where the files need to be edited to adapt the templates to 
+% a different application. The format file has the following form:
+%
+% <include>../muitemplates/dataimport_format_template.m</include>
+
+%% See Also
+% <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muicatalogue') muiCatalogue>,
+% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>.
+ 
+##### SOURCE END #####
+--></body></html>

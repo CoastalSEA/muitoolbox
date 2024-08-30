@@ -1,0 +1,124 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>muiStats</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-26"><meta name="DC.source" content="muistats.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>muiStats</h1><!--introduction--><p>Class for data that is selected using the <a href="matlab:doc('muistatsui')">muiStatsUI</a> interface included in  ModelUI, CoastalTools and other ModelUI apps.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#4">Description</a></li><li><a href="#5">muiStats properties</a></li><li><a href="#7">muiStats methods</a></li><li><a href="#8">Statistcal analysis options</a></li><li><a href="#10">See Also</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">muiStats.getStats(gobj,src,mobj);
+</pre><p>where <i>gobj</i> is a handle to <a href="matlab:doc('muistatsui')">muiStatsUI</a>, <i>src</i> is a handle to the graphical object used to initialise the call, and <i>mobj</i> is a handle to the main UI.</p><h2 id="4">Description</h2><p>Implement the Statistical analysis options that are provided for in <a href="matlab:doc('muistatsui')">muiStatsUI</a>.</p><h2 id="5">muiStats properties</h2><p>muiStats using the following Transient properties:</p><div><ul><li><b>UIsel</b> - structure for the variable selection made in muiStatsUI;</li><li><b>UIset</b> - structure for the plot settings made in muiStatsUI;</li><li><b>Data</b> - data to use in statistic (x,y,z);</li><li><b>MetaData</b> - text summary of primary variable selection;</li><li><b>Labels</b> - struct for XYZ labels;</li><li><b>Title</b> - Title text;</li><li><b>Order</b> - order of variables for selected statistic;</li><li><b>DescOut</b> - structure for descriptive output tables;</li><li><b>ExtrOut</b> - structure for extremes output tables;</li><li><b>Taylor</b> - structure for parameters defined for skill score;</li></ul></div><h2 id="7">muiStats methods</h2><p>% <b>getStats</b> is a static function called from muiStatsUI.</p><h2 id="8">Statistcal analysis options</h2><p>muiStats implements the following options, calling external functions that can be found in the muiApps/muiAppStatsFcns folder:</p><div><ul><li><b>General</b> - Descriptive for X, Regression, Cross-correlation, or User defined methods;</li><li><b>Timeseries</b> - Descriptive, Peaks, Clusters, Extremes, Poisson Stats, or User defined methods;</li><li><b>Taylor</b> - implements the generation of a Taylor diagram to compare data with a reference dataset;</li><li><b>Intervals</b> - compute general statistics of one dataset for the intervals defined by another data set (e.g. wave statistics in the interval between profile surveys).</li></ul></div><h2 id="10">See Also</h2><p><a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muistatsui)">muiStatsUI</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% muiStats
+% Class for data that is selected using the <matlab:doc('muistatsui') muiStatsUI> 
+% interface included in  ModelUI, CoastalTools and other ModelUI apps.
+
+%% Syntax
+%%
+%   muiStats.getStats(gobj,src,mobj);
+%%
+% where _gobj_ is a handle to <matlab:doc('muistatsui') muiStatsUI>, _src_ is a
+% handle to the graphical object used to initialise the call, and _mobj_ is a
+% handle to the main UI.
+
+%% Description
+% Implement the Statistical analysis options that are provided for in
+% <matlab:doc('muistatsui') muiStatsUI>.
+
+%% muiStats properties
+% muiStats using the following Transient properties:
+%%
+% * *UIsel* - structure for the variable selection made in muiStatsUI;
+% * *UIset* - structure for the plot settings made in muiStatsUI;
+% * *Data* - data to use in statistic (x,y,z);
+% * *MetaData* - text summary of primary variable selection;
+% * *Labels* - struct for XYZ labels;
+% * *Title* - Title text;
+% * *Order* - order of variables for selected statistic;
+% * *DescOut* - structure for descriptive output tables;
+% * *ExtrOut* - structure for extremes output tables;
+% * *Taylor* - structure for parameters defined for skill score; 
+
+%% muiStats methods
+% % *getStats* is a static function called from muiStatsUI.
+
+%% Statistcal analysis options
+% muiStats implements the following options, calling external functions
+% that can be found in the muiApps/muiAppStatsFcns folder:
+%%
+% * *General* - Descriptive for X, Regression, Cross-correlation, or User 
+% defined methods;
+% * *Timeseries* - Descriptive, Peaks, Clusters, Extremes, Poisson Stats, 
+% or User defined methods;
+% * *Taylor* - implements the generation of a Taylor diagram to compare
+% data with a reference dataset;
+% * *Intervals* - compute general statistics of one dataset for the intervals 
+% defined by another data set (e.g. wave statistics in the interval between
+% profile surveys).
+
+%% See Also
+% <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muistatsui) muiStatsUI>,
+% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>.
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,194 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>muiManipUI</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-06-25"><meta name="DC.source" content="muimanipui.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>muiManipUI</h1><!--introduction--><p>The muiManipUI class inherits the <a href="matlab:doc('muidataui')">muiDataUI</a> class and provides a user interface for selection of datasets and variables, and using these in a Matlab&#8482; expression or in a function call.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">muiManipUI properties</a></li><li><a href="#4">muiManipUI methods</a></li><li><a href="#7">User Equation or Function</a></li><li><a href="#15">Function library</a></li><li><a href="#18">muiUserModel</a></li><li><a href="#19">See Also</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">obj = muiManipUI.getManipUI(mobj);  <span class="comment">%mobj is handle to main UI.</span>
+</pre><h2 id="2">muiManipUI properties</h2><div><ul><li><b>TabOptions</b> - names the tabs used in the UI.</li><li><b>Tabs2Use</b> - cell array of tabs to include in UI. Allows subselection of the tabs included in a UI based on muiDataUI to suit the application. For example <i>muiPlotsUI</i> defines a wide range of plotting options, (2D, 3D, etc) and only some of these may be needed in a given application.</li></ul></div><p>The properties <i>UIselections</i> and <i>UIsettings</i> are initialised and set by the muiDataUI superclass and hold the selections made by the user.</p><h2 id="4">muiManipUI methods</h2><p><b>getManipUI</b> - static function used to initialise the UI from the main UI</p><p>The following methods are required by muiDataUI:</p><div><ul><li><b>setTabContent</b> - calls functions that define the layout options for individual tabs.</li><li><b>setVariableLists</b> - initialises the selection variables for each tab in the UI.</li><li><b>useSelection</b> - function to do something with selected data.</li></ul></div><h2 id="7">User Equation or Function</h2><p>The text box is used to define a Matlab&#8482; algebraic script , call a Matlab&#8482; function, or call an external function. The main constraint when using this utility is that the number of variables is limited to 3 (X, Y, and Z) in addition T can be used in the call to make use of the dataset RowNames (eg time), without the need to assign T to a button. The variables can be written in upper or lower case. For each variable defined in the call, a variable must be assigned to one or more of the XYZ buttons (with the exception of T). In addition, text inputs required by the call and the model instance (mobj) can also be passed. Comments can be used to pass additional instructions, such as the inclusion of the RowNames in the output to be saved as a new dataset, using either %time or %rows.</p><p>For example any of the following could be entered into the equation box:</p><pre class="language-matlab">x.^2+y   <span class="comment">%time</span>
+myfunction1(x,y,t,<span class="string">'usertext'</span>)
+myfunction2(x,mobj)
+</pre><p>The output from this type of function call can be figures or tables, a single numeric value, or a dataset to be saved (character vector or array). External functions must return output as a cell array with the new variable in the first cell and data to be used to define RowNames in the second cell. If the %time or %rows instruction is included in the call, row data are added providing that the length of the input dataset matches the output dataset. If there is no output to be passed back the function should return the character vector 'no output' to suppress the message box which is used for single value outputs. For expressions that return a result that is the same length as one, or more, of the variables used in the call, there is also the option to add the variable to one of the input datasets as a new variable. In all there are three ways in which results can be saved:</p><div><ol><li>Expression or function returns a result that is the same number of rows as one or more of the input datasets. Option to (a) add as a new variable to an existing data set, or (b) create a new dataset with no assignement to the RowNames property.</li><li>As (1) with the comment of %time or %rows in the call. Attempts to use the RowNames property of one of the inputs to define RowNames in a new dataset. Requires the input variables to have same number of rows. (<i>Plan to add interpolation so this may change</i>).</li><li>Expression or function returns a result with a new variable and time time in a 2-element cell array. The variable is saved as a new dataset.</li></ol></div><p>An alternative when calling external functions is to pass the selected variables as dstables, thereby also passing all the associated metadata and RowNames for each dataset selected. For this option up to 3 variables can be selected but they are defined in the call using dst, for example:</p><pre class="language-matlab">myfunction3(dst,<span class="string">'usertext'</span>,mobj)
+</pre><p>This passes the selected variables as a struct array of dstables to the function. Using this syntax the function can return a dstable, or struct of dstables, or a cell array containing one or more data sets. The options for saving the data are the same, with the additional option that when a dstable, or struct of dstables, is returned, these are saved directly and it is assumed that the <a href="matlab:doc('dsproperties')">dsproperties</a> have been defined in the function called.</p><h2 id="15">Function library</h2><p>To simplify accessing and using a range of functions that are commonly used in an application, the function syntax can be predefined in the file functionlibrarylist.m which can be found in the utils folder of the <i>muitoolbox</i>.  This defines a struct for library entries that contains:</p><div><ul><li>fname - cell array of function call syntax</li><li>fvars - cell array describing the input variables for each function</li><li>fdesc - cell array with a short description of each function</li></ul></div><p>In addition a subselection of the list can be associated with a given App based on the classname of the main UI. The Function button on the Derive Output UI can be used to access the list, select a function and add the syntax to the function input box, where it can be edited to suit the variable assignment to the XYZ buttons.</p><h2 id="18">muiUserModel</h2><p>Inherits from <a href="matlab:doc('muidataset')">muiDataSet</a> to allow new variables to be created using a selection of the existing variables and adds the results to the model catalogue. <a href="matlab:doc('muiusermodel')">muiUserModel</a> is called from <i>muiManipUI</i>.</p><h2 id="19">See Also</h2><p>See <a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a> and documentation for the <a href="matlab:doc('modelui')">ModelUI</a> App.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% muiManipUI
+% The muiManipUI class inherits the <matlab:doc('muidataui') muiDataUI> 
+% class and provides a user interface for selection of datasets and 
+% variables, and using these in a Matlab(TM) expression or in a function
+% call.
+
+%% Syntax
+%   obj = muiManipUI.getManipUI(mobj);  %mobj is handle to main UI. 
+
+%% muiManipUI properties
+% * *TabOptions* - names the tabs used in the UI.
+% * *Tabs2Use* - cell array of tabs to include in UI. Allows subselection of
+% the tabs included in a UI based on muiDataUI to suit the application. For
+% example _muiPlotsUI_ defines a wide range of plotting options, (2D, 3D,
+% etc) and only some of these may be needed in a given application.
+%%
+% The properties _UIselections_ and _UIsettings_ are initialised and set
+% by the muiDataUI superclass and hold the selections made by the user.
+%
+%% muiManipUI methods
+% *getManipUI* - static function used to initialise the UI from the main UI
+%%
+% The following methods are required by muiDataUI: 
+%%
+% * *setTabContent* - calls functions that define the layout options for individual tabs. 
+% * *setVariableLists* - initialises the selection variables for each tab in the UI.
+% * *useSelection* - function to do something with selected data.
+
+%% User Equation or Function
+% The text box is used to define a Matlab(TM) algebraic script , call a
+% Matlab(TM) function, or call an external function. The main constraint
+% when using this utility is that the number of variables is limited to 3
+% (X, Y, and Z) in addition T can be used in the call to make use of the
+% dataset RowNames (eg time), without the need to assign T to a button. 
+% The variables can be written in upper or lower case. For each variable defined 
+% in the call, a variable must be assigned to one or more of the XYZ buttons
+% (with the exception of T). In addition, text inputs 
+% required by the call and the model instance (mobj) can also be passed. 
+% Comments can be used to pass additional instructions, such as the
+% inclusion of the RowNames in the output to be saved as a new dataset,
+% using either %time or %rows. 
+%%
+% For example any of the following could be entered into the equation box:
+%%
+%   x.^2+y   %time
+%   myfunction1(x,y,t,'usertext') 
+%   myfunction2(x,mobj)
+%%
+% The output from this type of function call can be figures or tables, a 
+% single numeric value, or a dataset to be saved (character vector or array).
+% External functions must return output as a cell array with the new variable
+% in the first cell and data to be used to define RowNames in the second
+% cell. If the %time or %rows instruction is included in the call, row data
+% are added providing that the length of the input dataset matches the output
+% dataset. If there is no output to be passed back the function should
+% return the character vector 'no output' to suppress the
+% message box which is used for single value outputs. For expressions that
+% return a result that is the same length as one, or more, of the
+% variables used in the call, there is also the option to add the variable
+% to one of the input datasets as a new variable. In all there are three
+% ways in which results can be saved:
+%%
+% # Expression or function returns a result that is the same number of rows as one or 
+% more of the input datasets. Option to (a) add as a new variable to an
+% existing data set, or (b) create a new dataset with no assignement to the
+% RowNames property.
+% # As (1) with the comment of %time or %rows in the call. Attempts to use
+% the RowNames property of one of the inputs to define RowNames in a new
+% dataset. Requires the input variables to have same number of rows.
+% (_Plan to add interpolation so this may change_).
+% # Expression or function returns a result with a new variable and time
+% time in a 2-element cell array. The variable is saved as a new dataset.
+
+%%
+% An alternative when calling external functions is to pass the selected
+% variables as dstables, thereby also passing all the associated metadata
+% and RowNames for each dataset selected. For this option up to 3 variables
+% can be selected but they are defined in the call using dst, for example:
+%%
+%   myfunction3(dst,'usertext',mobj)
+%%
+% This passes the selected variables as a struct array of dstables to the
+% function. Using this syntax the function can return a dstable, or struct of
+% dstables, or a cell array containing one or more data sets. The options
+% for saving the data are the same, with the additional option that when a
+% dstable, or struct of dstables, is returned, these are saved directly and
+% it is assumed that the <matlab:doc('dsproperties') dsproperties> 
+% have been defined in the function called.
+
+%% Function library
+% To simplify accessing and using a range of functions that are commonly
+% used in an application, the function syntax can be predefined in the file
+% functionlibrarylist.m which can be found in the utils folder of the
+% _muitoolbox_.  This defines a struct for library entries that contains:
+%%
+% * fname - cell array of function call syntax
+% * fvars - cell array describing the input variables for each function
+% * fdesc - cell array with a short description of each function
+%%
+% In addition a subselection of the list can be associated with a given App
+% based on the classname of the main UI.
+% The Function button on the Derive Output UI can be used to access the
+% list, select a function and add the syntax to the function input box,
+% where it can be edited to suit the variable assignment to the XYZ
+% buttons.
+
+%% muiUserModel
+% Inherits from <matlab:doc('muidataset') muiDataSet> to allow new variables to be created using a
+% selection of the existing variables and adds the results to the model
+% catalogue. <matlab:doc('muiusermodel') muiUserModel> is called from _muiManipUI_.
+
+%% See Also
+% See <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('dstoolbox') dstoolbox>
+% and documentation for the <matlab:doc('modelui') ModelUI> App.
+
+
+##### SOURCE END #####
+--></body></html>

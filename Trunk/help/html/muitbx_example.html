@@ -1,0 +1,203 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>muitoolbox - example</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-02-09"><meta name="DC.source" content="muitbx_example.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>muitoolbox - example</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Simple model examples</a></li><li><a href="#4">mui_demoData class</a></li><li><a href="#5">mui_demoModel class</a></li><li><a href="#6">mui_demoPropsInput class</a></li><li><a href="#7">mui_demoUI class</a></li><li><a href="#9">mui_usage class</a></li><li><a href="#13">test_muitoolbox function</a></li><li><a href="#27">See Also</a></li></ul></div><h2 id="1">Simple model examples</h2><p>A number of examples are provided to illustrate a range of uses. The files for the example use case can be found in the example folder <a href="matlab:mui_example_folder">here</a>. Some slides providing an introduction to the use of the muitoolbox can be found <a href="matlab:mui_open_manual">here</a>.</p><p>The example folder includes the following options:</p><div><ol><li>Examples of individual class usage provided in the <i>test_muitoolbox.m</i> function;</li><li>The construct illustrated in the introduction of the <a href="matlab:doc('muitoolbox')">muitoolbox</a>, illustrated using the calling function <i>mui_usage.m</i> and the <b>mui_demoData</b> amd <b>mui_demoModel</b> classes that inherit from the <a href="matlab:doc('muidataset')">muiDataSet</a> abstract class;</li><li>A demonstration UI, provided by the <b>mui_demoUI</b> class that inherits from the <a href="matlab:doc('muimodelui')">muiModelUI</a> abstract class.</li></ol></div><h2 id="4">mui_demoData class</h2><p>A class to load data from a file and store it in a <a href="matlab:doc('dstable')">dstable</a>. The class includes methods to define the dsproperties, read the input file format, load the data into a <i>dstable</i> and plot some output.</p><h2 id="5">mui_demoModel class</h2><p>A class to run a simple model (2D diffusion using parameter settings defined in mui_demo_inputprops.m when called by <b>mui_usage</b> class, and using the Setup&gt;Input Parameters when called from within <b>mui_demoUI</b>). The class includes methods to run the model, save the results, and plot the model output.</p><h2 id="6">mui_demoPropsInput class</h2><p>A class to demonstrate the definition of model input parameters using the <a href="matlab:doc('muipropertyui')">muiPropertyUI</a> abstract class. The interface loads the properties required to run <b>mui_demoModel</b>.</p><h2 id="7">mui_demoUI class</h2><p>A class to demonstrate the implementation of the <a href="matlab:doc('muimodelui')">muiModelUI</a> abstract class. The model has calls to <b>mui_demoPropsInput</b>, <b>mui_demoModel</b>, and <b>mui_demoData</b>, to set up the model input, call the model and load data from a text file. The UI is initialised by simply typing the class name in the Command Window:</p><pre class="language-matlab">mui_demoUI;
+</pre><h2 id="9">mui_usage class</h2><p>A class to illustrate the combined use of data and model classes that use dstable and dsproperties, with a record for each data set held in dscatalouge. An option to run dstb_usage is included in test_dstoolbox</p><pre class="language-matlab">dm = dstb_usage;    <span class="comment">%initialise class that manages calls to models and data classes</span>
+run_a_model(dm);    <span class="comment">%run the demonstation model</span>
+load_data(dm);      <span class="comment">%load a dataset from a text file</span>
+plotCase(dm);       <span class="comment">%plot some results for a selected Case</span>
+displayProps(dm);   <span class="comment">%display the DSproperties for a selected Case</span>
+</pre><p>The above sequence of calls is is also provided in the *test_toolbox function and can be accessed using the call:</p><pre class="language-matlab">test_muitoolbox(<span class="string">'mui_usage'</span>);
+</pre><h2 id="13">test_muitoolbox function</h2><p><b>Examples of usage</b></p><pre class="language-matlab">test_muitoolbox(classname);
+</pre><p><i>classname</i> is one of the <a href="matlab:doc('muitbx_utilityclasses')">muitoolbox classes</a> or one of the example classes that illustrates the use of a muitoolbox abstract class.</p><p><b>muiCatalogue</b> <br> Initialises the class object, adds and removes some records, prompt to edit record, select records to be deleted. Results are displayed in the Command Window.</p><pre class="language-matlab">test_muitoolbox(<span class="string">'muiCatlogue'</span>);
+</pre><p><b>muiProject</b> <br> Initialises the class object, and prompts to edit the project properties.</p><pre class="language-matlab">test_muitoolbox(<span class="string">'muiProject'</span>);
+</pre><p><b>muiConstants</b> <br> Initialises the class object, and prompts to edit the project the properties.</p><pre class="language-matlab">test_muitoolbox(<span class="string">'muiConstants'</span>);
+</pre><p><b>mui_demoPropsInput</b> <br> Initialises the class object, and prompts to edit the project the properties.</p><pre class="language-matlab">test_muitoolbox(<span class="string">'mui_demoPropsInput'</span>);
+</pre><p><b>mui_usage</b> <br> Runs the model twice and loads a data set to create a catalogue of three data sets, then calls plot and display functions for selected cases.</p><pre class="language-matlab">test_muitoolbox(<span class="string">'mui_usage'</span>);
+</pre><h2 id="27">See Also</h2><p>Some slides providing an introduction to the use of the muitoolbox can be found <a href="matlab:mui_open_manual">here</a>. In addition, tool specific doucmentation is available for <a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muitbx_gettingstarted')">Getting Started</a>, and The demonstration UI provided in the <a href="matlab:doc('modelui')">ModelUI</a> App.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% muitoolbox - example
+
+%% Simple model examples
+% A number of examples are provided to illustrate a range of uses. The 
+% files for the example use case can be found in the example folder 
+% <matlab:mui_example_folder here>. Some slides
+% providing an introduction to the use of the muitoolbox can be found
+% <matlab:mui_open_manual here>.
+
+%%
+% The example folder includes the following options:
+%%
+% # Examples of individual class usage provided in the _test_muitoolbox.m_
+% function;
+% # The construct illustrated in the introduction of the
+% <matlab:doc('muitoolbox') muitoolbox>,
+% illustrated using the calling function _mui_usage.m_ and the
+% *mui_demoData* amd *mui_demoModel* classes that inherit from the 
+% <matlab:doc('muidataset') muiDataSet> abstract class;  
+% # A demonstration UI, provided by the *mui_demoUI* class that inherits
+% from the <matlab:doc('muimodelui') muiModelUI> abstract class. 
+
+%% mui_demoData class
+% A class to load data from a file and store it in a <matlab:doc('dstable') dstable>. 
+% The class includes methods to define the dsproperties, read the 
+% input file format, load the data into a _dstable_ and plot some output.
+
+%% mui_demoModel class
+% A class to run a simple model (2D diffusion using parameter settings 
+% defined in mui_demo_inputprops.m when called by *mui_usage* class, and using 
+% the Setup>Input Parameters when called from within *mui_demoUI*).
+% The class includes methods to run the model, save the results, and plot
+% the model output.
+
+%% mui_demoPropsInput class
+% A class to demonstrate the definition of model input parameters using the
+% <matlab:doc('muipropertyui') muiPropertyUI> abstract class. The interface
+% loads the properties required to run *mui_demoModel*.
+
+%% mui_demoUI class
+% A class to demonstrate the implementation of the
+% <matlab:doc('muimodelui') muiModelUI> abstract class. The model has calls
+% to *mui_demoPropsInput*, *mui_demoModel*, and *mui_demoData*, to set up
+% the model input, call the model and load data from a text file. The UI is
+% initialised by simply typing the class name in the Command Window:
+%%
+%   mui_demoUI;
+
+%% mui_usage class
+% A class to illustrate the combined use of data and model classes that use 
+% dstable and dsproperties, with a record for each data set held in
+% dscatalouge. An option to run dstb_usage is included in test_dstoolbox
+%%
+%   dm = dstb_usage;    %initialise class that manages calls to models and data classes
+%   run_a_model(dm);    %run the demonstation model
+%   load_data(dm);      %load a dataset from a text file
+%   plotCase(dm);       %plot some results for a selected Case
+%   displayProps(dm);   %display the DSproperties for a selected Case
+%%
+% The above sequence of calls is is also provided in the *test_toolbox
+% function and can be accessed using the call:
+%%
+%   test_muitoolbox('mui_usage');
+
+%% test_muitoolbox function
+% 
+%%
+% *Examples of usage*
+%%
+%   test_muitoolbox(classname);
+%%
+% _classname_ is one of the <matlab:doc('muitbx_utilityclasses') muitoolbox classes> 
+% or one of the example classes that illustrates the use of a muitoolbox
+% abstract class.
+
+%% 
+% *muiCatalogue* <br>
+% Initialises the class object, adds and removes some records, prompt to edit
+% record, select records to be deleted. Results are displayed in 
+% the Command Window.
+%%
+%   test_muitoolbox('muiCatlogue');
+
+%% 
+% *muiProject* <br>
+% Initialises the class object, and prompts to edit the project
+% properties. 
+ %%
+%   test_muitoolbox('muiProject');  
+
+%% 
+% *muiConstants* <br>
+% Initialises the class object, and prompts to edit the project
+% the properties. 
+%%
+%   test_muitoolbox('muiConstants');
+
+%% 
+% *mui_demoPropsInput* <br>
+% Initialises the class object, and prompts to edit the project
+% the properties. 
+%%
+%   test_muitoolbox('mui_demoPropsInput');
+
+%%
+% *mui_usage* <br>
+% Runs the model twice and loads a data set to create a catalogue of three data
+% sets, then calls plot and display functions for selected cases.
+%%
+%   test_muitoolbox('mui_usage');
+
+%% See Also
+% Some slides providing an introduction to the use of the muitoolbox can be found
+% <matlab:mui_open_manual here>. In addition, tool specific doucmentation
+% is available for <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muitbx_gettingstarted') Getting Started>, and
+% The demonstration UI provided in the <matlab:doc('modelui') ModelUI> App. 
+
+##### SOURCE END #####
+--></body></html>

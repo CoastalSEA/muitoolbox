@@ -1,0 +1,142 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>muiDataUI</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-12-22"><meta name="DC.source" content="muidataui.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>muiDataUI</h1><!--introduction--><p>Abstract class for creating graphic user interfaces to select data and pass selection to applications.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">muiDataUI abstract properties</a></li><li><a href="#4">muiDataUI properties</a></li><li><a href="#8">muiDataUI abstract methods</a></li><li><a href="#10">Creating a class using muiDataUI</a></li><li><a href="#11">See Also</a></li></ul></div><h2 id="1">Description</h2><p>The muiDataUI class provides a set of properties and methods that allow the creation of a bepoke user interfaces to access data held in a <a href="matlab:doc('muicatalogue')">muiCatalogue</a>. Several classes in the <a href="matlab:doc('muitoolbox')">muitoolbox</a> make use of muiDataUI, including <a href="matlab:doc('muieditui')">muiEditUI</a>, <a href="matlab:doc('muiplotsui')">muiPlotsUI</a>, <a href="matlab:doc('muistatsui')">muiStatsUI</a> and <a href="matlab:doc('muimanipui')">muiManipUI</a>. Classes derived from muiDataUI are intended to enable easy access to multi-dimensional data stored in <a href="matlab:doc('dstable')">dstables</a>, allowing the user to select individual Cases and Datasets before selecting specific variables and data ranges of both the variable and any associated dimension data.</p><h2 id="2">muiDataUI abstract properties</h2><p>Properties that all subclasses must include:</p><div><ul><li><b>TabOptions</b> - names of tabs that provide different data accces options</li></ul></div><h2 id="4">muiDataUI properties</h2><p>In addition to some properties that handle internal controls, the following two transient properties are set by muiDataUI derived classes in order to pass the user selection to other classes and methods:</p><p><b>UIselection</b> - struct array of UI selections (one struct for each selection option).</p><div><ul><li>caserec - case record index of selected case;</li><li>dataset - index to field name in Data struct to selected dstable;</li><li>variable - index to selected Variable in selected dstable;</li><li>property - name of what to use: variable,row or dimension description;</li><li>range - limits set for selected property;</li><li>scale - any scaling function to be applied to the variable;</li><li>dims - struct to hold dimension 'name' and 'value' when subselecting from a multi-dimensional array;</li><li>desc - text string that is displayed in the xyz selection text box.</li></ul></div><p><b>UIsettings</b> - struct of UI settings. The defaullt struct includes fields for the UserData value of any action buttons included on a tab, any settings that apply to the overall selection (e.g. plot type) any equation defined in a text box and details of the tab and calling button used to initiate the call to the useSelection method.</p><h2 id="8">muiDataUI abstract methods</h2><p>Methods that all subclasses must include:</p><div><ul><li><b>setTabContent</b> - define the layout options for individual tabs.</li><li><b>setVariableLists</b> - initialise selection lists defined for each tab</li><li><b>useSelection</b> - implement the actions to be taken in response to the calls from the control buttons. The Clear and Close buttons are handled within muiDataUI.</li></ul></div><h2 id="10">Creating a class using muiDataUI</h2><p>A template to create a class that uses muiDataSet can be found in the <a href="matlab:mui_template_folder">muitemplates folder</a>. The template provides the code for a subclass and the comments highlight where the file needs to be edited to adapt the template to a new application, as explained further in the <a href="matlab:doc('muitbx_gettingstarted')">Getting Started</a> documentation.</p><h2 id="11">See Also</h2><p><a href="matlab:doc('muitoolbox')">muitoolbox</a>&lt;matlab:doc('muicatalogue') muiCatalogue&gt;, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% muiDataUI
+% Abstract class for creating graphic user interfaces to select data
+% and pass selection to applications.
+
+
+%% Description
+% The muiDataUI class provides a set of properties and methods that allow
+% the creation of a bepoke user interfaces to access data held in a 
+% <matlab:doc('muicatalogue') muiCatalogue>. Several classes in the 
+% <matlab:doc('muitoolbox') muitoolbox> make use of muiDataUI, including
+% <matlab:doc('muieditui') muiEditUI>, <matlab:doc('muiplotsui') muiPlotsUI>, 
+% <matlab:doc('muistatsui') muiStatsUI> and <matlab:doc('muimanipui') muiManipUI>. 
+% Classes derived from muiDataUI are intended to enable easy access to 
+% multi-dimensional data stored in <matlab:doc('dstable') dstables>,
+% allowing the user to select individual Cases and Datasets before selecting
+% specific variables and data ranges of both the variable and any associated
+% dimension data.
+
+%% muiDataUI abstract properties
+% Properties that all subclasses must include:
+%%
+% * *TabOptions* - names of tabs that provide different data accces options
+
+%% muiDataUI properties
+% In addition to some properties that handle internal controls, the following
+% two transient properties are set by muiDataUI derived classes in order 
+% to pass the user selection to other classes and methods:
+%%
+% *UIselection* - struct array of UI selections (one struct for each selection
+% option).
+%%
+% * caserec - case record index of selected case;
+% * dataset - index to field name in Data struct to selected dstable;
+% * variable - index to selected Variable in selected dstable;
+% * property - name of what to use: variable,row or dimension description;  
+% * range - limits set for selected property;
+% * scale - any scaling function to be applied to the variable;
+% * dims - struct to hold dimension 'name' and 'value' when
+% subselecting from a multi-dimensional array;
+% * desc - text string that is displayed in the xyz selection text box.
+
+%%
+% *UIsettings* - struct of UI settings. The defaullt struct includes fields
+% for the UserData value of any action buttons included on a tab, any
+% settings that apply to the overall selection (e.g. plot type) any 
+% equation defined in a text box and details of the tab and calling button 
+% used to initiate the call to the useSelection method.
+
+%% muiDataUI abstract methods
+% Methods that all subclasses must include:
+%%
+% * *setTabContent* - define the layout options for individual tabs.
+% * *setVariableLists* - initialise selection lists defined for each tab
+% * *useSelection* - implement the actions to be taken in response to the
+% calls from the control buttons. The Clear and Close buttons are handled 
+% within muiDataUI.
+
+%% Creating a class using muiDataUI
+% A template to create a class that uses muiDataSet can be found in the
+% <matlab:mui_template_folder muitemplates folder>. The template provides the code for a subclass
+% and the comments highlight where the file needs to be edited to adapt 
+% the template to a new application, as explained further in the 
+% <matlab:doc('muitbx_gettingstarted') Getting Started> documentation. 
+
+%% See Also
+% <matlab:doc('muitoolbox') muitoolbox><matlab:doc('muicatalogue') muiCatalogue>,
+% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>.
+ 
+
+##### SOURCE END #####
+--></body></html>
