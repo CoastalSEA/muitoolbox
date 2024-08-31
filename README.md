@@ -45,11 +45,11 @@ The _muitoolbox_ integrates with the _dstoolbox_, which stores and manages acces
 
 ## Schematic
 These classes can be used together as illustrated in the following figure, where _ModelUI_ is the class that defines the bespoke UI:
+
 ![muitoolbox_model](https://github.com/user-attachments/assets/56cc9176-7c7a-4c1a-8d0c-e9dbf62e7299)
 
 ## Description
 The purpose of the muitoolbox is to minimise the effort in creating or prototyping an interface for a model or data analysis tool. Creating a new model requires 3 components to be defined, namely the interface (ModelUI in the above illustration), one or more classes to manage the input of model parameters (if required) and the classes to hold imported data, or running a model and storing the output. Central to this is the holding of input data in the Inputs property and accessing the data via the Cases property. In this context, Cases comprise a record of each Case and a dataset. The records are held in the Catalogue property and the dataset (an instance of the data or model class) in the DataSets property of muiCatalogue. Each data or model class stores the dataset in the Data property, with additional information held in the RunData property (e.g. holding input parameters of a model run). Any type of dataset can be stored in the Data property but when using the dstoolbox multidimensional data sets can be stored using dstable and a full set of meta-data attached using dsproperties. The overall architecture and the properties that provide the links between one class and another are shown in the flow chart below.
-
 ![muitoolbox_flow_diagram](https://github.com/user-attachments/assets/6709cf2a-8cdd-4488-9d7b-e1250cbfff1f)
 
 ## Usage
