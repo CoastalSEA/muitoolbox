@@ -182,13 +182,4 @@
          <file>help/html/psfunctions.html</file>
       </demoitem>
    </demosection>
-   <demosection>
-      <label>example</label>
-      <demoitem>
-         <label>mui_demoUI</label>
-         <type>other</type>
-         <source>mui_demoUI</source>
-         <file>example/html/mui_demoUI.html</file>
-      </demoitem>
-   </demosection>
 </demos>
