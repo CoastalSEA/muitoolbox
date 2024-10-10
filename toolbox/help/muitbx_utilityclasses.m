@@ -9,12 +9,13 @@
 % * <matlab:doc('muiproject') muiProject>: holds the current project details.
 % * <matlab:doc('muiconstants') muiConstants>: holds standard physical values (acceleration due to gravity, densities, year to seconds, etc).
 % * <matlab:doc('muiuserdata') muiUserData>: import data sets using user-defined format file.
+% * <matlab:doc('muitableimport') muiTableImport>: import tabular data from text file, spreadsheet, or mat file.
 % * <matlab:doc('muieditui') muiEditUI>: data selection UI to edit data sets.
 % * <matlab:doc('muiplotsui') muiPlotsUI>: data selection UI to generate plots. 
 % * <matlab:doc('muiplots') muiPlots>: methods for plot options based on UI selection.
 % * <matlab:doc('muiselectui') muiSelectUI>: stand alone UI for Case, Dataset and Variable selection.
 % * <matlab:doc('muistatsui') muiStatsUI>: data selection UI for statistical anlysis.
-% * <matlab:doc('muistats') muiStats>: methods for statistical analysis based on UI selectio. 
+% * <matlab:doc('muistats') muiStats>: methods for statistical analysis based on UI selection. 
 % * <matlab:doc('muimanipui') muiManipUI>: data selection UI to define an equation or function call.
 % * <matlab:doc('muiusermodel') muiUserModel>: methods to evaluate functions based on UI selection.  
 

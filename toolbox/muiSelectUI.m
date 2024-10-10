@@ -24,15 +24,15 @@ classdef muiSelectUI < muiDataUI
     end 
 %%  
     methods (Access=protected)
-        function obj = muiSelectUI(mobj)
+        function obj = muiSelectUI(mobj,guititle)
             %initialise standard figure and menus
-            guititle = 'Select Data';
+%             guititle = 'Select Data';
             setDataUIfigure(obj,mobj,guititle);    %initialise figure     
         end
     end
 %%    
     methods (Static)
-        function obj = getSelectUI(mobj)
+        function obj = getSelectUI(mobj,promptxt)
             %this is the function call to initialise the UI and assigning
             %to a handle of the main model UI (mobj.mUI.SelectUI) 
             %options for selection on each tab are defined in setTabContent
@@ -41,7 +41,8 @@ classdef muiSelectUI < muiDataUI
                 obj = [];
                 return;
             else
-                obj = muiSelectUI(mobj);
+                if nargin<2, promptxt = 'Select Data:'; end
+                obj = muiSelectUI(mobj,promptxt);
                 obj.Tabs2Use = {'Select'};
                 setDataUItabs(obj,mobj); %add tabs                
             end                

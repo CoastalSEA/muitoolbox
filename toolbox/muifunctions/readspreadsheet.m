@@ -15,8 +15,9 @@ function datable = readspreadsheet(filename,isdst)
 % OUTPUT
 %   datable - table of selected data
 % NOTES
-%   To omit Row Names, set Row names start cell to empty
-%   If included Row Names must use first or last column of the data range.
+%   To omit Row Names, set Row names start cell to empty and adjust the
+%   start cell of the variable names and data based on required data
+%   If included, Row Names must use column before the data range
 % Author: Ian Townend
 % CoastalSEA (c) May 2024
 %--------------------------------------------------------------------------
@@ -34,7 +35,7 @@ function datable = readspreadsheet(filename,isdst)
     opts = detectImportOptions(filename,'FileType','spreadsheet','Sheet',selection);
     
     %prompt user to select data range, row range, etc
-    promptxt = sprintf('Edit defaults to required variables and ranges\nTo omit Row Names, set Row names start cell to empty\nIf included Row Names must use first or last column of the data range\n\nVariables to use:');
+    promptxt = sprintf('Edit defaults to required variables and ranges\nTo omit Row Names, set Row names start cell to empty\nIf included Row Names must use column either side of the data range\n\nVariables to use:');
     promptxt = {promptxt,'Variable names start cell:','Data start cell:','Row names start cell:'};
     varnames = opts.VariableNames{1};
     for i=2:length(opts.VariableNames)
@@ -44,8 +45,18 @@ function datable = readspreadsheet(filename,isdst)
     answers = inputdlg(promptxt,'Read spreadsheet',1,defaults);
     if isempty(answers), datable = []; return; end
     
-    %use repsonse to amend the opts struct and read the data
+    %use response to amend the opts struct and read the data
     varnames = split(answers{1});
+    if ~isempty(answers{4})
+        %check if variable names start in same column as rownames and
+        %whether the user has adjusted any padded values
+        if strcmp(opts.VariableNamesRange(1),answers{4}(1)) && ...
+                length(opts.VariableNames)==length(varnames)
+            %rownames uses first column of values so trim variable names
+            varnames = varnames(2:end);
+        end
+    end
+
     vartypes = opts.VariableTypes;
     idx = ismatch(opts.VariableNames,varnames);
     opts.VariableNames = opts.VariableNames(idx);

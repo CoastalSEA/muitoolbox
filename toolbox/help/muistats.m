@@ -29,7 +29,7 @@
 % * *Taylor* - structure for parameters defined for skill score; 
 
 %% muiStats methods
-% % *getStats* is a static function called from muiStatsUI.
+% * *getStats* is a static function called from muiStatsUI.
 
 %% Statistcal analysis options
 % muiStats implements the following options, calling external functions

@@ -10,7 +10,8 @@ function cmap = cmap_selection(idsel)
 %   cmap = cmap_selection(idsel)
 % INPUTS
 %   idsel - index to row selection in color table (integer value), or
-%           values of zi if using landsea color map
+%           values of zi if using landsea color map. If no argument
+%           included the user is prompted to select a map from a list.
 % OUTPUT
 %   cmap - RGB values for selected color map
 % NOTES

@@ -74,8 +74,7 @@ function varargout = target_marker(varargin)
     end
 
     output = [hcr,hrg]; %handles to cross and and circle
-    nout = max(nargout,1) - 1;
-    for k=1:nout
+    for k=1:nargout
         varargout{k} = output(k); %#ok<AGROW> 
     end
 end

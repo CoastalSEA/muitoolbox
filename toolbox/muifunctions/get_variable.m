@@ -14,7 +14,8 @@ function var = get_variable(mobj,promptxt)
 %   var - data and metadata for selected variable. struct with fields:
 %         caserec, classrec, name, data, label, desc
 % NOTES
-%    called from edb_tools and edg_user_plot as part of EstuaryDB App.
+%   called from tableviewer_user_tools and tableviewer_user_plots as 
+%   part of TableViewer App.
 % SEE ALSO
 %   calls selectui and muiSelectUI
 %
