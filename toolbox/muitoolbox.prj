@@ -7,7 +7,7 @@
     <param.summary>muitoolbox is used to create bespoke interfaces for modelling applications.</param.summary>
     <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
     <param.screenshot>${PROJECT_ROOT}\help\html\muitoolbox_logo.png</param.screenshot>
-    <param.version>1.32</param.version>
+    <param.version>1.33</param.version>
     <param.output>${PROJECT_ROOT}\muitoolbox.mltbx</param.output>
     <param.products.name />
     <param.products.id />
@@ -132,6 +132,11 @@ Log.txt
          &lt;file type="main"&gt;/help/muistatsui.m&lt;/file&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
+      &lt;example name="muitableimport" type="html"&gt;
+         &lt;file type="source"&gt;/help/html/muitableimport.html&lt;/file&gt;
+         &lt;file type="main"&gt;/help/muitableimport.m&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
       &lt;example name="muitbx_abstractclasses" type="html"&gt;
          &lt;file type="source"&gt;/help/html/muitbx_abstractclasses.html&lt;/file&gt;
          &lt;file type="main"&gt;/help/muitbx_abstractclasses.m&lt;/file&gt;
@@ -213,7 +218,7 @@ Log.txt
     <param.exported.on.package>false</param.exported.on.package>
     <param.required.addons>
       <requiredaddons>
-        <requiredAddOn downloadURL="" earliest="earliest" fromRepository="false" id="3fed2193-17cc-4e12-9a85-874c6bf5fd0d" include="false" latest="latest">dstoolbox</requiredAddOn>
+        <requiredAddOn downloadURL="https://github.com/CoastalSEA/dstoolbox/releases/download/v1.11/dstoolbox.mltbx" earliest="earliest" fromRepository="false" id="3fed2193-17cc-4e12-9a85-874c6bf5fd0d" include="false" latest="latest">dstoolbox</requiredAddOn>
       </requiredaddons>
     </param.required.addons>
     <param.matlab.project.id />
@@ -279,6 +284,7 @@ Log.txt
       <file>${PROJECT_ROOT}\muiSelectUI.m</file>
       <file>${PROJECT_ROOT}\muiStats.m</file>
       <file>${PROJECT_ROOT}\muiStatsUI.m</file>
+      <file>${PROJECT_ROOT}\muiTableImport.m</file>
       <file>${PROJECT_ROOT}\muitemplates</file>
       <file>${PROJECT_ROOT}\muitoolbox_logo.jpg</file>
       <file>${PROJECT_ROOT}\muiUserData.m</file>

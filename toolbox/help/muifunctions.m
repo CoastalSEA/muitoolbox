@@ -83,6 +83,9 @@
 % * *inputUI.m*
 % - creates a multi-field UI
 %
+% * *isimage.m*
+% - test whether an array is the right size and data type to be an image
+%
 % * *ismatch.m*
 % - finds the occurence of matches between two sets of character vectors,
 % cell arrays or string arrays (from v2019b can use Matlab(TM) matches function)

@@ -35,25 +35,41 @@ classdef muiTableImport < muiDataSet
             [newdst,fname] = muiTableImport.loadFile();
             if isempty(newdst), return; end
 
-            promptxt = 'Provide description of the data sources           >';
+            promptxt = {'Provide description of the data sources          >','Name for dataset being added'};
             metatxt = inputdlg(promptxt,'muiTableImport',1);
 
+            %extract dataset names and ensure valid fieldname
+            if isempty(metatxt{2})
+                datasetname = 'Dataset';
+            else
+                datasetname = matlab.lang.makeValidName(metatxt{2});
+            end
+
             if isa(newdst,'struct')
+                dst = newdst;
                 %handle multiple dstables
-                dsetnames = fieldnames(newdst); %names of datasets
+                dsetnames = fieldnames(dst); %names of datasets
                 for j=1:length(dsetnames)
+                    %use existing dataset names (ignore datasetname)
                     dsname = dsetnames{j};
                     %use UI to allow user to add/edit DS properties
-                    newdst.(dsname) = muiTableImport.updateDSproperties(newdst.(dsname)); 
+                    dst.(dsname) = muiTableImport.updateDSproperties(dst.(dsname)); 
                     %assign metadata about data
-                    newdst.(dsname).Source{1} = fname;
-                    newdst.(dsname).MetaData = metatxt{1};
+                    dst.(dsname).Source{1} = fname;
+                    dst.(dsname).MetaData = metatxt{1};
                 end
             elseif isa(newdst,'dstable')
                 %single table loaded
                 promptxt = 'Option to load DS properties';
                 answer = questdlg(promptxt,'Import','File','UI','Skip','UI');
-                if ~strcmp(answer,'Skip')
+                if strcmp(answer,'Skip')
+                    %check that variable descriptions have been defined and
+                    %if not use variable names.
+                    idx = cellfun(@isempty,newdst.VariableDescriptions);
+                    if any(idx)    
+                        newdst.VariableDescriptions(idx) = newdst.VariableNames(idx);
+                    end
+                else
                     if strcmp(answer,'File')
                         newdst = muiTableImport.getDSpropertyFile(newdst);
                     end
@@ -62,11 +78,14 @@ classdef muiTableImport < muiDataSet
                 %assign metadata about data
                 newdst.Source{1} = fname;
                 newdst.MetaData = metatxt{1};
+                dst.(datasetname) = newdst;
             else
-
+                warndlg('Unrecognised data type for newdst in muiTableImport.loadData')
+                return;
             end
+            
             %setDataRecord classobj, muiCatalogue obj, dataset, classtype
-            setDataSetRecord(obj,muicat,newdst,'data');           
+            setDataSetRecord(obj,muicat,dst,'data');           
         end 
     end
 %%
@@ -102,7 +121,6 @@ classdef muiTableImport < muiDataSet
             elseif strcmp(ext,'.xlsx')
                 %load data from an Excel spreadsheet
                 newdst = readspreadsheet([path,fname],true); %return a dstable
-
             else
                 warndlg('File type not handled in muiTableImport.loadFile')
                 newdst = [];
@@ -183,6 +201,7 @@ classdef muiTableImport < muiDataSet
             [newdst,fname] = muiTableImport.loadFile();
             if isempty(newdst), return; end
             dst = vertcat(dst,newdst);
+            if isempty(dst), return; end
             %assign metadata about data
             nfile = length(dst.Source);
             dst.Source{nfile+1} = fname;
@@ -198,7 +217,19 @@ classdef muiTableImport < muiDataSet
             dst = obj.Data.(datasetname);      %selected dstable
             [newdst,fname] = muiTableImport.loadFile();
             if isempty(newdst), return; end
+
+            %new table loaded
+            promptxt = 'Option to load DS properties';
+            answer = questdlg(promptxt,'Import','File','UI','Skip','UI');
+            if ~strcmp(answer,'Skip')
+                if strcmp(answer,'File')
+                    newdst = muiTableImport.getDSpropertyFile(newdst);
+                end
+                newdst = muiTableImport.updateDSproperties(newdst); 
+            end
+
             dst = horzcat(dst,newdst);
+            if isempty(dst), return; end
             %assign metadata about data
             nfile = length(dst.Source);
             dst.Source{nfile+1} = fname;
@@ -219,6 +250,8 @@ classdef muiTableImport < muiDataSet
                 end
                 newdst = muiTableImport.updateDSproperties(newdst);
             end
+            if isempty(newdst), return; end
+
             promptxt = {'Provide description of the data sources          >','Name for dataset being added'};
             metatxt = inputdlg(promptxt,'muiTableImport',1);
 
@@ -247,6 +280,15 @@ classdef muiTableImport < muiDataSet
                     'ListSize',[250,100],'ListString',delist);
                 if ok<1, return; end
             end
+
+            %get user to confirm selection
+            checktxt = 'Deleting the following rows:';
+            for i=1:length(att2use)
+                checktxt = sprintf('%s\n%s',checktxt,delist{att2use(i)});
+            end
+            answer = questdlg(checktxt,'Delete','Continue','Quit','Quit');
+            if strcmp(answer,'Quit'), return; end
+
             %delete selected rows
             dst = removerows(dst,att2use);  
         
@@ -269,14 +311,23 @@ classdef muiTableImport < muiDataSet
                     'ListSize',[250,100],'ListString',delist);
                 if ok<1, return; end
             end
+
+            %get user to confirm selection
+            checktxt = 'Deleting the following variables:';
+            for i=1:length(att2use)
+                checktxt = sprintf('%s\n%s',checktxt,delist{att2use(i)});
+            end
+            answer = questdlg(checktxt,'Delete','Continue','Quit','Quit');
+            if strcmp(answer,'Quit'), return; end
+
             %delete selected variables
-            dst = removevars(dst,delist(att2use));  
+            dst = removevars(dst,dst.VariableNames(att2use));  
         
             obj.Data.(datasetname) = dst;
             updateCase(muicat,obj,classrec);
-        end
+        end    
 
-    %%
+%%
         function delDataset(obj,classrec,~,muicat)
             %delete a dataset
             dst = obj.Data;
@@ -287,113 +338,53 @@ classdef muiTableImport < muiDataSet
                 return
             else
                 datasetname = getDataSetName(obj); %prompts user to select dataset if more than one
+                %get user to confirm selection
+                checktxt = sprintf('Deleting the following dataset: %s',datasetname);
+                answer = questdlg(checktxt,'Delete','Continue','Quit','Quit');
+                if strcmp(answer,'Quit'), return; end
                 dst = rmfield(dst,datasetname);    %delete selected dstable
             end
 
             obj.Data = dst;
             updateCase(muicat,obj,classrec);
         end
-% 
-%         function addData(obj,classrec,~,muicat) 
-%             %add additional data to an existing user dataset
-%             datasetname = getDataSetName(obj); %prompts user to select dataset if more than one
-%             dst = obj.Data.(datasetname);      %selected dstable
-%             [newdst,fname] = muiTableImport.loadFile();
-%             if isempty(newdst), return; end
-% 
-%             rowvar = questdlg('Add rows or variables?','Add data','Rows','Variables','Quit','Rows');
-% 
-%             if strcmp(rowvar,'Quit')
-%                 return;
-%             elseif strcmp(rowvar,'Rows')
-%                 dst = vertcat(dst,newdst);
-%             else
-%                 dst = horzcat(dst,newdst);
-%             end
-%             
-%             %assign metadata about data
-%             nfile = length(dst.Source);
-%             dst.Source{nfile+1} = fname;
-%             
-%             obj.Data.(datasetname) = dst;  
-%             updateCase(muicat,obj,classrec);
-%         end   
-        
-%%
-%         function deleteData(obj,classrec,~,muicat)
-%             %delete variable or rows from a dataset
-%             datasetname = getDataSetName(obj); %prompts user to select dataset if more than one
-%             dst = obj.Data.(datasetname);      %selected dstable
-% 
-%             rowvar = questdlg('Delete rows or variables?','Add data','Rows','Variables','Quit','Rows');
-%             if strcmp(rowvar,'Quit')
-%                 return;
-%             elseif strcmp(rowvar,'Rows')
-%                 %select variable to use
-%                 delist = dst.DataTable.Properties.RowNames; %get char row names
-%                 promptxt = 'Select rows'; 
-%                 att2use = 1;
-%                 if length(delist)>1
-%                     [att2use,ok] = listdlg('PromptString',promptxt,...
-%                                      'Name','Delete data','SelectionMode','multiple',...
-%                                      'ListSize',[250,100],'ListString',delist);
-%                     if ok<1, return; end  
-%                 end
-%                 %delete selected variables
-%                 dst = removerows(dst,att2use);  %delete selected rows   
-%             else                
-%                 %select variable to use
-%                 delist = dst.VariableNames;
-%                 promptxt = 'Select Variable'; 
-%                 att2use = 1;
-%                 if length(delist)>1
-%                     [att2use,ok] = listdlg('PromptString',promptxt,...
-%                                      'Name','Delete data','SelectionMode','multiple',...
-%                                      'ListSize',[250,100],'ListString',delist);
-%                     if ok<1, return; end  
-%                 end
-%                 %delete selected variables
-%                 dst = removevars(dst,delist(att2use));  %delete selected rows
-%             end
-%            
-%             obj.Data.(datasetname) = dst;            
-%             updateCase(muicat,obj,classrec);
-%         end        
 
 %%
         function tabPlot(obj,src)
             %generate plot for display on Q-Plot tab
             tabcb  = @(src,evdat)tabPlot(obj,src);
-            ax = tabfigureplot(obj,src,tabcb,false);            
+            ax = tabfigureplot(obj,src,tabcb,false);
             %get data for variable and dimensions x,y,t
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
             %--------------------------------------------------------------
-            if strcmp(datasetname,'Images')
-                img = dst.image;
-                location = dst.RowNames;
-                idv = listdlg('PromptString','Select estuary:',...
-                           'SelectionMode','single',...
-                           'ListString',location);
-                imshow(img{idv});
-            else
-                vardesc = dst.VariableDescriptions;
+            vardesc = dst.VariableDescriptions;
+            if length(vardesc)>1
                 idv = listdlg('PromptString','Select variable:',...
-                               'SelectionMode','single',...
-                               'ListString',vardesc);
+                          'SelectionMode','single','ListString',vardesc);                
                 if isempty(idv), return; end
-
+            else
+                idv = 1;
+            end
+            %test for array of allowed data types for a color image
+            isim = isimage(dst.DataTable{1,1});
+            if isim(1) %isim(1) is color and isim(2) is greyscale
+                img = dst.(dst.VariableNames{idv});
+                location = dst.RowNames;
+                idl = listdlg('PromptString','Select estuary:',...
+                          'SelectionMode','single','ListString',location);                    
+                imshow(img{idl});
+            else
                 if size(dst.DataTable{1,1},2)>1
                     idx = listdlg('PromptString','Select X-variable:',...
-                               'SelectionMode','single',...
-                               'ListString',vardesc);
+                            'SelectionMode','single','ListString',vardesc);                        
                     if isempty(idv), return; end
                     vectorplot(obj,ax,dst,idv,idx);
                 else
                     scalarplot(obj,ax,dst,idv);
                 end
             end
-        end    
+        end
 
 %%
         function tabTable(obj,src)
@@ -402,6 +393,12 @@ classdef muiTableImport < muiDataSet
             delete(ht)
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
+            firstcell = dst.DataTable{1,1};
+            if ~isscalar(firstcell) || (iscell(firstcell) && ~isscalar(firstcell{1}))
+                %not tabular data
+                warndlg('Selected dataset is not tabular')
+                return; 
+            end 
             %title = sprintf('Data for %s table',datasetname);
             desc = sprintf('Source:%s\nMeta-data: %s',dst.Source{1},dst.MetaData);
             tablefigure(src,desc,dst);        

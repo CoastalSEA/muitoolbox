@@ -104,6 +104,12 @@
          <file>help/html/muistatsui.html</file>
       </demoitem>
       <demoitem>
+         <label>muitableimport</label>
+         <type>other</type>
+         <source>muitableimport</source>
+         <file>help/html/muitableimport.html</file>
+      </demoitem>
+      <demoitem>
          <label>muitbx_abstractclasses</label>
          <type>other</type>
          <source>muitbx_abstractclasses</source>
