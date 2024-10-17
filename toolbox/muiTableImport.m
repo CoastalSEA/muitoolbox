@@ -380,11 +380,12 @@ classdef muiTableImport < muiDataSet
 
 
 %%
-        function [idx,ax] = userPlot(obj,ax)
+        function [ax,idx,ids] = userPlot(obj,ax)
             %allows external functions to call vectorplot and scalatplot
+            % ax - handle to figure axes if not supplied
             % idx - sort order of x-variable if a scalarplot and the
             % selected x-variable if a vector plot
-            % ax - handle to figure axes if not supplied
+            % ids - indices of selected sub-set (after sorting)            
             if nargin<2
                 hfig = figure('Name','UserPlot','Units','normalized',...
                                             'Resize','on','Tag','PlotFig'); 
@@ -401,7 +402,7 @@ classdef muiTableImport < muiDataSet
                 if isempty(idx), return; end
                 vectorplot(obj,ax,dst,idv,idx);
             else
-                idx = scalarplot(obj,ax,dst,idv);
+                [idx,ids] = scalarplot(obj,ax,dst,idv);
             end
         end
 
@@ -428,8 +429,6 @@ classdef muiTableImport < muiDataSet
                        'HorizontalAlignment','center','Tag','titletxt');
         end
 
-%%
-
     end
 %%
     methods(Access = protected)
@@ -448,38 +447,41 @@ classdef muiTableImport < muiDataSet
             hold off
             xlabel(sprintf('Normalised %s',dst.VariableLabels{idx}))
             ylabel(sprintf('Normalised %s',dst.VariableLabels{idv}))
-            title(dst.Description)
+            title(['Case: ',dst.Description])
             ax.Color = [0.96,0.96,0.96];  %needs to be set after plot  
         end
 
 %%
-        function idx = scalarplot(obj,ax,dst,idv)
+        function [idx,ids] = scalarplot(~,ax,dst,idv)
             %plot selected variable as function of location
+            % idx - sort order of x-variable
+            % ids - indices of selected sub-set (after sorting)
             location = dst.RowNames;
             rn = categorical(location,location);
 
-            x = dst.DataTable{:,idv};
-            if iscell(x) && ischar(x{1})      
+            y = dst.DataTable{:,idv};
+            if iscell(y) && ischar(y{1})      
                 %if variable is not numeric make it numeric
-                x = categorical(x,'Ordinal',true);    
-                cats = categories(x);
-                x = double(x); %convert categorical data to numerical
+                y = categorical(y,'Ordinal',true);    
+                cats = categories(y);
+                y = double(y); %convert categorical data to numerical
             else
                 cats = [];
             end
 
             if isempty(rn) %handle case where rownames not defined
-                rn = 1:length(x);
+                rn = 1:length(y);
                 rn = categorical(rn,rn);
             end
 
             %option to plot alphabetically or in index order
-            answer = questdlg('Sort X-variable?','Import','Index','Sorted','Unsorted','Index');
-            [rn,idx] = sortXdata(obj,dst,rn,answer);
+            [rn,idx] = sort_var(dst,rn);
+            %option to subsample the x-variable
+            [sub_rn,sub_y,ids,~] = subsample_var(rn,y(idx)); 
             
             %bar plot of selected variable
-            bar(ax,rn,x);          
-            title (dst.Description);
+            bar(ax,sub_rn,sub_y);          
+            title (['Case: ',dst.Description]);
             if ~isempty(cats)
                 yticks(1:length(cats));
                 yticklabels(cats);
@@ -497,41 +499,6 @@ classdef muiTableImport < muiDataSet
             ax.Color = [0.96,0.96,0.96];  %needs to be set after plot  
         end
 
-%%
-        function [loc,idx]  = sortXdata(~,dst,loc,answer)
-            %function to sort x-axis data to required order
-            if strcmp(answer,'Index')
-                %allow user to select a variable to sort by (must return
-                %vector of unique values)
-                ok = 1;
-                while ok>0
-                    var = [];
-                    vardesc = dst.VariableDescriptions;
-                    idv = listdlg('PromptString','Select variable:',...
-                               'SelectionMode','single',...
-                               'ListString',vardesc);
-                    if isempty(idv), break; end
-                    var = dst.(dst.VariableNames{idv});
-                    if isunique(var)
-                        ok = 0; 
-                    else
-                        hw = warndlg('Index variable must be vector of unique values');
-                        waitfor(hw)
-                    end
-                end
-                if isempty(var), return; end
-                [~,idx] = sort(var);
-                loc = reordercats(loc,idx);   
-                
-            elseif strcmp(answer,'Sorted')
-                %sort categorical rownames into alphabetical order
-                sloc = string(loc);
-                [~,idx] = sort(sloc);
-                loc = reordercats(loc,idx);
-            else
-                idx = 1:length(loc);
-            end
-        end
 %%
         function [dst,idv] =selectDataSet(obj)
             %select dataset and variable to use for plot/analysis
