@@ -154,6 +154,9 @@
 % score plots. Skill score requires correlation coefficient and exponent.
 % Other parameters relate to local skill score
 %
+% * *sortplots.m*
+% - reorder plot handles so that the legend plots in sequence added
+%
 % * *stderror.m*
 % - compute the standard error of a data set relative to a fitted
 % regression line

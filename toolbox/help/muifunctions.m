@@ -141,9 +141,6 @@
 % * *setslider.m*
 % - define slider range text and value for data selection uicontrol  
 % 
-% * *sortplots.m*
-% - reorder plot handles so that the legend plots in sequence added
-% 
 % * *setPolar.m* 
 % - callback function for button to set XY plot to be polar 
 % instead of cartesian
@@ -151,6 +148,15 @@
 % * *setXYorder.m*
 % - callback function for button to switch X and Y data (eg on
 % a UI selecting data for plotting)
+%
+% * *sort_var.m*
+% - function to sort avar array to order defined by a selected index or in 
+% ascending order Input variable can be numeric, character, string or 
+% categoraical array. If categorical, the categories are reordered so that
+% they plot in the defined order
+%
+% * *subsample_var.m*
+% - subsample a unique index, X, and return X and var for selected values
 %
 % * *tablefigureUI.m*
 % - generate tablefigure and add buttons and controls to edit and return

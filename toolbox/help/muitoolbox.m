@@ -88,4 +88,4 @@
 % <matlab:doc('dstoolbox') dstoolbox> and use of both
 % toolboxes is illustrated in the <matlab:doc('modelui') ModelUI> App.
 % A summary of how to modify the code for a particular application is given 
-% in <matlab:doc('muitbx_gettingstarted').
+% in <matlab:doc('muitbx_gettingstarted') here>.
