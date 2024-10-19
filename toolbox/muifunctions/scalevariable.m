@@ -43,7 +43,7 @@ function  var = scalevariable(inputvar,selection,dim)
         idx = find(~isnan(subvar),1,'first');
         switch selection
             case 'Log'
-                var(:,i) = log(subvar);
+                var(:,i) = log10(subvar);
             case 'Relative: V-V(x=0)'                    
                 var(:,i) = subvar-subvar(idx);               
             case 'Scaled: V/V(x=0)',...

@@ -327,6 +327,8 @@ classdef muiPlots < handle
                 ylabel(obj.AxisLabels.Y)
             end
             title(obj.Title)
+
+            %handle ticks for categoric data
             if strcmp(symb{1},'grouped')&& strcmp(obj.UIset.Type.String,'barh') ...
                                                     && ~isempty(cats)
                 xticks(1:length(cats));
@@ -335,6 +337,20 @@ classdef muiPlots < handle
                 yticks(1:length(cats));
                 yticklabels(cats);
             end
+
+            %handle ticks for log scaled data
+            if strcmp(obj.UIset.scaleList{obj.UIsel(1).scale},'Log')
+                idx = find(mod(figax.XTick(:), 1) == 0);
+                figax.XTick = figax.XTick(idx); %remove non integer exponents
+                figax.XTickLabel = cellstr(num2str(figax.XTick(:), '10^{%d}'));
+            end
+
+            if strcmp(obj.UIset.scaleList{obj.UIsel(2).scale},'Log')
+                idy = find(mod(figax.YTick(:), 1) == 0);
+                figax.YTick = figax.YTick(idy); %remove non integer exponents
+                figax.YTickLabel = cellstr(num2str(figax.YTick(:), '10^{%d}'));
+            end        
+
             hl = legend(figax,hp,'Location','best');
             hl.Tag = fnum;
             hold(figax,'off')

@@ -12,10 +12,9 @@ function var = get_variable(mobj,promptxt)
 %   promptxt - text used as prompt in selection UI (optional)
 % OUTPUT
 %   var - data and metadata for selected variable. struct with fields:
-%         caserec, classrec, name, data, label, desc
+%         caserec, classrec, name, data, label, desc, case, scale
 % NOTES
-%   called from tableviewer_user_tools and tableviewer_user_plots as 
-%   part of TableViewer App.
+%   called from tableviewer_user_plots as part of TableViewer App.
 % SEE ALSO
 %   calls selectui and muiSelectUI
 %
@@ -35,12 +34,13 @@ function var = get_variable(mobj,promptxt)
     var.name = dst.VariableNames{UIsel(1).variable};
     var.data= dst.(var.name);
     var.label = dst.VariableLabels{UIsel(1).variable};
-    var.desc = dst.Description;
+    var.desc = dst.VariableDescriptions{UIsel(1).variable};
+    var.case = dst.Description;
+    var.scale = UIset.scaleList{UIsel(1).scale};
     if UIsel(1).scale>1
-        %adjust data is user has selected to rescale variable
-        usescale = UIset.scaleList{UIsel(1).scale};
+        %adjust data if user has selected to rescale variable
         dim = 1; %dimension to apply scaling function if matrix
-        var.data = scalevariable(var.data,usescale,dim);
-        var.label = sprintf('%s-%s',usescale,var.label);
+        var.data = scalevariable(var.data,var.scale,dim);
+        var.label = sprintf('%s-%s',var.scale,var.label);
     end
 end
