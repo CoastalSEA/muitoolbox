@@ -1,4 +1,4 @@
-function datable = readspreadsheet(filename,isdst)
+function datable = readspreadsheet(filename,isdst,cell_ids)
 %
 %-------header-------------------------------------------------------------
 % NAME
@@ -12,6 +12,9 @@ function datable = readspreadsheet(filename,isdst)
 %   filename - path and filename of spreadsheet to be read
 %   isdst - return data in a dstable if true, and a table if false
 %           (optional, default is false)
+%   cell_ids - location of start cells in spreadsheet for variable names,
+%           data and row names as character cell array (optional, default 
+%           uses 'B1';'B2';'A2')
 % OUTPUT
 %   datable - table of selected data
 % NOTES
@@ -22,7 +25,12 @@ function datable = readspreadsheet(filename,isdst)
 % CoastalSEA (c) May 2024
 %--------------------------------------------------------------------------
 % 
-    if nargin<2, isdst = false; end
+    if nargin<2
+        isdst = false; 
+        cell_ids = {'B1';'B2';'A2'};
+    elseif nargin<3
+        cell_ids = {'B1';'B2';'A2'};
+    end
 
     snames = sheetnames(filename);
     if length(snames)>1
@@ -41,7 +49,7 @@ function datable = readspreadsheet(filename,isdst)
     for i=2:length(opts.VariableNames)
         varnames = sprintf('%s %s',varnames,opts.VariableNames{i});
     end
-    defaults = {varnames;'B1';'B2';'A2'};
+    defaults = [{varnames};cell_ids(:)];
     answers = inputdlg(promptxt,'Read spreadsheet',1,defaults);
     if isempty(answers), datable = []; return; end
     
