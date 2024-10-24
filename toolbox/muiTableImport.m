@@ -69,6 +69,11 @@ classdef muiTableImport < muiDataSet
                     if any(idx)    
                         newdst.VariableDescriptions(idx) = newdst.VariableNames(idx);
                     end
+                    %
+                    idy = cellfun(@isempty,newdst.VariableLabels);
+                    if any(idy)    
+                        newdst.VariableLabels(idy) = newdst.VariableNames(idy);                        
+                    end                    
                 else
                     if strcmp(answer,'File')
                         newdst = muiTableImport.getDSpropertyFile(newdst);
