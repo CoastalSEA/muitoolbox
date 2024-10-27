@@ -502,7 +502,8 @@ classdef muiCatalogue < dscatalogue
                                 'CheckSingle',ischeck);
         end
 %%
-        function [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt)
+        function [cobj,classrec] = selectCaseObj(obj,casetype,classname,...
+                                                                 promptxt)
             %prompt user to select a Case and return instance (eg used in
             %GDinterface)
             % obj - class instance of muiCatalogue (eg using mobj.Cases for
@@ -532,6 +533,19 @@ classdef muiCatalogue < dscatalogue
                               'SelectionMode','single','ListSize',[250,200]);
             if ok<1, cobj = []; classrec = []; return; end
             [cobj,classrec] = getCase(obj,caserec);    
+        end
+%%
+        function [cobj,classrec,datasets,idd] = selectCaseDataset(obj,...
+                                              casetype,classname,promptxt)
+            %select case and dataset for use in plot or analysis
+            [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt);
+            datasets = fields(cobj.Data);
+            idd = 1;
+            if length(datasets)>1
+                idd = listdlg('PromptString','Select table:','ListString',datasets,...
+                                    'SelectionMode','single','ListSize',[160,200]);
+                if isempty(idd), return; end
+            end
         end
 %%
         function [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,...
@@ -843,6 +857,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             dst = cobj.Data.(dsname);
             varnames = dst.VariableNames;
             selvar = varnames{ivar};
+            seldesc = dst.VariableDescriptions{ivar};
             var = dst.(selvar);
             dtype = getdatatype(var);
             
@@ -858,7 +873,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             if isempty(idt), return; end
             seltype = types{idt};
             if strcmp(seltype,'ordinal') || strcmp(seltype,'categorical')
-                valuesetxt = sprintf('Uniques values of %s',selvar);
+                valuesetxt = sprintf('Uniques values of %s',seldesc);
                 prompts = {valuesetxt,'Matching category names'};
                 classes = unique(var);  %find categories and allow user to edit
                 [catstr,type,~] = var2str(classes);
@@ -871,9 +886,25 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 valueset = strsplit(answers{1},', ');
                 catnames = strsplit(answers{2},', ');
                 valueset = str2var(valueset,type,catnames);
-                if strcmp(seltype,'ordinal')
+                if isordinal(var) && strcmp(seltype,'categorical')
+                    %switch from ordinal to categorical
+                    var = categorical(var);
+                elseif iscategorical(var) && strcmp(seltype,'ordinal')
+                    %switch from categorical to ordinal
+                    var = categorical(var,'Ordinal',true);
+                elseif iscategorical(var) && contains(answers{1},'order')
+                    %reorder and existing categorical dataset
+                    var = reordercats(var,catnames);
+                elseif iscategorical(var) 
+                    %rename categories of existing categorical dataset
+                    var = renamecats(var,catnames);
+                elseif strcmp(seltype,'ordinal')
+                    %create a categorical dataset where values match the
+                    %valueset and named using catnames and are ordered                    
                     var = categorical(var,valueset,catnames,'Ordinal',true);
                 else
+                    %create an ordinal dateset where values match the
+                    %valueset and these are named using catnames
                     var = categorical(var,valueset,catnames);
                 end
                 dst = cobj.Data.(dsname);

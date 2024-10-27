@@ -358,6 +358,7 @@ classdef muiTableImport < muiDataSet
             ax = tabfigureplot(obj,src,tabcb,false);
             %get data and variable id
             [dst,idv] =selectDataSet(obj);
+            if isempty(idv), return; end
 
             %test for array of allowed data types for a color image
             isim = isimage(dst.DataTable{1,1});
@@ -372,14 +373,13 @@ classdef muiTableImport < muiDataSet
                     vardesc = dst.VariableDescriptions;
                     idx = listdlg('PromptString','Select X-variable:',...
                             'SelectionMode','single','ListString',vardesc);                        
-                    if isempty(idv), return; end
+                    if isempty(idx), return; end
                     vectorplot(obj,ax,dst,idv,idx);
                 else
                     scalarplot(obj,ax,dst,idv);
                 end
             end
         end
-
 
 %%
         function [ax,idx,ids] = userPlot(obj,ax)
@@ -416,7 +416,10 @@ classdef muiTableImport < muiDataSet
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
             firstcell = dst.DataTable{1,1};
-            if ~isscalar(firstcell) || (iscell(firstcell) && ~isscalar(firstcell{1}))
+            if ~isscalar(firstcell) || ...
+                        (iscell(firstcell) &&...
+                        ~(iscellstr(firstcell) || isstring(firstcell)) && ...
+                        ~isscalar(firstcell{1}))
                 %not tabular data
                 warndlg('Selected dataset is not tabular')
                 return; 
@@ -515,7 +518,6 @@ classdef muiTableImport < muiDataSet
             if length(vardesc)>1
                 idv = listdlg('PromptString','Select variable:',...
                           'SelectionMode','single','ListString',vardesc);                
-                if isempty(idv), return; end
             else
                 idv = 1;
             end
