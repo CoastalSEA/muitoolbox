@@ -480,7 +480,11 @@ classdef muiTableImport < muiDataSet
             [rn,idx] = sort_var(dst,rn);
             %option to subsample the x-variable
             [sub_rn,sub_y,ids,~] = subsample_var(rn,y(idx)); 
-            
+            if iscategorical(sub_y)
+                cats = categories(sub_y);
+                sub_y = double(sub_y); %convert categorical data to numerical
+            end           
+
             %bar plot of selected variable
             bar(ax,sub_rn,sub_y);          
             title (['Case: ',dst.Description]);

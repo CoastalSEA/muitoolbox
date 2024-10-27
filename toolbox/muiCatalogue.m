@@ -839,25 +839,29 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             %select a variable and modify that data type of the variable
             %used mainly to make data catagorical or ordinal
             [cobj,classrec,dsname,ivar]  = selectCaseDatasetVariable(obj);
-            if isepty(ivar), return; end  %user did not slect a variable
+            if isempty(ivar), return; end  %user did not select a variable
             dst = cobj.Data.(dsname);
             varnames = dst.VariableNames;
-            var = dst.(varnames{ivar});
+            selvar = varnames{ivar};
+            var = dst.(selvar);
             dtype = getdatatype(var);
             
             promptxt = sprintf('Data type is %s\nSelect new data type:',dtype{1});
-            types = {'logical','int8','int16','int32','int64','uint8','uint16',... 
-                 'uint32','uint64''single','double',...
-                 'char','string','categorical','ordinal',...
-                 'datetime','duration','calendarDuration'};
+            % types = {'logical','int8','int16','int32','int64','uint8',... 
+            %          'uint16','uint32','uint64''single','double','char',...
+            %          'string','categorical','ordinal','datetime','duration',...
+            %          'calendarDuration'};
+            %at the moment only categorical and ordinal is handled
+            types = {'categorical','ordinal'};              
             idt = listdlg('PromptString',promptxt,'ListString',types,...
-                                'SelectionMode','single','ListSize',[160,260]);
+                          'SelectionMode','single','ListSize',[160,260]);
             if isempty(idt), return; end
             seltype = types{idt};
             if strcmp(seltype,'ordinal') || strcmp(seltype,'categorical')
-                prompts = {'Define valueset','Define category names'};
+                valuesetxt = sprintf('Uniques values of %s',selvar);
+                prompts = {valuesetxt,'Matching category names'};
                 classes = unique(var);  %find categories and allow user to edit
-                [catstr,type,format] = var2str(classes);
+                [catstr,type,~] = var2str(classes);
                 catstr = sprintf('%s, ',catstr{:});
                 catstr = catstr(1:end-2);
                 defaults = {catstr,catstr};
@@ -865,13 +869,19 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 answers = inputdlg(prompts,'ModVar',1,defaults,opts);
                 if isempty(answers), return; end   
                 valueset = strsplit(answers{1},', ');
-                valueset = str2var(valueset,type,format);
                 catnames = strsplit(answers{2},', ');
-                var = categorical(var,valueset,catnames);
+                valueset = str2var(valueset,type,catnames);
                 if strcmp(seltype,'ordinal')
-                    var.Ordinal = true;
+                    var = categorical(var,valueset,catnames,'Ordinal',true);
+                else
+                    var = categorical(var,valueset,catnames);
                 end
-                cobj.Data.(dsname).(varnames{ivar}) = var;
+                dst = cobj.Data.(dsname);
+                dst.(selvar) = var;
+                
+                %update range based on categories used for var
+                dst = setVariableRange(dst,selvar);
+                cobj.Data.(dsname) = dst;
                 updateCase(obj,cobj,classrec,true);
             else
                 warndlg('Only categorial and ordinal currently handled');
@@ -1019,12 +1029,28 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             % Nested function----------------------------------------------
             function data = applyrange(data,range,subrange)
                 %set values outside subrange to NaN
-                if range{1}~=subrange{1}
-                    data(data<subrange{1}) = NaN;
-                end
-                %
-                if range{2}~=subrange{2}
-                    data(data>subrange{2}) = NaN;
+                if isnumeric(range{1})
+                    if range{1}~=subrange{1}
+                        data(data<subrange{1}) = NaN;
+                    end
+                    %
+                    if range{2}~=subrange{2}
+                        data(data>subrange{2}) = NaN;
+                    end
+                else
+                    %for text it would be better to be able to multi-select 
+                    %from a list but for now use a range to be consistent
+                    valueset = categories(categorical(data));
+                    ids = find(contains(valueset,subrange{1}));
+                    ide = find(contains(valueset,subrange{2}));
+                    idx = 1:length(valueset);
+                    idx(ids:ide) = 0;
+                    idx = idx>0;
+                    if iscategorical(data)
+                        data = removecats(data,valueset(idx));   
+                    else
+                        data(ismatch(data,valueset(idx))) = {''};
+                    end
                 end
             end     
             % Nested function----------------------------------------------
@@ -1032,12 +1058,14 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 %check for rounding errors when converting between numeric 
                 %ranges and the displayed text strings
                 outrange = inrange;
-                if str2double(sprintf('%g',inrange{1}))~=inrange{1}
-                    outrange{1} = str2double(sprintf('%g',inrange{1}));
-                end
-                %
-                if str2double(sprintf('%g',inrange{2}))~=inrange{2}
-                    outrange{2} = str2double(sprintf('%g',inrange{2}));
+                if isnumeric(inrange{1})                
+                    if str2double(sprintf('%g',inrange{1}))~=inrange{1}
+                        outrange{1} = str2double(sprintf('%g',inrange{1}));
+                    end
+                    %
+                    if str2double(sprintf('%g',inrange{2}))~=inrange{2}
+                        outrange{2} = str2double(sprintf('%g',inrange{2}));
+                    end
                 end
             end
         end

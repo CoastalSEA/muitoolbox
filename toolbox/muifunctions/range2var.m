@@ -35,7 +35,7 @@ function [rangevar,pretext] = range2var(rangetext,bounds)
                 rangevar{i} = getdatevariable(Vin{i});   
             catch                                                  
                rangevar{i} = str2duration(Vin{i});    %duration
-               if isempty(rangevar{1}) 
+               if isempty(rangevar{i}) 
                     try   
                         if isempty(str2num(Vin{i})) %#ok<ST2NM> %returns empty if not numeric
                             rangevar(i) = Vin(i);         %categorical or text              

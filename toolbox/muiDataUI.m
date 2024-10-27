@@ -518,6 +518,13 @@ classdef (Abstract = true) muiDataUI < handle
             varRange = dst.VariableRange.(dstnames{1});
             rangetext = var2range(varRange);
             scalelist = obj.TabContent(itab).Scaling;
+            
+            %if range is text use list of categories rather than end values
+            if iscellstr(varRange) || isstring(varRange)
+                varRange = categories(categorical(dst.(dstnames{1})));
+            elseif iscategorical(varRange)
+                varRange = categories(dst.(dstnames{1}));
+            end
                 
             %single variable or dimnsion selection
             inp.title    = 'Select variable';

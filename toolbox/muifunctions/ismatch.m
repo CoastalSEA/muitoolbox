@@ -43,6 +43,7 @@ elseif isstring(pat)
     end  
     ism = logical(ism);
 else
+    ism = [];
     warndlg('Type not handled in ismatch')
 end
     

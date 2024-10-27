@@ -39,8 +39,10 @@ function Vout = editrange_ui(Vin,selist)
                         'ActionButtons',{'Select','Cancel'});  
 
             waitfor(h_inp,'Action')
-            Vout = selist([h_inp.UIselection{:}]);
-            delete(h_inp.UIfig)
+            if ~isempty(h_inp.UIselection)  %selection made
+                Vout = selist([h_inp.UIselection{:}]);
+            end
+            delete(h_inp.UIfig) %delete figure even if user cancels
     else                 %otherwise use input dialogue
         dtype = getdatatype(Vin);
         if isnumeric(Vin{1}) || islogical(Vin{1})
