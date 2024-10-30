@@ -867,14 +867,14 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             %          'string','categorical','ordinal','datetime','duration',...
             %          'calendarDuration'};
             %at the moment only categorical and ordinal is handled
-            types = {'categorical','ordinal'};              
+            types = {'categorical','ordinal','datetime','duration'};              
             idt = listdlg('PromptString',promptxt,'ListString',types,...
                           'SelectionMode','single','ListSize',[160,260]);
             if isempty(idt), return; end
             seltype = types{idt};
             if strcmp(seltype,'ordinal') || strcmp(seltype,'categorical')
-                valuesetxt = sprintf('Uniques values of %s',seldesc);
-                prompts = {valuesetxt,'Matching category names'};
+                valuestxt = sprintf('Uniques values of %s',seldesc);
+                prompts = {valuestxt,'Matching category names'};
                 classes = unique(var);  %find categories and allow user to edit
                 [catstr,type,~] = var2str(classes);
                 catstr = sprintf('%s, ',catstr{:});
@@ -886,18 +886,20 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 valueset = strsplit(answers{1},', ');
                 catnames = strsplit(answers{2},', ');
                 valueset = str2var(valueset,type,catnames);
-                if isordinal(var) && strcmp(seltype,'categorical')
-                    %switch from ordinal to categorical
-                    var = categorical(var);
-                elseif iscategorical(var) && strcmp(seltype,'ordinal')
-                    %switch from categorical to ordinal
-                    var = categorical(var,'Ordinal',true);
-                elseif iscategorical(var) && contains(answers{1},'order')
-                    %reorder and existing categorical dataset
-                    var = reordercats(var,catnames);
-                elseif iscategorical(var) 
-                    %rename categories of existing categorical dataset
-                    var = renamecats(var,catnames);
+                if iscategorical(var)
+                    if isordinal(var) && strcmp(seltype,'categorical')
+                        %switch from ordinal to categorical
+                        var = categorical(var,'Ordinal',false);
+                    elseif strcmp(seltype,'ordinal')
+                        %switch from categorical to ordinal
+                        var = categorical(var,'Ordinal',true);
+                    elseif contains(answers{1},'order')
+                        %reorder and existing categorical dataset
+                        var = reordercats(var,catnames);
+                    else
+                        %rename categories of existing categorical dataset
+                        var = renamecats(var,catnames);
+                    end                       
                 elseif strcmp(seltype,'ordinal')
                     %create a categorical dataset where values match the
                     %valueset and named using catnames and are ordered                    
@@ -907,13 +909,40 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                     %valueset and these are named using catnames
                     var = categorical(var,valueset,catnames);
                 end
-                dst = cobj.Data.(dsname);
                 dst.(selvar) = var;
                 
                 %update range based on categories used for var
                 dst = setVariableRange(dst,selvar);
                 cobj.Data.(dsname) = dst;
                 updateCase(obj,cobj,classrec,true);
+            elseif strcmp(seltype,'datetime') || strcmp(seltype,'duration')
+                formatxt = sprintf('Format to use\nDatetime e.g. dd-MM-yyyy HH:mm:ss\nDuration e.g. s, m, h, d, y; or hh:mm:ss');
+                opts.Resize = 'on';
+                defaults = {'dd-MM-yyyy HH:mm:ss'};
+                answers = inputdlg(formatxt,'ModVar',1,defaults,opts);
+                format = answers{1};
+                if strcmp(seltype,'datetime')
+                    try
+                        var = datetime(var,'InputFormat',format);
+                    catch
+                        warndlg('Unable to make coversion to input format')
+                    end
+                elseif strcmp(seltype,'duration')
+                    try
+                        if contains(format,':')
+                            var = duration(var,'InputFormat',format); %uses duration input format
+                        else
+                            var = str2duration(var,format); %uses duration output string format
+                        end
+                    catch
+                        warndlg('Unable to make coversion to input format')
+                    end
+                end 
+                dst.(selvar) = var;
+                %update range based on categories used for var
+                dst = setVariableRange(dst,selvar);
+                cobj.Data.(dsname) = dst;
+                updateCase(obj,cobj,classrec,true);                
             else
                 warndlg('Only categorial and ordinal currently handled');
             end

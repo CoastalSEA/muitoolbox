@@ -193,12 +193,16 @@ classdef inputUI < handle
             %get the new range settings     
             selectedvar = obj.UIfig.UserData.SelectedVar; %id for [case,dataset,variable]
             range = getVarAttRange(dst,selectedvar(3),selected);%selectedvar(3)==variable
-            rangetext = var2range(range);
-            if iscategorical(range{1})
-                [attnames,attdescs] = getVarAttributes(dst,selectedvar(3));
-                attused = strcmp(attdescs,selected);
-                range = dst.Dimensions.(attnames{attused});
-            end            
+            if length(range)>2
+                rangetext = var2range({range{1},range{end}}); 
+            else
+                rangetext = var2range(range);
+            end
+%             if iscategorical(range{1}) %** wrong? why only Dimensions and categoric?
+%                 [attnames,attdescs] = getVarAttributes(dst,selectedvar(3));
+%                 attused = strcmp(attdescs,selected);
+%                 range = dst.Dimensions.(attnames{attused});
+%             end            
             
             %update the range widget  
             src.UserData = selid;           %current selection

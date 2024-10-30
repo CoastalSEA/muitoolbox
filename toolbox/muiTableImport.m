@@ -99,6 +99,7 @@ classdef muiTableImport < muiDataSet
             %prompt user to select file, open and load file based on
             %file extension and create dstable with data, variable names
             %and row names.
+            newdst = [];
             [fname,path,~] = getfiles('FileType','*.mat; *.txt; *.xlsx',...
                                            'PromptText','Select file to load');
             if fname==0, newdst = []; return; end
@@ -106,14 +107,30 @@ classdef muiTableImport < muiDataSet
 
             if strcmp(ext,'.mat')
                 %load data from an existing Matlab dstable or table
-                inp = load([path,fname]);
-                tablename = fieldnames(inp); %assumes inp is a struct?????
-                intable = inp.(tablename{1});
-                if isa(intable,'table')      %change a table to a dstable                          
-                    rownames = intable.Properties.RowNames;
-                    newdst = dstable(intable,'RowNames',rownames);
-                else                         %load a dstable 
-                    newdst = inp.(tablename{1});
+                S = load([path,fname]); %loads saved variables a struct
+                sname = fieldnames(S);
+                inp = S.(sname{1});     %assume only 1 variable in load file
+                if isstruct(inp)
+                    tablenames = fieldnames(inp);
+                    for i=1:length(tablenames)
+                        intable = inp.(tablenames{i});
+                        if isa(intable,'table')      %change a table to a dstable                          
+                            rownames = intable.Properties.RowNames;
+                            dst = dstable(intable,'RowNames',rownames);
+                            newdst.(tablenames{i}) = dst;
+                        elseif isa(intable,'dstable')     
+                            newdst.(tablenames{i}) = intable; %copy dstable
+                        else
+                            warndlg('Data type not handled in muiTableImport.loadFile')
+                        end                            
+                    end
+                elseif isa(inp,'table')      %change a table to a dstable
+                    rownames = inp.Properties.RowNames;
+                    newdst = dstable(inp,'RowNames',rownames);
+                elseif isa(inp,'dstable') 
+                    newdst = inp;
+                else
+                    warndlg('Data type not handled in muiTableImport.loadFile')
                 end
             elseif strcmp(ext,'.txt')
                 %read a text file with the row names defined in the first
@@ -128,7 +145,6 @@ classdef muiTableImport < muiDataSet
                 newdst = readspreadsheet([path,fname],true); %return a dstable
             else
                 warndlg('File type not handled in muiTableImport.loadFile')
-                newdst = [];
             end
         end
 %%
@@ -369,14 +385,25 @@ classdef muiTableImport < muiDataSet
                           'SelectionMode','single','ListString',location);                    
                 imshow(img{idl});
             else
-                if size(dst.DataTable{1,1},2)>1
+                [~,cdim,~] = getvariabledimensions(dst,idv);
+                if cdim==0
+                    scalarplot(obj,ax,dst,idv);
+                elseif cdim==1
                     vardesc = dst.VariableDescriptions;
                     idx = listdlg('PromptString','Select X-variable:',...
                             'SelectionMode','single','ListString',vardesc);                        
                     if isempty(idx), return; end
                     vectorplot(obj,ax,dst,idv,idx);
+                elseif cdim==2
+                    rowdesc = dst.RowNames;
+                    if isnumeric(rowdesc), rowdesc = num2str(rowdesc); end
+                    idx = listdlg('PromptString','Select X-variable:',...
+                            'SelectionMode','single','ListString',rowdesc);                        
+                    if isempty(idx), return; end
+                    arrayplot(obj,ax,dst,idv,idx);
                 else
-                    scalarplot(obj,ax,dst,idv);
+                    warndlg('Tab plot currently only handles 1-3 dimensions')
+                    
                 end
             end
         end
@@ -437,26 +464,6 @@ classdef muiTableImport < muiDataSet
     end
 %%
     methods(Access = protected)
-        function vectorplot(~,ax,dst,idv,idx)
-            %plot selected variable for all locations
-            location = dst.RowNames;
-            var = dst.(dst.VariableNames{idv});
-            Xvar = dst.(dst.VariableNames{idx});
-            hold on
-            for i=1:size(var,1)
-                pvar = var(i,:)/max(var(i,:));   
-                xvar = Xvar(i,:)/max(Xvar(i,:));
-                p1 = plot(ax,xvar,pvar,'DisplayName',location{i});
-                p1.ButtonDownFcn = {@godisplay};
-            end
-            hold off
-            xlabel(sprintf('Normalised %s',dst.VariableLabels{idx}))
-            ylabel(sprintf('Normalised %s',dst.VariableLabels{idv}))
-            title(['Case: ',dst.Description])
-            ax.Color = [0.96,0.96,0.96];  %needs to be set after plot  
-        end
-
-%%
         function [idx,ids] = scalarplot(~,ax,dst,idv)
             %plot selected variable as function of location
             % idx - sort order of x-variable
@@ -486,6 +493,9 @@ classdef muiTableImport < muiDataSet
             if iscategorical(sub_y)
                 cats = categories(sub_y);
                 sub_y = double(sub_y); %convert categorical data to numerical
+            elseif isdatetime(sub_y)
+                sub_y = datenum(sub_y);
+                datetick('y');
             end           
 
             %bar plot of selected variable
@@ -509,8 +519,77 @@ classdef muiTableImport < muiDataSet
         end
 
 %%
+        function vectorplot(~,ax,dst,idv,idx)
+            %plot selected variable for all locations
+            rowname = dst.RowNames;
+            var = dst.(dst.VariableNames{idv});
+            Xvar = dst.(dst.VariableNames{idx});
+            [rowname,~,ids,~] = subsample_var(rowname,[]); 
+            var = var(ids,:); Xvar = Xvar(ids,:);
+            hold on
+            for i=1:size(var,1)
+                pvar = var(i,:)/max(var(i,:));   
+                xvar = Xvar(i,:)/max(Xvar(i,:));
+                p1 = plot(ax,xvar,pvar,'DisplayName',rowname{i});
+                p1.ButtonDownFcn = {@godisplay};
+            end
+            hold off
+            xlabel(sprintf('Normalised %s',dst.VariableLabels{idx}))
+            ylabel(sprintf('Normalised %s',dst.VariableLabels{idv}))
+            title(['Case: ',dst.Description])
+            ax.Color = [0.96,0.96,0.96];  %needs to be set after plot  
+        end
+     
+%%
+        function arrayplot(~,ax,dst,idv,idx)
+            %plot 2-D array for selected row in table
+            var = dst.(dst.VariableNames{idv});
+            var = squeeze(var(idx,:,:));
+            rowvar = dst.DataTable.Properties.RowNames{idx};  %get a text value
+            dimnames = dst.DimensionNames;
+            dim1 = dst.Dimensions.(dimnames{1});
+            dim2 = dst.Dimensions.(dimnames{2});
+
+            if isnumeric(dim1)
+                x = dim1;
+            else
+                x = 1:length(dim1);
+            end
+            %
+            if isnumeric(dim2)
+                y = dim2;
+            else
+                y = 1:length(dim2);
+            end
+
+            [X,Y] =meshgrid(x,y);
+            contourf(ax,X,Y,var')
+            xticks(x); yticks(y);
+            
+            if ~isnumeric(dim1)
+                if iscellstr(dim1) || isstring(dim1)                    
+                    xticklabels(dim1)
+                else
+                    xticklabels(string(dim1))
+                end
+            end
+            %
+            if ~isnumeric(dim2)
+                if iscellstr(dim2) || isstring(dim2) 
+                    yticklabels(dim2)
+                else
+                    yticklabels(char(dim2))
+                end
+            end
+            xlabel(dst.DimensionNames{1})
+            ylabel(dst.DimensionNames{2})
+            title(sprintf('Case: %s, Row: %s',dst.Description,rowvar))
+        end
+%%
         function [dst,idv] =selectDataSet(obj)
             %select dataset and variable to use for plot/analysis
+            % dst - dstable for selected data set
+            % idv - index of selected variable in dstable
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
             %--------------------------------------------------------------

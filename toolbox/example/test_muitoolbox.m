@@ -6,26 +6,31 @@ function h = test_muitoolbox(classname)
 % PURPOSE
 %   functions to test the abstract classes in the muitoolbox
 % USAGE
-%   test_muitoolbox('funcname',casenum,option);
-%       e.g. test_muitoolbox('muiCatalogue');
+%   test_muitoolbox(classname);
+%       e.g. test_muitoolbox('muiProject');    %create and edit project settings
+%            test_muitoolbox('muiConstants');  %create and edit Constants
+%            test_muitoolbox('mui_demoPropsInput');  %test data input using muiPropertyUI
+%            test_muitoolbox('muiCatalogue');  %test assigning and accessing catalogue
+%            h = test_muitoolbox('mui_usage'); %test the usage of muitoolbox components
 % INPUT
-%   classsname - name of muitoolbox or example class function to be tested
-
+%   classsname - name of muitoolbox class, or example class, to be tested
 % OUTPUT
 %   See in-code comments for details of test and in-code outputs.
+%   h - handle to mui_usage a class to demonstrate use of muitoolbox 
+%       abstract classes
 %
 % Author: Ian Townend
 % CoastalSEA (c)Nov 2020
 %--------------------------------------------------------------------------
 %
     switch classname
-        case 'muiProject'
+        case 'muiProject'          %create and edit project settings
             test_muiProject;
-        case 'muiConstants'
+        case 'muiConstants'        %create and edit Constants
             test_muiConstants;     
-        case 'mui_demoPropsInput'  %test  data input using muiPropertyUI
+        case 'mui_demoPropsInput'  %test data input using muiPropertyUI
             test_mui_demoPropsInput();
-        case 'muiCatalogue'        %test assiging and accessing catalogue
+        case 'muiCatalogue'        %test assigning and accessing catalogue
             test_muiCatalogue();
         case 'mui_usage'           %test the usage of muitoolbox components
             h = test_mui_usage();    

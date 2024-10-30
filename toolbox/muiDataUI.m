@@ -681,7 +681,7 @@ classdef (Abstract = true) muiDataUI < handle
             for k=1:nprop
                 range(k).val = getVarAttRange(dst,dstdesc,inputxt{k});
                 range(k).txt = var2range(range(k).val);
-                if iscellstr(range(k).val)
+                if iscellstr(range(k).val) || isstring(range(k).val)
                     %if text list is being used set var to the list
                     %val sets userdata which is used in editrange to check 
                     %data type in range2var and switch to list selection

@@ -34,6 +34,6 @@ function [X,Var,idx,issub] = subsample_var(x,var)
     if iscategorical(x)     %categorical or ordinal data
         X = removecats(X);  %remove categories that are not used in the subsampled categorical array
     end
-    Var = var(idx);
+    if ~isempty(var), Var = var(idx); end 
     if length(X)~=length(x), issub = true; end    
 end
