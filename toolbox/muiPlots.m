@@ -1062,7 +1062,11 @@ classdef muiPlots < handle
             %a dimension are a function of another dimension (eg elevation
             %and chainage are both a function of time so that one dimension 
             %is a nx1 vector and the other dimension and variable are nxm
-            isallmat = ~isvector(x) && ~isvector(y);
+            if ~isnumeric(x) || ~isnumeric(y) %check for text variables
+                [x,y] = muiPlots.makeNumeric(x,y);
+            end
+            
+            isallmat = isvector(x) && ~isvector(y);            
             if (isvector(x) && isvector(y)) || isallmat
                 %x and y are vectors so use griddata to get arrays
                 minX = min(min(x)); maxX = max(max(x));
@@ -1083,6 +1087,19 @@ classdef muiPlots < handle
                 zq = z;
             else
                 xq = []; yq = []; zq = [];
+            end
+        end
+        
+%%
+        function [x,y] = makeNumeric(x,y)
+            %check x and y values and convert to numeric if any form of
+            %text
+            if ~isnumeric(x)
+                x = 1:length(x);
+            end
+            %
+            if ~isnumeric(y)
+                y =  1:length(y);
             end
         end
 %%

@@ -51,6 +51,11 @@ function valididx = getvarindices(var,limtxt)
                 var = startyear+var;
                 minB = startyear+str2caldur(lowerlimit);
                 maxB = startyear+str2caldur(upperlimit);
+            elseif iscategorical(var)
+                minV = find(ismember(var,strip(lowerlimit)),1,'first');
+                maxV = find(ismember(var,strip(upperlimit)),1,'last');
+                valididx = minV:maxV;
+                return;
             elseif iscell(var) && ischar(lowerlimit)
                 %cell array of character vectors with limits being values
                 %in list

@@ -19,34 +19,52 @@ function setslider(src,~)
 % CoastalSEA (c)June 2020
 %--------------------------------------------------------------------------
 % 
-    startvalue = var2str(src(1).UserData{1});
-    endvalue = var2str(src(1).UserData{2});
-    if isdatetime(src(1).UserData{1})
-        dt = between(src(1).UserData{1},src(1).UserData{2})/2;
-        midpoint = src(1).UserData{1}+dt;
-    elseif iscategorical(src(1).UserData{1})
-        dst = src(2).UserData;
-        if iscategorical(dst.RowNames)
-            if dst.RownNames(1)==src(1).UserData{1}
-                npt = round(height(dst)/2);
-                midpoint = dst.RowNames(npt);
-            end
-        elseif ~isempty(dst.Dimensions)
-            fnames = fieldnames(dst.Dimensions);
-            for i=1:length(fnames)
-                if iscategorical(dst.Dimensions.(fnames{i})) && ...
-                          char(dst.Dimensions.(fnames{i})(1))==src(1).UserData{1}
-                    npt = round(length(dst.Dimensions.(fnames{i}))/2);
-                    midpoint = dst.Dimensions.(fnames{i})(npt);
-                    src(1).UserData = dst.Dimensions.(fnames{i});
-                    break
-                end
-            end
-        end
+    startval = src(1).UserData{1};
+    endval = src(1).UserData{end};
+    startxt = var2str(startval);
+    endtxt = var2str(endval);
+
+    if isdatetime(startval)
+        dt = between(startval,endval)/2;
+        midpoint = startval+dt;     
+    elseif iscategorical(startval) || isstring(startval) || ...
+                                iscellstr(startval) || ischar(startval)
+%     elseif ~isnumeric(startval)
+        dt = round(length(src(1).UserData)/2);
+        midpoint = src(1).UserData(dt);
     else
-        average = (src(1).UserData{2}-src(1).UserData{1})/2;
-        midpoint = src(1).UserData{1}+average;
+        average = (endval-startval)/2; %should handle duration
+        isinteger = all((src(1).UserData{1}-round(src(1).UserData{end}))<10*eps());
+        if isinteger, average = round(average); end
+        midpoint = startval+average;
     end
+    
+%     if isdatetime(startval)
+%         dt = between(startval,endval)/2;
+%         midpoint = startval+dt;
+%     elseif iscategorical(startval)
+%         dst = src(2).UserData;
+%         if iscategorical(dst.RowNames)
+%             if dst.RownNames(1)==startval
+%                 npt = round(height(dst)/2);
+%                 midpoint = dst.RowNames(npt);
+%             end
+%         elseif ~isempty(dst.Dimensions)
+%             fnames = fieldnames(dst.Dimensions);
+%             for i=1:length(fnames)
+%                 if iscategorical(dst.Dimensions.(fnames{i})) && ...
+%                           char(dst.Dimensions.(fnames{i})(1))==startval
+%                     npt = round(length(dst.Dimensions.(fnames{i}))/2);
+%                     midpoint = dst.Dimensions.(fnames{i})(npt);
+%                     src(1).UserData = dst.Dimensions.(fnames{i});
+%                     break
+%                 end
+%             end
+%         end
+%     else
+%         average = (endval-startval)/2;
+%         midpoint = startval+average;
+%     end
     slidevalue = var2str(midpoint);
     %
     S = src(1);
@@ -63,13 +81,13 @@ function setslider(src,~)
     pos(3) = pos(3)/3;
     pos(4) = pos(4)*0.8;
     uicontrol('Parent',src(1).Parent,...
-        'Style','text','String',startvalue{1},...
+        'Style','text','String',startxt{1},...
         'HorizontalAlignment', 'left',...
         'Units','normalized', 'Position', pos,...
         'Tag',['slide-start',src(1).Tag(end)]);
     pos(1) = endpos-pos(3);
     uicontrol('Parent',src(1).Parent,...
-        'Style','text','String',endvalue{1},...
+        'Style','text','String',endtxt{1},...
         'HorizontalAlignment', 'right',...
         'Units','normalized', 'Position', pos,...
         'Tag',['slide-end',src(1).Tag(end)]);

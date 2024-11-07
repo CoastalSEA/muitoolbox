@@ -193,15 +193,23 @@ classdef inputUI < handle
             %get the new range settings     
             selectedvar = obj.UIfig.UserData.SelectedVar; %id for [case,dataset,variable]
             range = getVarAttRange(dst,selectedvar(3),selected);%selectedvar(3)==variable
+            
             if length(range)>2
                 rangetext = var2range({range{1},range{end}}); 
             else
                 rangetext = var2range(range);
             end
-%             if iscategorical(range{1}) %** wrong? why only Dimensions and categoric?
-%                 [attnames,attdescs] = getVarAttributes(dst,selectedvar(3));
+            
+%             if iscategorical(range{1}) || isstring(range) || iscellstr(range)
+%                 [attnames,attdescs] = getAllAttributes(dst,selectedvar(3));
 %                 attused = strcmp(attdescs,selected);
-%                 range = dst.Dimensions.(attnames{attused});
+%                 if attused(1)             %variable
+%                     range = dst.(attnames{attused});
+%                 elseif attused(2)         %row
+%                     range = dst.RowNames;
+%                 else                      %dimension
+%                     range = dst.Dimensions.(attnames{attused});
+%                 end
 %             end            
             
             %update the range widget  
@@ -304,9 +312,14 @@ classdef inputUI < handle
             src.UserData = range;
             
             %update slider text            
-            if iscategorical(range)
+            if iscategorical(range) || isstring(range) || iscellstr(range)                             
                 value{1} = var2str(range(1));
                 value{2} = var2str(range(end));
+                npt = round(length(range)/2);
+                midpoint = range(npt);
+            elseif iscategorical(range{1})
+                value{1} = var2str(range{1});
+                value{2} = var2str(range{end});
                 npt = round(length(range)/2);
                 midpoint = range(npt);
             else
@@ -329,7 +342,12 @@ classdef inputUI < handle
         end
 %%
         function [pos,startvalue,endvalue] = getPosition(~,src)
-            if iscategorical(src.UserData)
+            %update the slider position
+            newpos = src.UserData;
+            if iscategorical(newpos) || iscellstr(newpos) || isstring(newpos)
+                nrec = round((length(src.UserData)-1)*src.Value/100)+1;
+                pos = src.UserData(nrec);
+            elseif iscategorical(newpos{1}) 
                 nrec = round((length(src.UserData)-1)*src.Value/100)+1;
                 pos = src.UserData(nrec);
             else

@@ -164,7 +164,7 @@ classdef UseUI_template < muiModelUI                         % << Edit to classn
                 'ParamInput_template','Inputs',[0.45,0.48],{180,60},'Run parameters:'};
         end    
  %%
-        function setTabAction(~,src,cobj)
+        function setTabAction(obj,src,cobj)
             %function required by muiModelUI and sets action for selected
             %tab (src)
             msg = 'No results to display';

@@ -681,7 +681,9 @@ classdef (Abstract = true) muiDataUI < handle
             for k=1:nprop
                 range(k).val = getVarAttRange(dst,dstdesc,inputxt{k});
                 range(k).txt = var2range(range(k).val);
-                if iscellstr(range(k).val) || isstring(range(k).val)
+                rangeval = range(k).val{1};
+                if iscellstr(rangeval) || isstring(rangeval) ||...
+                    iscategorical(rangeval) || ischar(rangeval)
                     %if text list is being used set var to the list
                     %val sets userdata which is used in editrange to check 
                     %data type in range2var and switch to list selection
@@ -716,7 +718,7 @@ classdef (Abstract = true) muiDataUI < handle
                     dimvalue = slidervals{2};                    
                 else %drop down list has been used
                     dimname = dstnames{2*mdim+i};
-                    dimvalue = range(mdim+i).val(slidervals);
+                    dimvalue = range(mdim+i).val{slidervals};%******CHANGED TO CELL READ
                 end
                 obj.UIselection(xyz).dims(mdim+i).name = dimname;
                 obj.UIselection(xyz).dims(mdim+i).value = dimvalue;

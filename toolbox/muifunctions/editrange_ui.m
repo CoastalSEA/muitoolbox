@@ -29,7 +29,8 @@ function Vout = editrange_ui(Vin,selist)
             ti.Format = Vin{i}.Format;
             Vout{i} = ti;
         end
-    elseif nargin>1 && (iscellstr(selist) || isstring(selist))
+    elseif nargin>1 && (iscellstr(selist) || isstring(selist) || ...
+            iscategorical(selist)) %|| iscategorical(selist{1})
         h_inp = inputUI('FigureTitle', 'Edit range',...
                         'PromptText','Select start and end of range:',...
                         'InputFields',{'From: ','To: '},...
@@ -41,6 +42,10 @@ function Vout = editrange_ui(Vin,selist)
             waitfor(h_inp,'Action')
             if ~isempty(h_inp.UIselection)  %selection made
                 Vout = selist([h_inp.UIselection{:}]);
+                if ~iscell(Vout)
+                    dtype = underlyingType(Vout);
+                    warndlg(sprintf('Type %s in editrange_ui should be cell',dtype))
+                end
             end
             delete(h_inp.UIfig) %delete figure even if user cancels
     else                 %otherwise use input dialogue

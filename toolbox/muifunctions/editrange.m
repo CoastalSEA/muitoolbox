@@ -28,6 +28,7 @@ function editrange(src,~)
     rangetext = uic.String;
     bounds = uic.UserData;
     if length(bounds)>2
+%     if length(bounds)>2 && ~iscategorical(bounds)
         bounds = [bounds(1),bounds(end)];
     end
     [rangevar,pretext] = range2var(rangetext,bounds);

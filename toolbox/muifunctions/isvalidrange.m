@@ -10,7 +10,7 @@ function isvalid  = isvalidrange(testvar,bounds)
 % INPUT
 %   testvar - cell array with lower and upper values of range to be checked
 %   bounds - cell array for user defined lower and upper limits to the 
-%            range (optional)
+%            range or valid list if text (optional)
 % OUTPUT
 %   isvalid - logical true if the range is valid
 % NOTES
@@ -35,11 +35,12 @@ function isvalid  = isvalidrange(testvar,bounds)
             if ~isbetween(testvar{i},tlower,tupper)
                 %return out or range date + message
                 isvalid = false;
-                msgbox(sprintf('%s Invald date. Please correct input', testvar{i}))
-                return
+                msgbox(sprintf('%s Invald date. Please correct input', testvar{i}))            
             end
+            return
         end
     end
+    
     %check for NaNs
     if isnumeric(testvar{1})
         nancheck = cellfun(@isnan,testvar);
@@ -49,19 +50,37 @@ function isvalid  = isvalidrange(testvar,bounds)
             return
         end
     end
-    %check bounds
+    
+    %check bounds   
+     if iscategorical(testvar{1})
+        %catch user entering a value that is not in category list
+        if isundefined(testvar{1}) %indicates which elements in categorical array contain undefined values
+            isvalid = false;
+            msgbox(setmsgtext(1,3));
+        elseif isundefined(testvar{2})
+            isvalid = false;
+            msgbox(setmsgtext(2,3));
+        end
+    end   
+    
     if  ~isempty(bounds) && iscategorical(bounds)
         %testvar is as cell array with categorical cells. Need to convert to categorical array
-        if any(~iscategory(bounds,testvar))
+        stid = find(strcmp(bounds,testvar{1}));
+        ndid = find(strcmp(bounds,testvar{2}));
+        if ndid<stid
             isvalid = false;
-            msgbox('Invald data. Input is not a valid category')
-        elseif isordinal(bounds)
-            catvar = categorical(testvar,string(bounds),'Ordinal',true);
-            if catvar(1)>catvar(2)
-                isvalid = false;
-                msgbox('Invald data. Incorrect order for Ordinal data')
-            end
+            msgbox('Invald selection: range values are in the wrong order')
         end
+%         if any(~iscategory(bounds,testvar{1}))
+%             isvalid = false;
+%             msgbox('Invald data. Input is not a valid category')
+%         elseif isordinal(bounds)
+%             catvar = categorical(testvar{1},string(bounds),'Ordinal',true);
+%             if catvar(1)>catvar(2)
+%                 isvalid = false;
+%                 msgbox('Invald data. Incorrect order for Ordinal data')
+%             end
+%         end
     elseif ~ischar(testvar{1}) && ~isempty(bounds)
         if isnumeric(bounds{1})
             bounds = check_bounds(bounds);
@@ -79,22 +98,12 @@ function isvalid  = isvalidrange(testvar,bounds)
             msgbox(setmsgtext(bounds{2},2));
             return;
         end
-        
-        if iscategorical(testvar{1})
-            %catch user entering a value that is not in category list
-            if isundefined(testvar{1})
-                isvalid = false;
-                msgbox(setmsgtext(1,3));
-            elseif isundefined(testvar{2})
-                isvalid = false;
-                msgbox(setmsgtext(2,3));
-            end
-        end
     end
+    
     %check that range is in correct order (From->To)
     if ~ischar(testvar{1}) && testvar{2}<testvar{1}
         isvalid = false;
-        msgbox('Warning: range values are in the wrong order')
+        msgbox('Invald selection: range values are in the wrong order')
     end
 end
 %%

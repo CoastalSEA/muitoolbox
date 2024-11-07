@@ -964,12 +964,16 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             % var is the variable to select from and value is a numeric
             % value to select the nearest index, or a text string defining
             % the range of values required
-            if ischar(value)     
+            if ischar(value) && ~iscell(var)  
                 %range character vector
                 indices = getvarindices(var,value);
             elseif iscell(var) && length(var)>1
                 %cell array of character vectors NB value must be a cell
-                indices = find(ismatch(var,value));
+                if contains(value,'From')
+                    value = range2var(value);
+                end
+                st_nd = find(ismatch(var,value)); %start and end values
+                indices = min(st_nd):max(st_nd);  %indices from start to end
             elseif isinteger(var) && var(end)==value
                 indices = value;   
             elseif iscategorical(var)
