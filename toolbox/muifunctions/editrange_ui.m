@@ -43,8 +43,7 @@ function Vout = editrange_ui(Vin,selist)
             if ~isempty(h_inp.UIselection)  %selection made
                 Vout = selist([h_inp.UIselection{:}]);
                 if ~iscell(Vout)
-                    dtype = underlyingType(Vout);
-                    warndlg(sprintf('Type %s in editrange_ui should be cell',dtype))
+                    Vout = {Vout(1),Vout(2)};
                 end
             end
             delete(h_inp.UIfig) %delete figure even if user cancels

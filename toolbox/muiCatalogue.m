@@ -390,6 +390,7 @@ classdef muiCatalogue < dscatalogue
             %        timeseries data set (assumes rows are datetime)
             % props - returns a struct containing data, description of 
             %         property being used and the associated label 
+            dvals = [];
             props = setPropsStruct(obj);
             if nargin<3, outopt = 'array'; end
             istable = false;
@@ -402,21 +403,21 @@ classdef muiCatalogue < dscatalogue
                 %return selected dimensions of variable
                 %NB: any range defined for the Variable is NOT applied
                 %returns all values within dimension range specified
-                [id,dvals] = getSelectedIndices(obj,UIsel,dst,attribnames);
+                [idx,dvals] = getSelectedIndices(obj,UIsel,dst,attribnames);
                 label = attriblabel{1};
                 switch outopt
                     case 'array'
                         %extracts array for selected variable
-                        data = getData(dst,id.row,id.var,id.dim); 
+                        data = getData(dst,idx.row,idx.var,idx.dim); 
                         if isempty(data), return; end
                         data = squeeze(data{1}); %getData returns a cell array
                     case 'table'
-                        data = getDataTable(dst,id.row,id.var,id.dim);
+                        data = getDataTable(dst,idx.row,idx.var,idx.dim);
                     case 'dstable'
-                        data = getDSTable(dst,id.row,id.var,id.dim);
+                        data = getDSTable(dst,idx.row,idx.var,idx.dim);
                     case 'splittable'
                         %split array variable into multiple variables
-                        array = getData(dst,id.row,id.var,id.dim);
+                        array = getData(dst,idx.row,idx.var,idx.dim);
                         if isempty(array), return; end
                         array = squeeze(array{1});
                         %get dimension name and indices
@@ -424,7 +425,7 @@ classdef muiCatalogue < dscatalogue
                         data = array2table(array,'RowNames',dimnames{1},...
                                             'VariableNames',dimnames{2});
                     case 'timeseries'
-                        userdst = getDSTable(dst,id.row,id.var,id.dim);
+                        userdst = getDSTable(dst,idx.row,idx.var,idx.dim);
                         data = dst2tsc(userdst);
                 end
                 if isempty(data), return; end
@@ -433,18 +434,19 @@ classdef muiCatalogue < dscatalogue
                 subrange = UIsel.range;
                 data = getVariableSubSelection(obj,data,varange,subrange,outopt);
                 istable = true;
+                dvals.nvar = length(attribnames);
             elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
                 %return selected row values 
-                idrow = getIndices(obj,dst.RowNames,UIsel.range);
-                data = dst.RowNames(idrow); %returns values in source data type
+                idx = getIndices(obj,dst.RowNames,UIsel.range);
+                data = dst.RowNames(idx); %returns values in source data type
                 useprop = dst.TableRowName;
                 label = attriblabel{2};
             elseif any(strcmp(dst.DimensionNames,useprop))
                 %return selected dimension              
-                iddim = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
-                data = dst.Dimensions.(useprop)(iddim);               
+                idx = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
+                data = dst.Dimensions.(useprop)(idx);               
                 label = attriblabel{UIsel.property}; 
-            elseif any(contains(useprop,'noDim'))
+            elseif any(contains(useprop,'noDim'))                
                 rvals = range2var(UIsel.range);
                 data = rvals{1}:rvals{2};
                 label = 'Undefined dimension';
@@ -464,7 +466,8 @@ classdef muiCatalogue < dscatalogue
             props.dset = dstxt;
             props.desc = usedesc;
             props.label = label;
-            props.data = data;                    
+            props.data = data; 
+            props.dvals = dvals;
         end
 %%
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt,ischeck)
@@ -802,7 +805,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
 %%
         function props = setPropsStruct(~)
             %initialise struct used in muiCatalogue.getProperty
-            props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[]);
+            props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[],'dvals',[]);
         end 
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
@@ -967,7 +970,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             if ischar(value) && ~iscell(var)  
                 %range character vector
                 indices = getvarindices(var,value);
-            elseif iscell(var) && length(var)>1
+            elseif (iscell(var) || isstring(var)) && length(var)>1
                 %cell array of character vectors NB value must be a cell
                 if contains(value,'From')
                     value = range2var(value);

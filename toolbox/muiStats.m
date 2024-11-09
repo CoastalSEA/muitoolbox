@@ -399,6 +399,12 @@ classdef muiStats < handle
             tests = obj.Data.Y;
             metadata{1} = sprintf('%s: %s',refts.Description,refts.VariableDescriptions{1});
             metadata{2} = sprintf('%s: %s',tests.Description,tests.VariableDescriptions{1});
+            if ~isempty(refts.RowNames) && length(refts.RowNames)==1
+                dimtxt = var2str(refts.RowNames);
+                metadata{1} = sprintf('%s, %s: %s',metadata{1},refts.RowDescription,dimtxt{1});
+                dimtxt = var2str(tests.RowNames);
+                metadata{2} = sprintf('%s, %s: %s',metadata{2},tests.RowDescription,dimtxt{1});
+            end
             rLim = obj.UIset.Other;
             %see if user wants to include skill score
 %             ok = setTaylorParams(obj);

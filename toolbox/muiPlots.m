@@ -156,7 +156,12 @@ classdef muiPlots < handle
             for j=2:length(dimtxt)
                 title = sprintf('%s%s, ',title,dimtxt{j}(1:idt{j}-2));
             end
-            obj.Title = sprintf('%s)',title(1:end-2));
+            subtitle = muiPlots.setScalarDims(props);
+            if isempty(subtitle)
+                obj.Title = sprintf('%s)',title(1:end-2));
+            else
+                obj.Title = sprintf('%s, %s)',title(1:end-2),subtitle);
+            end
         end
 %%    
         function legtext = setLegendText(~,props,legformat,ivar)
@@ -955,6 +960,35 @@ classdef muiPlots < handle
             t3 = {'Z','T','X','Y'};
             t4 = {'V','T','X','Y','Z'};
             varorder = table(d2,d3,d4,t2,t3,t4,'VariableNames',varnames);
+        end
+ %%       
+        function subtitle = setScalarDims(props)
+            %define subtitle based on dimension selections that are scalar
+            subtitle = [];
+            for i=1:length(props)
+                if isstruct(props(i).dvals), j = i; break; end
+            end
+            dimvals = props(j).dvals;
+            if dimvals.nvar-1>ndims(props(j).data)
+                %more dimensions than being used for plot
+                subtitle = [];
+                if isscalar(dimvals.row)  
+                    dimtxt = var2str(dimvals.row);
+                    subtitle = sprintf('Row: %s',dimtxt{1});   %row is sub-sampled
+                end
+                %
+                for k=1:length(dimvals.dim)  
+                    if isscalar(dimvals.dim{k})
+                        dimtxt = var2str(dimvals.dim{k});
+                        dimnum = sprintf('Dim %d',k);
+                        if isempty(subtitle)
+                            subtitle = sprintf('%s: %s',dimnum,dimtxt{1}); %dimension is subsampled
+                        else
+                            subtitle = sprintf('%s, %s: %s',subtitle,dimnum,dimtxt{1}); 
+                        end
+                    end
+                end
+            end
         end
     end
 %%

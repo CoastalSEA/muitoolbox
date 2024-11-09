@@ -494,16 +494,20 @@ classdef muiTableImport < muiDataSet
                 cats = categories(sub_y);
                 sub_y = double(sub_y); %convert categorical data to numerical
             elseif isdatetime(sub_y)
-                sub_y = datenum(sub_y);
-                datetick('y');
+                stdate = min(sub_y);
+                sub_y = sub_y-stdate;  %convert to durations
             end           
 
             %bar plot of selected variable
             bar(ax,sub_rn,sub_y);          
             title (['Case: ',dst.Description]);
-            if ~isempty(cats)
+            if ~isempty(cats)  
                 yticks(1:length(cats));
                 yticklabels(cats);
+            elseif isdatetime(y)
+                ytk = ax.YTick;
+                dtime = stdate+ytk;
+                yticklabels(datestr(dtime))
             end
             xlabel(dst.RowLabel)
             if isempty(dst.VariableLabels)
@@ -591,6 +595,7 @@ classdef muiTableImport < muiDataSet
             % dst - dstable for selected data set
             % idv - index of selected variable in dstable
             datasetname = getDataSetName(obj);
+            if isempty(datasetname), dst = []; idv = []; return; end
             dst = obj.Data.(datasetname);
             %--------------------------------------------------------------
             vardesc = dst.VariableDescriptions;
