@@ -50,7 +50,10 @@ function Vout = editrange_ui(Vin,selist)
     else                 %otherwise use input dialogue
         dtype = getdatatype(Vin);
         if isnumeric(Vin{1}) || islogical(Vin{1})
-            Vin = cellfun(@num2str,Vin,'UniformOutput',false);
+            %replaced use of cellfun to avoid rounding error in num2str
+            numdpl = max(get_precision(Vin{1}),get_precision(Vin{2}));
+            Vin{1} = num2str(Vin{1},numdpl);
+            Vin{2} = num2str(Vin{2},numdpl);
         elseif ~ischar(Vin{1})    
             Vin = cellfun(@cellstr,Vin);
         end

@@ -23,6 +23,8 @@ function editrange(src,~)
 %--------------------------------------------------------------------------
 % 
     uicoption = replace(src.Tag,'but','uic'); %order of Selections on itab
+                                              %replace but with uic to get
+                                              %existing selection
     %get existing range text and extract range values 
     uic = findobj(src.Parent,'Tag',uicoption);
     rangetext = uic.String;

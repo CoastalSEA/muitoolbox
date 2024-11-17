@@ -1,4 +1,4 @@
-function [UIsel,UIset] = selectui(mobj,promptxt)
+function [UIsel,UIset] = selectui(mobj,promptxt,varargin)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -11,6 +11,7 @@ function [UIsel,UIset] = selectui(mobj,promptxt)
 % INPUTS
 %   mobj - handle to App UI to allow access to data 
 %   promptxt - text used in figure title (optional)
+%   varargin - Name,Value pairs for properties set in TabContent (optional)
 % OUTPUT
 %   UIsel - user selection (UIselection   struct defined in muiDataUI)
 %   UIset - UI settings (UIsettings struct defined in muiDataUI)
@@ -21,8 +22,13 @@ function [UIsel,UIset] = selectui(mobj,promptxt)
 % CoastalSEA (c) May 2024 
 %--------------------------------------------------------------------------
 % 
-    if nargin<2, promptxt = 'Select Data:'; end
-    selobj = muiSelectUI.getSelectUI(mobj,promptxt);
+    if nargin<2
+        promptxt = 'Select data:'; 
+        varargin = {};
+    elseif nargin<3
+        varargin = {};
+    end
+    selobj = muiSelectUI.getSelectUI(mobj,promptxt,varargin{:});
     waitfor(selobj,'Selected')
 
     UIsel = selobj.UIselection;    %user selection

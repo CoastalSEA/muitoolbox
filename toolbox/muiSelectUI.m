@@ -26,25 +26,37 @@ classdef muiSelectUI < muiDataUI
     methods (Access=protected)
         function obj = muiSelectUI(mobj,guititle)
             %initialise standard figure and menus
-%             guititle = 'Select Data';
             setDataUIfigure(obj,mobj,guititle);    %initialise figure     
         end
     end
 %%    
     methods (Static)
-        function obj = getSelectUI(mobj,promptxt)
+        function obj = getSelectUI(mobj,promptxt,varargin)
             %this is the function call to initialise the UI and assigning
             %to a handle of the main model UI (mobj.mUI.SelectUI) 
             %options for selection on each tab are defined in setTabContent
+            % varargin - Name,Value pairs for properties set in TabContent
+            % NB Value must be in format used for property (not checked)
             if isempty(mobj.Cases.Catalogue.CaseID)
                 warndlg('No data available');
                 obj = [];
                 return;
             else
-                if nargin<2, promptxt = 'Select Data:'; end
+                if nargin<2
+                    promptxt = 'Select data:';
+                end
                 obj = muiSelectUI(mobj,promptxt);
                 obj.Tabs2Use = {'Select'};
-                setDataUItabs(obj,mobj); %add tabs                
+                setDataUItabs(obj,mobj); %add tabs  
+                
+                if nargin>2
+                    %input includes modifications to the default tab layout
+                    S = obj.TabContent;
+                    for k=1:2:length(varargin)
+                        S.(varargin{k}) = varargin{k+1};
+                    end 
+                    obj.TabContent = S;
+                end
             end                
         end
     end
@@ -61,7 +73,7 @@ classdef muiSelectUI < muiDataUI
             
             %customise the layout of each tab. Overload the default
             %template with a function for the tab specific definition
-            setSelectTab(obj,src)            
+            setSelectTab(obj,src)    
         end                
 %%
         function setVariableLists(obj,src,mobj)
@@ -101,6 +113,7 @@ classdef muiSelectUI < muiDataUI
 %%
         function exitDataUI(obj,~,~,~)    %overload muiDataUI method
             %delete GUI figure and pass control to main GUI to reset obj
+            obj.TabContent.Selections = [];
             delete(obj.dataUI.Figure);
             obj.dataUI.Figure = [];  %clears deleted handle
             obj.Selected = true;

@@ -33,6 +33,9 @@
 % * *cleantable.m*
 % - clean table by checking numeric data are not cells and 
 % replacing non-standard values
+%
+% * *editlist.m*
+% - callback function to select single value from list (used in inputUI)
 % 
 % * *editrange.m*
 % - button callback function to edit range and enter in a text uicontrol
@@ -43,6 +46,17 @@
 %
 % * *functionlibrarylist.m*
 % - Lists available functions for use in DataManip
+%
+% * *get_precision.m*
+% - find the precision of  a number
+%
+% * *get_selection.m*
+% - retrieve selected variable or dimension based on selection made 
+% using selectui
+%
+% * *get_selection_text.m*
+% - generate text to summarise the selection made from a data ui using
+% properties that are defined in muiCatalogue.getProperty
 %
 % * *get_variable.m*
 % - retrieve selected variable based on selection made using selectui
@@ -85,6 +99,11 @@
 %
 % * *isimage.m*
 % - test whether an array is the right size and data type to be an image
+%
+% * *islist.m*
+% - test whether a variable is some form of text data. Input option allows 
+% different combinations of character data types to be tested. If option is not included
+% the function tests for cellstr, or string, or categorical, or char array
 %
 % * *ismatch.m*
 % - finds the occurence of matches between two sets of character vectors,

@@ -22,7 +22,11 @@ function rangetext = var2range(rangevar,pretext)
 % 
     nvar = length(rangevar);
     if nvar>2           %select start and end values if a vector
-        rangevar = {rangevar{1},rangevar{end}};
+        if iscell(rangevar)
+            rangevar = {rangevar{1},rangevar{end}};
+        else
+            rangevar = {rangevar(1),rangevar(end)};
+        end
     end
     
     var1 = rangevar{1}; var2 = rangevar{2};
@@ -42,5 +46,5 @@ function rangetext = var2range(rangevar,pretext)
     %add any explanatory text in front of range if included
     if nargin>1
         rangetext = sprintf('%s %s',pretext,rangetext);
-    end    
+    end  
 end

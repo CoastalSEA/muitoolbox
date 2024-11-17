@@ -23,85 +23,77 @@ function isvalid  = isvalidrange(testvar,bounds)
 % 
     if nargin<2, bounds = []; end
     isvalid = true;
-    if isdatetime(testvar{1})
-        upperyear = 2500;
-        for i=1:2
-            if isnat(testvar{i})
-                msgbox('Invald data. Cannot be a NaT value')
-            end
-            %check that date is not negative and in a sensible range
-            tlower = datetime(0,1,1);
-            tupper = datetime(upperyear,12,31);
-            if ~isbetween(testvar{i},tlower,tupper)
-                %return out or range date + message
+    nvar = length(testvar);
+    %----------------------------------------------------------------------
+    for i=1:nvar  %check each range value in turn
+        testval = testvar{i};
+        %check for NaNs
+        if isnumeric(testval)
+            if isnan(testval)
                 isvalid = false;
-                msgbox(sprintf('%s Invald date. Please correct input', testvar{i}))            
+                msgbox('Invald data. Cannot be a NaN value')
+                return
             end
-            return
-        end
-    end
+        elseif isdatetime(testval)
+            if isnat(testval)
+                msgbox('Invald data. Cannot be a NaT value')
+                return
+            else
+                %check that date is not negative and in a sensible range
+                tlower = datetime(0,1,1);
+                tupper = datetime(2500,12,31);
+                if ~isempty(bounds)
+                    tlower = max([tlower,bounds{1}]);
+                    tupper = min([tupper,bounds{2}]);
+                end
+                %
+                if ~isbetween(testval,tlower,tupper)
+                    %return out or range date + message
+                    isvalid = false;
+                    msgbox(sprintf('%s Invald date. Please correct input', testval))
+                    return
+                end
+            end
+        elseif iscategorical(testval)
+            %catch user entering a value that is not in category list
+            if isundefined(testval) %indicates which elements in categorical array contain undefined values
+                isvalid = false;
+                msgbox(setmsgtext(i,3));
+            end
+        end    
+    end    
     
-    %check for NaNs
-    if isnumeric(testvar{1})
-        nancheck = cellfun(@isnan,testvar);
-        if any(nancheck)
-            isvalid = false;
-            msgbox('Invald data. Cannot be a NaN value')
-            return
-        end
-    end
-    
-    %check bounds   
-     if iscategorical(testvar{1})
-        %catch user entering a value that is not in category list
-        if isundefined(testvar{1}) %indicates which elements in categorical array contain undefined values
-            isvalid = false;
-            msgbox(setmsgtext(1,3));
-        elseif isundefined(testvar{2})
-            isvalid = false;
-            msgbox(setmsgtext(2,3));
-        end
-    end   
-    
-    if  ~isempty(bounds) && iscategorical(bounds)
-        %testvar is as cell array with categorical cells. Need to convert to categorical array
-        stid = find(strcmp(bounds,testvar{1}));
-        ndid = find(strcmp(bounds,testvar{2}));
-        if ndid<stid
-            isvalid = false;
-            msgbox('Invald selection: range values are in the wrong order')
-        end
-%         if any(~iscategory(bounds,testvar{1}))
-%             isvalid = false;
-%             msgbox('Invald data. Input is not a valid category')
-%         elseif isordinal(bounds)
-%             catvar = categorical(testvar{1},string(bounds),'Ordinal',true);
-%             if catvar(1)>catvar(2)
-%                 isvalid = false;
-%                 msgbox('Invald data. Incorrect order for Ordinal data')
-%             end
-%         end
-    elseif ~ischar(testvar{1}) && ~isempty(bounds)
-        if isnumeric(bounds{1})
-            bounds = check_bounds(bounds);
-        end
-        islower = testvar{1}<bounds{1} || testvar{2}<bounds{1};
-        if islower
-            isvalid = false;
-            msgbox(setmsgtext(bounds{1},1));
-            return;
-        end
+    %now check relative order
+    if ~isempty(bounds)
+        if islist(bounds)
+            %if bounds is a list of text data convert to 
+            stid = find(strcmp(bounds,testvar{1}));
+            ndid = find(strcmp(bounds,testvar{2}));
+            if ndid<stid
+                isvalid = false;
+                msgbox('Invald selection: range values are in the wrong order')
+            end 
+        elseif isnumeric(bounds{1})  
+            bounds = check_bounds(bounds);       %check for rounding errors
             
-        isabove = testvar{1}>bounds{2} || testvar{2}>bounds{2};
-        if isabove
-            isvalid = false;
-            msgbox(setmsgtext(bounds{2},2));
-            return;
+            islower = testvar{1}<bounds{1} || testvar{2}<bounds{1};
+            if islower
+                isvalid = false;
+                msgbox(setmsgtext(bounds{1},1));
+                return;
+            end
+
+            isabove = testvar{1}>bounds{2} || testvar{2}>bounds{2};
+            if isabove
+                isvalid = false;
+                msgbox(setmsgtext(bounds{2},2));
+                return;
+            end            
         end
     end
     
     %check that range is in correct order (From->To)
-    if ~ischar(testvar{1}) && testvar{2}<testvar{1}
+    if ~islist(testvar,1) && testvar{2}<testvar{1}
         isvalid = false;
         msgbox('Invald selection: range values are in the wrong order')
     end

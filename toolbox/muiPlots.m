@@ -136,32 +136,15 @@ classdef muiPlots < handle
             obj.MetaData = mtxt;
             
             %generate legend text
-            obj.Legend = setLegendText(obj,props,legformat,1);
+            obj.Legend = setLegendText(obj,props,legformat,1); %returns root case(dset)var
             idplotvar = find([obj.UIsel(:).property]==1);
             for ivar=2:length(idplotvar)
                 legtxt = setLegendText(obj,props,legformat,ivar);
                 obj.Legend = sprintf('%s\n%s',obj.Legend,legtxt);               
             end
 
-            %description of selection for use as title            
-            dimtxt = {props(:).label};
-            islbl = ~cellfun(@isempty,dimtxt); %remove undefined dimensions
-            dimtxt = dimtxt(islbl);
-            idt = regexp(dimtxt,'('); %remove units from label
-            id0 = cellfun(@isempty,idt);
-            if any(id0)
-                idt(id0) = num2cell(cellfun(@length,dimtxt(id0))+2);
-            end
-            title = sprintf('%s (',dimtxt{1}(1:idt{1}-2));
-            for j=2:length(dimtxt)
-                title = sprintf('%s%s, ',title,dimtxt{j}(1:idt{j}-2));
-            end
-            subtitle = muiPlots.setScalarDims(props);
-            if isempty(subtitle)
-                obj.Title = sprintf('%s)',title(1:end-2));
-            else
-                obj.Title = sprintf('%s, %s)',title(1:end-2),subtitle);
-            end
+            %description of selection for use as title (short dims text option)
+            obj.Title = get_selection_text(props(1),3); %use dependent variable to define title
         end
 %%    
         function legtext = setLegendText(~,props,legformat,ivar)
@@ -321,6 +304,17 @@ classdef muiPlots < handle
             else
                 cats = [];
             end
+            
+            %add checks for list type variables 
+            xlist = false;
+            if islist(x,2)
+                xtxt = x; x = 1:length(x); xlist = true;
+            end
+            ylist = false;
+            if islist(y,2)
+                ytxt = y; y = 1:length(y); ylist = true;
+            end
+            
             %hptype uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hp = hptype(figax,x,y,symb{1},symb{2},obj.Legend,'1');
             hp.UserData = obj.MetaData;
@@ -342,7 +336,16 @@ classdef muiPlots < handle
                 yticks(1:length(cats));
                 yticklabels(cats);
             end
-
+            
+            if xlist
+                xticks(1:length(x));
+                xticklabels(xtxt);
+            end
+            if ylist
+                yticks(1:length(y));
+                yticklabels(ytxt);
+            end
+            
             %handle ticks for log scaled data
             if strcmp(obj.UIset.scaleList{obj.UIsel(1).scale},'Log')
                 idx = find(mod(figax.XTick(:), 1) == 0);
@@ -1028,14 +1031,26 @@ classdef muiPlots < handle
             if nargin<11, iscmap=true; end
             wid = 'MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId';
             warning('off',wid)
-             [xq,yq,zq] = muiPlots.reshapeXYZ(x,y,z,xint,yint);
-             h = muiPlots.get3DPlotType(xq,yq,zq,ptype);
+              [xq,yq,zq] = muiPlots.reshapeXYZ(x,y,z,xint,yint);
+              h = muiPlots.get3DPlotType(xq,yq,zq,ptype);
             warning('on',wid)
             hold on
             xlabel(xtext);
             ylabel(ytext);
             title(titletxt);
             hold off
+            
+            %handle axes that are text of some form
+            if islist(x,1)  
+                xticks(1:length(x));
+                xticklabels(x);
+            end
+            if islist(y,1)
+                yticks(1:length(y));
+                yticklabels(y);
+            end           
+            
+            %set color map based on user selection
             if iscmap, cmap = cmap_selection; else, cmap = []; end
             if isempty(cmap), cmap = 'parula'; end
             colormap(cmap)

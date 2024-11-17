@@ -30,6 +30,9 @@
 % - differences and approximate derivatives, padded to be same length as
 % input variable
 %
+% * *display_selection.m*
+% - callback function to display text from a uicontrol in a dialog box
+%
 % * *downsample.m*
 % - wrapper to put downsample_ts, output into an array. From Matlab(TM) Forum, 
 % by Chad A. Greene (c) 2014, 

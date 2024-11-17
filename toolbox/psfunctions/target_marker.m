@@ -26,7 +26,7 @@ function varargout = target_marker(varargin)
 %--------------------------------------------------------------------------
 %
     nvar = length(varargin);
-    if isa(varargin{1},'axes')           %first variable is x, y
+    if isa(varargin{1},'matlab.graphics.axis.Axes')  %first variable is axes handle
         ax = varargin{1};
         x = varargin{2};
         y = varargin{3};

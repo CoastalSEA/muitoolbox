@@ -395,7 +395,8 @@ classdef muiCatalogue < dscatalogue
             if nargin<3, outopt = 'array'; end
             istable = false;
             [dst,~,~,dstxt] = getDataset(obj,UIsel.caserec,UIsel.dataset);
-            [attribnames,attribdesc,attriblabel] = getVarAttributes(dst,UIsel.variable);
+            %get attribute lists for variable, excluding any unused dimensions
+            [attribnames,attribdesc,attriblabel] = getVarAttributes(dst,UIsel.variable); 
             useprop = attribnames{UIsel.property};
             usedesc = attribdesc{UIsel.property};
             
@@ -431,10 +432,9 @@ classdef muiCatalogue < dscatalogue
                 if isempty(data), return; end
                 %apply any subselection to the range of the variable
                 varange = dst.VariableRange.(useprop);
-                subrange = UIsel.range;
-                data = getVariableSubSelection(obj,data,varange,subrange,outopt);
+                dvals.var = UIsel.range;
+                data = getVariableSubSelection(obj,data,varange,dvals.var,outopt);
                 istable = true;
-                dvals.nvar = length(attribnames);
             elseif any(strcmp('RowNames',useprop)) %value set in dstable.getVarAttributes
                 %return selected row values 
                 idx = getIndices(obj,dst.RowNames,UIsel.range);
@@ -467,7 +467,8 @@ classdef muiCatalogue < dscatalogue
             props.desc = usedesc;
             props.label = label;
             props.data = data; 
-            props.dvals = dvals;
+            props.attribs = attribdesc;
+            props.dvals = dvals;            
         end
 %%
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt,ischeck)
@@ -805,7 +806,8 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
 %%
         function props = setPropsStruct(~)
             %initialise struct used in muiCatalogue.getProperty
-            props = struct('case',[],'dset',[],'desc',[],'label',[],'data',[],'dvals',[]);
+            props = struct('case',[],'dset',[],'desc',[],'label',[],...
+                           'data',[],'attribs',[],'dvals',[]);
         end 
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
@@ -951,6 +953,73 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             end
             %updateCase(obj,cobj,classrec,true);
         end
+%%
+        function data = getVariableSubSelection(~,data,range,selrange,outopt)
+            %if the range of a variable has been subselected, assign the
+            %values outside the range as NaNs
+            %NB - limited testing with real data ***
+            subrange = range2var(selrange);
+            range = check_bounds(range);
+            if all(cellfun(@isequal,range,subrange)), return; end
+
+            switch outopt
+                case 'array'
+                    data = applyrange(data,range,subrange);
+                case 'table'
+                    varname = data.Properties.VariableNames{1};
+                    data.(varname) = applyrange(data.(varname),range,subrange);
+                case 'dstable'
+                    varname = data.VariableNames{1};
+                    data.(varname) = applyrange(data.(varname),range,subrange);
+                case 'splittable'
+                    data{:,:} = applyrange(data{:,:},range,subrange); %assumes can only be 2D table
+                case 'timeseries'
+                    data.Data = applyrange(data.Data,range,subrange);                    
+            end
+            % Nested function----------------------------------------------
+            function data = applyrange(data,range,subrange)
+                %set values outside subrange to NaN
+                if isnumeric(range{1})
+                    if range{1}~=subrange{1}
+                        data(data<subrange{1}) = NaN;
+                    end
+                    %
+                    if range{2}~=subrange{2}
+                        data(data>subrange{2}) = NaN;
+                    end
+                else
+                    %for text it would be better to be able to multi-select 
+                    %from a list but for now use a range to be consistent
+                    valueset = categories(categorical(data));
+                    ids = find(contains(valueset,subrange{1}));
+                    ide = find(contains(valueset,subrange{2}));
+                    idx = 1:length(valueset);
+                    idx(ids:ide) = 0;
+                    idx = idx>0;
+                    if iscategorical(data)
+                        data = removecats(data,valueset(idx));   
+                    else
+                        data(ismatch(data,valueset(idx))) = {''};
+                    end
+                end
+            end     
+            % Nested function----------------------------------------------
+            function outrange = check_bounds(inrange)
+                %check for rounding errors when converting between numeric 
+                %ranges and the displayed text strings
+                outrange = inrange;
+                if isnumeric(inrange{1})                
+                    if str2double(sprintf('%g',inrange{1}))~=inrange{1}
+                        outrange{1} = str2double(sprintf('%g',inrange{1}));
+                    end
+                    %
+                    if str2double(sprintf('%g',inrange{2}))~=inrange{2}
+                        outrange{2} = str2double(sprintf('%g',inrange{2}));
+                    end
+                end
+            end
+        end        
+        
     end
 %%
     methods (Access=private)      
@@ -966,8 +1035,8 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             %get the index or vector of indices based on selection
             % var is the variable to select from and value is a numeric
             % value to select the nearest index, or a text string defining
-            % the range of values required
-            if ischar(value) && ~iscell(var)  
+            % the range of values required.
+            if ischar(value) && contains(value,'>')
                 %range character vector
                 indices = getvarindices(var,value);
             elseif (iscell(var) || isstring(var)) && length(var)>1
@@ -1066,72 +1135,6 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                         propdata{k,1} = NaN;
                     else
                         propdata{k,1} = localObj.(proplabels{k});
-                    end
-                end
-            end
-        end
-        %%
-        function data = getVariableSubSelection(~,data,range,selrange,outopt)
-            %if the range of a variable has been subselected, assign the
-            %values outside the range as NaNs
-            %NB - limited testing with real data ***
-            subrange = range2var(selrange);
-            range = check_bounds(range);
-            if all(cellfun(@isequal,range,subrange)), return; end
-
-            switch outopt
-                case 'array'
-                    data = applyrange(data,range,subrange);
-                case 'table'
-                    varname = data.Properties.VariableNames{1};
-                    data.(varname) = applyrange(data.(varname),range,subrange);
-                case 'dstable'
-                    varname = data.VariableNames{1};
-                    data.(varname) = applyrange(data.(varname),range,subrange);
-                case 'splittable'
-                    data{:,:} = applyrange(data{:,:},range,subrange); %assumes can only be 2D table
-                case 'timeseries'
-                    data.Data = applyrange(data.Data,range,subrange);                    
-            end
-            % Nested function----------------------------------------------
-            function data = applyrange(data,range,subrange)
-                %set values outside subrange to NaN
-                if isnumeric(range{1})
-                    if range{1}~=subrange{1}
-                        data(data<subrange{1}) = NaN;
-                    end
-                    %
-                    if range{2}~=subrange{2}
-                        data(data>subrange{2}) = NaN;
-                    end
-                else
-                    %for text it would be better to be able to multi-select 
-                    %from a list but for now use a range to be consistent
-                    valueset = categories(categorical(data));
-                    ids = find(contains(valueset,subrange{1}));
-                    ide = find(contains(valueset,subrange{2}));
-                    idx = 1:length(valueset);
-                    idx(ids:ide) = 0;
-                    idx = idx>0;
-                    if iscategorical(data)
-                        data = removecats(data,valueset(idx));   
-                    else
-                        data(ismatch(data,valueset(idx))) = {''};
-                    end
-                end
-            end     
-            % Nested function----------------------------------------------
-            function outrange = check_bounds(inrange)
-                %check for rounding errors when converting between numeric 
-                %ranges and the displayed text strings
-                outrange = inrange;
-                if isnumeric(inrange{1})                
-                    if str2double(sprintf('%g',inrange{1}))~=inrange{1}
-                        outrange{1} = str2double(sprintf('%g',inrange{1}));
-                    end
-                    %
-                    if str2double(sprintf('%g',inrange{2}))~=inrange{2}
-                        outrange{2} = str2double(sprintf('%g',inrange{2}));
                     end
                 end
             end

@@ -520,13 +520,13 @@ classdef (Abstract = true) muiDataUI < handle
             scalelist = obj.TabContent(itab).Scaling;
             
             %if range is text use list of categories rather than end values
-            if iscellstr(varRange) || isstring(varRange)
+            if islist(varRange,2) %option checks for cellstr and string
                 varRange = categories(categorical(dst.(dstnames{1})));
             elseif iscategorical(varRange)
                 varRange = categories(dst.(dstnames{1}));
             end
                 
-            %single variable or dimnsion selection
+            %single variable or dimension selection
             inp.title    = 'Select variable';
             inp.prompt   = 'Select the property to use and any limits to be applied to the data range of the selected property';  
             %inputs for fields,style,controls,default and userdata have one value per
@@ -579,7 +579,8 @@ classdef (Abstract = true) muiDataUI < handle
                         ndim = 0;
                         mdim = pdim;
                     end
-                    subVarSelection(obj,dst,1,xyz,mdim,ndim);
+                    ok = subVarSelection(obj,dst,1,xyz,mdim,ndim);
+                    if ok<1, return; end
                 else                         %dimension selected
                     for j=1:pdim
                         varRange = getVarAttRange(dst,dstdesc,dstdesc{j+1});
@@ -618,7 +619,7 @@ classdef (Abstract = true) muiDataUI < handle
             elseif strcmp(src.String,'Function')
                 useSelection(obj,src,mobj);    %do something with selection
             elseif obj.issetXYZ
-                ok = assignSelection(obj,src,mobj);  %selections in UI
+                ok = assignSelection(obj,src,mobj);  %selections in UI  
                 if ok<1, return; end
                 assignSettings(obj,src);       %settings in UI                
                 useSelection(obj,src,mobj);    %do something with selection
@@ -682,8 +683,7 @@ classdef (Abstract = true) muiDataUI < handle
                 range(k).val = getVarAttRange(dst,dstdesc,inputxt{k});
                 range(k).txt = var2range(range(k).val);
                 rangeval = range(k).val{1};
-                if iscellstr(rangeval) || isstring(rangeval) ||...
-                    iscategorical(rangeval) || ischar(rangeval)
+                if islist(rangeval,1) %checks for all text options that are lists
                     %if text list is being used set var to the list
                     %val sets userdata which is used in editrange to check 
                     %data type in range2var and switch to list selection
@@ -717,7 +717,7 @@ classdef (Abstract = true) muiDataUI < handle
                     dimname = dstnames{strcmp(dstdesc,slidervals{1})};
                     dimvalue = slidervals{2};                    
                 else %drop down list has been used
-                    dimname = dstnames{2*mdim+i};
+                    dimname = dstnames{1+mdim+i}; %var+mdim
                     dimvalue = range(mdim+i).val{slidervals};%******CHANGED TO CELL READ
                 end
                 obj.UIselection(xyz).dims(mdim+i).name = dimname;
@@ -741,25 +741,21 @@ classdef (Abstract = true) muiDataUI < handle
             seltext = repmat({'Select:','Range:'},1,mdim);
             uinput.fields   = [seltext(:);dstdesc((mdim+2):end)'];
             style1 = repmat({'linkedpopup','edit'},1,mdim);
+            
             %check for selections that use text lists
-            islist = cellfun(@iscellstr,{selrange(:).val});
-            if any(islist) && mdim==1
-                %assumes only the last dimension is a text list
-                %introduced to handle elements in Asmita
-                style2 = repmat({'popupmenu'},1,ndim);
-                mcontrol = {'','','',''};
-                nvar = find(islist);
-                if nvar==1
-                    mcontrol = {'','Ed','',''};
-                else
-                    selrange(islist).txt = selrange(islist).val; %swap range for list(*)
-                    mcontrol{islist} = 'Ed';
-                end
-            else   %default for numeric and datatime/duration dimensions
-                style2 = repmat({'linkedslider'},1,ndim);
-                nvar = 2:length(dstdesc);
-                mcontrol = repmat({'';'Ed'},1,mdim);
+            islist = cellfun(@islist,{selrange(:).val});
+            style2 = repmat({'linkedslider'},1,ndim);
+            nvar = 2:length(dstdesc);
+            mcontrol = repmat({'';'Ed'},1,mdim);      
+            if any(islist)  
+                for i=1:length(style2) 
+                   if islist(mdim+i)  %other selection options are lists
+                       selrange(mdim+i).txt = selrange(mdim+i).val; %swap range for list(*)
+                       style2(i) = {'popupmenu'};
+                   end
+               end
             end
+
             uinput.style    = [style1(:);style2(:)];            
             ncontrol = repmat({'Ed'},1,ndim);
             uinput.controls = [mcontrol(:);ncontrol(:)];

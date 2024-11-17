@@ -25,11 +25,9 @@ function setslider(src,~)
     endtxt = var2str(endval);
 
     if isdatetime(startval)
-        dt = between(startval,endval)/2;
+        dt = diff([startval,endval])/2;
         midpoint = startval+dt;     
-    elseif iscategorical(startval) || isstring(startval) || ...
-                                iscellstr(startval) || ischar(startval)
-%     elseif ~isnumeric(startval)
+    elseif islist(startval,1)  %checks for all list types
         dt = round(length(src(1).UserData)/2);
         midpoint = src(1).UserData(dt);
     else
@@ -38,33 +36,7 @@ function setslider(src,~)
         if isinteger, average = round(average); end
         midpoint = startval+average;
     end
-    
-%     if isdatetime(startval)
-%         dt = between(startval,endval)/2;
-%         midpoint = startval+dt;
-%     elseif iscategorical(startval)
-%         dst = src(2).UserData;
-%         if iscategorical(dst.RowNames)
-%             if dst.RownNames(1)==startval
-%                 npt = round(height(dst)/2);
-%                 midpoint = dst.RowNames(npt);
-%             end
-%         elseif ~isempty(dst.Dimensions)
-%             fnames = fieldnames(dst.Dimensions);
-%             for i=1:length(fnames)
-%                 if iscategorical(dst.Dimensions.(fnames{i})) && ...
-%                           char(dst.Dimensions.(fnames{i})(1))==startval
-%                     npt = round(length(dst.Dimensions.(fnames{i}))/2);
-%                     midpoint = dst.Dimensions.(fnames{i})(npt);
-%                     src(1).UserData = dst.Dimensions.(fnames{i});
-%                     break
-%                 end
-%             end
-%         end
-%     else
-%         average = (endval-startval)/2;
-%         midpoint = startval+average;
-%     end
+
     slidevalue = var2str(midpoint);
     %
     S = src(1);

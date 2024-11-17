@@ -25,10 +25,13 @@ function h = getwidget(handle,settings,widgetpos,idx)
 %   settings.InputFields = {'var1'};   %text prompt for input field to be displayed
 %   settings.Style = {'style'};        %uicontrols for each input field (same no. as input fields)
 %   settings.DefaultInputs = {'test'}; %default text or selection lists
-%   settings.Userdata = [];           %data assigned to UserData of uicontrol
+%   settings.Userdata = [];            %data assigned to UserData of uicontrol
 %   settings.ControlButtons = {'Ev'};  %text for buttons to edit or update selection
 %   widgetpos.height = 0.9;
 %   widgetpos.pos4 = 0.1;
+%
+%   Widget tag format is as follows: widgetname>uic# where widgetname is 
+%   defined by settings.InputFields and #=idx is the index identifier of widget
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2020

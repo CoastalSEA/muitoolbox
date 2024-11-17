@@ -8,7 +8,7 @@ classdef inputUI < handle
 % USAGE
 %   Called by inputgui.m
 % INPUT
-%   Defined using varargin for the following fields
+%   Defined using varargin for the following fields and assigned to settings
 %    FigureTitle     - title for the UI figure
 %    PromptText      - text to guide user on selection to make
 %    InputFields     - text prompt for input fields to be displayed
@@ -20,6 +20,9 @@ classdef inputUI < handle
 %    SelectedVar     - index vector to define case,dataset,variable selection  
 %    ActionButtons   - text for buttons to take action based on selection
 %    Position        - poosition and size of figure (normalized units)
+% NOTES
+%   Widget tag format is as follows: widgetname>uic# where widgetname is 
+%   defined by settings.InputFields and #=idx is the index identifier of widget
 % SEE ALSO
 %   used in muiDataUI. See test_inputgui.m for examples of usage. 
 %
@@ -99,21 +102,26 @@ classdef inputUI < handle
                 widgetpos.height = 1-i*intheight+intheight/2-widgetpos.pos4/2;
                 hw = getwidget(h_pnl,settings,widgetpos,i);
                 if strcmp(settings.Style{i},'linkedpopup')
-                   %hw(1) is the ui popumenu and hw(2) the edit field button
-                   hw(1).Callback = @(src,evt)linkedPopUp(obj,src,evt);
-%                    hw(1).UserData = settings.DataObject;
-                   hw(1).UserData = count; %used to track previous selection
-                   hw(1).Value = count;
-                   count = count+1;
+                    %hw(1) is the ui popumenu and hw(2) the edit field button
+                    %default set in getwidget is for hw(2) to call editrange
+                    hw(1).Callback = @(src,evt)linkedPopUp(obj,src,evt);
+                    %                    hw(1).UserData = settings.DataObject;
+                    hw(1).UserData = count; %used to track previous selection
+                    hw(1).Value = count;
+                    count = count+1;
                 elseif strcmp(settings.Style{i},'slider') ||...
                         strcmp(settings.Style{i},'linkedslider')
-                   hw(1).Callback = @(src,evt)updateSlider(obj,src,evt);  
-                   hw(2).Callback = @(src,evt)updateSlider(obj,src,evt); 
-                   hw(1).UserData = settings.UserData{i};
-                   hw(2).UserData = settings.DataObject;
-                   setslider(hw);
+                    hw(1).Callback = @(src,evt)updateSlider(obj,src,evt);
+                    hw(2).Callback = @(src,evt)updateSlider(obj,src,evt);
+                    hw(1).UserData = settings.UserData{i};
+                    hw(2).UserData = settings.DataObject;
+                    setslider(hw);
+                elseif strcmp(settings.Style{i},'popupmenu') && length(hw)==2
+                    %popupmenu that includes an edit button
+                    hw(2).Callback = @(src,evt)editlist(src,evt);
+                    hw(2).UserData = settings.UserData{i};
                 end
-            end 
+            end
             
             %add buttons to figure
             nbut = length(settings.ActionButtons);
@@ -163,24 +171,34 @@ classdef inputUI < handle
 %%
         function linkedPopUp(obj,src,~)
             %link popopmenu to an editable range field
-            selid = src.Value;                         %new selection in popupmenu
-            selected = src.String{selid};              %text selection
-            allhw = findobj(obj.UIfig,'Style','edit'); %all text edit uic
-            hwtag = sprintf('uic%d',str2double(src.Tag(end))+1);
-            hw = findobj(allhw,'-regexp','Tag',hwtag); %text edit uic linked to popupmenu
-            dst = obj.UIfig.UserData.DataObject;       %dataset selected
+            
+            %a new selection has been made using a linked popup menu
+            selid = src.Value;                            %new selection in popupmenu
+            selected = src.String{selid};                 %text selection           
+            
+            %get the handles to the existing functional uis
+            hpan = findobj(obj.UIfig.Children,'Tag','PlotPanel');
+            alledit = findobj(hpan,'Style','edit'); %all text edit uic
+            allpopup = findobj(hpan,'Style','popupmenu'); %all popupmenu uic
+            allslide = findobj(hpan,'Style','slider');    %all slider uic
+            
+            %change the linked edit range ui to the range of new selection
+            hwtag = sprintf('uic%d',str2double(src.Tag(end))+1); %tag of linked edit range ui
+            hw = findobj(alledit,'-regexp','Tag',hwtag);  %handle to linked edit range
+            
+            dst = obj.UIfig.UserData.DataObject;          %dataset selected
             
             %check that selection does not duplicate another popupmenu selection
             alllnkpops = find(strcmp(obj.UIfig.UserData.Style,'linkedpopup'));
-            allpops = findobj(obj.UIfig,'Style','popupmenu'); %all popupmenu uic
+            
             nprops = length(alllnkpops);
             lkpval = zeros(1,nprops);
             for i=1:nprops
                 lkptag = sprintf('uic%d',alllnkpops(i));
-                hlkp = findobj(allpops,'-regexp','Tag',lkptag);
+                hlkp = findobj(allpopup,'-regexp','Tag',lkptag);
                 lkpval(i) = hlkp.Value;
             end
-            %
+            %if duplicated restore the original value
             if sum(lkpval==selid)>1 || selid==src.UserData
                 src.Value = src.UserData;
                 return;
@@ -195,50 +213,46 @@ classdef inputUI < handle
             range = getVarAttRange(dst,selectedvar(3),selected);%selectedvar(3)==variable
             
             if length(range)>2
-                rangetext = var2range({range{1},range{end}}); 
+                rangetext = var2range({range{1},range{end}}); %range is a list
             else
-                rangetext = var2range(range);
+                rangetext = var2range(range);                 %range is 1x2 cell
             end
-            
-%             if iscategorical(range{1}) || isstring(range) || iscellstr(range)
-%                 [attnames,attdescs] = getAllAttributes(dst,selectedvar(3));
-%                 attused = strcmp(attdescs,selected);
-%                 if attused(1)             %variable
-%                     range = dst.(attnames{attused});
-%                 elseif attused(2)         %row
-%                     range = dst.RowNames;
-%                 else                      %dimension
-%                     range = dst.Dimensions.(attnames{attused});
-%                 end
-%             end            
-            
-            %update the range widget  
+
+            %update the linkedpopup edit range widget  
             src.UserData = selid;           %current selection
             hw.String = rangetext;          %new range string
             hw.UserData = range;            %new range values
-
-            %just swap new for old
-            hpan = findobj(obj.UIfig.Children,'Tag','PlotPanel');
-            hslide = findobj(hpan,'Style','slider');  %all sliders
-            if ~isempty(hslide)
-                aslide = findobj(hslide,'-regexp','Tag',selected);
-                dimtext = src.String{oldselid};                
-                resetSliderWidget(obj,aslide,oldrange,dimtext);
-            end
             
-            %if there are additional dimension sliders update all sliders
-            % hpan = findobj(obj.UIfig.Children,'Tag','PlotPanel');
-            % hslide = findobj(hpan,'Style','slider');  %all sliders
-            % idx = find(~ismember(src.String,selected));
-            % for i=1:length(hslide)
-            %     dimtext = src.String{idx(i)};
-            %     range = getVarAttRange(dst,selectedvar(3),dimtext);                
-            %     resetSliderWidget(obj,hslide(i),range,dimtext);
-            % end
+            %now need to update the ui for the single value selection
+            %just swap new for old but check for change of variable type
+            dimtext = src.String{oldselid}; 
+            %find single value ui to be updated
+            asingle = findobj([allslide;allpopup],'-regexp','Tag',selected);
+            if ~isempty(asingle) 
+                if islist(oldrange,1) %checks for all list types
+                    %set ui to popupmenu style
+                    if ~strcmp(asingle.Style,'popupmenu')
+                        asingle.Style = 'popupmenu';   %change to popupmenu
+                        clearSliderText(obj,asingle);  %clear slider start-end text                    
+                        updateCallback(obj,asingle,'popupmenu');  %update callback to new style
+                    end
+                    resetPopupWidget(obj,asingle,oldrange,dimtext);
+                else
+                    %set ui to slider style
+                    if ~strcmp(asingle.Style,'slider')
+                        asingle.Style = 'slider';      %change to slider
+                        setslider(asingle)             %initialise slider start-end text
+                        updateCallback(obj,asingle,'slider');  %update callback to new style
+                    end
+                    resetSliderWidget(obj,asingle,oldrange,dimtext);
+                end
+                %update the edit button Tag to the name of the single value uic
+                updateEdButton(obj,asingle);    
+            end
         end
 %%
         function updateSlider(obj,src,~)
-            %called from slider or edit button to maintain link
+            %called from slider or edit button for slider to maintain link
             if strcmp(src.Style,'slider')
                 %find the position in source data units
                 newpos = getPosition(obj,src);
@@ -251,11 +265,18 @@ classdef inputUI < handle
                 slideobj = findobj(src.Parent,'-regexp','Tag',slitag);
                 oldpos = getPosition(obj,slideobj);
                 
-                promptxt = 'Set dimension value to use';                
-                defaults = var2str(oldpos);
-                answer = inputdlg(promptxt,'inputUI',1,defaults);
-                if isempty(answer), return; end
+                %get an updated position. use date picker if a datetime
+                if isdatetime(oldpos)
+                    %uigetdate is from Matlab Forum (copyright Elmar Tarajan) 
+                    answer = {datetime(uigetdate(oldpos,'Select date'),'ConvertFrom','datenum')};
+                else
+                    promptxt = 'Set dimension value to use';                
+                    defaults = var2str(oldpos);
+                    answer = inputdlg(promptxt,'inputUI',1,defaults);
+                    if isempty(answer), return; end
+                end
                 
+                %get the start and end slider values
                 if iscell(slideobj.UserData)
                     svalue = slideobj.UserData{1};
                     evalue = slideobj.UserData{2};
@@ -263,24 +284,30 @@ classdef inputUI < handle
                     svalue = slideobj.UserData(1);
                     evalue = slideobj.UserData(end);
                 end
-                %
-                if isdatetime(svalue) || isduration(svalue)
+                
+                %get the format of datasets that need this
+                if isduration(svalue)
                     format = svalue.Format;
                     %if user corrupts input format then str2var cannot read input
                     checkstr = split(answer{1});
                     if isduration(svalue) && length(checkstr)<2
                         answer{1} = sprintf('%s %s',answer{1},format);
                     end
+                elseif isdatetime(svalue)                                     
+                    format = svalue.Format;
                 elseif iscategorical(svalue)
                     format = cellstr(slideobj.UserData);
                 else
                     format = [];
                 end
                 
+                %check that the new position is a valid selection
                 newpos = str2var(answer{1},getdatatype(svalue),format);
+                %check newpos by setting range to end value and use isvalidrange
                 isvalid  = isvalidrange({newpos,evalue},{svalue,evalue});
                 if ~isvalid, return; end
-
+                
+                %calculate the new position in slider coordinates
                 if iscategorical(newpos)
                     pos = find(newpos==slideobj.UserData);
                     relpos = pos/length(slideobj.UserData)*100; 
@@ -312,25 +339,25 @@ classdef inputUI < handle
             src.UserData = range;
             
             %update slider text            
-            if iscategorical(range) || isstring(range) || iscellstr(range)                             
-                value{1} = var2str(range(1));
-                value{2} = var2str(range(end));
+            if islist(range,3) %checks for cellstr, sting and categorical                            
+                value(1) = var2str(range(1));
+                value(2) = var2str(range(end));
                 npt = round(length(range)/2);
                 midpoint = range(npt);
             elseif iscategorical(range{1})
-                value{1} = var2str(range{1});
-                value{2} = var2str(range{end});
+                value(1) = var2str(range{1});
+                value(2) = var2str(range{end});
                 npt = round(length(range)/2);
                 midpoint = range(npt);
             else
-                value{1} = var2str(range{1});
-                value{2} = var2str(range{2});
+                value(1) = var2str(range{1});
+                value(2) = var2str(range{2});
                 midpoint = (range{2}-range{1})/2;
                 if isdatetime(range{1}) %reset duration as a datetime
                     midpoint = range{1}+midpoint;
                 end
             end
-            value{3} = var2str(midpoint);            
+            value(3) = var2str(midpoint);            
             tagname = {'slide-start','slide-end','slide-val'};
             for i=1:3
                 uislidetext = findobj(src.Parent,'-regexp','Tag',[tagname{i},uinum]);
@@ -344,7 +371,7 @@ classdef inputUI < handle
         function [pos,startvalue,endvalue] = getPosition(~,src)
             %update the slider position
             newpos = src.UserData;
-            if iscategorical(newpos) || iscellstr(newpos) || isstring(newpos)
+            if islist(newpos,3) %checks for cellstr, sting and categorical 
                 nrec = round((length(src.UserData)-1)*src.Value/100)+1;
                 pos = src.UserData(nrec);
             elseif iscategorical(newpos{1}) 
@@ -356,6 +383,60 @@ classdef inputUI < handle
                 relpos = src.Value/100;
                 pos = startvalue+(endvalue-startvalue)*relpos;
             end
+        end
+%%
+        function clearSliderText(~,src)
+            %when switching from slider to popupmenu need to remove slider
+            %limits and selection text
+            uinum = src.Tag(end);
+            uislides = findobj(src.Parent,'-regexp','Tag','slide');
+            uitext = findobj(uislides,'-regexp','Tag',uinum);
+            delete(uitext)
+        end
+%%
+        function resetPopupWidget(~,src,range,dimtext)
+            %reset text and settings for the selected widget uic (src)
+            
+            %update text descriptor
+            uinum = src.Tag(end);
+            uicname = split(src.Tag,'>');
+            uitext = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>txt']);
+            uitext.String = dimtext;
+
+            uitext.Tag = sprintf('%s>%s%s',dimtext,'txt',uinum);
+            src.Tag = sprintf('%s>%s',dimtext,uicname{2});
+
+            %update range in list
+            src.UserData = range;
+            src.String = range;
+            src.Value = 1;            
+        end
+%%
+        function updateCallback(obj,src,style)
+            %update the widget and edit button callbacks to new style selection
+            uinum = src.Tag(end);
+            uicname = split(src.Tag,'>');
+            uibut = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>but']);
+            uicon = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>uic']);
+            switch style
+                case 'slider'
+                   uicon.Callback = @(src,evt)updateSlider(obj,src,evt);  
+                   uibut.Callback = @(src,evt)updateSlider(obj,src,evt);                    
+                case 'popupmenu'
+                   uicon.Callback =  @(src,evt)editlist(src,evt);
+                   uibut.Callback =  @(src,evt)editlist(src,evt);
+            end
+            uibut.UserData = uicon.UserData;
+        end
+%%
+        function updateEdButton(~,src)
+            %update the name of the Edit button if the variable has changed
+            uinum = src.Tag(end);
+            uicname = split(src.Tag,'>');
+            uibut = findobj(src.Parent,'-regexp','Tag',['>but',uinum]);
+            
+            newname = sprintf('%s>but%s',uicname{1},uinum);
+            uibut.Tag = newname;
         end
 %%
         function closeuicallback(obj,~,~)
