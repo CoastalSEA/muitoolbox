@@ -715,10 +715,10 @@ classdef (Abstract = true) muiDataUI < handle
                 if length(slidervals)>1
                     %slider has been used
                     dimname = dstnames{strcmp(dstdesc,slidervals{1})};
-                    dimvalue = slidervals{2};                    
+                    dimvalue = var2str(slidervals{2});        %added var2string to catch datetimes etc              
                 else %drop down list has been used
                     dimname = dstnames{1+mdim+i}; %var+mdim
-                    dimvalue = range(mdim+i).val{slidervals};%******CHANGED TO CELL READ
+                    dimvalue = range(mdim+i).val{slidervals};
                 end
                 obj.UIselection(xyz).dims(mdim+i).name = dimname;
                 obj.UIselection(xyz).dims(mdim+i).value = dimvalue;

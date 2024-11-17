@@ -27,7 +27,7 @@ function setslider(src,~)
     if isdatetime(startval)
         dt = diff([startval,endval])/2;
         midpoint = startval+dt;     
-    elseif islist(startval,1)  %checks for all list types
+    elseif islist(startval,1) || ischar(startval) %checks for all list types
         dt = round(length(src(1).UserData)/2);
         midpoint = src(1).UserData(dt);
     else
