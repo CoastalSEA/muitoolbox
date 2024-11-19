@@ -50,9 +50,14 @@ function Vout = editrange_ui(Vin,selist)
         dtype = getdatatype(Vin);
         if isnumeric(Vin{1}) || islogical(Vin{1})
             %replaced use of cellfun to avoid rounding error in num2str
-            numdpl = max(get_precision(Vin{1}),get_precision(Vin{2}));
-            Vin{1} = num2str(Vin{1},numdpl);
-            Vin{2} = num2str(Vin{2},numdpl);
+            numdpl = max(getprecision(Vin{1}),getprecision(Vin{2}));
+            if numdpl>0
+                Vin{1} = num2str(Vin{1},numdpl);
+                Vin{2} = num2str(Vin{2},numdpl);
+            else
+                Vin{1} = num2str(Vin{1}); %num2str misbehaves if numdpl=0
+                Vin{2} = num2str(Vin{2});                
+            end
         elseif ~ischar(Vin{1})
             Vin = cellfun(@cellstr,Vin);
         end

@@ -47,9 +47,6 @@
 % * *functionlibrarylist.m*
 % - Lists available functions for use in DataManip
 %
-% * *get_precision.m*
-% - find the precision of a number that is a double
-%
 % * *get_selection.m*
 % - retrieve selected variable or dimension based on selection made 
 % using selectui
@@ -97,17 +94,8 @@
 % * *inputUI.m*
 % - creates a multi-field UI
 %
-% * *isallround.m*
-% - check whether vector of numbers or durations are are all round numbers
-% but may or may not be integer data types
-%
 % * *isimage.m*
 % - test whether an array is the right size and data type to be an image
-%
-% * *islist.m*
-% - test whether a variable is some form of text data. Input option allows 
-% different combinations of character data types to be tested. If option is not included
-% the function tests for cellstr, or string, or categorical, or char array
 %
 % * *ismatch.m*
 % - finds the occurence of matches between two sets of character vectors,
