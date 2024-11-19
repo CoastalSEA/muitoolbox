@@ -122,6 +122,12 @@ classdef inputUI < handle
                 end
             end
             
+            if nvar==2 && all(strcmp(settings.Style,'popupmenu'))
+                %two popupmenus - assume start and end range values and set
+                %second popupmenu to the end value.
+                hw(1).Value = length(hw(1).String);
+            end
+
             %add buttons to figure
             nbut = length(settings.ActionButtons);
             butxt = fliplr(settings.ActionButtons);

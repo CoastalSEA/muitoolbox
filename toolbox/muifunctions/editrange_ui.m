@@ -29,24 +29,23 @@ function Vout = editrange_ui(Vin,selist)
             ti.Format = Vin{i}.Format;
             Vout{i} = ti;
         end
-    elseif nargin>1 && (iscellstr(selist) || isstring(selist) || ...
-            iscategorical(selist)) %|| iscategorical(selist{1})
+    elseif nargin>1 && islist(selist,3) %3 - cellstr, string, categorical
         h_inp = inputUI('FigureTitle', 'Edit range',...
-                        'PromptText','Select start and end of range:',...
-                        'InputFields',{'From: ','To: '},...
-                        'Style',{'popupmenu','popupmenu'},...
-                        'ControlButtons',{'',''},...                            
-                        'DefaultInputs',{selist,selist},...
-                        'ActionButtons',{'Select','Cancel'});  
+			            'PromptText','Select start and end of range:',...
+			            'InputFields',{'From: ','To: '},...
+			            'Style',{'popupmenu','popupmenu'},...
+			            'ControlButtons',{'',''},...
+			            'DefaultInputs',{selist,selist},...
+			            'ActionButtons',{'Select','Cancel'});
 
-            waitfor(h_inp,'Action')
-            if ~isempty(h_inp.UIselection)  %selection made
-                Vout = selist([h_inp.UIselection{:}]);
-                if ~iscell(Vout)
-                    Vout = {Vout(1),Vout(2)};
-                end
+        waitfor(h_inp,'Action')
+        if ~isempty(h_inp.UIselection)  %selection made
+            Vout = selist([h_inp.UIselection{:}]);
+            if ~iscell(Vout)
+                Vout = {Vout(1),Vout(2)};
             end
-            delete(h_inp.UIfig) %delete figure even if user cancels
+        end
+        delete(h_inp.UIfig) %delete figure even if user cancels
     else                 %otherwise use input dialogue
         dtype = getdatatype(Vin);
         if isnumeric(Vin{1}) || islogical(Vin{1})
@@ -54,13 +53,13 @@ function Vout = editrange_ui(Vin,selist)
             numdpl = max(get_precision(Vin{1}),get_precision(Vin{2}));
             Vin{1} = num2str(Vin{1},numdpl);
             Vin{2} = num2str(Vin{2},numdpl);
-        elseif ~ischar(Vin{1})    
+        elseif ~ischar(Vin{1})
             Vin = cellfun(@cellstr,Vin);
         end
         newvalues = inputdlg({'From:','To:'},'Edit range',1,Vin);
 
         if ~isempty(newvalues)
             Vout = setdatatype(newvalues,dtype);
-        end        
+        end
     end
 end

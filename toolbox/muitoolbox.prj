@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration build-checksum="4091217133" file="D:\Matlab Code\muiModels\muitoolbox\toolbox\muitoolbox.prj" location="D:\Matlab Code\muiModels\muitoolbox\toolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="2318545027" file="D:\Matlab Code\muiModels\muitoolbox\toolbox\muitoolbox.prj" location="D:\Matlab Code\muiModels\muitoolbox\toolbox" name="muitoolbox" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>muitoolbox</param.appname>
     <param.authnamewatermark>Ian Townend</param.authnamewatermark>
     <param.email>i.townend@coastalsea.uk</param.email>
