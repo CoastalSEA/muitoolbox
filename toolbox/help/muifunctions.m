@@ -48,7 +48,7 @@
 % - Lists available functions for use in DataManip
 %
 % * *get_precision.m*
-% - find the precision of  a number
+% - find the precision of a number that is a double
 %
 % * *get_selection.m*
 % - retrieve selected variable or dimension based on selection made 
@@ -96,6 +96,10 @@
 % 
 % * *inputUI.m*
 % - creates a multi-field UI
+%
+% * *isallround.m*
+% - check whether vector of numbers or durations are are all round numbers
+% but may or may not be integer data types
 %
 % * *isimage.m*
 % - test whether an array is the right size and data type to be an image

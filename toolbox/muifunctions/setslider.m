@@ -13,7 +13,7 @@ function setslider(src,~)
 %   Sets up range text and current value in source units by linking the
 %   scale of 0-100 set for the slider to the variable range values
 % SEE ALSO
-% called by inputUI when using sliders as a control Style
+%   called by inputUI when using sliders as a control Style
 %   
 % Author: Ian Townend
 % CoastalSEA (c)June 2020
@@ -32,8 +32,14 @@ function setslider(src,~)
         midpoint = src(1).UserData(dt);
     else
         average = (endval-startval)/2; %should handle duration
-        isinteger = all((src(1).UserData{1}-round(src(1).UserData{end}))<10*eps());
-        if isinteger, average = round(average); end
+        isinteger = isallround([src(1).UserData{:}]);
+        if isinteger
+            average = round(average); 
+            if isduration(average)
+                src(1).UserData = cellfun(@time2num,src(1).UserData,'UniformOutput',false);
+            end
+            src(1).UserData = cellfun(@int16,src(1).UserData,'UniformOutput',false);
+        end
         midpoint = startval+average;
     end
 

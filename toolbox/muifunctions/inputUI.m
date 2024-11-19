@@ -105,7 +105,6 @@ classdef inputUI < handle
                     %hw(1) is the ui popumenu and hw(2) the edit field button
                     %default set in getwidget is for hw(2) to call editrange
                     hw(1).Callback = @(src,evt)linkedPopUp(obj,src,evt);
-                    %                    hw(1).UserData = settings.DataObject;
                     hw(1).UserData = count; %used to track previous selection
                     hw(1).Value = count;
                     count = count+1;
@@ -306,13 +305,17 @@ classdef inputUI < handle
                 %check newpos by setting range to end value and use isvalidrange
                 isvalid  = isvalidrange({newpos,evalue},{svalue,evalue});
                 if ~isvalid, return; end
-                
+
                 %calculate the new position in slider coordinates
                 if iscategorical(newpos)
                     pos = find(newpos==slideobj.UserData);
                     relpos = pos/length(slideobj.UserData)*100; 
                 elseif isinteger(newpos)
-                    relpos = double(newpos-svalue)/double(evalue-svalue)*100;
+                    relpos = round(double(newpos-svalue)/double(evalue-svalue)*100);
+                elseif isallround(newpos) 
+                    %no data to check for round number values in range vector
+                    %this only forces a round value to remain round
+                    relpos = round((newpos-svalue)/(evalue-svalue)*100);
                 else     %numeric and datetime handled by differences                     
                     relpos = (newpos-svalue)/(evalue-svalue)*100;
                 end
@@ -338,7 +341,7 @@ classdef inputUI < handle
             %update range in slider
             src.UserData = range;
             
-            %update slider text            
+            %update slider text    
             if islist(range,3) %checks for cellstr, sting and categorical                            
                 value(1) = var2str(range(1));
                 value(2) = var2str(range(end));
@@ -351,10 +354,18 @@ classdef inputUI < handle
                 midpoint = range(npt);
             else
                 value(1) = var2str(range{1});
-                value(2) = var2str(range{2});
+                value(2) = var2str(range{end});
                 midpoint = (range{2}-range{1})/2;
                 if isdatetime(range{1}) %reset duration as a datetime
                     midpoint = range{1}+midpoint;
+                elseif isallround([range{:}])
+                    %no data to check for round number values in range vector
+                    %use range start-end values as basis for reset
+                    midpoint = range{1}+round(midpoint);
+                    if isduration(midpoint)
+                        src.UserData = cellfun(@time2num,src.UserData,'UniformOutput',false);
+                    end
+                    src.UserData = cellfun(@int16,src.UserData,'UniformOutput',false);
                 end
             end
             value(3) = var2str(midpoint);            
@@ -369,7 +380,8 @@ classdef inputUI < handle
         end
 %%
         function [pos,startvalue,endvalue] = getPosition(~,src)
-            %update the slider position
+            %update the slider position 
+            %no data to check for round number values in range vector
             newpos = src.UserData;
             if islist(newpos,3) %checks for cellstr, sting and categorical 
                 nrec = round((length(src.UserData)-1)*src.Value/100)+1;
