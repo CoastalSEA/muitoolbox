@@ -15,7 +15,7 @@ function [avar,idx] = sort_var(dst,avar)
 %   avar - a-variable to be sorted
 % OUTPUT
 %   avar - sorted a-variable in ascending order
-%   idx - indices used to sort the input varion of avar
+%   idx - indices used to sort the input version of avar
 % SEE ALSO
 %   used in muiTableImport for scalar tabPlot
 %

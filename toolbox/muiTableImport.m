@@ -272,10 +272,15 @@ classdef muiTableImport < muiDataSet
 
             promptxt = {'Provide description of the data sources          >','Name for dataset being added'};
             metatxt = inputdlg(promptxt,'muiTableImport',1);
+            dsnames = fieldnames(obj.Data);
+            if isempty(metatxt{2})
+                metatxt{2} = sprintf('%s_%d',fname,length(dsnames)+1);
+            end
 
             %assign metadata about data
             newdst.Source{1} = fname;
             newdst.MetaData = metatxt{1};
+            newdst.Description = obj.Data.(dsnames{1}).Description;
             %extrac dataset names and ensure valid fieldname
             datasetname = matlab.lang.makeValidName(metatxt{2});
             
@@ -409,20 +414,19 @@ classdef muiTableImport < muiDataSet
         end
 
 %%
-        function [ax,idx,ids] = userPlot(obj,ax)
-            %allows external functions to call vectorplot and scalatplot
+        function [ax,idx,ids] = userPlot(obj,dst,idv,ax)
+            %allows external functions to call vectorplot and scalarplot
+            % dst - dataset to use for plot
+            % idv - index of variable to use
             % ax - handle to figure axes if not supplied
             % idx - sort order of x-variable if a scalarplot and the
             % selected x-variable if a vector plot
             % ids - indices of selected sub-set (after sorting)            
-            if nargin<2
+            if nargin<4
                 hfig = figure('Name','UserPlot','Units','normalized',...
                                             'Resize','on','Tag','PlotFig'); 
                 ax = axes(hfig);
             end
-
-            %get data and variable id
-            [dst,idv] =selectDataSet(obj);
 
             if size(dst.DataTable{1,1},2)>1  %matrix data set
                 vardesc = dst.VariableDescriptions;
@@ -464,7 +468,7 @@ classdef muiTableImport < muiDataSet
     end
 %%
     methods(Access = protected)
-        function [idx,ids] = scalarplot(~,ax,dst,idv)
+        function [idx,ids] = scalarplot(obj,ax,dst,idv)
             %plot selected variable as function of location
             % idx - sort order of x-variable
             % ids - indices of selected sub-set (after sorting)
@@ -487,7 +491,14 @@ classdef muiTableImport < muiDataSet
             end
 
             %option to plot alphabetically or in index order
-            [rn,idx] = sort_var(dst,rn);
+            datasetname = getDataSetName(obj,'Select Dataset to use for index (optional)');
+            if isempty(datasetname)
+                sortdst = dst; 
+            else
+                sortdst = obj.Data.(datasetname);
+            end            
+            [rn,idx] = sort_var(sortdst,rn);
+
             %option to subsample the x-variable
             [sub_rn,sub_y,ids,~] = subsample_var(rn,y(idx)); 
             if iscategorical(sub_y)
@@ -507,7 +518,7 @@ classdef muiTableImport < muiDataSet
             elseif isdatetime(y)
                 ytk = ax.YTick;
                 dtime = stdate+ytk;
-                yticklabels(datestr(dtime))
+                yticklabels(datestr(dtime)) %#ok<DATST> 
             end
             xlabel(dst.RowLabel)
             if isempty(dst.VariableLabels)

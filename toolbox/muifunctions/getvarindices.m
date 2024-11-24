@@ -51,43 +51,20 @@ function valididx = getvarindices(var,limtxt)
                 var = startyear+var;
                 minB = startyear+str2caldur(lowerlimit);
                 maxB = startyear+str2caldur(upperlimit);
-            elseif iscategorical(var)
-                minV = find(ismember(var,strip(lowerlimit)),1,'first');
-                maxV = find(ismember(var,strip(upperlimit)),1,'last');
-                valididx = minV:maxV;
-                return;
-            elseif iscell(var) && ischar(lowerlimit)
-                %cell array of character vectors with limits being values
-                %in list
-                minV = find(strcmp(var,strip(lowerlimit)));
-                maxV = find(strcmp(var,strip(upperlimit)));
-                valididx = minV:maxV;
-                return;
-            elseif iscell(var)  && ischar(var{1})
-                %handle limits for categorical data
-                minV = str2double(lowerlimit);
-                maxV = str2double(upperlimit);
-                valididx = minV:maxV;
+            elseif islist(var,1) %cellstr, string, categorical, char (NxM) array ie a list
+                valididx = listrange(var,limtxt);
                 return;
             else 
-                minV = str2double(lowerlimit);
-                maxV = str2double(upperlimit);
-                if minV>maxV
-                    minV = maxV;
-                    maxV = str2double(lowerlimit);
-                elseif isnan(minV) && ischar(lowerlimit)
-                    %handle limits for categorical data
-                    if isunique(var)
-                        %retain order of var by specifying categories
-                        var = categorical(var,var,'Ordinal',true);
-                    else
-                        %var has multiple occurrences of a category
-                        var = categorical(var,'Ordinal',true);
+                try
+                    minV = str2double(lowerlimit);
+                    maxV = str2double(upperlimit);
+                    if minV>maxV
+                        minV = maxV;
+                        maxV = str2double(lowerlimit);
                     end
-                    cats = categories(var);
-                    minV = categorical({lowerlimit},cats,'Ordinal',true);
-                    maxV = categorical({upperlimit},cats,'Ordinal',true);
-                    valididx = find(var>=(minV) & var<=(maxV));
+                catch
+                    warndlg('Could not find limits in getvarindices')
+                    valididx =[];
                     return;
                 end
                 %need to ensure that end values are not cut off (rounding

@@ -36,10 +36,10 @@ function metatxt = get_selection_text(props,option,pretxt)
     if nargin<3
         pretxt = [];
     end
-    casetxt = sprintf('%s(%s)',props.case,props.dset);
+    casetxt = sprintf('%s (%s)',props.case,props.dset);
     switch option
         case 1                              %format: Case(Dataset)Var
-            metatxt = sprintf('%s%s',casetxt,props.desc);
+            metatxt = sprintf('%s %s',casetxt,props.desc);
         case 2                              %format: Var(Dim1,Dim2,etc)
             metatxt = setSummaryDims(props);
         case 3                              %format: Var(Dim1,Dim2:value,Dim3:value, etc)
@@ -95,7 +95,7 @@ function dimstxt = setSummaryDims(props)
     %set variable and dimensions text using just attribute names
     %format: Var(Dim1,Dim2,etc)
     attdesc = props.attribs;  %may need to change this to labels in getProperty
-    dimstxt = sprintf('%s(',attdesc{1});
+    dimstxt = sprintf('%s (',attdesc{1});
     for i=2:length(attdesc)
         dimstxt = sprintf('%s%s, ',dimstxt,attdesc{i});
     end

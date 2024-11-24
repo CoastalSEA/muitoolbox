@@ -516,6 +516,10 @@ classdef (Abstract = true) muiDataUI < handle
             
             %set up call to inputUI
             varRange = dst.VariableRange.(dstnames{1});
+            if isempty(varRange)
+                warndlg('No data for current selection. Please amend selection')
+                return;
+            end
             rangetext = var2range(varRange);
             scalelist = obj.TabContent(itab).Scaling;
             
