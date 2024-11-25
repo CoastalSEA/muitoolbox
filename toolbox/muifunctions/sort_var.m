@@ -1,4 +1,4 @@
-function [avar,idx] = sort_var(dst,avar)                       
+function [avar,idx] = sort_var(obj,idd,avar)                       
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -9,26 +9,50 @@ function [avar,idx] = sort_var(dst,avar)
 %   categoraical array. If categorical the categories are reordered so that
 %   they plot in the defined order
 % USAGE
-%   [loc,idx] = sort_var(dst,xvar);
+%   [loc,idx] = sort_var(obj,xvar);
 % INPUTS
-%   dst - dstable that holds variable to be used as an index
-%   avar - a-variable to be sorted
+%   obj - handle to class instance containing dataset to be sorted and
+%         index variable if this is used
+%   idd - index of dataset to use for variable to be sorted
+%   avar - a-variable to be sorted (n>1) or a scalar index to the variable
+%          to use (optional)
 % OUTPUT
 %   avar - sorted a-variable in ascending order
 %   idx - indices used to sort the input version of avar
+% NOTE
+%   selection option is only for a variable but a dimension can be passed
+%   in as avar.
 % SEE ALSO
-%   used in muiTableImport for scalar tabPlot
+%   used in muiTableImport for scalar tabPlot and userPlot
 %
 % Author: Ian Townend
 % CoastalSEA (c) Oct 2024
 %--------------------------------------------------------------------------
 %  
+    datasets = fieldnames(obj.Data);
+    if nargin<3        
+        adst = obj.Data.(datasets{idd});        %selected dataset
+        promptxt = 'Select Variable to Sort:';
+        [~,idv] = selectAttribute(adst,1,promptxt); %1 - select a variable
+        avar = adst.(adst.VariableNames{idv});
+    elseif isscalar(avar)
+        adst = obj.Data.(datasets{idd});        %selected dataset
+        avar = adst.(adst.VariableNames{avar});  %variable index used as input
+    end
+
     %option to plot alphabetically or in index order
     answer = questdlg('Sort X-variable?','Import','Index','Sorted',...
                                                      'Unsorted','Sorted');
     if strcmp(answer,'Index')
         %allow user to select a variable to sort by (must return
         %vector of unique values)
+        datasetname = getDataSetName(obj,'Select Dataset to use for index');
+        if isempty(datasetname)
+            dst = adst; 
+        else
+            dst = obj.Data.(datasetname);
+        end   
+
         ok = 1;
         while ok>0
             idvar = [];

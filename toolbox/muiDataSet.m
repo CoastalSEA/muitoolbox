@@ -229,22 +229,23 @@ classdef (Abstract = true) muiDataSet < handle
             updateCase(muicat,obj,classrec);
         end
 %%
-        function [datasetname,ok] = getDataSetName(obj,promptxt)
+        function [datasetname,ok,idd] = getDataSetName(obj,promptxt)
             %check whether there is more than one dstable and select
             % promptext - cellstr with prompt to use (optional)
+            % idd - index to selected dataset (added Nov 24)
             if nargin<2, promptxt = {'Select dataset'}; end
 
-            dataset = 1; ok = 1; datasetname = [];  %initialise variables
+            idd = 1; ok = 1; datasetname = [];  %initialise variables
             
             datasetnames = fieldnames(obj.Data);
             if length(datasetnames)>1
                 title = 'DataSet names';
-                [dataset,ok] = listdlg('PromptString',promptxt,...
+                [idd,ok] = listdlg('PromptString',promptxt,...
                            'SelectionMode','single','Name',title,...
                            'ListSize',[200,100],'ListString',datasetnames);
                 if ok<1,  return; end       
             end
-            datasetname = datasetnames{dataset};
+            datasetname = datasetnames{idd};
         end  
 %%
         function [cobj,dst,ok] = selectClassInstance(obj,propname,propvalue)

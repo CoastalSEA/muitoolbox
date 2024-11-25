@@ -378,7 +378,7 @@ classdef muiTableImport < muiDataSet
             tabcb  = @(src,evdat)tabPlot(obj,src);
             ax = tabfigureplot(obj,src,tabcb,false);
             %get data and variable id
-            [dst,idv] =selectDataSet(obj);
+            [dst,idd,idv] =selectDataSet(obj);
             if isempty(idv), return; end
 
             %test for array of allowed data types for a color image
@@ -392,7 +392,7 @@ classdef muiTableImport < muiDataSet
             else
                 [~,cdim,~] = getvariabledimensions(dst,idv);
                 if cdim==0
-                    scalarplot(obj,ax,dst,idv);
+                    scalarplot(obj,ax,idd,idv);
                 elseif cdim==1
                     vardesc = dst.VariableDescriptions;
                     idx = listdlg('PromptString','Select X-variable:',...
@@ -414,28 +414,30 @@ classdef muiTableImport < muiDataSet
         end
 
 %%
-        function [ax,idx,ids] = userPlot(obj,dst,idv,ax)
+        function [ax,idx,ids] = userPlot(obj,idd,idv,ax)
             %allows external functions to call vectorplot and scalarplot
-            % dst - dataset to use for plot
+            % idd - index of dataset to use for plot
             % idv - index of variable to use
-            % ax - handle to figure axes if not supplied
+            % ax - handle to figure axes (optional,created if not supplied) 
             % idx - sort order of x-variable if a scalarplot and the
-            % selected x-variable if a vector plot
-            % ids - indices of selected sub-set (after sorting)            
+            %       selected x-variable if a vector plot
+            % ids - indices of selected sub-set (after sorting)             
             if nargin<4
                 hfig = figure('Name','UserPlot','Units','normalized',...
                                             'Resize','on','Tag','PlotFig'); 
                 ax = axes(hfig);
             end
 
-            if size(dst.DataTable{1,1},2)>1  %matrix data set
+            datasets = fieldnames(obj.Data);
+            dst = obj.Data.(datasets{idd});  %selected dataset
+            if size(dst.DataTable{1,1},2)>1  %matrix data set              
                 vardesc = dst.VariableDescriptions;
                 idx = listdlg('PromptString','Select X-variable:',...
                     'SelectionMode','single','ListString',vardesc);
                 if isempty(idx), return; end
-                vectorplot(obj,ax,dst,idv,idx);
+                vectorplot(obj,ax,idd,idv,idx);
             else
-                [idx,ids] = scalarplot(obj,ax,dst,idv);
+                [idx,ids] = scalarplot(obj,ax,idd,idv);
             end
         end
 
@@ -447,10 +449,11 @@ classdef muiTableImport < muiDataSet
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
             firstcell = dst.DataTable{1,1};
-            if ~isscalar(firstcell) || ...
-                        (iscell(firstcell) &&...
-                        ~(iscellstr(firstcell) || isstring(firstcell)) && ...
-                        ~isscalar(firstcell{1}))
+            if iscell(firstcell), firstcell = firstcell{1}; end
+            isscalarvalue = isscalar(firstcell) && isnumeric(firstcell) || ... %check for scalar numbers
+                            ischar(firstcell) || isstring(firstcell) || ...    %or character vector or string
+                            iscategorical(firstcell);                          %or categorical value
+            if ~isscalarvalue
                 %not tabular data
                 warndlg('Selected dataset is not tabular')
                 return; 
@@ -468,10 +471,12 @@ classdef muiTableImport < muiDataSet
     end
 %%
     methods(Access = protected)
-        function [idx,ids] = scalarplot(obj,ax,dst,idv)
+        function [idx,ids] = scalarplot(obj,ax,idd,idv)
             %plot selected variable as function of location
             % idx - sort order of x-variable
             % ids - indices of selected sub-set (after sorting)
+            datasets = fieldnames(obj.Data);
+            dst = obj.Data.(datasets{idd});  %selected dataset
             location = dst.RowNames;
             rn = categorical(location,location);
 
@@ -490,14 +495,8 @@ classdef muiTableImport < muiDataSet
                 rn = categorical(rn,rn);
             end
 
-            %option to plot alphabetically or in index order
-            datasetname = getDataSetName(obj,'Select Dataset to use for index (optional)');
-            if isempty(datasetname)
-                sortdst = dst; 
-            else
-                sortdst = obj.Data.(datasetname);
-            end            
-            [rn,idx] = sort_var(sortdst,rn);
+            %option to plot alphabetically or in index order        
+            [rn,idx] = sort_var(obj,idd,rn);
 
             %option to subsample the x-variable
             [sub_rn,sub_y,ids,~] = subsample_var(rn,y(idx)); 
@@ -601,12 +600,12 @@ classdef muiTableImport < muiDataSet
             title(sprintf('Case: %s, Row: %s',dst.Description,rowvar))
         end
 %%
-        function [dst,idv] =selectDataSet(obj)
+        function [dst,idd,idv] =selectDataSet(obj)
             %select dataset and variable to use for plot/analysis
             % dst - dstable for selected data set
             % idv - index of selected variable in dstable
-            datasetname = getDataSetName(obj);
-            if isempty(datasetname), dst = []; idv = []; return; end
+            [datasetname,ok,idd] = getDataSetName(obj);
+            if ok<1, dst = []; idd = []; idv = []; return; end
             dst = obj.Data.(datasetname);
             %--------------------------------------------------------------
             vardesc = dst.VariableDescriptions;

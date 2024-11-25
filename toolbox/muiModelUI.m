@@ -458,7 +458,21 @@ classdef (Abstract = true) muiModelUI < handle
             %load sobj from mat file contents and assign to model handles
             ipath = obj.Info.PathName;
             ifile = obj.Info.FileName;
+
+            %load file and test that it is the right model class
+            classname = metaclass(obj).Name;
+            warning ('off','MATLAB:load:cannotInstantiateLoadedVariable');
             load([ipath,ifile],'sobj');
+            warning ('on','MATLAB:load:cannotInstantiateLoadedVariable');
+            sobjclass = metaclass(sobj).Name;
+            if ~strcmp(classname,sobjclass) 
+                errtxt = sprintf('Unable to load selected file\nModel class is %s and selected file is %s',...
+                                 classname,sobjclass);
+                errordlg(errtxt,'Load Model');
+                return; 
+            end
+            
+            %load data from file to current instance of model
             obj.Info = sobj.Info;
             obj.Info.PathName =  ipath;  %path and file name may change
             obj.Info.FileName = ifile;   %reset to current values
