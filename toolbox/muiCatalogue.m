@@ -549,7 +549,6 @@ classdef muiCatalogue < dscatalogue
             if length(datasets)>1
                 idd = listdlg('PromptString','Select table:','ListString',datasets,...
                                     'SelectionMode','single','ListSize',[160,200]);
-                if isempty(idd), return; end
             end
         end
 %%
@@ -565,7 +564,7 @@ classdef muiCatalogue < dscatalogue
             %             class names 
             % promptxt - alternative text to use as a prompt
             %            cell array for (1) case and (2) row
-            % itable - id of dataset table to use
+            % idd - id of dataset table to use
             %uses selectCaseObj above. Used in getInletTools.
             if nargin<2
                 idd = [];
@@ -824,6 +823,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             uidims = UIsel.dims;
             ndim = length(uidims);
             idx.row = 1; 
+            dimnames.row = dst.RowNames(1);
             idx.dim = cell(1,ndim-1); %use cell because can be multiple dimensions of different length
             for i=1:ndim
                 %assign to dimension or row                    
@@ -1057,6 +1057,9 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 indices = find(value==var);
             elseif length(var)>1
                 %numerical array
+                if isnumeric(var) && isinteger(value)
+                    value = double(value);
+                end
                 indices = interp1(var,1:length(var),value,'nearest'); 
             else
                 indices = 1;

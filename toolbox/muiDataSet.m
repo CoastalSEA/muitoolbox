@@ -383,10 +383,10 @@ classdef (Abstract = true) muiDataSet < handle
 %%
         function formatfile = setFileFormat(~)
             %prompt user to select a FileFormat m file
-            [fname,~,~] = getfiles('PromptText','Format code file','FileType','*.m');
+            [fname,path,~] = getfiles('PromptText','Format code file','FileType','*.m');
             if fname==0, formatfile = []; return; end  %user cancelled
             %check that can find file on path
-            isfile = exist(fname,'file');
+            isfile = exist([path,fname],'file');
             if isfile==2
                 formatfile = fname(1:end-2); %function name to call format file
             else

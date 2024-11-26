@@ -32,10 +32,11 @@ function setslider(src,~)
         midpoint = src(1).UserData(dt);
     else
         average = (endval-startval)/2; %should handle duration
-        isinteger = isallround([src(1).UserData{:}]);
-        if isinteger
+        isround = isallround([src(1).UserData{:}]);
+        if isround
             average = round(average); 
             if isduration(average)
+                %force round durations to integer values
                 src(1).UserData = cellfun(@time2num,src(1).UserData,'UniformOutput',false);
             end
             src(1).UserData = cellfun(@int16,src(1).UserData,'UniformOutput',false);
@@ -75,5 +76,6 @@ function setslider(src,~)
                 'Style','text','String',slidevalue{1},...                    
                 'HorizontalAlignment', 'center',...
                 'Units','normalized', 'Position', pos,...
+                'UserData',midpoint,...
                 'Tag',['slide-val',idx{2}]);
 end 

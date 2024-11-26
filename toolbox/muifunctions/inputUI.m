@@ -12,6 +12,7 @@ classdef inputUI < handle
 %    FigureTitle     - title for the UI figure
 %    PromptText      - text to guide user on selection to make
 %    InputFields     - text prompt for input fields to be displayed
+%    InputOrder      - dstnames used to define initial order of var+dimensions
 %    Style           - uicontrols for each input field (same no. as input fields)
 %    ControlButtons  - text for buttons to edit or update selection 
 %    DefaultInputs   - default text or selection lists
@@ -19,7 +20,7 @@ classdef inputUI < handle
 %    DataObject      - data object to use for selection
 %    SelectedVar     - index vector to define case,dataset,variable selection  
 %    ActionButtons   - text for buttons to take action based on selection
-%    Position        - poosition and size of figure (normalized units)
+%    Position        - position and size of figure (normalized units)
 % NOTES
 %   Widget tag format is as follows: widgetname>uic# where widgetname is 
 %   defined by settings.InputFields and #=idx is the index identifier of widget
@@ -32,6 +33,7 @@ classdef inputUI < handle
 % 
     properties (Transient)
         UIselection   %struct of current selection from input fields
+        UIorder       %order of attributes vector based on id for initial order
         UIfig         %handle to UI figure
         Action        %indicate close or action state
     end
@@ -127,6 +129,9 @@ classdef inputUI < handle
                 %second popupmenu to the end value.
                 hw(1).Value = length(hw(1).String);
             end
+            
+            %set initial order of attributes (var, row, dim)
+            obj.UIorder = settings.InputOrder;
 
             %add buttons to figure
             nbut = length(settings.ActionButtons);
@@ -156,7 +161,7 @@ classdef inputUI < handle
                     'Callback', callback); 
         end
 %%
-        function inputuicallback(obj,~,~)
+        function inputuicallback(obj,src,~)
             %callback function for inputUIfig
             uic = flipud(findobj(obj.UIfig,'-regexp','Tag','uic'));
             for i=1:length(uic)
@@ -168,6 +173,10 @@ classdef inputUI < handle
                     case 'slider'
                         uicname = split(uic(i).Tag,'>');
                         uicpos = getPosition(obj,uic(i));
+                        uitext = findobj(src.Parent,'Tag',['slide-val',uicname{2}(end)]);
+                        if isduration(uitext.UserData)
+                            uicpos = num2duration(uicpos,uitext.UserData.Format);
+                        end
                         obj.UIselection{i} = {uicname{1},uicpos};
                 end                    
             end
@@ -329,15 +338,19 @@ classdef inputUI < handle
             end
             %assign new position as text string
             uitext = findobj(src.Parent,'Tag',['slide-val',slitag(end)]);
+            if isduration(uitext.UserData)
+                %reset value to duration
+                newpos = num2duration(newpos,uitext.UserData.Format);
+            end
             uitext.String = var2str(newpos);
         end
 %%
-        function resetSliderWidget(~,src,range,dimtext)
-            %reset text and settings for the selected widget uic (src)
-            
-            %update text descriptor
+        function resetSliderWidget(obj,src,range,dimtext)
+            %reset text and settings for the selected widget uic (src)           
             uinum = src.Tag(end);
             uicname = split(src.Tag,'>');
+            updateOrder(obj,uicname{1},dimtext);
+            %update text descriptor
             uitext = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>txt']);
             uitext.String = dimtext;
 
@@ -348,7 +361,7 @@ classdef inputUI < handle
             src.UserData = range;
             
             %update slider text    
-            if islist(range,3) %checks for cellstr, sting and categorical                            
+            if islist(range{1},3) %checks for cellstr, string and categorical                            
                 value(1) = var2str(range(1));
                 value(2) = var2str(range(end));
                 npt = round(length(range)/2);
@@ -380,7 +393,10 @@ classdef inputUI < handle
                 uislidetext = findobj(src.Parent,'-regexp','Tag',[tagname{i},uinum]);
                 uislidetext.String = value{i};
             end
-            
+
+            %update text userdata to current data type
+            uislidetext.UserData = midpoint;
+  
             %update slider position
             src.Value = 50;
         end
@@ -389,7 +405,7 @@ classdef inputUI < handle
             %update the slider position 
             %no data to check for round number values in range vector
             newpos = src.UserData;
-            if islist(newpos,3) %checks for cellstr, sting and categorical 
+            if islist(newpos{1},3) %checks for cellstr, sting and categorical 
                 nrec = round((length(src.UserData)-1)*src.Value/100)+1;
                 pos = src.UserData(nrec);
             elseif iscategorical(newpos{1}) 
@@ -412,12 +428,12 @@ classdef inputUI < handle
             delete(uitext)
         end
 %%
-        function resetPopupWidget(~,src,range,dimtext)
+        function resetPopupWidget(obj,src,range,dimtext)
             %reset text and settings for the selected widget uic (src)
-            
-            %update text descriptor
             uinum = src.Tag(end);
             uicname = split(src.Tag,'>');
+            updateOrder(obj,uicname{1},dimtext);
+            %update text descriptor
             uitext = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>txt']);
             uitext.String = dimtext;
 
@@ -432,7 +448,6 @@ classdef inputUI < handle
 %%
         function updateCallback(obj,src,style)
             %update the widget and edit button callbacks to new style selection
-            uinum = src.Tag(end);
             uicname = split(src.Tag,'>');
             uibut = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>but']);
             uicon = findobj(src.Parent,'-regexp','Tag',[uicname{1},'>uic']);
@@ -455,6 +470,15 @@ classdef inputUI < handle
             
             newname = sprintf('%s>but%s',uicname{1},uinum);
             uibut.Tag = newname;
+        end
+%%
+        function updateOrder(obj,var1,var2)
+            %update UIorder when order on selection UI is changed
+            id1 = find(ismatch(obj.UIorder,var1));
+            id2 = find(ismatch(obj.UIorder,var2));
+            temp = obj.UIorder{id1};
+            obj.UIorder{id1} = obj.UIorder{id2};
+            obj.UIorder{id2} = temp;
         end
 %%
         function closeuicallback(obj,~,~)

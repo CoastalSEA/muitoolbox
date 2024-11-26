@@ -363,13 +363,14 @@ classdef (Abstract = true) muiDataUI < handle
 %--------------------------------------------------------------------------
 % initialise an inputUI for selection and sub-sampling
 %--------------------------------------------------------------------------
-        function selection = setInputUI(obj,inp,xyz)
+        function [selection,order] = setInputUI(obj,inp,xyz)
             %setup call to inputUI and await response
             uis = obj.UIselection(xyz);
             selvar = [uis.caserec,uis.dataset,uis.variable];
             h_inp = inputUI('FigureTitle', inp.title,...
                             'PromptText',inp.prompt,...
                             'InputFields',inp.fields,...
+                            'InputOrder',inp.order,...
                             'Style',inp.style,...
                             'ControlButtons',inp.controls,...                            
                             'DefaultInputs',inp.default,...
@@ -380,6 +381,7 @@ classdef (Abstract = true) muiDataUI < handle
 
             waitfor(h_inp,'Action')
             selection = h_inp.UIselection;
+            order = h_inp.UIorder;
             delete(h_inp.UIfig)
         end
 %%
@@ -549,9 +551,10 @@ classdef (Abstract = true) muiDataUI < handle
                 inp.userdata = {[],varRange,[]};
             end
             %pass a data object if used (eg for linkedpopup menus)
+            inp.order = dstdesc;
             inp.dataobj  = dst;
             inp.actions  = {'Select','Close'};            
-            selection = setInputUI(obj,inp,xyz);
+            [selection,~] = setInputUI(obj,inp,xyz);
             
             %define selection by setting case,dataset,variable,property,
             %range,scale. Sub-sampling dims not defined by this selection.      
@@ -704,30 +707,36 @@ classdef (Abstract = true) muiDataUI < handle
             %sub-sampling of variable based on range and values required
             uinput = getUIinput(obj,mdim,ndim,dst,dstdesc,range);  
             if ~isfield(uinput,'default'), ok=0; return; end
-            selection = setInputUI(obj,uinput,xyz);
+            [selection,order]  = setInputUI(obj,uinput,xyz);
             if isempty(selection), ok = 0; return; end            
 
-            for j=1:mdim
+            for j=1:mdim  %dimensions with range values
                 idx = strcmp(dstdesc,inputxt{selection{2*j-1}});
                 obj.UIselection(xyz).dims(j).name = dstnames{idx};
                 obj.UIselection(xyz).dims(j).value = selection{2*j};
                 boxtxt = sprintf('%s, %s: %s',boxtxt,dstdesc{idx},selection{2*j});
             end
             %
-            for i=1:ndim
+            for i=1:ndim  %dimensions with a scalar selection
                 slidervals = selection{2*mdim+i};
                 if length(slidervals)>1
                     %slider has been used
-                    dimname = dstnames{strcmp(dstdesc,slidervals{1})};
-                    dimvalue = var2str(slidervals{2});        %added var2string to catch datetimes etc              
+                    idn = find(strcmp(dstdesc,slidervals{1}));
+                    dimname = dstnames{idn}; 
+                    if isdatetime(slidervals{2})
+                        dimvalue = var2str(slidervals{2}); %added var2string to catch datetimes etc
+                    else
+                        dimvalue = slidervals{2};
+                    end
                 else %drop down list has been used
-                    dimname = dstnames{1+mdim+i}; %var+mdim
-                    dimvalue = range(mdim+i).val{slidervals};
+                    idn = find(strcmp(dstdesc,order{1+mdim+i})); %var+range dim+scalar dim
+                    dimname = dstnames{idn}; 
+                    dimvalue = range(idn-1).val{slidervals};
                 end
                 obj.UIselection(xyz).dims(mdim+i).name = dimname;
                 obj.UIselection(xyz).dims(mdim+i).value = dimvalue;
                 txtval =  var2str(dimvalue);
-                boxtxt = sprintf('%s, %s: %s',boxtxt,dimname,txtval{1});
+                boxtxt = sprintf('%s, %s: %s',boxtxt,dstdesc{idn},txtval{1});
             end
 
             %update boxtext description
@@ -777,6 +786,7 @@ classdef (Abstract = true) muiDataUI < handle
                 uinput.default{2*mdim+k} = selrange(mdim+k).txt;
                 uinput.userdata{2*mdim+k} = selrange(mdim+k).val;
             end
+            uinput.order = dstdesc;
             uinput.dataobj  = dst;
             uinput.actions  = {'Select','Cancel'};
         end
@@ -784,6 +794,7 @@ classdef (Abstract = true) muiDataUI < handle
         function assignSettings(obj,src)
             %update the UIsettings to the current values
             %These are settings that are not specific to a variable
+            %the struct is dynamic and depends on the tab definition
             
             %get the current button value settings
             itab = strcmp(obj.Tabs2Use,src.Parent.Tag);
@@ -895,6 +906,8 @@ classdef (Abstract = true) muiDataUI < handle
         function selection = uisel()
             %return a default struct for UI selection definition
             %Defaullt includes:
+            % xyz - logical vector of selection (size depends on how many
+            %       variables or dimesnions need to be selected for use)
             % caserec - caserec in listid of selected case
             % dataset - id to field name in Data struct to select specific dstable
             % variable - id to selected Variable in table 
