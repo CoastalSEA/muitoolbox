@@ -173,7 +173,7 @@ classdef UseModelUI_template < ModelUI                       % << Edit to classn
                 case 'Run Model'                             % << Edit to call Model class
                     Model_template.runModel(obj); 
                 case 'Derive Output'
-                    obj.mUI.Manip = muiManipUI.getManipUI(obj);
+                    obj.mUI.ManipUI = muiManipUI.getManipUI(obj);
             end            
         end  
         %% Help menu ------------------------------------------------------

@@ -456,7 +456,7 @@ classdef inputUI < handle
                    uicon.Callback = @(src,evt)updateSlider(obj,src,evt);  
                    uibut.Callback = @(src,evt)updateSlider(obj,src,evt);                    
                 case 'popupmenu'
-                   uicon.Callback =  @(src,evt)editlist(src,evt);
+                   uicon.Callback =  []; %clear previous callback setting
                    uibut.Callback =  @(src,evt)editlist(src,evt);
             end
             uibut.UserData = uicon.UserData;

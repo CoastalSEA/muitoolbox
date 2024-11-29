@@ -757,26 +757,6 @@ classdef muiPlots < handle
             end
         end
 %%
-        function isvalid = checkdimensions(obj)
-            %check that the dimensions of the selected data match
-            data = struct2cell(obj.Data);
-            vecdim = cellfun(@isvector,data);
-            dimlen = cellfun(@length,data(vecdim));
-            matsze = cellfun(@numel,data(~vecdim))/dimlen;
-            if all(vecdim)          %all data are vectors
-                isvalid = true;
-            elseif diff(matsze)==0  %a vector + arrays of same size
-                isvalid = true;
-            else                    %vectors that match array size
-                varsz = size(data{~vecdim});
-                isvalid = all(ismember(varsz(varsz>1),dimlen));
-            end
-            %
-            if ~isvalid
-                warndlg('Dimensions of selected variables do not match')
-            end
-        end
-%%
         function hm = setControlPanel(obj,hfig,nrec,t0)
             %intialise button to re-run animation and slider to scroll through
             %add playback button

@@ -27,6 +27,10 @@ function rangetext = var2range(rangevar,pretext)
         else
             rangevar = {rangevar(1),rangevar(end)};
         end
+    elseif nvar==1
+        rangevar{2} = rangevar{1};   %single row or dimension
+    elseif isempty(nvar)
+        rangetext = []; return;      %no range set
     end
     
     var1 = rangevar{1}; var2 = rangevar{2};

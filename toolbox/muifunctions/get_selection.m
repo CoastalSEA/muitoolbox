@@ -33,20 +33,22 @@ function [props,sel] = get_selection(mobj,promptxt,varargin)
     elseif nargin<3
         varargin = {};
     end
-    
-    props = [];
+       
     [UIsel,UIset] = selectui(mobj,promptxt,varargin{:});      %calls UI to make selection
-    if isempty(UIsel), return; end %user cancelled
-    sel.caserec = UIsel(1).caserec;
-    [~,sel.classrec] = getCase(mobj.Cases,UIsel(1).caserec);  %included to be consistent with get_variable
-    props = getProperty(mobj.Cases,UIsel,'array');
-    sel.scale = UIset.scaleList{UIsel(1).scale};
-    if UIsel(1).scale>1
-        %adjust data if user has selected to rescale variable
-        dim = 1; %dimension to apply scaling function if matrix
-        props.data = scalevariable(props.data,props.scale,dim);
-        props.label = sprintf('%s-%s',props.scale,props.label);
-        props.desc = sprintf('%s-%s',props.scale,props.desc); %????
+    if isempty(UIsel), props = []; sel = [];  return; end %user cancelled
+
+    for i=1:length(UIsel)
+        sel(i).caserec = UIsel(i).caserec; %#ok<*AGROW> 
+        [sel(i).obj,sel(i).classrec] = getCase(mobj.Cases,UIsel(i).caserec);  %included to be consistent with get_variable
+        props(i) = getProperty(mobj.Cases,UIsel(i),'array');
+        sel(i).scale = UIset.scaleList{UIsel(i).scale};
+        if UIsel(1).scale>1 %only test first selection because all must be same
+            %adjust data if user has selected to rescale variable
+            dim = 1; %dimension to apply scaling function if matrix
+            props(i).data = scalevariable(props(i).data,sel(i).scale,dim);
+            props(i).label = sprintf('%s-%s',sel(i).scale,props(i).label);
+            props(i).desc = sprintf('%s-%s',sel(i).scale,props(i).desc); 
+        end
     end
 end
 

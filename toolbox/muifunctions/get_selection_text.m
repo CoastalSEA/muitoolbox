@@ -16,6 +16,7 @@ function metatxt = get_selection_text(props,option,pretxt)
 %   pretxt - text to use instead of attribute name at start of text string (optional)
 % OUTPUT
 %   metatxt - defines any subselection of rows and dimensions, options:  
+%             0: case, dataset > case (dset)
 %             1: case, dataset, variable > case (dset) Var
 %             2: variable and dimensions short> Var(dim1,dim2,...)
 %             3: variable and dimensions, define scalar > Var(dim1,dim2:value,dim3:value, etc)
@@ -38,6 +39,8 @@ function metatxt = get_selection_text(props,option,pretxt)
     end
     casetxt = sprintf('%s (%s)',props.case,props.dset);
     switch option
+        case 0                              %format: Case(Dataset)
+            metatxt = casetxt;
         case 1                              %format: Case(Dataset)Var
             metatxt = sprintf('%s %s',casetxt,props.desc);
         case 2                              %format: Var(Dim1,Dim2,etc)
@@ -67,7 +70,7 @@ function proptxt = getPropRangeText(props)
     proptxt = struct('desc','','range','');
     %attribute lists for variable, exclude any unused dimensions - see
     %muiCatalogue.getProperty and dstable.getVatAttributes
-    attdesc = props.attribs;  %may need to change this to labels in getProperty
+    attdesc = props.attribs.desc;  %may need to change this to labels in getProperty
     dimvals = props.dvals;
     if isempty(dimvals)
         proptxt.desc = props.desc;
@@ -94,7 +97,7 @@ end
 function dimstxt = setSummaryDims(props)
     %set variable and dimensions text using just attribute names
     %format: Var(Dim1,Dim2,etc)
-    attdesc = props.attribs;  %may need to change this to labels in getProperty
+    attdesc = props.attribs.desc;  %may need to change this to labels in getProperty
     dimstxt = sprintf('%s (',attdesc{1});
     for i=2:length(attdesc)
         dimstxt = sprintf('%s%s, ',dimstxt,attdesc{i});

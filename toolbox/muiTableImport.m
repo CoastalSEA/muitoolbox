@@ -448,24 +448,9 @@ classdef muiTableImport < muiDataSet
             delete(ht)
             datasetname = getDataSetName(obj);
             dst = obj.Data.(datasetname);
-            firstcell = dst.DataTable{1,1};
-            if iscell(firstcell), firstcell = firstcell{1}; end
-            isscalarvalue = isscalar(firstcell) && isnumeric(firstcell) || ... %check for scalar numbers
-                            ischar(firstcell) || isstring(firstcell) || ...    %or character vector or string
-                            iscategorical(firstcell);                          %or categorical value
-            if ~isscalarvalue
-                %not tabular data
-                warndlg('Selected dataset is not tabular')
-                return; 
-            end 
 
-            desc = sprintf('Source:%s\nMeta-data: %s',dst.Source{1},dst.MetaData);
-            tablefigure(src,desc,dst);        
-            src.Units = 'normalized';
-            uicontrol('Parent',src,'Style','text',...
-                       'Units','normalized','Position',[0.1,0.95,0.8,0.05],...
-                       'String',['Case: ',dst.Description],'FontSize',10,...
-                       'HorizontalAlignment','center','Tag','titletxt');
+            %generate table
+            table_figure(dst,src)
         end
 
     end

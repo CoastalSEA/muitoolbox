@@ -363,9 +363,10 @@ classdef muiCatalogue < dscatalogue
                 caserec = find(strcmp(obj.Catalogue.CaseDescription,caserec));
             end
             cobj = getCase(obj,caserec);  %matches caseid to find record in class
-            %
+            if isempty(cobj), dst = []; dstxt = []; return; end
             datasetnames = fieldnames(cobj.Data);
-            if ~isnumeric(idset) 
+
+            if ~isnumeric(idset)  %check that idset is a valid name if not numeric
                 dstxt = idset; 
                 idset =  find(strcmp(datasetnames,dstxt));
                 if isempty(idset), dst = []; return; end
@@ -396,16 +397,16 @@ classdef muiCatalogue < dscatalogue
             istable = false;
             [dst,~,~,dstxt] = getDataset(obj,UIsel.caserec,UIsel.dataset);
             %get attribute lists for variable, excluding any unused dimensions
-            [attribnames,attribdesc,attriblabel] = getVarAttributes(dst,UIsel.variable); 
-            useprop = attribnames{UIsel.property};
-            usedesc = attribdesc{UIsel.property};
+            [attrib.names,attrib.desc,attrib.label] = getVarAttributes(dst,UIsel.variable); 
+            useprop = attrib.names{UIsel.property};
+            usedesc = attrib.desc{UIsel.property};
             
             if any(strcmp(dst.VariableNames,useprop))                
                 %return selected dimensions of variable
                 %NB: any range defined for the Variable is NOT applied
                 %returns all values within dimension range specified
-                [idx,dvals] = getSelectedIndices(obj,UIsel,dst,attribnames);
-                label = attriblabel{1};
+                [idx,dvals] = getSelectedIndices(obj,UIsel,dst,attrib.names);
+                label = attrib.label{1};
                 switch outopt
                     case 'array'
                         %extracts array for selected variable
@@ -422,7 +423,7 @@ classdef muiCatalogue < dscatalogue
                         if isempty(array), return; end
                         array = squeeze(array{1});
                         %get dimension name and indices
-                        dimnames = setDimNames(obj,array,dvals,attribnames);                        
+                        dimnames = setDimNames(obj,array,dvals,attrib.names);                        
                         data = array2table(array,'RowNames',dimnames{1},...
                                             'VariableNames',dimnames{2});
                     case 'timeseries'
@@ -440,12 +441,12 @@ classdef muiCatalogue < dscatalogue
                 idx = getIndices(obj,dst.RowNames,UIsel.range);
                 data = dst.RowNames(idx); %returns values in source data type
                 useprop = dst.TableRowName;
-                label = attriblabel{2};
+                label = attrib.label{2};
             elseif any(strcmp(dst.DimensionNames,useprop))
                 %return selected dimension              
                 idx = getIndices(obj,dst.Dimensions.(useprop),UIsel.range);
                 data = dst.Dimensions.(useprop)(idx);               
-                label = attriblabel{UIsel.property}; 
+                label = attrib.label{UIsel.property}; 
             elseif any(contains(useprop,'noDim'))                
                 rvals = range2var(UIsel.range);
                 data = rvals{1}:rvals{2};
@@ -467,7 +468,7 @@ classdef muiCatalogue < dscatalogue
             props.desc = usedesc;
             props.label = label;
             props.data = data; 
-            props.attribs = attribdesc;
+            props.attribs = attrib;
             props.dvals = dvals; 
             props.idx = idx;
         end

@@ -167,11 +167,11 @@ classdef muiEditUI < muiDataUI
             varatt = getVarAttributes(dst,UIsel.variable);
             [id,~] = getSelectedIndices(muicat,UIsel,dst,varatt);
             
-            % if size(idrows,1)~=height(newtable)
-            %     newtable = newtable(idrows,:);
-            % end
             %assign subsampled data to the selected case object
             dst.DataTable.(id.var)(idrows,id.dim{:}) = newtable{:,:};
+            %update range for edited variable
+            dst = setVariableRange(dst,varatt);
+            %assign updated table to class instance
             cobj.Data.(ds{UIsel.dataset}) = dst;
         end
     end

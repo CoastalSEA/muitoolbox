@@ -47,8 +47,11 @@ classdef muiSelectUI < muiDataUI
                 end
                 obj = muiSelectUI(mobj,promptxt);
                 obj.Tabs2Use = {'Select'};
-                setDataUItabs(obj,mobj); %add tabs  
-                
+
+                obj.TabContent(1) = muiDataUI.defaultTabContent;
+                src.Tag = {'Select'};
+                setSelectTab(obj,src) %set default single variable selection
+
                 if nargin>2
                     %input includes modifications to the default tab layout
                     S = obj.TabContent;
@@ -57,6 +60,7 @@ classdef muiSelectUI < muiDataUI
                     end 
                     obj.TabContent = S;
                 end
+                setDataUItabs(obj,mobj); %add tabs  
             end                
         end
     end
@@ -65,15 +69,15 @@ classdef muiSelectUI < muiDataUI
 % Abstract methods required by muiDataUI to define tab content
 %--------------------------------------------------------------------------
     methods (Access=protected) 
-        function setTabContent(obj,src)
+        function setTabContent(~,~)
             %setup default layout options for individual tabs
             %Abstract function required by DataGUIinterface
-            itab = find(strcmp(obj.Tabs2Use,src.Tag));
-            obj.TabContent(itab) = muiDataUI.defaultTabContent;
-            
-            %customise the layout of each tab. Overload the default
-            %template with a function for the tab specific definition
-            setSelectTab(obj,src)    
+            % itab = find(strcmp(obj.Tabs2Use,src.Tag));
+            % obj.TabContent(itab) = muiDataUI.defaultTabContent;
+            % 
+            % %customise the layout of each tab. Overload the default
+            % %template with a function for the tab specific definition
+            % setSelectTab(obj,src)    
         end                
 %%
         function setVariableLists(obj,src,mobj)

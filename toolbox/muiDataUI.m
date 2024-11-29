@@ -907,7 +907,8 @@ classdef (Abstract = true) muiDataUI < handle
             %return a default struct for UI selection definition
             %Defaullt includes:
             % xyz - logical vector of selection (size depends on how many
-            %       variables or dimesnions need to be selected for use)
+            %       variables or dimensions need to be selected for use)
+            %       logical true if property set for selection 
             % caserec - caserec in listid of selected case
             % dataset - id to field name in Data struct to select specific dstable
             % variable - id to selected Variable in table 

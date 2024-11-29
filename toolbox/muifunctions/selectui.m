@@ -35,8 +35,12 @@ function [UIsel,UIset] = selectui(mobj,promptxt,varargin)
     UIset = selobj.UIsettings;     %other UI settings
     delete(selobj.dataUI.Figure);
     delete(selobj)
-    if UIsel.xyz==0
-        UIsel = []; UIset = []; 
+
+    for i=1:length(UIsel)
+        %check whether each selection has been made-
+        %assumes that all selections set for muiSelectUI are required
+        isset = all(UIsel(1).xyz==0); 
+        if isset, UIsel = []; UIset = []; return; end
     end
 end
 
