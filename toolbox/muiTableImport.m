@@ -382,24 +382,26 @@ classdef muiTableImport < muiDataSet
             if isempty(idv), return; end
 
             %test for array of allowed data types for a color image
+            [vdim,cdim,~] = getvariabledimensions(dst,idv);
             isim = isimage(dst.DataTable{1,1});
-            if isim(1) %isim(1) is color and isim(2) is greyscale
+            if isim(1) && (vdim==1 && cdim==0) 
+                %cannot be image if single row but can be an array
+                %isim(1) is color and isim(2) is greyscale
                 img = dst.(dst.VariableNames{idv});
                 location = dst.RowNames;
                 idl = listdlg('PromptString','Select estuary:',...
                           'SelectionMode','single','ListString',location);                    
                 imshow(img{idl});
             else
-                [~,cdim,~] = getvariabledimensions(dst,idv);
-                if cdim==0
+                if cdim==0                       %scalar values
                     scalarplot(obj,ax,idd,idv);
-                elseif cdim==1
+                elseif cdim==1                   %vectors
                     vardesc = dst.VariableDescriptions;
                     idx = listdlg('PromptString','Select X-variable:',...
                             'SelectionMode','single','ListString',vardesc);                        
                     if isempty(idx), return; end
                     vectorplot(obj,ax,dst,idv,idx);
-                elseif cdim==2
+                elseif cdim==2                  %arrays
                     rowdesc = dst.RowNames;
                     if isnumeric(rowdesc), rowdesc = num2str(rowdesc); end
                     idx = listdlg('PromptString','Select X-variable:',...
@@ -407,8 +409,7 @@ classdef muiTableImport < muiDataSet
                     if isempty(idx), return; end
                     arrayplot(obj,ax,dst,idv,idx);
                 else
-                    warndlg('Tab plot currently only handles 1-3 dimensions')
-                    
+                    warndlg('Tab plot currently only handles 1-3 dimensions')                    
                 end
             end
         end
@@ -510,10 +511,21 @@ classdef muiTableImport < muiDataSet
             else
                 ylabel(dst.VariableLabels{idv})
             end
-            answer = questdlg('Linear or Log y-axis?','Qplot','Linear','Log','Linear');
-            if strcmp(answer,'Log')
-                ax.YScale = 'log';
+            
+            src = ax.Parent;                             %handle to tab
+            hb = findobj(src,'Tag','LogButton');
+            if isempty(hb)
+                %button to toggle y-axis between linear and log scale
+                uicontrol('Parent',src,'Style','pushbutton',...
+                    'String','>Log ','Tag','LogButton',...
+                    'TooltipString','Switch to Log',...
+                    'Units','normalized','Position',[0.02 0.95 0.05 0.044],...
+                    'UserData',ax,...
+                    'Callback',@(src,evdat)setlog(src,evdat));
+            else
+                hb.UserData = ax;
             end
+
             ax.Color = [0.96,0.96,0.96];  %needs to be set after plot  
         end
 
@@ -580,8 +592,8 @@ classdef muiTableImport < muiDataSet
                     yticklabels(char(dim2))
                 end
             end
-            xlabel(dst.DimensionNames{1})
-            ylabel(dst.DimensionNames{2})
+            xlabel(dst.DimensionLabels{1})
+            ylabel(dst.DimensionLabels{2})
             title(sprintf('Case: %s, Row: %s',dst.Description,rowvar))
         end
 %%

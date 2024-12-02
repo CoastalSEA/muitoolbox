@@ -152,6 +152,9 @@
 % - initialise a slider on a figure with the option to include text 
 % displaying the current slider value and an action button
 %
+% * *setlog.m*
+% - callback function for button to set XY plot to have log/linear y-axis
+%
 % * *setskillparameters.m*
 % - initialise the skill properties used for Taylor plot and local skill
 % score plots. Skill score requires correlation coefficient and exponent.

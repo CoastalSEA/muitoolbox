@@ -1,4 +1,4 @@
-function [select,setting] = multivar_selection(mobj,varnames,promptxt,varargin)                       
+function [select,setting] = multivar_selection(mobj,varnames,promptxt,issave,varargin)                       
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -6,12 +6,12 @@ function [select,setting] = multivar_selection(mobj,varnames,promptxt,varargin)
 % PURPOSE
 %   select one or more variables
 % USAGE
-%   select = multivar_selection(mobj,varnames,promptxt,varargin)
+%   select = multivar_selection(mobj,varnames,promptxt,issave,varargin)
 %   e.g. multiple selection returning 2 variables each with 3 selections 
 %        for upper, central and lower values of a variable
 %     varnames = {'Xvar','Yvar'};
 %     promptxt = {'Select variables for X-Axis:','Select variables for Y-Axis:'};              
-%     select = multivar_selection(mobj,varnames,promptxt,...
+%     select = multivar_selection(mobj,varnames,promptxt,true,...
 %                             'XYZnset',3,...                           %minimum number of buttons to use for selection
 %                             'XYZmxvar',[1,1,1],...                    %maximum number of dimensions per selection button, set to 0 to ignore subselection
 %                             'XYZpanel',[0.05,0.2,0.9,0.3],...         %position for XYZ button panel [left,bottom,width,height]
@@ -20,6 +20,7 @@ function [select,setting] = multivar_selection(mobj,varnames,promptxt,varargin)
 %   mobj - ModelUI instance
 %   varnames - cell array of selection variable names to use
 %   promptxt - cell array of prompts to use
+%   issave - logical scalar true if option to save selection is to be used
 %   varargin - modifications to the muiSelectUI tab selection options
 % OUTPUT
 %   select - selections made with fields: case, dset, desc, 
@@ -36,26 +37,34 @@ function [select,setting] = multivar_selection(mobj,varnames,promptxt,varargin)
 % CoastalSEA (c) Nov 2024
 %--------------------------------------------------------------------------
 %  
-    answer = questdlg('Load saved selection?','User plots','Yes','No','No');
+    if issave %allows use of save option to be suppresed in the call
+        answer = questdlg('Load saved selection?','User plots','Yes','No','No');
+    else
+        answer = 'No';
+    end
+
     if strcmp(answer,'Yes')         
         [fname,path] = getfiles('FileType','*.mat;',...
                         'PromptText','Select saved selection file:');
         S = load([path,fname],'-mat');
         select = S.select;
+        setting = S.setting;
     else
         for i=1:length(varnames)
              [select.(varnames{i}),setting.(varnames{i}),select.names] = ...
                            selectMVar(mobj,promptxt{i},varargin{:});
              if isempty(select.(varnames{i})), select = []; return; end
         end
-
-        answer = questdlg('Save selection?','User plots','Yes','No','Yes');
-        if strcmp(answer,'Yes')
-            selname = inputdlg('Name selection','User plots',1,{'Case XX'});
-            if ~isempty(selname)
-                save(selname{1},'select')
-            end
-        end        
+        
+        if issave
+            answer = questdlg('Save selection?','User plots','Yes','No','Yes');
+            if strcmp(answer,'Yes')
+                selname = inputdlg('Name selection','User plots',1,{'Case XX'});
+                if ~isempty(selname)
+                    save(selname{1},'select','setting')
+                end
+            end   
+        end
     end
 end
 %%

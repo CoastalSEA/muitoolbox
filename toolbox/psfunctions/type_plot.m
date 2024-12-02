@@ -21,7 +21,7 @@ function type_plot(mobj)
 %--------------------------------------------------------------------------
 %
     promptxt = 'Select Case to plot';
-     [cobj,~,datasets,idd] = selectCaseDataset(mobj.Cases,[],{'muiTableImport'},promptxt);
+    [cobj,~,datasets,idd] = selectCaseDataset(mobj.Cases,[],{'muiTableImport'},promptxt);
     if isempty(cobj), return; end
     dst = cobj.Data.(datasets{idd});  %selected dataset
     promptxt = 'Select Variable to plot:'; 

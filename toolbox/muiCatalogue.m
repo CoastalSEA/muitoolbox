@@ -545,6 +545,7 @@ classdef muiCatalogue < dscatalogue
                                               casetype,classname,promptxt)
             %select case and dataset for use in plot or analysis
             [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt);
+            if isempty(cobj), datasets = []; idd = []; return; end   %user cancelled
             datasets = fields(cobj.Data);
             idd = 1;
             if length(datasets)>1
