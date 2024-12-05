@@ -111,8 +111,31 @@
 % the dataset in the Data struct. If this is omitted and there is more than
 % one dataset the user is prompted to select a dataset.
 %%
-%   [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,classname,promptxt,itable);
-                                                
+%   [cobj,classrec,irow] = selectCaseDatasetRow(muicat,casetype,classname,promptxt,itable);
+
+%%
+% *selectCaseDataset* select a case and and dataset and return the class
+% instance, the class record id, datesetnames and the id of the selected
+% dataset, where _casetype_ and _classname_ can be used to control the 
+% Case selection and _promptxt_ is used as a prompt for case selection.
+%%
+%   [cobj,classrec,datasets,idd] = selectCaseDataset(muicat,casetype,classname,promptxt);
+
+%%
+% *selectCaseDatasetVariable* prompt user to select a Case, Dataset (if not specified) and 
+% a variable, return instance and variable id. All inputs except muicat are
+% optional. if unspecified pass as []
+%%
+%   [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(muicat,casetype,classname,promptxt,idd);
+%   cobj = selectCaseDatasetVariable(muicat);
+%   [cobj,classrec] = selectCaseDatasetVariable(muicat,[],classname);
+                                            
+%%
+% *selectDataset* select a dataset table to use for a given class
+% instance, cobj. Returns dataset name, dsname, and index, idd.
+%%
+%   [dsname,idd] = selectDataset(muicat,cobj);
+
 %%
 % *useCase* select which existing data set to use and pass to another
 % method, where _mode_ is 'none', 'single' or 'multiple'
@@ -164,21 +187,6 @@
 % used mainly to make data catagorical or ordinal
 %%
 %   modifyVariableType(muicat)
-
-%%
-% *selectCaseDatasetVariable* prompt user to select a Case, Dataset (if not specified) and 
-% a variable, return instance and variable id. All inputs except muicat are
-% optional. if unspecified pass as []
-%%
-%   [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(muicat,casetype,classname,promptxt,idd);
-%   cobj = selectCaseDatasetVariable(muicat);
-%   [cobj,classrec] = selectCaseDatasetVariable(muicat,[],classname);
-
-%%
-% *selectDataset* select a dataset table to use for a given class
-% instance, cobj. Returns dataset name, dsname, and index, idd.
-%%
-%   [dsname,idd] = selectDataset(muicat,cobj);
 
 %%
 % *setDataClassID* get the index for a new instance of class held in

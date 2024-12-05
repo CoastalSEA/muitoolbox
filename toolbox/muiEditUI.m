@@ -170,7 +170,7 @@ classdef muiEditUI < muiDataUI
             %assign subsampled data to the selected case object
             dst.DataTable.(id.var)(idrows,id.dim{:}) = newtable{:,:};
             %update range for edited variable
-            dst = setVariableRange(dst,varatt);
+            dst = setVariableRange(dst,varatt{1});
             %assign updated table to class instance
             cobj.Data.(ds{UIsel.dataset}) = dst;
         end

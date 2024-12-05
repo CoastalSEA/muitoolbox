@@ -36,9 +36,8 @@ function type_plot(mobj)
     promptxt = 'Select classification variable:'; 
     datasetname = getDataSetName(cobj,promptxt); 
     classdst = cobj.Data.(datasetname);    
-    [~,idc] = selectAttribute(classdst,1,promptxt); %1 - select a variable
+    [varname,idc] = selectAttribute(classdst,1,promptxt); %1 - select a variable
     if isempty(idc), return; end
-    varname = classdst.VariableNames{idc};
     vardesc = classdst.VariableDescriptions{idc};
     typevar = classdst.(varname); 
     typevar = typevar(idx); %if sorted in userPlot ensure same order

@@ -102,7 +102,7 @@ classdef muiTableImport < muiDataSet
             newdst = [];
             [fname,path,~] = getfiles('FileType','*.mat; *.txt; *.xlsx',...
                                            'PromptText','Select file to load');
-            if fname==0, newdst = []; return; end
+            if isnumeric(fnames) && fnames==0, newdst = []; return; end
             [~,~,ext] = fileparts(fname);
 
             if strcmp(ext,'.mat')
@@ -495,8 +495,10 @@ classdef muiTableImport < muiDataSet
             end           
 
             %bar plot of selected variable
-            bar(ax,sub_rn,sub_y);          
-            title (['Case: ',dst.Description]);
+            bar(ax,sub_rn,sub_y);  
+            titletxt = sprintf('Case: %s (%s)',dst.Description,datasets{idd});
+            subtitle(dst.VariableDescriptions{idv});
+            title (titletxt);
             if ~isempty(cats)  
                 yticks(1:length(cats));
                 yticklabels(cats);

@@ -93,9 +93,15 @@ function [ax,idn] = var_range_plot(ax,X,Y,names,varnames,islog)
                 ytxt = Y(:,2)+scalefactor*10.^log10(Y(:,2));
             end
         end
-    else
-                xtxt = X(:,2)+scalefactor*10.^log10(X(:,2));
-                ytxt = Y(:,2)+scalefactor*10.^log10(Y(:,2));        
+    elseif strcmp(ax.XScale,'log') || strcmp(ax.YScale,'log')            
+        %log axis already set so use log scaling for text offsets
+        scalefactor = 0.05;
+        if strcmp(ax.XScale,'log')
+            xtxt = X(:,2)+scalefactor*10.^log10(X(:,2));
+        end
+        if strcmp(ax.XScale,'log')
+            ytxt = Y(:,2)+scalefactor*10.^log10(Y(:,2));
+        end
     end
 
     hold on
