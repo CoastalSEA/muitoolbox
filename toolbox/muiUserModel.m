@@ -291,7 +291,7 @@ classdef muiUserModel < muiDataSet
             try
                 %handle to anonymous function based on user equation
                 heq = str2func(['@(t,x,y,z,mobj) ',inp.eqn]);
-                if isempty(inp.fcn)
+                if isempty(inp.fcn) || length(inp.fcn)==1
                     maxnargout = 1;
                 else
                     maxnargout = nargout(inp.fcn);
@@ -445,9 +445,17 @@ classdef muiUserModel < muiDataSet
         function save2obj(obj,mobj,dst,inputxt)        
             %save results as record in catalogue
             type = 'derived'; %assign metadata about model
-            dst.Source =  sprintf('Class %s, using %s',metaclass(obj).Name,...
-                                                                    type);
-            dst.MetaData = inputxt;            
+            source = sprintf('Class %s, using %s',metaclass(obj).Name,type);                                                         
+            if isa(dst,'dstable')
+                dst.Source = source;
+                dst.MetaData = inputxt;   
+            else
+                dsnames = fieldnames(dst);
+                for i=1:length(dsnames)
+                    dst.(dsnames{i}).Source = source;
+                    dst.(dsnames{i}).MetaData = inputxt; 
+                end
+            end
             %save results
             setDataSetRecord(obj,mobj.Cases,dst,type);
             getdialog('Run complete');                
