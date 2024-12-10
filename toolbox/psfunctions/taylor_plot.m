@@ -190,8 +190,8 @@ function plotTaylor(metatxt,cfstats,option,score)
     %option - New, Add, Delete; 
 
     %unpack and normalize data to be plotted
-    ndteststd = cfstats.teststd/cfstats.refstd;
-    ndcrmsd = cfstats.crmsd/cfstats.refstd;
+    ndteststd = cfstats.teststd/cfstats.refstd; %normalised std
+    ndcrmsd = cfstats.crmsd/cfstats.refstd;     %normalised centred root mean square differences
     acoscor = asin(cfstats.corrcoef(1,2));
     bias = cfstats.testmean-cfstats.refmean;
     corr = cfstats.corrcoef(1,2);
@@ -240,6 +240,8 @@ function plotTaylor(metatxt,cfstats,option,score)
               symb,'LineWidth',1.5,'DisplayName',legtext,...
               'Tag','1','UserData',usertst);
             h1 = legend(figax,'show','Location','northeastoutside');
+            h1.Title.String = 'B=Bias; E''''=normalised-centred RMS error';
+            h1.Title.FontWeight = 'normal';
             h1.Tag = 'Taylor';
         case 'Add'
             hp = findobj(figax,'Type','Line');

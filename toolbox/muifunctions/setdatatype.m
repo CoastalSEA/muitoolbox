@@ -69,11 +69,14 @@ function datevar = getdatevariable(Vin)
     if length(datebrk{2})==2 && length(datebrk{3})==4
         %this traps the format day-month-year that is not
         %recognised by datetime (does accept yyyy-mm-dd)
-        fmt = ['dd',matches{1},'MM',matches{2},'yyyy',' HH:mm:ss'];
+        if contains(Vin,':')
+            fmt = ['dd',matches{1},'MM',matches{2},'yyyy',' HH:mm:ss'];
+        else
+            fmt = ['dd',matches{1},'MM',matches{2},'yyyy'];
+        end
         datevar = datetime(char(Vin),'InputFormat',fmt);
         datevar.Format = fmt;
     else
         datevar = datetime(char(Vin),'Format','preserveinput'); 
     end 
 end
-

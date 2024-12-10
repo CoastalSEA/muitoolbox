@@ -210,6 +210,7 @@ classdef muiStats < handle
             
             waitbar(0.2,hw,'Processing')
             results = descriptive_stats(dataset,obj.MetaData.X,src);
+            if isempty(results), return; end
             [idx,casedesc] = setcase(obj.DescOut,false);
             results.Properties.UserData = casedesc;
             obj.DescOut{idx} = results;
@@ -275,9 +276,13 @@ classdef muiStats < handle
                     %(ie [])then a stand-alone figure is used
                     src = getTabHandle(obj,mobj,1);  
                     results = descriptive_stats(obj.Data.X,obj.MetaData.X,src);
+                    if isempty(results), return; end
                     [idx,casedesc] = setcase(obj.DescOut,false);
                     results.Properties.UserData = casedesc;
                     obj.DescOut{idx} = results;
+                    msgtxt = sprintf('Results are displayed on the Stats>%s tab\n\nNB These are NOT saved with with project\nAll Cases of statistical analysis remain available from the Stats tab\nwhile the Statistics UI remains open',...
+                                         strip(src.Title));
+                    getdialog(msgtxt,[],3);
                 case 'Regression'
                     obj.Data.Y = obj.Data.X;  %assign variable to Y
                     obj.Labels.Y = obj.Labels.X;
@@ -338,7 +343,9 @@ classdef muiStats < handle
             classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(1).caserec); 
             heq = str2func(classname);
             cobj = heq();  %instance of class object
-            cobj.ModelType = 'stats';
+            if isprop(cobj,'ModelType')
+                cobj.ModelType = 'stats';
+            end
             %save results  
             setDataSetRecord(cobj,mobj.Cases,dst,'stats');
             getdialog('Run complete');
@@ -369,7 +376,9 @@ classdef muiStats < handle
             classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(1).caserec); 
             heq = str2func(classname);
             cobj = heq();  %instance of class object
-            cobj.ModelType = 'stats';
+            if isprop(cobj,'ModelType')
+                cobj.ModelType = 'stats';
+            end
             %save results  
             setDataSetRecord(cobj,mobj.Cases,dst,'stats');
             getdialog('Run complete');
@@ -473,7 +482,9 @@ classdef muiStats < handle
             classname = mobj.Cases.Catalogue.CaseClass(obj.UIsel(2).caserec); 
             heq = str2func(classname);
             cobj = heq();  %instance of class object
-            cobj.ModelType = 'stats';
+            if isprop(cobj,'ModelType')
+                cobj.ModelType = 'stats';
+            end
             %save results  
             setDataSetRecord(cobj,mobj.Cases,dst,'stats');
             getdialog('Run complete');

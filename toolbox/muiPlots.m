@@ -368,8 +368,12 @@ classdef muiPlots < handle
             %add data set to existing 2D plot
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
             figax = hfig.CurrentAxes; 
-            hold(figax,'on');                    
-            hp = findobj(figax,'Type',obj.UIset.Type.String);
+            hold(figax,'on');                 
+            if strcmp(obj.UIset.Type.String,'stairs')
+                hp = findobj(figax,'Type','stair'); %Matlab function call and type inconsistent
+            else
+                hp = findobj(figax,'Type',obj.UIset.Type.String);
+            end
             idline = length(hp)+1;
             if isa(figax,'matlab.graphics.axis.PolarAxes')
                 x = deg2rad(x);
@@ -415,7 +419,11 @@ classdef muiPlots < handle
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
             figax = hfig.CurrentAxes; 
             hold(figax,'on');
-            hp = findobj(figax,'Type',obj.UIset.Type.String);
+            if strcmp(obj.UIset.Type.String,'stairs')
+                hp = findobj(figax,'Type','stair'); %Matlab function call and type inconsistent
+            else
+                hp = findobj(figax,'Type',obj.UIset.Type.String);
+            end
             hl = findobj('Type','legend','Tag',fnum);
             idline = [];
 

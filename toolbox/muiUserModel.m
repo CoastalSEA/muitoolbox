@@ -54,11 +54,11 @@ classdef muiUserModel < muiDataSet
             %in parseEquation but not currently used
             inp = parseEquation(obj,usereqn);
             isvalid = isValidEqnSelection(obj,inp);
-            if ~isvalid, return; end
+            if ~isvalid,  close(hw); return; end
             
             waitbar(0.2)
             [XYZT,props,ok] = getData(obj,mobj.Cases);
-            if ok<1, return; end 
+            if ok<1, close(hw); return; end 
             waitbar(0.8)
             %use t,x,y,z variables to evaluate user equation
             %NB: any Scaling selected will have been applied      ??????????????
@@ -70,7 +70,7 @@ classdef muiUserModel < muiDataSet
             
             if isempty(varout)    %quit if no data returned
                 warndlg('No results from function used in Derive output')
-                return; 
+                close(hw); return; 
             end
             
             if any(strcmp(inp.comtxt,{'time','rows'})) && ~isempty(XYZT{4})
@@ -96,8 +96,17 @@ classdef muiUserModel < muiDataSet
     methods (Access=private)  
         function inp = parseEquation(~,usereqn)
             %extract variables, user text and instructions from usereqn
-            %string
-            inp.utext = [];
+            %string. 'inp' is a struct with fields:
+            % isdst - logical true if eqn references dst
+            % idm - loigcal true if eqn references model instance, mobj
+            % utext - for all strings in the call
+            % comtxt - for any comment text which are assigned in 
+            %         parseEquation but not currently used
+            % varsused - list of whether x,y,z,t or dst are used in equation
+            % fcn - function name in equation (if used)
+            % eqn - input usereqn forced to lower case
+            inp = struct('isdst',[],'idm',[],'utext',[],'comtxt',[],... 
+                                        'varsused',[],'fcn',[],'eqn',[]);
             %find whether user is passing 'dst' to the function
             inp.isdst = contains(usereqn,'dst','IgnoreCase',true);
             %find whether user is passing 'mobj' to the function
@@ -111,7 +120,12 @@ classdef muiUserModel < muiDataSet
                 for i=1:2:length(idchar)
                     %commented text stores all values in quotes before
                     %applying mask
-                    utext = usereqn(idchar(i):idchar(i+1));
+                    try
+                        utext = usereqn(idchar(i):idchar(i+1));
+                    catch
+                        errordlg('Unable to parse input equation. Check equation definition')
+                        return;
+                    end
                     if strcmp(utext(1),'''')    %character vector
                         inp.utext{count} = strip(utext,'''');
                     else                        %string

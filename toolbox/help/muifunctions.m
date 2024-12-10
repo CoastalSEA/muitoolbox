@@ -126,7 +126,11 @@
 % 
 % * *rotatebutton.m*
 % - callback for the rotate button on a figure or tab plot
-% 
+%
+% * *scale_data.m*
+% - scale variables in a dataset based on user defined factors
+% for each variable.
+%
 % * *scalevariable.m*
 % - rescale a variable (vector or matrix) based on user selection
 %

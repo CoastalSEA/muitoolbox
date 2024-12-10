@@ -46,6 +46,9 @@ function stats = getTSstats(data,metatxt)
         warntxt = sprintf('Invalid data entry:\nEnter 0 and 1 for basic stats');
         warndlg(warntxt);
         return; 
+    elseif isempty(str2num(cthr{2})) %#ok<ST2NM> %handles matrices
+        warndlg('Please select the Syntax column to copy, not the Seasonal column')
+        return;
     end
 
     datatimes = data.RowNames;
@@ -61,15 +64,18 @@ function stats = getTSstats(data,metatxt)
     stats.Properties.Description =  sprintf('Descriptive statistics for %s',...
                                                             metatxt);
     %get statistics for seasons if defined
-    seasons = eval(cthr{2});
+    seasons = str2num(cthr{2}); %#ok<ST2NM> %handles matrices
     stats.Properties.UserData  = data.VariableLabels{1};
+    seachar = {'J','F','M','A','M','J','J','A','S','O','N','D'};
     if length(seasons)>1   
-        seastr = cellstr(num2str(seasons));
+        %seastr = cellstr(num2str(seasons));
         seastxt = [];
         stats = season_stats(ts,cthr,stats,seasons);
         varnames = stats.Properties.VariableNames;
         for i=2:length(varnames)
-            seastxt = sprintf('%s%s - %s;  ',seastxt,varnames{i},seastr{i-1});
+            seastr = join(seachar(seasons(i-1,:)));     %alpha output
+            seastr = cellstr(num2str(seasons(i-1,:)));  %numeric output
+            seastxt = sprintf('%s%s - %s;  ',seastxt,varnames{i},seastr{1});
         end
         stats.Properties.Description = sprintf('Seasons: %s',seastxt);
         answer = questdlg('Cartesian or Polar plot?','Stats plot',...
