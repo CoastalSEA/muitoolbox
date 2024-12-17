@@ -119,6 +119,10 @@ classdef muiPlotsUI < muiDataUI
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Dataset'
                         sel_uic{i}.String = dsnames; 
+                        if sel_uic{i}.Value>length(dsnames)
+                            sel_uic{i}.Value = 1; %reset if case changed to
+                            ids = 1;              %case with fewer datasets
+                        end
                         sel_uic{i}.UserData = sel_uic{i}.Value; %used to track changes
                     case 'Variable' 
                         sel_uic{i}.Value = 1;

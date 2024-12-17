@@ -66,7 +66,7 @@ function datable = readspreadsheet(filename,isdst,cell_ids)
     end
 
     vartypes = opts.VariableTypes;
-    idx = ismatch(opts.VariableNames,varnames);
+    idx = matches(opts.VariableNames,varnames);
     opts.VariableNames = opts.VariableNames(idx);
     opts.VariableTypes = vartypes(idx);
     opts.SelectedVariableNames = varnames';    

@@ -102,7 +102,7 @@ classdef muiTableImport < muiDataSet
             newdst = [];
             [fname,path,~] = getfiles('FileType','*.mat; *.txt; *.xlsx',...
                                            'PromptText','Select file to load');
-            if isnumeric(fnames) && fnames==0, newdst = []; return; end
+            if fname==0, newdst = []; return; end
             [~,~,ext] = fileparts(fname);
 
             if strcmp(ext,'.mat')
