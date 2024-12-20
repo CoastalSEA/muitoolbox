@@ -300,6 +300,7 @@ classdef (Abstract = true) muiDataSet < handle
             %so that missing times are removed and missing data are set to NaN
             %Time MUST be first column in table to use this function
             opts = detectImportOptions(filename,'FileType','text');  %v2016b
+            opts.VariableNames = matlab.lang.makeValidName(opts.VariableNames);
             data = readtable(filename,opts); 
             if isempty(data)
                 data = [];
