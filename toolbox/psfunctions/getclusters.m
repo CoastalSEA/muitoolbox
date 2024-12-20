@@ -53,7 +53,7 @@ function [idcls,options] = getclusters(ts)
     numlines = 1;
     default = {num2str(mean(data,'omitnan')+2*std(data,'omitnan')),...
                                     num2str(3),num2str(18),num2str(15)};
-    ok=0; h1 = [];
+    ok=0;
     while ok<1
         answer = inputdlg(prompt,title,numlines,default);
         if isempty(answer), return; end
@@ -80,7 +80,9 @@ function [idcls,options] = getclusters(ts)
         else
             h_ax = clusterPlot(mdate,idcls,threshold,h_ax);
             waitfor(h_but,'Tag');
-            if strcmp(h_but.Tag,'Yes')
+            if ~ishandle(h_but)   %this handles the user deleting figure window
+                return;
+            elseif strcmp(h_but.Tag,'Yes')
                 ok=1;
                 panelText(h_but,threshold,method,tint,clint) 
             else

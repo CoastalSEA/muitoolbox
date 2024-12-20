@@ -82,7 +82,9 @@ function [idpks,options] = getpeaks(ts)
             h3 = plot(mdate(idpks),data(idpks),'xr');
             hold off
             waitfor(h_but,'Tag');
-            if strcmp(h_but.Tag,'Yes')
+            if ~ishandle(h_but)   %this handles the user deleting figure window
+                return;
+            elseif strcmp(h_but.Tag,'Yes')
                 ok=1;
                 panelText(h_but,threshold,method,tint);
             else
