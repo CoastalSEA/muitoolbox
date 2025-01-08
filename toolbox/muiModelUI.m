@@ -789,13 +789,26 @@ classdef (Abstract = true) muiModelUI < handle
             end
               
             h_fig = tabtablefigure('Case Metadata',dstnames,tabtxts,tables);
-            
-            %add button to access DSproperties of each table displayed
+
+           
             h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
             h_but = findobj(h_fig.Children,'Tag','uicopy');
+            %enforce minimum width to figure to make room for actionbuttons            
+            if h_fig.Position(3)<300
+                ratio = 300/h_fig.Position(3);
+                h_fig.Position(3) = 300; 
+                h_but.Position(1) = h_but.Position(1)*ratio;
+            end
+
+            %add button to access DSproperties of each table displayed            
             position = h_but.Position;
-            position(1) = 10;      
-            sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-90, 60, 18];
+            position(1) = 10;    
+            % userpos = [h_fig.Position(3)-70, h_fig.Position(4)-70, 60, 18]; 
+            % sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-90, 60, 18];            
+            xpos = h_fig.Position(3)/2-30;
+            userpos = [xpos,position(2),60,18];
+            sourcepos = [xpos,position(2)+20,60,18];
+
             sourcetxt = cell(ntables,1);
             for j=1:ntables
                 itab = h_tab.Children(j); 
@@ -806,7 +819,7 @@ classdef (Abstract = true) muiModelUI < handle
                    'getDSP','View the dstables DSproperties',dst);
                 %initialise the button to access UserData (use h_fig
                 %because itab may not have updated Position)
-                setactionbutton(itab,'User data',[h_fig.Position(3)-70, h_fig.Position(4)-70, 60, 18],...
+                setactionbutton(itab,'User data',userpos,...
                     @(src,evt)getUserData(obj,src,evt),...
                    'getUserData','View User Data',dst);
                 
@@ -824,7 +837,7 @@ classdef (Abstract = true) muiModelUI < handle
             %adjust position on screen            
             h_fig.Position(1) =  h_fig.Position(3)*3/2;
             % screendata = get(0,'ScreenSize');
-            % h_fig.Position(2)=  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
+            % h_fig.Position(2) =  screendata(4)-h_fig.Position(2)-h_fig.Position(4); 
             h_fig.Visible = 'on';
         end
 %%
