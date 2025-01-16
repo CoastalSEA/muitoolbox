@@ -33,7 +33,7 @@ function isok = initialise_mui_app(appname,msgtxt,varargin)
     if isfolder([path{1},filesep,appname])
         %Matlab installs the App as a subfolder of the App folder if there
         %are folders included that are on the same level (ie not subfolders)
-        path{1} = [path{1},filesep,appname];
+        path{1} = [path{1},filesep,appname,filesep,'app'];
     end
     
     path{2} = [path{1},filesep,'doc'];

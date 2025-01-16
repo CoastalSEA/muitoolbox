@@ -38,7 +38,7 @@ function cfig = selectedFigure
     cfig = [];
     figs = findall(0,'type','figure');
     if isempty(figs), return; end
-    fignums = [figs(:).Number];
+    fignums = sort([figs(:).Number]);
     if length(fignums)>1
         prmptxt = 'Select Figure Number:';                       
         hd = listdlg('PromptString',prmptxt,'ListString',string(fignums'),...

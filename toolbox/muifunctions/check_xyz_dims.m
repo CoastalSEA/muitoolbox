@@ -20,7 +20,8 @@ function [xint,yint] = check_xyz_dims(xint,yint)
 % CoastalSEA (c)June 2020
 %--------------------------------------------------------------------------
 %
-    maxdim = 1e7;  %depends on available memory
+    [~, sys] = memory;
+    maxdim = sys.PhysicalMemory.Available;  %depends on available memory
     arraydim = maxdim+1;
     
     while arraydim>maxdim

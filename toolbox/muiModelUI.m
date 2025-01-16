@@ -766,6 +766,7 @@ classdef (Abstract = true) muiModelUI < handle
             muicat = obj.Cases;
             casedesc = muicat.Catalogue.CaseDescription{caserec}; 
             cobj = getCase(muicat,caserec);
+            classname = metaclass(cobj).Name;
             
             dstables = cobj.Data;   %extract data tables (can be more than one)
             dstnames = fieldnames(dstables);
@@ -783,34 +784,34 @@ classdef (Abstract = true) muiModelUI < handle
                 unit = dst.VariableUnits';            
                 tables{i,1} = table(name,desc,unit);
                 %output summary to tablefigure
-                tabtxts{i,1} = sprintf('Metadata for %s dated: %s\n%s',...
-                                                casedesc,lastmod,meta);
+                tabtxts{i,1} = sprintf('Metadata for %s\nClass: %s\nDate: %s\n%s',...
+                                                casedesc,classname,lastmod,meta);
                 clear dst 
             end
               
-            h_fig = tabtablefigure('Case Metadata',dstnames,tabtxts,tables);
-
-           
+            h_fig = tabtablefigure('Case Metadata',dstnames,tabtxts,tables);           
             h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
             h_but = findobj(h_fig.Children,'Tag','uicopy');
             %enforce minimum width to figure to make room for actionbuttons            
             if h_fig.Position(3)<300
-                ratio = 300/h_fig.Position(3);
+                posdiff = 300-h_fig.Position(3);
                 h_fig.Position(3) = 300; 
-                h_but.Position(1) = h_but.Position(1)*ratio;
+                for i=1:ntables
+                    h_but(i).Position(1) = h_but(i).Position(1)+posdiff*0.98;
+                end
             end
-
-            %add button to access DSproperties of each table displayed            
-            position = h_but.Position;
-            position(1) = 10;    
-            % userpos = [h_fig.Position(3)-70, h_fig.Position(4)-70, 60, 18]; 
-            % sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-90, 60, 18];            
-            xpos = h_fig.Position(3)/2-30;
-            userpos = [xpos,position(2),60,18];
-            sourcepos = [xpos,position(2)+20,60,18];
 
             sourcetxt = cell(ntables,1);
             for j=1:ntables
+                %add button to access DSproperties of each table displayed            
+                position = h_but(j).Position;
+                position(1) = 10;    
+                % userpos = [h_fig.Position(3)-70, h_fig.Position(4)-70, 60, 18]; 
+                % sourcepos = [h_fig.Position(3)-70, h_fig.Position(4)-90, 60, 18];            
+                xpos = h_fig.Position(3)/2-30;
+                userpos = [xpos,position(2),60,18];
+                sourcepos = [xpos,position(2)+20,60,18];
+        
                 itab = h_tab.Children(j); 
                 dst = dstables.(dstnames{j});
                 %initialise the button to access DSproperties

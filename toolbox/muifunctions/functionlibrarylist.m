@@ -37,16 +37,17 @@ fname = {'moving(x,n,''func'')';...                                         %1
          'frequencyanalysis(x,t,''vardesc'')';...                           %15
          'wave_steepness(x,y,z,t)';...                                      %16
          'wave_scatter(dst)';...                                            %17
-         'beachtransportratio(x,theta,isvector)';...                        %18
-         'littoraldriftstats(x,t,''period'')';...                           %19
-         'posneg_dv_stats(x,t,''varlabel'')';...                            %20
-         'binned_wave_climate(x,y,z) or (dst)';...                          %21
-         'userderivedoutput(t,x,y,z,flag)';...                              %22
-         '[z.*repmat(1,1,length(x),length(y))]';...                         %23
-         '[z.*repmat(1,length(t)),length(x),length(y))]';...                %24
-         '[NaN;diff(x)]';...                                                %25
-         '[diff(x);NaN]';...                                                %26
-         'diffpadded(var,n,dim,ispad)'};                                    %27
+         'wave_scatter_3d(x,y,z)';...                                       %18
+         'beachtransportratio(x,theta,isvector)';...                        %19
+         'littoraldriftstats(x,t,''period'')';...                           %20
+         'posneg_dv_stats(x,t,''varlabel'')';...                            %21
+         'binned_wave_climate(x,y,z) or (dst)';...                          %22
+         'userderivedoutput(t,x,y,z,flag)';...                              %23
+         '[z.*repmat(1,1,length(x),length(y))]';...                         %24
+         '[z.*repmat(1,length(t)),length(x),length(y))]';...                %25
+         '[NaN;diff(x)]';...                                                %26
+         '[diff(x);NaN]';...                                                %27
+         'diffpadded(var,n,dim,ispad)'};                                    %28
  
 fvars = {'Any variable, number of points in sample window, function (optional, default is mean). Use %time to include time dimension in result';...
          'Any variable, Time, duration to average over (y,d,h,m, or s), duration fo time step (y,d,h,m, or s), function (optional, default is mean)';...  
@@ -64,7 +65,8 @@ fvars = {'Any variable, number of points in sample window, function (optional, d
          'WaterLevels, Time';...
          'Variable, Time, Variable description';...
          'Wave Height, Wave Period, Depth and Time';...
-         'Depth, as X,Y,Z, using dst assignment';...
+         'Wave Height, Wave Period, Depth, as X,Y,Z, using dst assignment';...
+         'Wave Height, Wave Period, Direction, as X,Y,Z, using dst assignment';...
          'Wave direction (degTN), Beach angle (degTN), vector output - true/false (optional)';...         
          'Littoral drift, Time, period';...
          'Any +/-ve Variable, Time, variable label text (optional)';...
@@ -93,6 +95,7 @@ fdesc = {'Stats - Moving average (or similar statistic)';...
          'Plot - Selection of frequency analysis plots of timeseries data';...
          'Data - Depth dependent wave steepness';...
          'Plot - Wave height-period scatter plots';...
+         'Plot - Wave height-period-direction scatter plots';...
          'Data - Ratio of alongshore to cross-shore transport';...
          'Plot - Annual and monthly mean plots of littoral drift';... 
          'Plot - Rate of change of volume + plot erosion and accretion histograms';...
@@ -110,17 +113,17 @@ classname = classmeta.Name;
 %now define any subselection so that only valid functions are displayed
 switch classname
     case 'Asmita'
-        idinc = [1:9,23:27];
+        idinc = [1:9,24:28];
     case {'CoastalTools','SpitDeltaSEM','WaveRayModel'}
-        idinc = [1:21,23:27];
+        idinc = [1:22,24:28];
     case {'TableViewer','EstuaryDB'}
-        idinc = [1:9,15,23:27];
+        idinc = [1:9,15,24:28];
     case 'ChannelForm'
-        idinc = [1,7:9,23:27];
+        idinc = [1,7:9,24:28];
     case 'Diffusion'
-        idinc = [1,22:27];   
+        idinc = [1,23:28];   
     otherwise
-        idinc = [1,7:9,23:27];
+        idinc = [1,7:9,24:28];
 end
 
 lib.fname = fname(idinc);

@@ -252,7 +252,7 @@ classdef (Abstract = true) muiDataSet < handle
             %Prompt to select a class instance. Filter based on a class
             %property is optional. Returns class instance and selected
             %dataset
-            select = 1; dst = [];   %initialise variables
+            select = 1; cobj = []; dst = [];   %initialise variables
             
             [dsname,ok] = getDataSetName(obj(1));
             if ok<1,  return; end  
@@ -350,7 +350,11 @@ classdef (Abstract = true) muiDataSet < handle
                 definedinput = fieldnames(mobj.Inputs);
                 isinp = find(ismember(minp,definedinput));
                 for i=1:length(isinp)
-                    obj.RunParam.(minp{isinp(i)}) = copy(mobj.Inputs.(minp{isinp(i)}));
+                    if isstruct(mobj.Inputs.(minp{isinp(i)}))
+                        obj.RunParam.(minp{isinp(i)}) = mobj.Inputs.(minp{isinp(i)});
+                    else
+                        obj.RunParam.(minp{isinp(i)}) = copy(mobj.Inputs.(minp{isinp(i)}));
+                    end
                 end
             end
             %add any additional models used as inputs

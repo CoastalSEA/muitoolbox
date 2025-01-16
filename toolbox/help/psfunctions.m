@@ -4,6 +4,10 @@
 % function.
 
 %%
+% * *addgeodata.m*
+% - add data to an existing figure from a shape file, geospatial table file, 
+% or raster image file
+%
 % * *annual_polar_plot.m*
 % - plot the monthly or seasonal values of a timeseries variable
 %
