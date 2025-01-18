@@ -25,7 +25,13 @@ function rangetext = var2range(rangevar,pretext)
         if iscell(rangevar)
             rangevar = {rangevar{1},rangevar{end}};
         else
-            rangevar = {rangevar(1),rangevar(end)};
+            if isnumeric(rangevar)
+                id1 = find(~isnan(rangevar),1,"first"); %check for NaN at front of vector
+                id2 = find(~isnan(rangevar),1,"last");  %check for NaN at end of vector
+            else
+                id1 = 1; id2 = length(rangevar);
+            end
+            rangevar = {rangevar(id1),rangevar(id2)};
         end
     elseif nvar==2 && ~iscell(rangevar)
         rangevar = {rangevar(1),rangevar(2)};

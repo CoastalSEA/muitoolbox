@@ -76,6 +76,12 @@ function proptxt = getPropRangeText(props)
         proptxt.desc = props.desc;
         proptxt.range = getDimensionText(props.data);
         proptxt.isvec = true;
+    elseif length(attdesc)-2~=length(dimvals.dim)
+        %datasets such as profiles in CoastalTools have additional
+        %variables to pass chainage hence attdesc does not match dimvals
+        proptxt.desc = props.desc;
+        proptxt.range = getDimensionText(props.data.(props.attribs.names{1}));
+        proptxt.isvec = contains(proptxt.range,'From');
     else
         for i=1:length(attdesc)        
             proptxt(i).desc = attdesc{i};
@@ -116,7 +122,7 @@ function dimstxt = setDimsTextShort(props)
         initxt = sprintf('%s%s, ',initxt,ptxt(j).desc);
     end
     
-    for k=1:length(isnot)                   %scalar dimenion selections
+    for k=1:length(isnot)                   %scalar dimension selections
         if k==1
             subtxt = sprintf('%s: %s',ptxt(isnot(k)).desc,ptxt(isnot(k)).range);
         else
@@ -124,7 +130,7 @@ function dimstxt = setDimsTextShort(props)
         end
     end
 
-    if isempty(props.dvals)
+    if isempty(props.dvals) || length(isvec)==1
         dimstxt = sprintf('%s',initxt(1:end-2));
     elseif isempty(isnot)
         dimstxt = sprintf('%s)',initxt(1:end-2));
@@ -162,11 +168,18 @@ function dimstxt = setDimsTextLong(props)
 end
 %%
 function dimtxt = getDimensionText(var)
-    if length(var)>1 && ~ischar(var)
+    %find dimension text for a variable 
+    if isscalar(var)
+        dimtxt = string(var);
+    elseif isvector(var)
+        if length(var)>1 && ~ischar(var)
+            dimtxt = var2range(var); 
+        else
+            dimcell = var2str(var); %returns a cell character vector
+            dimtxt = dimcell{1};
+        end
+    else  %matrix or multi-dimensional array
         dimtxt = var2range(var); 
-    else
-        dimcell = var2str(var); %returns a cell character vector
-        dimtxt = dimcell{1};
     end
 end
 

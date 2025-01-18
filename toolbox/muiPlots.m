@@ -353,7 +353,8 @@ classdef muiPlots < handle
                 figax.XTickLabel = cellstr(num2str(figax.XTick(:), '10^{%d}'));
             end
 
-            if strcmp(obj.UIset.scaleList{obj.UIsel(2).scale},'Log')
+            if obj.UIsel(2).scale>0 && ...
+                      strcmp(obj.UIset.scaleList{obj.UIsel(2).scale},'Log')
                 idy = find(mod(figax.YTick(:), 1) == 0);
                 figax.YTick = figax.YTick(idy); %remove non integer exponents
                 figax.YTickLabel = cellstr(num2str(figax.YTick(:), '10^{%d}'));
@@ -391,14 +392,14 @@ classdef muiPlots < handle
             %
             xrange = figax.XLim;
             dtype = whos('xrange');
-            if isa(x,dtype.class)    
-                if ~(x(end)>xrange(1) && x(1)<xrange(2))
-                    %check that x axis values are of the same type and
-                    %overlapping range
-                    warndlg('X-data range not compatible with existing axis')
-                    return;
-                end
-            else
+            if ~isa(x,dtype.class)    
+%                 if ~(x(end)>xrange(1) && x(1)<xrange(2))
+%                     %check that x axis values are of the same type and
+%                     %overlapping range
+%                     warndlg('X-data range not compatible with existing axis')
+%                     return;
+%                 end
+%             else
                 warndlg('X-data type not compatible with existing axis')
                 return;
             end
@@ -1073,10 +1074,13 @@ classdef muiPlots < handle
             if ~isnumeric(x) || ~isnumeric(y) %check for text variables
                 [x,y] = muiPlots.makeNumeric(x,y);
             end
-            
-            isallmat = isvector(x) && ~isvector(y);            
-            if (isvector(x) && isvector(y)) || isallmat
-                %x and y are vectors so use griddata to get arrays
+
+            %isallmat = isvector(x) && ~isvector(y); %do not know why this was added
+
+            if (isvector(x) && isvector(y)) || isequal(size(x), size(y), size(z))  %possibly only need check x and y?
+                %x and y are vectors so use griddata to get arrays or
+                % x, y and z are are already array of same size so regrid
+                % them to selected xint and yint
                 minX = min(min(x)); maxX = max(max(x));
                 minY = min(min(y)); maxY = max(max(y));
                 xint = (minX:(maxX-minX)/xint:maxX);
@@ -1085,12 +1089,14 @@ classdef muiPlots < handle
                 zq = griddata(x,y,z,xq,yq);
             elseif isvector(x) && ~isvector(y)
                 %x is vector and y is array with same dimensions as z
+                if iscolumn(x), x = x'; end  
                 xq = repmat(x,1,size(z,1))';
                 yq = y';
                 zq = z;
             elseif isvector(y) && ~isvector(x)
                 %y is vector and x is array with same dimensions as z
                 xq = x;
+                if isrow(y), y = y'; end  
                 yq = repmat(y,1,size(z,2));
                 zq = z;
             else
@@ -1102,11 +1108,11 @@ classdef muiPlots < handle
         function [x,y] = makeNumeric(x,y)
             %check x and y values and convert to numeric if any form of
             %text
-            if ~isnumeric(x)
+            if isvector(x) && ~isnumeric(x)
                 x = 1:length(x);
             end
             %
-            if ~isnumeric(y)
+            if isvector(y) && ~isnumeric(y)
                 y =  1:length(y);
             end
         end
