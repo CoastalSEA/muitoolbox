@@ -7,7 +7,7 @@
     <param.summary>muitoolbox is used to create bespoke interfaces for modelling applications.</param.summary>
     <param.description>muitoolbox enables the rapid prototyping of models by allowing the model developer to focus on the model, rather than the functional, or operational needs of the software package itself.  To this end, the muitoolbox provides a standard user interface with drop-down menus, tools to open and close files, keep track of model runs, as well as providing the means to implement model set-up, data import and export, derivation of new variables, and some basic plotting and statistical tools.</param.description>
     <param.screenshot>${PROJECT_ROOT}\help\html\muitoolbox_logo.png</param.screenshot>
-    <param.version>1.42</param.version>
+    <param.version>1.43</param.version>
     <param.output>${PROJECT_ROOT}\muitoolbox.mltbx</param.output>
     <param.products.name />
     <param.products.id />

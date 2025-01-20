@@ -459,11 +459,21 @@ classdef (Abstract = true) muiModelUI < handle
             ipath = obj.Info.PathName;
             ifile = obj.Info.FileName;
 
-            %load file and test that it is the right model class
             classname = metaclass(obj).Name;
+            %check that selected file is a mui app file
+            S = whos('-file',[ipath,ifile]);
+            if ~strcmp(S(1).name,'sobj')
+                errtxt = sprintf('Unable to load selected file\nModel class is %s\nSelected file includes ''%s'' and not ''sobj''',...
+                                 classname,S(1).name);
+                errordlg(errtxt,'Load Model');
+                return; 
+            end
+
+            %load file and test that it is the right model class            
             warning ('off','MATLAB:load:cannotInstantiateLoadedVariable');
             load([ipath,ifile],'sobj');
-            warning ('on','MATLAB:load:cannotInstantiateLoadedVariable');
+            warning ('on','MATLAB:load:cannotInstantiateLoadedVariable');            
+
             sobjclass = metaclass(sobj).Name;
             if ~strcmp(classname,sobjclass) 
                 errtxt = sprintf('Unable to load selected file\nModel class is %s and selected file is %s',...
@@ -781,7 +791,10 @@ classdef (Abstract = true) muiModelUI < handle
                 meta = dst.MetaData;
                 name = dst.VariableNames';
                 desc = dst.VariableDescriptions';
-                unit = dst.VariableUnits';            
+                unit = dst.VariableUnits';     
+                if isempty(unit)
+                    unit = repmat({'not defined'},size(name));
+                end
                 tables{i,1} = table(name,desc,unit);
                 %output summary to tablefigure
                 tabtxts{i,1} = sprintf('Metadata for %s\nClass: %s\nDate: %s\n%s',...
@@ -792,14 +805,21 @@ classdef (Abstract = true) muiModelUI < handle
             h_fig = tabtablefigure('Case Metadata',dstnames,tabtxts,tables);           
             h_tab = findobj(h_fig.Children,'Tag','GuiTabs');
             h_but = findobj(h_fig.Children,'Tag','uicopy');
-            %enforce minimum width to figure to make room for actionbuttons            
-            if h_fig.Position(3)<300
-                posdiff = 300-h_fig.Position(3);
+            %enforce minimum width to figure to make room for actionbuttons  
+            posdiff0 = 300-h_fig.Position(3);
+            if h_fig.Position(3)<300                
                 h_fig.Position(3) = 300; 
-                for i=1:ntables
-                    h_but(i).Position(1) = h_but(i).Position(1)+posdiff*0.98;
-                end
             end
+
+            for i=1:ntables
+                if posdiff0>0
+                    posdiff = posdiff0;
+                else
+                    posdiff = h_fig.Position(3)-(h_but(i).Position(1)+h_but(i).Position(3));
+                end
+                h_but(i).Position(1) = h_but(i).Position(1)+posdiff-5;
+            end
+%             end
 
             sourcetxt = cell(ntables,1);
             for j=1:ntables

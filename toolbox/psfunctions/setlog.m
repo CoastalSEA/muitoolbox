@@ -1,4 +1,4 @@
-function setlog(src,~) 
+function setlog(ax,src,~) 
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -8,7 +8,9 @@ function setlog(src,~)
 % USAGE
 %   callback function: @(src,evt)setlog(src,evt)
 % INPUT
+%   ax - axes for plot to be scaled
 %   src - handle to calling object (eg graphical button)
+%         src.UserData used to pass  'x-axis', 'y-axis', or 'both'
 % OUTPUT
 %   change the String and Tooltip of src object and modify scale of Y-axis
 % SEE ALSO
@@ -18,16 +20,31 @@ function setlog(src,~)
 % CoastalSEA (c) Nov 2024
 %--------------------------------------------------------------------------
 %
-    %
     if strcmp(src.String,'>Log ')
         src.String = '>Lin ';
         src. Tooltip = 'Switch to Linear';
-        ax = src.UserData;
-        ax.YScale = 'log';
+        if isvalid(ax)         %when tab plots an image there is no axes
+            if strcmp(src.UserData,'x-axis')
+                ax.XScale = 'log';
+            elseif strcmp(src.UserData,'y-axis')
+                ax.YScale = 'log';
+            elseif strcmp(src.UserData,'both')
+                ax.XScale = 'log';
+                ax.YScale = 'log';
+            end
+        end
     elseif strcmp(src.String,'>Lin ')
         src.String = '>Log ';
         src. Tooltip = 'Switch to Log';
-        ax = src.UserData;
-        ax.YScale = 'linear';
+        if isvalid(ax)
+            if strcmp(src.UserData,'x-axis')
+                ax.XScale = 'linear';
+            elseif strcmp(src.UserData,'y-axis')
+                ax.YScale = 'linear';
+            elseif strcmp(src.UserData,'both')
+                ax.XScale = 'linear';
+                ax.YScale = 'linear';              
+            end
+        end
     end
 end

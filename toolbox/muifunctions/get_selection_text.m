@@ -119,7 +119,7 @@ function dimstxt = setDimsTextShort(props)
     initxt = sprintf('%s (',ptxt(1).desc);  %variable
     
     for j=2:length(isvec)                   %dimensions with a range
-        initxt = sprintf('%s%s, ',initxt,ptxt(j).desc);
+        initxt = sprintf('%s%s, ',initxt,ptxt(isvec(j)).desc);
     end
     
     for k=1:length(isnot)                   %scalar dimension selections
