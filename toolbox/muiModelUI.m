@@ -819,7 +819,6 @@ classdef (Abstract = true) muiModelUI < handle
                 end
                 h_but(i).Position(1) = h_but(i).Position(1)+posdiff-5;
             end
-%             end
 
             sourcetxt = cell(ntables,1);
             for j=1:ntables

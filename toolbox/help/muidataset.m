@@ -61,9 +61,12 @@
 %   qcData(obj,classrec,catrec,muicat);  %catrec not used
 
 %%
-% *getDataSetName* - check whether there is more than one dstable and select
+% *getDataSetName* - check whether there is more than one dstable
+% and prompts user to select if there is. Options to provide a suitable
+% prompt, _promptxt_ and define whether select multiple or single datasets,
+% _selectmode_.
 %%
-%   datasetname = getDataSetName(obj);   %obj is a class instance
+%   datasetname = getDataSetName(obj,promptxt,selectmode);   %obj is a class instance, promptxt and selectmode are optional
 
 %%
 % *selectClassInstance* - Prompt to select a class instance from an array 

@@ -229,11 +229,18 @@ classdef (Abstract = true) muiDataSet < handle
             updateCase(muicat,obj,classrec);
         end
 %%
-        function [datasetname,ok,idd] = getDataSetName(obj,promptxt)
+        function [datasetname,ok,idd] = getDataSetName(obj,promptxt,selectmode)
             %check whether there is more than one dstable and select
             % promptext - cellstr with prompt to use (optional)
+            % selectmode - SelectionMode either 'multiple' or 'single'
             % idd - index to selected dataset (added Nov 24)
-            if nargin<2, promptxt = {'Select dataset'}; end
+            % datasetname - character vector if single selection or cell array
+            if nargin<2
+                selectmode = 'single';
+                promptxt = {'Select dataset'}; 
+            elseif nargin<3
+                selectmode = 'single';
+            end
 
             idd = 1; ok = 1; datasetname = [];  %initialise variables
             
@@ -241,11 +248,15 @@ classdef (Abstract = true) muiDataSet < handle
             if length(datasetnames)>1
                 title = 'DataSet names';
                 [idd,ok] = listdlg('PromptString',promptxt,...
-                           'SelectionMode','single','Name',title,...
+                           'SelectionMode',selectmode,'Name',title,...
                            'ListSize',[200,100],'ListString',datasetnames);
                 if ok<1,  return; end       
             end
-            datasetname = datasetnames{idd};
+            if length(idd)==1
+                datasetname = datasetnames{idd};  %maintain legacy output
+            else
+                datasetname = datasetnames(idd);  %add option for multi-selection
+            end
         end  
 %%
         function [cobj,dst,ok] = selectClassInstance(obj,propname,propvalue)

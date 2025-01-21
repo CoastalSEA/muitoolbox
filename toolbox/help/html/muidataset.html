@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>muiDataSet</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-12-22"><meta name="DC.source" content="muidataset.m"><style type="text/css">
+      --><title>muiDataSet</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2025-01-21"><meta name="DC.source" content="muidataset.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -71,7 +71,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 </pre><p><b>addData</b> - add additional data to an existing dataset, where <i>obj</i> is an instance of a class that uses muiDataSet, <i>classrec</i> is the id of the record in the class handle, <i>catrec</i> is the Catalogue record for the selected case and <i>muicat</i> is a handle to a muiCatalogue instance.</p><pre class="language-matlab">addData(obj,classrec,catrec,muicat);
 </pre><p><b>deleteData</b> - delete variable or rows from a dataset, where <i>obj</i> is an instance of a class that uses muiDataSet, <i>classrec</i> is the id of the record in the class handle, <i>catrec</i> is the Catalogue record for the selected case and <i>muicat</i> is a handle to a muiCatalogue instance.</p><pre class="language-matlab">deleteData(obj,classrec,catrec,muicat);
 </pre><p><b>qcData</b> - apply quality control to a dataset, where <i>obj</i> is an instance of a class that uses muiDataSet, <i>classrec</i> is the id of the record in the class handle, <i>catrec</i> is the Catalogue record for the selected case and <i>muicat</i> is a handle to a muiCatalogue instance.</p><pre class="language-matlab">qcData(obj,classrec,catrec,muicat);  <span class="comment">%catrec not used</span>
-</pre><p><b>getDataSetName</b> - check whether there is more than one dstable and select</p><pre class="language-matlab">datasetname = getDataSetName(obj);   <span class="comment">%obj is a class instance</span>
+</pre><p><b>getDataSetName</b> - check whether there is more than one dstable and prompts user to select if there is. Options to provide a suitable prompt, <i>promptxt</i> and define whether select multiple or single datasets, <i>selectmode</i>.</p><pre class="language-matlab">datasetname = getDataSetName(obj,promptxt,selectmode);   <span class="comment">%obj is a class instance, promptxt and selectmode are optional</span>
 </pre><p><b>selectClassInstance</b> - Prompt to select a class instance from an array of class instances held in obj. Filter based on a class property is optional, where propname is the class property to test and propvalue is the value to match. Returns class instance and selected dataset. Flag ok=1 if successful and ok =0 if user cancels selection.</p><pre class="language-matlab">[cobj,dst,ok] = selectClassInstance(obj,propname,propvalue);
 </pre><p><b>getClassInstances</b> - get the class indices for the instances in an array of class instances, obj, where the class property name, propname (as a character vector), matches propvalue (propvalue can be a numeric or logical array, or a cell array of character vectors, or a string array - similar to Matlab&#8482; <a href="matlab:doc('ismember')">ismember</a>)</p><pre class="language-matlab">caseidx = getClassInstances(obj,propname,propvalue);
 </pre><p><b>readTSinputFile</b> - uses Matlab detectImportOptions to decipher the header and read the data into a table, where the columns use the variable names in file (if defined). Checks are made to ensure that no times are duplicated and the data are standardised so that missing times are removed and missing data are set to NaN Time MUST be first column in table to use this function.</p><pre class="language-matlab">data = readTSinputFile(obj,filename);  <span class="comment">%returns a table of data read from filename</span>
@@ -261,9 +261,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 %   qcData(obj,classrec,catrec,muicat);  %catrec not used
 
 %%
-% *getDataSetName* - check whether there is more than one dstable and select
+% *getDataSetName* - check whether there is more than one dstable
+% and prompts user to select if there is. Options to provide a suitable
+% prompt, _promptxt_ and define whether select multiple or single datasets,
+% _selectmode_.
 %%
-%   datasetname = getDataSetName(obj);   %obj is a class instance
+%   datasetname = getDataSetName(obj,promptxt,selectmode);   %obj is a class instance, promptxt and selectmode are optional
 
 %%
 % *selectClassInstance* - Prompt to select a class instance from an array 
