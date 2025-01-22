@@ -76,7 +76,7 @@ function proptxt = getPropRangeText(props)
         proptxt.desc = props.desc;
         proptxt.range = getDimensionText(props.data);
         proptxt.isvec = true;
-    elseif length(attdesc)-2~=length(dimvals.dim)
+    elseif isfield(dimvals,'dim') && length(attdesc)-2~=length(dimvals.dim)
         %datasets such as profiles in CoastalTools have additional
         %variables to pass chainage hence attdesc does not match dimvals
         proptxt.desc = props.desc;
