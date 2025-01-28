@@ -1,4 +1,4 @@
-function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
+function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position,tooltips)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -12,7 +12,9 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
 %   promptxt - text used on figure to prompt user on selection to be made
 %   tag - figure Tag name (used for group deletes in ModelUI)
 %   butnames - names on buttons; optional, default is {'Yes','No'};
-%   position - figure position; optional, default is [0.372,0.576,0.255,0.34]         
+%   position - figure position; optional, default is [0.372,0.576,0.255,0.34]   
+%   tooltips - cell array of tooltips to assign to buttons.cell size must
+%              match number of buttons
 % OUTPUT
 %   h_plt - handle to plot panel
 %   h_but - handle to button panel
@@ -46,8 +48,12 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
     if nargin<4
         butnames = {'Yes','No'};
         position = [0.372, 0.576, 0.255,0.34];
+        tooltips = repmat({''},size(butnames));
     elseif nargin<5        
         position = [0.372, 0.576, 0.255,0.34];
+        tooltips = repmat({''},size(butnames));
+    elseif nargin<6
+        tooltips = repmat({''},size(butnames));
     end
     
     if length(butnames)<2
@@ -69,5 +75,5 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position)
                     'Units','normalized','Position',[0.005 0.005 0.99 0.9]);       
                 
     %add panel for buttons  
-    h_but = acceptpanel(h_fig,promptxt,butnames,[0.005 0.904 0.99 0.098]);
+    h_but = acceptpanel(h_fig,promptxt,butnames,[0.005 0.904 0.99 0.098],tooltips);
 end 

@@ -1,4 +1,4 @@
-function h_pnl = acceptpanel(h1,promptxt,butnames,position)
+function h_pnl = acceptpanel(h1,promptxt,butnames,position,tooltips)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -11,7 +11,9 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position)
 %   h1 - handle to figure or tab to position panel within
 %   promptxt - text used in panel to prompt user on selection to be made
 %   butnames - names on buttons; optional, default is {'Yes','No'};
-%   position - panel position; optional, default is [0.005 0.92 0.99 0.08]        
+%   position - panel position; optional, default is [0.005 0.92 0.99 0.08]  
+%   tooltips - cell array of tooltips to assign to buttons.cell size must
+%              match number of buttons
 % OUTPUT
 %   h_pnl - handle to panel
 % EXAMPLE
@@ -34,8 +36,12 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position)
     if nargin<3
         butnames = {'Yes','No'};
         position = [0.005 0.92 0.99 0.08];
+        tooltips = repmat({''},size(butnames));
     elseif nargin<4        
         position = [0.005 0.92 0.99 0.08];
+        tooltips = repmat({''},size(butnames));
+    elseif nargin<5
+        tooltips = repmat({''},size(butnames));
     end
     
     h_pnl = uipanel(h1,'Tag','ButtonPanel',...
@@ -50,6 +56,7 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position)
         uicontrol('Parent',h_pnl,'Tag','YesNo',...
         'Style','pushbutton',...
         'String', butnames{i},...
+        'Tooltip',tooltips{i},...
         'Units','normalized', ...
         'Position', [pos1 0.08 0.1 0.8], ...
         'Callback', @panelButton);  
