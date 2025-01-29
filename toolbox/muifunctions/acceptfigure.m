@@ -67,8 +67,8 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position,to
     h_fig.ToolBar = 'figure'; %allow access to data tips and save tools
     
     %move figure    
-    h_fig.Position(1) = 1-h_fig.Position(3)-0.01;  %top right
-    h_fig.Position(2) = 1-h_fig.Position(4)-0.12;           
+%     h_fig.Position(1) = 1-h_fig.Position(3)-0.01;  %top right
+%     h_fig.Position(2) = 1-h_fig.Position(4)-0.12;           
               
     %add panel for plot window and create empty axes handle          
     h_plt = uipanel(h_fig,'Tag','PlotPanel',...
