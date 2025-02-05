@@ -904,6 +904,7 @@ classdef (Abstract = true) muiModelUI < handle
             if~isempty(src.UserData)
                 if iscell(src.UserData) && length(src.UserData)>1
                     %cell with multiple cells (eg several filenames)
+                    if isrow(src.UserData), src.UserData = src.UserData'; end
                     stable = cell2table(src.UserData,'VariableNames',{'Sources'});
                     headtext = 'The following sources were used for the selected data set';
                     tablefigure('Sources',headtext,stable);

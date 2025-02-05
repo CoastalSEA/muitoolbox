@@ -78,6 +78,7 @@ classdef muiTableImport < muiDataSet
                     if strcmp(answer,'File')
                         newdst = muiTableImport.getDSpropertyFile(newdst);
                     end
+                    if isempty(newdst), return; end %user cancelled loading of file
                     newdst = muiTableImport.updateDSproperties(newdst); 
                 end
                 %assign metadata about data

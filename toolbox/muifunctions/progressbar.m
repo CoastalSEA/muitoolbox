@@ -8,9 +8,10 @@ function pobj = progressbar(mobj,pobj,msgtxt,titletxt)
 %   the ProgressDialog object. The figure must be created using the 
 %   uifigure function.  
 % USAGE
-%   pobj = progressbar([],msgtxt); to intialise the progress bar
-%   progressbar(pobj);  to close the progress bar
+%   pobj = progressbar(mobj,[],msgtxt); to intialise the progress bar
+%   progressbar(mobj,pobj);  to close the progress bar
 % INPUTS
+%   mobj - mui model instance
 %   pobj = empty to initialise and the ProgressDialogue dialog object to delete
 %   msgtxt - message text to be displayed in dialog box (optional) 
 %   titletxt - dialog box title - default is 'Please wait' (optional)

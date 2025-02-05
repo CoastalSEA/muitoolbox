@@ -37,6 +37,7 @@ function datable = readspreadsheet(filename,isdst,cell_ids)
         %select worksheet if more more than one.
         selection = listdlg("ListString",snames,"PromptString",'Select worksheet:',...
                     'ListSize',[150,200],'Name','EDBimports','SelectionMode','single');
+        if isempty(selection), return; end   %user cancelled
     else
         selection = 1;
     end
