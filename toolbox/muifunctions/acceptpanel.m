@@ -1,4 +1,4 @@
-function h_pnl = acceptpanel(h1,promptxt,butnames,position,tooltips)
+function h_pnl = acceptpanel(h1,promptxt,butnames,position,butfactor,tooltips)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -12,8 +12,9 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position,tooltips)
 %   promptxt - text used in panel to prompt user on selection to be made
 %   butnames - names on buttons; optional, default is {'Yes','No'};
 %   position - panel position; optional, default is [0.005 0.92 0.99 0.08]  
+%   butfactor - scale factor for button size (optional, default = 1)
 %   tooltips - cell array of tooltips to assign to buttons.cell size must
-%              match number of buttons
+%              match number of buttons (optional)
 % OUTPUT
 %   h_pnl - handle to panel
 % EXAMPLE
@@ -37,10 +38,15 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position,tooltips)
         butnames = {'Yes','No'};
         position = [0.005 0.92 0.99 0.08];
         tooltips = repmat({''},size(butnames));
+        butfactor = 1;
     elseif nargin<4        
         position = [0.005 0.92 0.99 0.08];
         tooltips = repmat({''},size(butnames));
+        butfactor = 1;
     elseif nargin<5
+        tooltips = repmat({''},size(butnames));
+        butfactor = 1;
+    elseif nargin<6
         tooltips = repmat({''},size(butnames));
     end
     
@@ -50,15 +56,15 @@ function h_pnl = acceptpanel(h1,promptxt,butnames,position,tooltips)
 
     % Create push buttons
     nbut = length(butnames);
-    pos0 = 0.5-(0.1*nbut/2+(nbut-1)*0.01/2);
+    pos0 = 0.5-(0.1*butfactor*nbut/2+(nbut-1)*0.01/2);
     for i=1:nbut
-        pos1 = pos0+(i-1)*0.11;
+        pos1 = pos0+(i-1)*0.11*butfactor;
         uicontrol('Parent',h_pnl,'Tag','YesNo',...
         'Style','pushbutton',...
         'String', butnames{i},...
         'Tooltip',tooltips{i},...
         'Units','normalized', ...
-        'Position', [pos1 0.08 0.1 0.8], ...
+        'Position', [pos1, 0.08, 0.1*butfactor, 0.8*butfactor], ...
         'Callback', @panelButton);  
     end    
 end
