@@ -7,7 +7,7 @@ function datable = readspreadsheet(filename,isdst,cell_ids)
 %   prompt user for selection on what to read from Excel spreadsheet and
 %   load selected data as table or a dstable
 % USAGE
-%   datable = readspreadsheet(filename,isdst)
+%   datable = readspreadsheet(filename,isdst,cell_ids);
 % INPUTS
 %   filename - path and filename of spreadsheet to be read
 %   isdst - return data in a dstable if true, and a table if false

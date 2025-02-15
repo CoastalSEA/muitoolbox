@@ -12,9 +12,18 @@ function hd = display_selection(src,~)
 % OUTPUT
 %   hd - handle to dialog created to display the text in src.UserData
 % NOTES
-%   
+%   Example of usage:
+%     %create button to allow user to view detailed selection description 
+%     hf.Units = 'normalized';
+%     butxt = 'Selection';   %text to appear on button
+%     position = [0.85,0.92,0.1,0.05]; 
+%     callback =  @(src,evt)display_selection(src,evt); %function to be called on button press
+%     tag = 'selbutton';
+%     tooltip = 'Details of selection made';
+%     hbut = setactionbutton(hf,butxt,position,callback,tag,tooltip);
+%     hbut.UserData = seltxt;
 % SEE ALSO
-%   used in tableviewrer_user_plots.m
+%   used in scatter_plot.m
 %
 % Author: Ian Townend
 % CoastalSEA (c) Nov 2024

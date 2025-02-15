@@ -92,8 +92,7 @@ function scatter_plot(mobj)
         subtitle(titxtZ)
     end
     
-    %create button to allow user to view detailed selection description
-    
+    %create button to allow user to view detailed selection description 
     hf.Units = 'normalized';
     butxt = 'Selection';   %text to appear on button
     position = [0.85,0.92,0.1,0.05];          %position of button on parent (units as per parent)

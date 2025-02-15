@@ -13,6 +13,9 @@ function godisplay(src,~)
 % OUTPUT
 %   name of object is displayed a temporary dialogue box
 % NOTES
+%   Example usage:
+%   
+% SEE ALSO
 %   uses getdialog and setdialog
 %
 % Author: Ian Townend
@@ -27,7 +30,7 @@ function godisplay(src,~)
         return;
     end
 
-    delay = 5;
+    delay = 3;
     [~,colwidth] = getcolumnwidths({msgtxt});
     screendata = get(0,'ScreenSize');
     txtwidth = colwidth/screendata(3)*1.15;
