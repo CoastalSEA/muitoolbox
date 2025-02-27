@@ -1,4 +1,4 @@
-function pobj = progressbar(mobj,pobj,msgtxt,titletxt)
+function prog = progressbar(prog,msgtxt,titletxt)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -8,10 +8,9 @@ function pobj = progressbar(mobj,pobj,msgtxt,titletxt)
 %   the ProgressDialog object. The figure must be created using the 
 %   uifigure function.  
 % USAGE
-%   pobj = progressbar(mobj,[],msgtxt); to intialise the progress bar
-%   progressbar(mobj,pobj);  to close the progress bar
+%   prog = progressbar([],msgtxt); to intialise the progress bar
+%   progressbar(prog);  to close the progress bar
 % INPUTS
-%   mobj - mui model instance
 %   pobj = empty to initialise and the ProgressDialogue dialog object to delete
 %   msgtxt - message text to be displayed in dialog box (optional) 
 %   titletxt - dialog box title - default is 'Please wait' (optional)
@@ -25,11 +24,7 @@ function pobj = progressbar(mobj,pobj,msgtxt,titletxt)
 % CoastalSEA (c) Jan 2025
 %--------------------------------------------------------------------------
 %
-    if isa(pobj,'matlab.ui.dialog.ProgressDialog')
-        close(pobj)
-        delete(mobj.mUI.Figure.UserData)
-        mobj.mUI.Figure.UserData = [];
-    else
+    if isempty(prog)
         if nargin<3
             msgtxt = '';
             titletxt = 'Please wait';
@@ -37,10 +32,12 @@ function pobj = progressbar(mobj,pobj,msgtxt,titletxt)
             titletxt = 'Please wait';
         end
     
-        hfig = uifigure('Tag','ProgressBarFigure');
-        mobj.mUI.Figure.UserData = hfig;
-        pobj = uiprogressdlg(hfig,'Title',titletxt,'Message',msgtxt,...
+        prog.hfig = uifigure;
+        prog.pobj = uiprogressdlg(prog.hfig,'Title',titletxt,'Message',msgtxt,...
                                                    'Indeterminate','on'); 
         drawnow
+    else
+        close(prog.pobj)
+        close(prog.hfig)
     end
 end

@@ -356,7 +356,7 @@ classdef muiTableImport < muiDataSet
             %delete a dataset
             dst = obj.Data;
             N = length(fieldnames(dst));
-            if N==1
+            if isscalar(N)
                 %catch if only one dataset as need to delete Case
                 warndlg(sprintf('There is only one dataset in this Case\nTo delete the Case use: Project > Cases > Delete Case'))
                 return

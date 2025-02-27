@@ -321,7 +321,19 @@ classdef muiCatalogue < dscatalogue
         end
 %% 
         function [cobj,classrec,catrec] = getCase(obj,caserec)
-            %retrieve the class instance, class record and catalogue record
+            % PURPOSE
+            %   retrieve the class instance, class record and catalogue record
+            % USAGE
+            %   [cobj,classrec,catrec] = getCase(obj,caserec)
+            % INPUTS            
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            %   caserec - record index in muiCatalogue 
+            % OUTPUTS
+            %   cobj - handle to selected class object
+            %   classrec - index of class object within class array
+            %   catrec - the catalogue record (row of table)
+            %
             catrec = getRecord(obj,caserec); 
             if isempty(catrec), cobj = []; classrec = []; return; end
             lobj = obj.DataSets.(catrec.CaseClass);  
@@ -330,15 +342,23 @@ classdef muiCatalogue < dscatalogue
         end
 %%
         function caseid = setCase(obj,cobj,varargin)
-            %add a case to the Catalogue and assign to DataSets
-            % cobj - instance of class to be saved
-            % varargin are as defined for dscatalogue.addRecord with
-            % classname derived from obj          
-            % casetype  - type of data set (e.g. keywords: model, data)
-            % casedesc  - description of case (optional)
-            % SupressPrompts - logical flag to use casedesc as record 
-            %                  description without prompting user (optional
-            %returns caseid to allow user to retrieve new record
+            % PURPOSE
+            %   add a case to the Catalogue and assign to DataSets
+            % USAGE
+            %   caseid = setCase(obj,cobj,varargin)
+            % INPUTS
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            %   cobj - instance of class to be saved
+            %   varargin are as defined for dscatalogue.addRecord with
+            %   classname derived from obj:      
+            %     casetype  - type of data set (e.g. keywords: model, data)
+            %     casedesc  - description of case (optional)
+            %     SupressPrompts - logical flag to use casedesc as record 
+            %                  description without prompting user (optional)
+            % OUTPUTS
+            %   caseid - returns caseid to allow user to retrieve new record
+            %
             classname = metaclass(cobj).Name;            
             %add record to the catalogue and update mui.Cases.DataSets
             caserec = addRecord(obj,classname,varargin{:});
@@ -357,12 +377,23 @@ classdef muiCatalogue < dscatalogue
         end
 %%
         function [dst,caserec,idset,dstxt] = getDataset(obj,caserec,idset)
-            %use the caserec id to get a case and return selected dataset
-            %also returns caserec and idset as numeric index values and dstxt 
-            % caserec - record id in mui Catalogue
-            % idset - numeric index or a name defined dataset MetaData property
-            % dstxt - dataset names used in class object Data property struct
-            %function called by getProperty and muiDataUI.XYZselection
+            % PURPOSE
+            %   use the caserec id to get a case and return selected dataset
+            % USAGE
+            %   [dst,caserec,idset,dstxt] = getDataset(obj,caserec,idset)
+            % INPUTS            
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            %   caserec - record in muiCatalogue - id or CaseDescription
+            %   idset - numeric index or a name defined dataset MetaData property
+            % OUTPUTS
+            %   dst - dstable for selected dataset
+            %   caserec - record index in muiCatalogue
+            %   idset - dataset index
+            %   dstxt - dataset names used in class object Data property struct
+            % SEE ALSO
+            %   function called by getProperty and muiDataUI.XYZselection
+            %
             if ~isnumeric(caserec)               
                 caserec = find(strcmp(obj.Catalogue.CaseDescription,caserec));
             end
@@ -385,16 +416,23 @@ classdef muiCatalogue < dscatalogue
         end                                      %should no longer be needed BUT IT IS!
 %%
         function props = getProperty(obj,UIsel,outopt)
-            %extract the data based on the selection made using a UI that
-            %inherits muiDataUI and provides the UIselection struct
-            % UIsel - UIselection struct that defines the dataset and
+            % PURPOSE
+            %   extract the data based on the selection made using a UI that
+            % USAGE
+            %   props = getProperty(obj,UIsel,outopt)
+            % INPUTS
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            %   UIsel - UIselection struct that defines the dataset and
             %         dimensions/indices required
-            % outopt - options to return the data as an array, table, dstable,
-            %        a splittable where the 2nd dimension has been split into
-            %        variables (see muiEditUI for example of usage), or a
-            %        timeseries data set (assumes rows are datetime)
-            % props - returns a struct containing data, description of 
-            %         property being used and the associated label 
+            %   outopt - options to return the data as an array, table, dstable,
+            %          a splittable where the 2nd dimension has been split into
+            %          variables (see muiEditUI for example of usage), or a
+            %          timeseries data set (assumes rows are datetime)
+            % OUTPUTS
+            %   props - returns a struct containing data, description of 
+            %           property being used and the associated label 
+            %
             dvals = [];
             props = setPropsStruct(obj);
             if nargin<3, outopt = 'array'; end
@@ -478,19 +516,30 @@ classdef muiCatalogue < dscatalogue
         end
 %%
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt,ischeck)
-            %select a case record to use with options to subselect
-            %the selection list based on class or type (used in muiModelUI)
-            % promptxt - text to use to prompt user
-            % mode - single or multiple selection mode            
-            % selopt - selection options:
+            % PURPOSE
+            %   select a case record to use with options to subselect
+            %   the selection list based on class or type (used in muiModelUI)
+            % USAGE
+            %  [caserec,ok] = selectCase(obj,promptxt,mode,selopt,ischeck)
+            % INPUTS
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            %   promptxt - text to use to prompt user
+            %   mode - single or multiple selection mode            
+            %   selopt - selection options:
             %          0 = no subselection, 
             %          1 = subselect using class, 
             %          2 = subselect using type, 
             %          3 = subselect using both
-            % ischeck - flag to check selection if only a single option
-            % Note: to select and return a class instance use selectCaseObj
-            % to get a class object array (no Case/Record selection) use
-            % getClassObj in muiModelUI.
+            %   ischeck - flag to check selection if only a single option
+            % OUTPUTS
+            %   caserec - record index in muiCatalogue
+            %   ok - logical flag, true if selection made
+            % NOTES
+            %   to select and return a class instance use selectCaseObj
+            %   to get a class object array (no Case/Record selection) use
+            %   getClassObj in muiModelUI.
+            %
             if nargin<5, ischeck = false; end
             classops = cellstr(unique(obj.Catalogue.CaseClass));
             typeops  = cellstr(unique(obj.Catalogue.CaseType));
@@ -512,21 +561,30 @@ classdef muiCatalogue < dscatalogue
                                 'CheckSingle',ischeck);
         end
 %%
-        function [cobj,classrec] = selectCaseObj(obj,casetype,classname,...
+function [cobj,classrec,catrec] = selectCaseObj(obj,casetype,classname,...
                                                                  promptxt)
-            %prompt user to select a Case and return instance (eg used in
-            %GDinterface)
-            % obj - class instance of muiCatalogue (eg using mobj.Cases for
+            % PURPOSE
+            %   prompt user to select a Case and return instance (eg used in
+            %   GDinterface)
+            % USAGE
+            %  [cobj,classrec,caserec] = selectCaseObj(obj,casetype,classname,promptxt)
+            % INPUTS               
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
             %       a class mobj that inherits muiModelUI)
-            % casetype - can be empty, or cell array of one or more case
+            %   casetype - can be empty, or cell array of one or more case
             %            types
-            % classname - can be empty, or cell array of one or more
+            %   classname - can be empty, or cell array of one or more
             %             class names 
-            % promptxt - alternative text to use as a prompt (optional) 
-            % [e.g. [cobj,crec] = selectCaseObj(obj,[],{'c1','c2'},'Select Case:');
-            % Note: to select a Case when only caserec is required use 
-            % selectCase (above). To get a class object array (no Case/Record 
-            % selection) use getClassObj in muiModelUI.
+            %   promptxt - alternative text to use as a prompt (optional) 
+            % OUTPUTS
+            %   cobj - handle to selected class object
+            %   classrec - index of class object within class array
+            %   catrec - the catalogue record (row of table)
+            % NOTES
+            %   to select a Case when only caserec is required use 
+            %   selectCase (above). To get a class object array (no Case/Record 
+            %   selection) use getClassObj in muiModelUI.
+            %
             if nargin<2
                 promptxt = 'Select Case:'; 
                 classname = []; 
@@ -542,12 +600,33 @@ classdef muiCatalogue < dscatalogue
                               'CaseType',casetype,'CaseClass',classname,...
                               'SelectionMode','single','ListSize',[250,200]);
             if ok<1, cobj = []; classrec = []; return; end
-            [cobj,classrec] = getCase(obj,caserec);    
+            [cobj,classrec,catrec] = getCase(obj,caserec);    
         end
 %%
         function [cobj,classrec,datasets,idd] = selectCaseDataset(obj,...
                                               casetype,classname,promptxt)
-            %select case and dataset for use in plot or analysis
+            % PURPOSE
+            %   select case and dataset for use in plot or analysis
+            % USAGE
+            %  [cobj,classrec,datasets,idd] = selectCaseDataset(obj,casetype,classname,promptxt)
+            % INPUTS               
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
+            %       a class mobj that inherits muiModelUI)
+            %   casetype - can be empty, or cell array of one or more case
+            %            types
+            %   classname - can be empty, or cell array of one or more
+            %             class names 
+            %   promptxt - alternative text to use as a prompt
+            %            cell array for (1) case and (2) row
+            %   idd - id of dataset table to use
+            % OUTPUTS
+            %   cobj - handle to selected class object
+            %   classrec - index of class object within class array   
+            %   datasets - fieldnames of datasets available in selected case
+            %   idd - index of selected dataset table
+            % SEE ALSO
+            %   uses selectCaseObj above. 
+            %
             [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt);
             if isempty(cobj), datasets = []; idd = []; return; end   %user cancelled
             datasets = fields(cobj.Data);
@@ -560,18 +639,28 @@ classdef muiCatalogue < dscatalogue
 %%
         function [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,...
                                                 classname,promptxt,idd)
-            %prompt user to select a Case, Dataset (if not specified) and 
-            %a row, return instance and row no.
-            % obj - class instance of muiCatalogue (eg using mobj.Cases for
+            % PURPOSE
+            %   prompt user to select a Case, Dataset (if not specified) and 
+            %   a row, return instance and row no.
+            % USAGE
+            %  [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,classname,promptxt,idd)
+            % INPUTS               
+            %   obj - class instance of muiCatalogue (eg using mobj.Cases for
             %       a class mobj that inherits muiModelUI)
-            % casetype - can be empty, or cell array of one or more case
+            %   casetype - can be empty, or cell array of one or more case
             %            types
-            % classname - can be empty, or cell array of one or more
+            %   classname - can be empty, or cell array of one or more
             %             class names 
-            % promptxt - alternative text to use as a prompt
+            %   promptxt - alternative text to use as a prompt
             %            cell array for (1) case and (2) row
-            % idd - id of dataset table to use
-            %uses selectCaseObj above. Used in getInletTools.
+            %   idd - id of dataset table to use
+            % OUTPUTS
+            %   cobj - handle to selected class object
+            %   classrec - index of class object within class array   
+            %   irow - index of selected row
+            % SEE ALSO
+            %   uses selectCaseObj above. Used in getInletTools.
+            %
             if nargin<2
                 idd = [];
                 promptxt = {'Select Case:','Select Row:'}; 
@@ -618,8 +707,12 @@ classdef muiCatalogue < dscatalogue
 %%
 function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,...
                                                         classname,promptxt,idd)
-            %prompt user to select a Case, Dataset (if not specified) and 
-            %a variable, return instance and variable id.
+            % PURPOSE
+            %   prompt user to select a Case, Dataset (if not specified) and 
+            %   a variable, return instance and variable id.
+            % USAGE
+            %  props = getProperty(obj,UIsel,outopt)
+            % INPUTS               
             % obj - class instance of muiCatalogue (eg using mobj.Cases for
             %       a class mobj that inherits muiModelUI)
             % casetype - can be empty, or cell array of one or more case
@@ -628,7 +721,8 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             %             class names 
             % promptxt - alternative text to use as a prompt
             %            cell array for (1) case and (2) row
-            % itable - id of dataset table to use
+            % idd - id of dataset table to use
+            % OUTPUTS
             %uses selectCaseObj above. Used in getInletTools.
             if nargin<2
                 idd = [];
@@ -691,11 +785,18 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
         end
 %%
         function useCase(obj,mode,classname,action)
-            %select which existing data set to use and pass to action method
+            % PURPOSE
+            %   select which existing data set to use and pass to action method
+            % USAGE
+            %  props = getProperty(obj,UIsel,outopt)
+            % INPUTS   
             % mode - none, single or multiple selection mode  
             % classname - character vector or cell array of class name(s) to select cases for
             % action - method of class to pass class object to,
             %          e.g. 'addData' in muiDataSet abstract class.
+            % OUTPUTS
+            %
+            %
             if strcmp(mode,'none')
                 if iscell(classname), classname = classname{1}; end
                 heq = str2func(['@(muicat,classname) ',...
