@@ -875,6 +875,10 @@ classdef (Abstract = true) muiModelUI < handle
                 desctext = sprintf('User data for %s',dst.Description);
                 if isstruct(dst.UserData)
                     outable = struct2table(dst.UserData);
+                    if isstruct(outable{1,1})
+                        structFields = outable.Properties.VariableNames;
+                        outable = cell2table(structFields);
+                    end
                 elseif iscell(dst.UserData)
                     outable = cell2table(dst.UserData);
                 elseif istable(dst.UserData)
@@ -893,8 +897,12 @@ classdef (Abstract = true) muiModelUI < handle
                         end
                     end
                     outable(:,idx) = []; 
-                end              
-                tablefigure('User data',desctext,outable);
+                end 
+                if ~isempty(outable)
+                    tablefigure('User data',desctext,outable);
+                else
+                    getdialog('No User Data for selected data set');
+                end
             else
                 getdialog('No User Data for selected data set');
             end            
