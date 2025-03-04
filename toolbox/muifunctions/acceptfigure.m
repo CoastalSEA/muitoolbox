@@ -13,7 +13,7 @@ function [h_plt,h_but] = acceptfigure(figtitle,promptxt,tag,butnames,position,bu
 %   tag - figure Tag name (used for group deletes in ModelUI)
 %   butnames - names on buttons; optional, default is {'Yes','No'};
 %   position - figure position; optional, default is [0.372,0.576,0.255,0.34]  
-%   butfactor - scale factor for button size (default = 1)     
+%   butheight - scale factor for button height (default = 1)     
 %   tooltips - cell array of tooltips to assign to buttons.cell size must
 %              match number of buttons
 % OUTPUT
