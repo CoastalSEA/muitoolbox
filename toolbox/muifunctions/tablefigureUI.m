@@ -101,13 +101,24 @@ function output = tablefigureUI(figtitle,headtext,atable,isedit,butdef,...
          
         %assign data from tablefigure to output table
         if any([hb(:).UserData]==1)
-                temptable = cell2table(hands.ht.Data);
-            output = hands.hf.UserData;    
-            if isa(output,'dstable')                
-                output.DataTable{:,:} = temptable{:,:};  %to capture any edits
+            atable = hands.hf.UserData;
+            if isa(atable,'dstable')
+                rownames = atable.DataTable.Properties.RowNames; %strings
+                varnames = atable.VariableNames;
             else
-                output{:,:} = temptable{:,:};  %to capture any edits
-            end 
+                rownames = atable.Properties.RowNames;
+                varnames = atable.Properties.VariableNames;
+            end
+            output = cell2table(hands.ht.Data,'RowNames',rownames,...
+                                        'VariableNames',varnames);
+
+            if isa(atable,'dstable')
+                varnames = atable.VariableNames;
+                for i=1:width(output)
+                    atable.DataTable.(varnames{i}) = output.(varnames{i});
+                end
+                output = atable;
+            end
         else
             output = [];
         end
