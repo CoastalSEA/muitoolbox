@@ -159,6 +159,9 @@
 % * *setlog.m*
 % - callback function for button to set XY plot to have log/linear y-axis
 %
+% * *setnan.m*
+% - callback function for button to include or exclude NaN values from plot
+%
 % * *setskillparameters.m*
 % - initialise the skill properties used for Taylor plot and local skill
 % score plots. Skill score requires correlation coefficient and exponent.

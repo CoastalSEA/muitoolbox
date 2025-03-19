@@ -22,7 +22,7 @@ function setlog(ax,src,~)
 %
     if strcmp(src.String,'>Log ')
         src.String = '>Lin ';
-        src. Tooltip = 'Switch to Linear';
+        src.Tooltip = 'Switch to Linear';
         if isvalid(ax)         %when tab plots an image there is no axes
             if strcmp(src.UserData,'x-axis')
                 ax.XScale = 'log';
@@ -35,7 +35,7 @@ function setlog(ax,src,~)
         end
     elseif strcmp(src.String,'>Lin ')
         src.String = '>Log ';
-        src. Tooltip = 'Switch to Log';
+        src.Tooltip = 'Switch to Log';
         if isvalid(ax)
             if strcmp(src.UserData,'x-axis')
                 ax.XScale = 'linear';
