@@ -326,6 +326,21 @@ classdef (Abstract = true) muiModelUI < handle
 %%
         function newproject(obj,~,~)
             %clear any existing model and initialise a new project
+            spath = obj.Info.PathName;
+            sfile = obj.Info.FileName;            
+            %if input data defined or data/model classes exist, check need
+            %to save existing project setup
+            isdata = ~isempty(obj.Inputs) || ~isempty(obj.Cases.DataSets); 
+            if exist([spath,sfile],'file')==2 && any(isdata)                                    
+                ansQ = questdlg('Do you want to save the current project file?', ...
+                    'Save file','Save','Save as','No','No');
+                if strcmp('Save', ansQ)==1
+                    savefile(obj,0,0);
+                elseif strcmp('Save as', ansQ)==1
+                    saveasfile(obj,0,0);
+                end
+            end
+
             obj.clearModel;
             Prompt = {'Project Name','Date'};
             Title = 'Project';
@@ -343,13 +358,12 @@ classdef (Abstract = true) muiModelUI < handle
         function obj = openfile(obj,~,~)
             %check to see if there is a file open and whether this needs to be saved
             spath = obj.Info.PathName;
-            sfile = obj.Info.FileName;
-            
+            sfile = obj.Info.FileName;            
             %if input data defined or data/model classes exist, check need
             %to save existing project setup
             isdata = ~isempty(obj.Inputs) || ~isempty(obj.Cases.DataSets); 
             if exist([spath,sfile],'file')==2 && any(isdata)                                    
-                ansQ = questdlg('Do you want to save the current model file?', ...
+                ansQ = questdlg('Do you want to save the current project file?', ...
                     'Save file','Save','Save as','No','No');
                 if strcmp('Save', ansQ)==1
                     savefile(obj,0,0);
@@ -415,7 +429,7 @@ classdef (Abstract = true) muiModelUI < handle
             end
                 
             [sfile,spath] = uiputfile({'*.mat','MAT-files (*.mat)'}, ...
-                           'Save Asmita work file');
+                           'Save project file');
             if isequal(sfile,0)|| isequal(spath,0)
                 return     %user selected cancel
             else
@@ -435,7 +449,7 @@ classdef (Abstract = true) muiModelUI < handle
 %%
         function exitprogram(obj,~,~)
             %delete all existing figures and delete UI
-            choice = questdlg('Do you want to save model before exiting?', ...
+            choice = questdlg('Do you want to save project before exiting?', ...
                 'Exit','Yes','No','Cancel','No');
             if strcmp(choice,'Yes')
                 savefile(obj,0,0);

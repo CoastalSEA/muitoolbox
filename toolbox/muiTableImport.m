@@ -516,10 +516,9 @@ classdef muiTableImport < muiDataSet
             end
             
             src = ax.Parent;                             %handle to tab
-            src.UserData = {sub_rn,sub_y};
 
             %add control buttons for scalar plots only (can be set in call
-            %to tablefigureplot but that would set them for all plot types)
+            %to tabfigureplot but that would set them for all plot types)
             hb = findobj(src,'Tag','LogButton'); delete(hb)
             hb = findobj(src,'Tag','NaNButton'); delete(hb)
             %button to toggle y-axis between linear and log scale
@@ -535,7 +534,6 @@ classdef muiTableImport < muiDataSet
                 'String','-NaN','Tag','NaNButton',...
                 'Tooltip','Exclude NaNs',...
                 'Units','normalized','Position',[0.015 0.90 0.06 0.044],...
-                'UserData','y-axis',...
                 'Callback',@(src,evdat)setnan(ax,src,evdat));
 
             ax.Color = [0.96,0.96,0.96];  %needs to be set after plot  

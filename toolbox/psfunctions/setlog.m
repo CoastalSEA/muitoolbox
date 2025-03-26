@@ -20,8 +20,8 @@ function setlog(ax,src,~)
 % CoastalSEA (c) Nov 2024
 %--------------------------------------------------------------------------
 %
-    if strcmp(src.String,'>Log ')
-        src.String = '>Lin ';
+    if strcmp(src.String,'>Log')
+        src.String = '>Lin';
         src.Tooltip = 'Switch to Linear';
         if isvalid(ax)         %when tab plots an image there is no axes
             if strcmp(src.UserData,'x-axis')
@@ -33,8 +33,8 @@ function setlog(ax,src,~)
                 ax.YScale = 'log';
             end
         end
-    elseif strcmp(src.String,'>Lin ')
-        src.String = '>Log ';
+    elseif strcmp(src.String,'>Lin')
+        src.String = '>Log';
         src.Tooltip = 'Switch to Log';
         if isvalid(ax)
             if strcmp(src.UserData,'x-axis')

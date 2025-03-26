@@ -23,8 +23,8 @@ function setnan(ax,src,~)
 %
     data = src.Parent.UserData;
     hplot = ax.Children;
-    ytxt = ax.YLabel.String;
-    yscale = ax.YScale;
+    fc = hplot.FaceColor;
+
     delete(hplot)
     if strcmp(src.String,'-NaN')
         src.String = '+NaN';
@@ -42,7 +42,9 @@ function setnan(ax,src,~)
         src.String = '-NaN';
         src. Tooltip = 'Exclude NaNs in plot';
     end
-    bar(ax,data{1},data{2}); 
-    ylabel(ytxt);
-    ax.YScale = yscale;
+    hold on
+        hb = bar(ax,data{1},data{2});
+        hb.FaceColor = fc;
+    hold off
+
 end 
