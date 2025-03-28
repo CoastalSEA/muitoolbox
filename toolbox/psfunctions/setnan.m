@@ -24,6 +24,7 @@ function setnan(ax,src,~)
     data = src.Parent.UserData;
     hplot = ax.Children;
     fc = hplot.FaceColor;
+    cd = hplot.CData;
 
     delete(hplot)
     if strcmp(src.String,'-NaN')
@@ -42,9 +43,12 @@ function setnan(ax,src,~)
         src.String = '-NaN';
         src. Tooltip = 'Exclude NaNs in plot';
     end
+    ax.XAxis.Categories = data{1};
+    set(ax,'XTick',data{1},'XTickLabel',data{1});
     hold on
         hb = bar(ax,data{1},data{2});
         hb.FaceColor = fc;
+        hb.CData = cd(idx,:);
     hold off
 
 end 

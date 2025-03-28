@@ -41,7 +41,7 @@ function scatter_plot(mobj)
         while ok<1
             scalevar = get_variable(mobj,promptxt,'XYZmxvar',1);
             if isempty(scalevar), return; end
-            scalevar.data
+            scalevar.data;
             isvalid = isnumeric(scalevar.data) && checkdimensions(indvar.data,scalevar.data);
             if isvalid
                 ok = 1;

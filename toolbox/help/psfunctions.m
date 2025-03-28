@@ -145,6 +145,9 @@
 % * *regression_plot.m*
 % - generate regression plot for 2-D data and fitted regression model
 %
+% * *reshape_axes.m*
+% - reshape subplots in a figure from a single column to two columns
+%
 % * *saveanimation2file.m*
 % - saves movie to selected file type
 %
