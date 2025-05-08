@@ -260,9 +260,9 @@ classdef muiCatalogue < dscatalogue
             title = 'Import case';
             datatype = inputdlg(prompt,title,1,{'data'});
             if isempty(datatype), return; end
-            
-%             addCaseRecord(cobj,obj,datatype);
-            setCase(obj,cobj,datatype);
+
+            [~,casename] = fileparts([path,fname]);
+            setCase(obj,cobj,datatype,{casename},false);
             activateTables(obj);
         end
 %%

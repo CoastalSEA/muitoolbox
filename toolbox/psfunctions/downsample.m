@@ -7,10 +7,12 @@ function [tout,var] = downsample(Z,t,varargin)
 %   wrapper to put downsample_ts, by Chad A. Greene, output into an array
 % USAGE
 %   [tout,var] = downsample(Z,t,varargin)
+%   [tout,var] = downsample(Z,t,'month','nanmean');
 % INPUT
 %   Z - variable to downsample
 %   t - time 
-%   varargin - sampling period and methos to use (eg mean)
+%   varargin - sampling period and method to use (eg mean)
+%              %NB to omit NaNs use nanXXX as the method 
 % OUTPUT
 %   tout -  each value in tout is the mean time of all data contributing to 
 %   the variable, var, for the sampling interval
@@ -19,30 +21,33 @@ function [tout,var] = downsample(Z,t,varargin)
 %   Calls downsable_ts as a sub-function. This function was written by 
 %   Chad A. Greene of the University of Texas at Austin's Insititue for 
 %   Geophysics (UTIG) and downloaded from the Matlab Forum. 
+%   Function modified to remove dependency on nanXXX functions and
+%   Statistics Toolbox. Calls still use 'nanXXX to apply the 'omitnan' 
+%   option.(May'25)
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2015
 %----------------------------------------------------------------------
 %
-t = datenum(t); %muiUserModel passes datetime
-if nargin>2
-    period = varargin{1};
-    if length(varargin)>1
-        method = varargin{2};
-        [Z_downsamp,t_downsamp] = downsample_ts(Z,t,period,method);
+    %t = datenum(t); %muiUserModel passes datetime
+    if nargin>2
+        period = varargin{1};
+        if length(varargin)>1
+            method = varargin{2};
+            [Z_downsamp,t_downsamp] = downsample_ts(Z,t,period,method);
+        else
+            [Z_downsamp,t_downsamp] = downsample_ts(Z,t,period);
+        end
     else
-        [Z_downsamp,t_downsamp] = downsample_ts(Z,t,period);
+        [Z_downsamp,t_downsamp] = downsample_ts(Z,t);
     end
-else
-    [Z_downsamp,t_downsamp] = downsample_ts(Z,t);
+    %DataManip requires a matrix or cell array with time in datetime format as
+    %the first variable
+    % var = {datetime(t_downsamp,'ConvertFrom','datenum'),Z_downsamp'};
+    var = Z_downsamp';
+    tout = datetime(t_downsamp,'ConvertFrom','datenum');
 end
-%DataManip requires a matrix or cell array with time in datetime format as
-%the first variable
-% var = {datetime(t_downsamp,'ConvertFrom','datenum'),Z_downsamp'};
-var = Z_downsamp';
-tout = datetime(t_downsamp,'ConvertFrom','datenum');
-end
-
+%%
 function [Z_downsamp,t_downsamp] = downsample_ts(Z,t,varargin)
 % downsample_ts function downsamples 1D or 3D data to monthly, yearly, hourly,
 % minutely, or secondly data. This function was originally designed to
@@ -80,15 +85,11 @@ function [Z_downsamp,t_downsamp] = downsample_ts(Z,t,varargin)
 % the functions listed below.
 % 
 % A note on functions which ignore NaNs: To get the monthly means of data
-% while ignoring NaN values, you can use the 'nanmean' option. The
-% nanmean function is part of the Statistics Toolbox, but may also be
-% found as part of the  NaN Suite on File Exchange. However, the File Exchange versions mix up the order
-% of dimensions and flags for nanstd, nanvar, nanmin, and nanmax, so you will 
-% need the Statistics Toolbox for those particular functions.  In all, the
+% while ignoring NaN values, you can use the 'nanmean' option. In all, the
 % following functions are available: 
 % 
 %     * 'mean' (default) 
-%     * 'nanmean' ignores NaN values in Z. Requires Statistics toolbox or NaN Suite. 
+%     * 'nanmean' ignores NaN values in Z. applies 'omitnan' 
 %     * 'median' 
 %     * 'nanmedian' ignores NaN values in Z. Requires Statistics toolbox or NaN Suite. 
 %     * 'min' 
@@ -130,9 +131,9 @@ function [Z_downsamp,t_downsamp] = downsample_ts(Z,t,varargin)
 %% Input error checks: 
 
 narginchk(2,4)
-assert(isnumeric(Z)==1,'Input data3D must be numeric.')
-assert(isvector(t)==1,'Input time array must be a 1D array.') 
-assert(isvector(Z)==1|ndims(Z)==3,'Input data3D must be a 1D array or a 3D matrix.') 
+assert(isnumeric(Z),'Input data3D must be numeric.')
+assert(isvector(t),'Input time array must be a 1D array.') 
+assert(isvector(Z)|ndims(Z)==3,'Input data3D must be a 1D array or a 3D matrix.') 
 
 Zdims = ndims(Z); 
 assert(Zdims<4,'Z must be 1D or 2D.') 
@@ -145,7 +146,7 @@ end
 %% Input manipulation: 
 
 % Convert (assumed) date strings to datenums if necessary: 
-if ischar(t)
+if ischar(t) || isdatetime(t)
     t = datenum(t); 
 end
 
@@ -189,28 +190,24 @@ if any(strncmpi(varargin,'max',3))
     method = 'max'; 
 end
 if any(strcmpi(varargin,'nanmax'))
-    assert(license('test','statistics_toolbox')==1,'nanmax requires statistics toolbox because the free version of nanmax that you will find on the internet does not behave exactly the same as the stats toolbox version.')
     method = 'nanmax'; 
 end
 if any(strncmpi(varargin,'min',3))
     method = 'min'; 
 end
 if any(strcmpi(varargin,'nanmin'))
-    assert(license('test','statistics_toolbox')==1,'nanmin requires statistics toolbox because the free version of nanmin that you will find on the internet does not behave exactly the same as the stats toolbox version.')
     method = 'nanmin'; 
 end
 if any(strcmpi(varargin,'std'))
     method = 'std'; 
 end
 if any(strcmpi(varargin,'nanstd'))
-    assert(license('test','statistics_toolbox')==1,'nanstd requires statistics toolbox because the free version of nanstd that you will find on the internet does not behave exactly the same as the stats toolbox version.')
     method = 'nanstd'; 
 end
 if any(strncmpi(varargin,'var',3))
     method = 'var'; 
 end
 if any(strcmpi(varargin,'nanvar'))
-    assert(license('test','statistics_toolbox')==1,'nanvar requires statistics toolbox because the free version of nanvar that you will find on the internet does not behave exactly the same as the stats toolbox version.')
     method = 'nanvar'; 
 end
 if any(strcmpi(varargin,'mode'))
@@ -289,18 +286,18 @@ for k = 1:length(ut)
     switch method
         case 'mean'
             if Zdims==3
-                Z_downsamp(:,:,k) = mean(Z(:,:,CompArray==ut(k)),3,'omitnan'); 
+                Z_downsamp(:,:,k) = mean(Z(:,:,CompArray==ut(k)),3); 
             else
-                Z_downsamp(k) = mean(Z(CompArray==ut(k)),'omitnan'); 
+                Z_downsamp(k) = mean(Z(CompArray==ut(k))); 
             end
             
         case 'nanmean'
             if Zdims==3
-                Z_downsamp(:,:,k) = nanmean(Z(:,:,CompArray==ut(k)),3); 
+                Z_downsamp(:,:,k) = mean(Z(:,:,CompArray==ut(k)),3,'omitnan'); 
             else
-                Z_downsamp(k) = nanmean(Z(CompArray==ut(k))); 
+                Z_downsamp(k) = mean(Z(CompArray==ut(k)),'omitnan'); 
             end
-            
+
         case 'median'
             if Zdims==3
                 Z_downsamp(:,:,k) = median(Z(:,:,CompArray==ut(k)),3); 
@@ -310,9 +307,9 @@ for k = 1:length(ut)
             
         case 'nanmedian'
             if Zdims==3
-                Z_downsamp(:,:,k) = nanmedian(Z(:,:,CompArray==ut(k)),3); 
+                Z_downsamp(:,:,k) = median(Z(:,:,CompArray==ut(k)),3,'omitnan'); 
             else
-                Z_downsamp(k) = nanmedian(Z(CompArray==ut(k))); 
+                Z_downsamp(k) = median(Z(CompArray==ut(k)),'omitnan'); 
             end
             
         case 'max' 
@@ -324,9 +321,9 @@ for k = 1:length(ut)
             
         case 'nanmax' 
             if Zdims==3
-                Z_downsamp(:,:,k) = nanmax(Z(:,:,CompArray==ut(k)),[],3); 
+                Z_downsamp(:,:,k) = max(Z(:,:,CompArray==ut(k)),[],3,'omitnan'); 
             else
-                Z_downsamp(k) = nanmax(Z(CompArray==ut(k))); 
+                Z_downsamp(k) = max(Z(CompArray==ut(k)),[],'omitnan'); 
             end
             
         case 'min' 
@@ -338,9 +335,9 @@ for k = 1:length(ut)
             
         case 'nanmin' 
             if Zdims==3
-                Z_downsamp(:,:,k) = nanmin(Z(:,:,CompArray==ut(k)),[],3);
+                Z_downsamp(:,:,k) = min(Z(:,:,CompArray==ut(k)),[],3,'omitnan');
             else
-                Z_downsamp(k) = nanmin(Z(CompArray==ut(k)));
+                Z_downsamp(k) = min(Z(CompArray==ut(k)),[],'omitnan');
             end
             
         case 'std' 
@@ -352,9 +349,9 @@ for k = 1:length(ut)
             
         case 'nanstd' 
             if Zdims==3
-                Z_downsamp(:,:,k) = nanstd(Z(:,:,CompArray==ut(k)),0,3);
+                Z_downsamp(:,:,k) = std(Z(:,:,CompArray==ut(k)),0,3,'omitnan');
             else
-                Z_downsamp(k) = nanstd(Z(CompArray==ut(k)));
+                Z_downsamp(k) = std(Z(CompArray==ut(k)),0,'omitnan');
             end
             
         case 'var' 
@@ -366,9 +363,9 @@ for k = 1:length(ut)
             
         case 'nanvar' 
             if Zdims==3
-                Z_downsamp(:,:,k) = nanvar(Z(:,:,CompArray==ut(k)),0,3);
+                Z_downsamp(:,:,k) = var(Z(:,:,CompArray==ut(k)),0,3,'omitnan');
             else
-                Z_downsamp(k) = nanvar(Z(CompArray==ut(k)));
+                Z_downsamp(k) = var(Z(CompArray==ut(k)),0,'omitnan');
             end
             
         case 'mode' 
@@ -387,9 +384,9 @@ for k = 1:length(ut)
             
         case 'nansum'
             if Zdims==3
-                Z_downsamp(:,:,k) = nansum(Z(:,:,CompArray==ut(k)),3);
+                Z_downsamp(:,:,k) = sum(Z(:,:,CompArray==ut(k)),3,'omitnan');
             else
-                Z_downsamp(k) = nansum(Z(CompArray==ut(k)));
+                Z_downsamp(k) = sum(Z(CompArray==ut(k)),'omitnan');
             end          
     end
 
