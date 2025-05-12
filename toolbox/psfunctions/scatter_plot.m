@@ -19,9 +19,9 @@ function scatter_plot(mobj)
 % CoastalSEA (c) Nov 2024
 %--------------------------------------------------------------------------
 %
-    questxt = 'Scatter plot with points (2D) or scaled data points (3D):';
+    questxt = 'Scatter plot with points (2-var) or scaled data points (3-var):';
     %prompt user to select type of scatter plot required
-    answer = questdlg(questxt,'Scatter','2D','3D','2D');
+    answer = questdlg(questxt,'Scatter','2-var','3-var','2-var');
 
     %prompt user to select variables to be used in plot
     %NB uses =get_variable to restrict selection to variables only to
@@ -35,7 +35,7 @@ function scatter_plot(mobj)
     isvalid = checkdimensions(indvar.data,depvar.data);
     if ~isvalid, return; end
 
-    if strcmp(answer,'3D')
+    if strcmp(answer,'3-var')
         promptxt = 'Select variable to scale scatter points:';    
         ok = 0;
         while ok<1
@@ -50,8 +50,19 @@ function scatter_plot(mobj)
             end
         end
         markersz = scalevar.data/max(scalevar.data)*1000; %scaling to give size in points
+        if any(indvar.data<0) || any(depvar.data<0)  %if x or y are negative cannot use variable marker size
+            anscale = 'Colour';   %vary color with constant marker size
+        else                     %otherwise choose what to scale
+            anscale = questdlg('Scale marker size, colour or both?',...
+                               'Scatter','Size','Colour','Both','Colour');
+        end
     else
-        markersz = 36; %Matlab default value
+        anscale = 'Size';
+        if length(indvar.data)<100
+            markersz = 36; %Matlab default value
+        else
+            markersz = 18; %Matlab default value
+        end
     end
 
     %now do something with selected data
@@ -60,8 +71,20 @@ function scatter_plot(mobj)
     %desc - variable description, case - case description
     hf = figure('Tag','UserFig');    
     ax = axes (hf);
-    legtxt = sprintf('%s(%s)',depvar.desc,indvar.desc);    
-    hs = scatter(ax,indvar.data,depvar.data,markersz,'filled','DisplayName',legtxt);
+    legtxt = sprintf('%s(%s)',depvar.desc,indvar.desc); 
+    if strcmp(anscale,'Colour')
+        inp = inputdlg({'Marker size (in points)'},'Scatter plot',1,{'18'});
+        hs = scatter(ax,indvar.data,depvar.data,str2double(inp{1}),scalevar.data,'filled','DisplayName',legtxt);
+        hc = colorbar;
+        hc.Label.String = scalevar.desc;  %short description of dimensions
+    elseif  strcmp(anscale,'Size')
+        hs = scatter(ax,indvar.data,depvar.data,markersz,'filled','DisplayName',legtxt);
+    else
+        hs = scatter(ax,indvar.data,depvar.data,markersz,scalevar.data,'filled','DisplayName',legtxt);
+        hc = colorbar;
+        hc.Label.String = scalevar.desc;  %short description of dimensions
+    end
+    
     xlabel(indvar.label)
     if strcmp(indsel.scale,'Log')
         idx = find(mod(ax.XTick(:), 1) == 0);
@@ -84,7 +107,7 @@ function scatter_plot(mobj)
                 
     seltxt = sprintf('%s\n%s',seltxtX,seltxtY);         
     title(sprintf('%s\n%s',titxtX,titxtY))
-    if strcmp(answer,'3D')
+    if strcmp(answer,'3-var')
         hs.MarkerFaceAlpha = 0.5; %transparency
         seltxtZ = get_selection_text(scalevar,6,'Z'); %full description of dimensions
         titxtZ = get_selection_text(scalevar,5,'Z');  %short description of dimensions

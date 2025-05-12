@@ -746,7 +746,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
 
             %select the Case to use
             [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt{1});
-            if isempty(cobj), ivar = []; return; end
+            if isempty(cobj), dsname = []; ivar = []; return; end
 
             %select a dataset table to use if not specified
             if isempty(idd)

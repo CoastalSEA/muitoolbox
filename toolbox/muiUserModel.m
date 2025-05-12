@@ -305,7 +305,7 @@ classdef muiUserModel < muiDataSet
             try
                 %handle to anonymous function based on user equation
                 heq = str2func(['@(t,x,y,z,mobj) ',inp.eqn]);
-                if isempty(inp.fcn) || length(inp.fcn)==1
+                if isempty(inp.fcn) || isscalar(inp.fcn)
                     maxnargout = 1;
                 else
                     maxnargout = nargout(inp.fcn);
@@ -352,7 +352,7 @@ classdef muiUserModel < muiDataSet
             %Uses first variable only, or multple variables with
             %first variable defining row dimension to enable passing of
             %multiple variables (not implemented in current version).
-            if length(var)==1                  %only one variable returned
+            if isscalar(var)                  %only one variable returned
                 isrows = false;
                 rowdata = [];
                 results = var;
@@ -483,7 +483,7 @@ classdef muiUserModel < muiDataSet
             elseif ischar(var) || iscell(var)
                 msg = var;
             end
-            msgbox(msg,'Derived Ouutput Result');
+            msgbox(msg,'Derived Output Result');
         end  
 %%
 function dsp = blank_dsp(~,nvar,ndim,istime)
