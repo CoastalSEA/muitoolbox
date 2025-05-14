@@ -252,7 +252,7 @@ classdef (Abstract = true) muiDataSet < handle
                            'ListSize',[200,100],'ListString',datasetnames);
                 if ok<1,  return; end       
             end
-            if length(idd)==1
+            if isscalar(idd)
                 datasetname = datasetnames{idd};  %maintain legacy output
             else
                 datasetname = datasetnames(idd);  %add option for multi-selection

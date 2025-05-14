@@ -533,7 +533,7 @@ classdef muiPlots < handle
             %get an existing figure of create a new one
             [x,y,hfig,~,~] = plot2Ddata(obj);
             figax = findobj(hfig,'Type','Axes','-or','Type','PolarAxes');
-            if length(figax)==1
+            if isscalar(figax)
                 %order and interaction with wind_rose is not straightforward
                 s1 = subplot(1,2,1,figax);
                 set(s1,'Position',[0.03 0.1 0.45 0.8] ,'Units', 'normalized');
