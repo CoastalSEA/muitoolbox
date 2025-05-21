@@ -22,22 +22,22 @@ function res = frequencyanalysis(var,t,vartxt)
     if nargin<3
         vartxt  = 'Variable';
     end
-    res = {'Plots completed'}; %cell ouput required by call from DataManip.createVar   
+    res = 'no output'; %null ouput required for exit in muiUserModel.setEqnData
     ok = 1;
     while ok>0
         z0 = [];
         %allow user to generate various plots
         plotlist = {'Time series plot of variable',...
-                    'Time series plot of variable above threshold',...
+                    'Time series plot of variable above/below threshold',...
                     'Plot variable frequency',...
-                    'Plot variable frequency above threshold',...
+                    'Plot variable frequency above/below threshold',...
                     'Spectral analysis plot',...
                     'Duration of threshold exceedance',...
-                    'Rolling mean duration above a threshold'};
+                    'Rolling mean duration above/below a threshold'};
         [idx,ok] = listdlg('Name','Plot options', ...
             'PromptString','Select a plot:', ...
             'SelectionMode','single', ...
-            'ListSize',[250,150],...
+            'ListSize',[300,150],...
             'ListString',plotlist);
         if ok<1, return; end
 
@@ -50,42 +50,55 @@ function res = frequencyanalysis(var,t,vartxt)
                 var_spectrum(var,t,vartxt)       
             otherwise            
                 %get threshold elevation from user
-                prompt = {'Threshold elevation (mOD):'};
-                dlgtitle = 'Define elevation (mOD)';
+                prompt = {'Threshold value:','Above (1), Below (0)'};
+                dlgtitle = 'Define threshold';
                 numlines = 1;
-                defaultvalues{1} = num2str(0);
+                defaultvalues = {'0','1'};
                 useInp=inputdlg(prompt,dlgtitle,numlines,defaultvalues);
                 if isempty(useInp), return; end %user cancelled
                 z0 = str2double(useInp{1});
-                thrvar = var;
+                isabove = logical(str2double(useInp{2}));
+
+                thrvar = var;  %apply threshold
+                if isabove
+                    thrvar(var<=z0) = NaN;
+                else
+                    thrvar(var>z0) = NaN;
+                end
 
                 switch plotlist{idx}
-                    case 'Time series plot of variable above threshold'
-                        thrvar(var<=z0) = NaN;
-                        var_ts_exceed_thr(thrvar,t,z0,vartxt);
-                    case 'Plot variable frequency above threshold'
-                        thrvar(var<=z0) = NaN;
-                        var_freq_plot(thrvar,z0,vartxt);
+                    case 'Time series plot of variable above/below threshold'                    
+                        var_ts_exceed_thr(thrvar,t,z0,vartxt,isabove);
+                    case 'Plot variable frequency above/below threshold'
+                        var_freq_plot(thrvar,z0,vartxt,isabove);
                     case 'Duration of threshold exceedance'   
-                        thr_durations(var,t,z0,false);
-                    case 'Rolling mean duration above a threshold'
-                        thr_durations(var,t,z0,true);
+                        thr_durations(var,t,z0,false,isabove);
+                    case 'Rolling mean duration above/below a threshold'
+                        thr_durations(var,t,z0,true,isabove);
                 end
         end
     end
 end
 %%
-function var_ts_exceed_thr(var,t,z0,vartxt)
+function var_ts_exceed_thr(var,t,z0,vartxt,isabove)
     %Plot time series of variable above a threshold if specified
     figure('Name','Elevation exceedance','Units','normalized',...                
-           'Resize','on','HandleVisibility','on','Tag','PlotFig'); 
+           'Resize','on','HandleVisibility','on','Tag','PlotFig');
     plot(t,var);
-    title(sprintf('Elevations above %.3g (mOD) threshold',z0))
+    if isempty(z0)
+        title(sprintf('Full time series for %s',vartxt))
+    else
+        if isabove
+            title(sprintf('%s above %.3g threshold',vartxt,z0))
+        else
+            title(sprintf('%s below %.3g threshold',vartxt,z0))
+        end
+    end
     ylabel(vartxt)
     xlabel('Time')
 end
 %%
-function var_freq_plot(var,z0,vartxt)
+function var_freq_plot(var,z0,vartxt,isabove)
     %plot the frequency of occurence of a variable
     minwl = min(var,[],1,'omitnan');
     maxwl = max(var,[],1,'omitnan');
@@ -98,7 +111,11 @@ function var_freq_plot(var,z0,vartxt)
     if isempty(z0)
         title('Frequency of occurrence')
     else
-        title(sprintf('Frequency of occurrence above %.3g threshold',z0))
+        if isabove
+            title(sprintf('Frequency of occurrence above %.3g threshold',z0))
+        else
+            title(sprintf('Frequency of occurrence below %.3g threshold',z0))
+        end
     end
     ylabel(vartxt)
     xlabel('Probability of occurrence (%)')   
@@ -124,7 +141,7 @@ function var_spectrum(var,t,vartxt)
     ylabel('|P1(f)|')     
 end
 %%
-function thr_durations(var,t,z0,ismoving)
+function thr_durations(var,t,z0,ismoving,isabove)
     %Plot - 'Duration of threshold exceedance' 
     [stid,edid] = zero_crossing(var,z0);
     if isempty(stid)
@@ -133,36 +150,54 @@ function thr_durations(var,t,z0,ismoving)
         return; 
     end
     %
-    if stid(1)>edid(1)
+    if ~isabove
         temp = stid;
         stid = edid;
         edid  = temp;
     end
+
+    if stid(1)>edid(1)   %correct order for exceedances above threshold
+        stid = stid(1:end-1);
+        edid = edid(2:end);
+    end
     vardur = t(edid)-t(stid);
     vardur.Format = 'h';
+
     figure('Name','Duration exceedance','Units','normalized',...                
            'Resize','on','HandleVisibility','on','Tag','PlotFig'); 
     if ismoving
         vardur = hours(vardur);
         tper = years(1);  %set to annual but movingtime allows this to be changed!
         [tm,vm] = movingtime(vardur,t(stid),tper,tper,'mean');
-        plot(tm,vm);
-        title(sprintf('Rolling mean above %.3g (mOD) threshold',z0))
-        ylabel('Mean annual duration of exceedances (hours)')
+        plot(tm,vm);        
         xlabel('Time')
+
         reclen = t(end)-t(1);
         pcntexcdur = sum(vardur)/hours(reclen)*100;
         numexc = mean(length(stid),length(edid));
         aveannumexc = numexc/years(reclen);
-        msg1 = sprintf('Percentage time duration exceeded in %.3g years = %.3g%%',years(reclen),pcntexcdur);
-        msg2 = sprintf('Average annual number of threshold exceedances = %.3g',aveannumexc);
+        if isabove
+            ylabel('Mean annual duration of exceedances (hours)')
+            title(sprintf('Rolling mean above %.3g threshold',z0))
+            msg1 = sprintf('Percentage time above threshold in %.3g years = %.3g%%',years(reclen),pcntexcdur);
+            msg2 = sprintf('Average annual number of events above threshold = %.3g',aveannumexc);
+        else
+            ylabel('Mean annual duration of non-exceedances (hours)')
+            title(sprintf('Rolling mean below %.3g threshold',z0))
+            msg1 = sprintf('Percentage time below threshold in %.3g years = %.3g%%',years(reclen),pcntexcdur);
+            msg2 = sprintf('Average annual number of events below threshold = %.3g',aveannumexc);
+        end
         msgtxt = sprintf('%s\n%s',msg1,msg2);
         hm = msgbox(msgtxt,'Mean duration results');
         waitfor(hm)
     else 
         sledges = min(vardur):(max(vardur)-min(vardur))/10:max(vardur);
         histogram(vardur,sledges,'Normalization', 'probability');
-        title(sprintf('Duration of %.3g (mOD) threshold exceedance',z0))
+        if isabove
+            title(sprintf('Duration above %.3g threshold',z0))
+        else
+            title(sprintf('Duration below %.3g threshold',z0))
+        end
         ylabel('Probability of occurrence (%)')
         xlabel('Duration (hours)')
     end

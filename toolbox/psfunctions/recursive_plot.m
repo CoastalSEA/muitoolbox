@@ -22,7 +22,7 @@ function res = recursive_plot(data,varname,nint)
 % CoastalSEA (c)June 2020
 %--------------------------------------------------------------------------
 %
-    res = {'Plot completed'}; %cell ouput required by call from DataManip.createVar  
+    res = 'no output'; %null ouput required for exit in muiUserModel.setEqnData
 
     if nargin<2
         varname = 'X';

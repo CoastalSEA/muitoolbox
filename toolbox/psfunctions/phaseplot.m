@@ -26,7 +26,7 @@ function res = phaseplot(x,y,t,labels)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-    res = {'Plot completed'}; %cell ouput required by call from DataManip.createVar 
+    res = 'no output'; %null ouput required for exit in muiUserModel.setEqnData
     %check input includes labels
     template = struct('title','Phase plot','xlabel','Xvar',...
              'ylabel','Yvar','tformat','dd-mm-yyyy','pname','Data points');
