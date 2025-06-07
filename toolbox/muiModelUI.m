@@ -533,10 +533,15 @@ classdef (Abstract = true) muiModelUI < handle
             spath = obj.Info.PathName;
             sfile = obj.Info.FileName;
             sobj = obj; 
-            %this was -v7.3 but this created large files in some cases
-            %https://uk.mathworks.com/matlabcentral/answers/153759
-            %https://uk.mathworks.com/matlabcentral/answers/311544
-            save([spath,sfile],'sobj','-v7'); 
+            try 
+                save([spath,sfile],'sobj','-v7'); %much smaller file
+            catch
+                msgbox('Unable to save as v7 and saving as v7.3. File likely to be large')
+                %this was -v7.3 but this created large files in some cases
+                %https://uk.mathworks.com/matlabcentral/answers/153759
+                %https://uk.mathworks.com/matlabcentral/answers/311544
+                save([spath,sfile],'sobj','-v7.3'); 
+            end
             clear sobj
         end
 %%

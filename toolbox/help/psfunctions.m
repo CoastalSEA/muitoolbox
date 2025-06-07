@@ -11,6 +11,10 @@
 % * *annual_polar_plot.m*
 % - plot the monthly or seasonal values of a timeseries variable
 %
+% * *binned_variable.m*
+% - sort the data into interval bins for each interval within a period (e.g
+% monthly bins for each year of a record)
+%
 % * *clusters.m*
 % - function to find clusters of peaks over a threshold
 %

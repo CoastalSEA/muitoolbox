@@ -173,8 +173,8 @@ classdef muiPlots < handle
                     legtext = sprintf('%s (%s) %s',deflegend{:}); 
                 end
             else  %use default text for legend based on Case(Dataset)Variable
-                legtext = sprintf('%s (%s) %s',props(1).case,...
-                                            props(1).dset,props(1).desc);                     
+                legtext = sprintf('%s (%s) %s',props(ivar).case,...
+                                       props(ivar).dset,props(ivar).desc);
             end
         end
 %%
@@ -388,18 +388,11 @@ classdef muiPlots < handle
                 else
                     x = x+(idline-1)*x/10000;
                 end
-            end      
-            %
-            xrange = figax.XLim;
+            end   
+
+            %check axis values are compatible
             dtype = whos('xrange');
             if ~isa(x,dtype.class)    
-%                 if ~(x(end)>xrange(1) && x(1)<xrange(2))
-%                     %check that x axis values are of the same type and
-%                     %overlapping range
-%                     warndlg('X-data range not compatible with existing axis')
-%                     return;
-%                 end
-%             else
                 warndlg('X-data type not compatible with existing axis')
                 return;
             end
@@ -507,15 +500,26 @@ classdef muiPlots < handle
                     hold(figax,'off')
                 case 'Rose'
                     hfig.Name = 'Rose plot';
-                    qinp= inputdlg('To add reference line enter angle to degTN:','Rose plot');
-                    if isempty(qinp)
-                        wind_rose(x,y,'parent',figax,'dtype','meteo',...
-                            'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
-                    else
-                        theta = str2double(qinp{1});
-                        wind_rose(x,y,'parent',figax,'dtype','meteo','shore',theta,...
-                            'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
-                    end
+                    promptxt = {'To add reference line enter angle to degTN:',...
+                                'Variable intensity subdivistions (eg 0 0.5 1 ...)',...
+                                'Percentage circles to draw (eg 10 20 30)'};
+                    rinp = inputdlg(promptxt,'Rose plot');
+                    rose.theta = parseInput(rinp{1});
+                    rose.di = parseInput(rinp{2});
+                    rose.ci = parseInput(rinp{3});
+                    rh = wind_rose(x,y,'parent',figax,'dtype','meteo',...
+                        'shore',rose.theta,'di',rose.di,'ci',rose.ci,...
+                        'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                    rax = rh.Parent;
+                    rax.UserData = rose;
+            end
+            %-nested function----------------------------------------------
+            function var = parseInput(vartxt)
+                if isempty(vartxt)
+                    var = [];
+                else
+                    var = str2num(vartxt); %#ok<ST2NM> parsing scalar and vector
+                end
             end
         end
 %%
@@ -533,6 +537,7 @@ classdef muiPlots < handle
             %get an existing figure of create a new one
             [x,y,hfig,~,~] = plot2Ddata(obj);
             figax = findobj(hfig,'Type','Axes','-or','Type','PolarAxes');
+            rose = figax.UserData;
             if isscalar(figax)
                 %order and interaction with wind_rose is not straightforward
                 s1 = subplot(1,2,1,figax);
@@ -540,8 +545,14 @@ classdef muiPlots < handle
                 set(groot,'CurrentFigure',hfig)
                 s2 = subplot(1,2,2);
                 set(s2,'Position',[0.5 0.1 0.45 0.8] ,'Units', 'normalized');
-                wind_rose(x,y,'parent',s2,'dtype','meteo',...
-                       'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                if isempty(rose)
+                    wind_rose(x,y,'parent',s2,'dtype','meteo',...
+                        'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                else
+                    wind_rose(x,y,'parent',figax,'dtype','meteo',...
+                        'shore',rose.theta,'di',rose.di,'ci',rose.ci,...
+                        'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
+                end
             else
                 warndlg('Only one plot can be added using a Rose')
             end

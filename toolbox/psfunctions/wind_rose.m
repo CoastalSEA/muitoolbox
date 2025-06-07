@@ -362,20 +362,21 @@ function varargout = wind_rose(D,F,varargin)
     axis equal
     axis off
 
+    %move labs and circles components to top of UI stack
+    uistack(labs,'top')
+    uistack(circles,'top')
     % uistack has problems in some matlab versions, so:
-    %uistack(labs,'top')
-    %uistack(circles,'top')
-    ch=get(wrAx,'children');
-    if inorm
-      % only bring circles up in inorm case.
-      for i=1:length(circles)
-        ch(ch==circles(i))=[]; ch=[circles(i); ch];
-      end
-    end
-    for i=1:length(labs)
-      ch(ch==labs(i))=[]; ch=[labs(i); ch];
-    end
-    set(wrAx,'children',ch);
+    % ch=get(wrAx,'children');
+    % if inorm
+    %   % only bring circles up in inorm case.
+    %   for i=1:length(circles)
+    %     ch(ch==circles(i))=[]; ch=[circles(i); ch];
+    %   end
+    % end
+    % for i=1:length(labs)
+    %   ch(ch==labs(i))=[]; ch=[labs(i); ch];
+    % end
+    % set(wrAx,'children',ch);
 
 
     % N S E W labels:
@@ -512,7 +513,7 @@ function cor = caxcolor(val,cax,cmap)
       cmap = get(gcf,'colormap');
     end
     if nargin < 2
-      cax = caxis;
+      cax = clim;
     end
 
     n=size(cmap,1);

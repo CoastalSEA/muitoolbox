@@ -1,4 +1,4 @@
-function [idcls,options] = getclusters(ts)
+function [idcls,options] = getclusters(ts,options)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -10,6 +10,11 @@ function [idcls,options] = getclusters(ts)
 %   [idcls,options] = getclusters(ts)
 %INPUT
 %   ts - timeseries or dstable dataset
+%   options - defines initial parameters used for cluster selection:
+%               Threshold for peaks, 
+%               Selection method, 
+%               Time between peaks (hours),
+%               Cluster time interval (days).
 %OUTPUT
 %   idcls - structure ('date','pks') containing values, the date of the 
 %         cluster and the values of peaks within each cluster  
@@ -18,12 +23,24 @@ function [idcls,options] = getclusters(ts)
 %               Selection method, 
 %               Time between peaks (hours),
 %               Cluster time interval (days).
+% SEE ALSO
+%   used in muiStats and wrm_transport_plots
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2019
 %----------------------------------------------------------------------
 %   
-    idcls = []; options = [];
+    idcls = []; 
+    if nargin<2 || isempty(options)
+        default = {num2str(mean(data,'omitnan')+2*std(data,'omitnan')),...
+                                    num2str(3),num2str(18),num2str(15)};
+    else
+        default{1} = num2str(options.threshold);
+        default{2} = num2str(options.method);
+        default{3} = num2str(options.tint);
+        default{4} = num2str(options.clint);
+    end
+
     if isa(ts,'timeseries')
         mdate = datetime(getabstime(ts));
         data = ts.Data;
@@ -47,21 +64,20 @@ function [idcls,options] = getclusters(ts)
     xlabel('Date');
     ylabel(ytxt);
     
-    prompt = {'Threshold for peaks:','Selection method', ...
-        'Time between peaks (hours)','Cluster time interval (days)'};
+    prompt = {'Threshold for peaks:','Selection method (1-4)', ...
+        'Time between peaks (hours)','Time between clusters (days)'};
     title = 'Cluster Statistics';
     numlines = 1;
-    default = {num2str(mean(data,'omitnan')+2*std(data,'omitnan')),...
-                                    num2str(3),num2str(18),num2str(15)};
+    
     ok=0;
     while ok<1
         answer = inputdlg(prompt,title,numlines,default);
         if isempty(answer), return; end
 
-        threshold = str2double(answer{1});   %wave height threshold
-        method = str2double(answer{2});      %peak selection method (see peaks.m)
-        tint = str2double(answer{3}); %time interval between independent peaks
-        clint = str2double(answer{4}); %time interval for clusters
+        threshold = str2double(answer{1}); %variable threshold
+        method = str2double(answer{2});    %peak selection method (see peaks.m)
+        tint = str2double(answer{3});      %time interval between independent peaks
+        clint = str2double(answer{4});     %time interval for clusters
 
         % find peaks (method 1:all peaks; 2:independent crossings; 3:timing
         % seperation of tint)
@@ -71,7 +87,7 @@ function [idcls,options] = getclusters(ts)
 
         % find clusters based on results from peak selection
         pk_date = mdate(idpks);    %datetime of peak
-        pk_vals = data(idpks);  %value of peak
+        pk_vals = data(idpks);     %value of peak
         idcls = clusters(pk_date,pk_vals,days(clint));
 
         if isempty(idcls(1).pks)

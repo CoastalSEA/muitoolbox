@@ -1,4 +1,4 @@
-function cls = clusters(mdate,mpks,tint)
+function cls = clusters(mdate,mpks,clint)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -10,7 +10,8 @@ function cls = clusters(mdate,mpks,tint)
 %INPUT
 %   mdate - vector of time of mpks
 %   mpks  - peaks above threshold (eg returned from function 'peaks')
-%   tint  - time interval for clusters (hours)
+%   clint - separation interval for clusters (days) a new cluster exists if
+%           time between consecutive peaks is > than clint
 %OUTPUT
 %   cls - structure ('date','pks') containing values, the date of the 
 %         cluster and the values of peaks within each cluster      
@@ -23,13 +24,14 @@ function cls = clusters(mdate,mpks,tint)
     cls.date = [];
     cls.pks = [];
     %cls.per = [];
-    dt  = time(caldiff(mdate,'time'));   %interval between peaks
-    dt = [dt',tint];                     %pad dt to make same length as idx
+    %interval between peaks
+    dt  = time(caldiff(mdate,'time'));   %'time' converts time of calendar duration to duration
+    dt = [dt',clint];                     %pad dt to make same length as idx
     j = 1;
     count =1;
     while count<=length(idx)
-        if dt(count)<tint
-            id_idx = find(idx>idx(count) & dt>tint);
+        if dt(count)<clint
+            id_idx = find(idx>idx(count) & dt>clint); 
             if ~isempty(id_idx)
                 id_idx = id_idx(1);
             else
