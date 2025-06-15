@@ -1,4 +1,4 @@
-function [avar,idx] = sort_var(obj,idd,avar)                       
+function [avar,idx] = sort_var(obj,mobj,idd,avar)                       
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -9,10 +9,12 @@ function [avar,idx] = sort_var(obj,idd,avar)
 %   categoraical array. If categorical the categories are reordered so that
 %   they plot in the defined order
 % USAGE
-%   [loc,idx] = sort_var(obj,xvar);
+%   [loc,idx] = sort_var(obj,mobj,idd,avar);
 % INPUTS
 %   obj - handle to class instance containing dataset to be sorted and
 %         index variable if this is used
+%   mobj - handle to model class instances containing datasets that could 
+%          be used as the index variable
 %   idd - index of dataset to use for variable to be sorted
 %   avar - a-variable to be sorted (n>1) or a scalar index to the variable
 %          to use (optional)
@@ -31,12 +33,12 @@ function [avar,idx] = sort_var(obj,idd,avar)
 %  
     datasets = fieldnames(obj.Data);
     if nargin<3        
-        adst = obj.Data.(datasets{idd});        %selected dataset
+        adst = obj.Data.(datasets{idd});         %selected dataset
         promptxt = 'Select Variable to Sort:';
         [~,idv] = selectAttribute(adst,1,promptxt); %1 - select a variable
         avar = adst.(adst.VariableNames{idv});
     elseif isscalar(avar)
-        adst = obj.Data.(datasets{idd});        %selected dataset
+        adst = obj.Data.(datasets{idd});         %selected dataset
         avar = adst.(adst.VariableNames{avar});  %variable index used as input
     end
 
@@ -46,6 +48,10 @@ function [avar,idx] = sort_var(obj,idd,avar)
     if strcmp(answer,'Index')
         %allow user to select a variable to sort by (must return
         %vector of unique values)
+        if length(mobj.Cases.DataSets.muiTableImport)>1
+            obj = selectCaseObj(mobj.Cases,[],{'muiTableImport'});
+        end
+        
         datasetname = getDataSetName(obj,'Select Dataset to use for index');
         if isempty(datasetname)
             dst = adst; 
@@ -69,7 +75,8 @@ function [avar,idx] = sort_var(obj,idd,avar)
                 waitfor(hw)
             end
         end
-        if isempty(idvar), return; end
+        if isempty(idvar), idx = []; return; end
+        
         [~,idx] = sort(idvar);      %return indices so other variables can be sorted
         avar = avar(idx);
         if iscategorical(avar)

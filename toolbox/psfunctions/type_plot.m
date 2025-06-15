@@ -28,12 +28,16 @@ function type_plot(mobj)
     [~,idv] = selectAttribute(dst,1,promptxt); %1 - select a variable
     if isempty(idv), return; end
 
-    [ax,idx,ids] = userPlot(cobj,idd,idv); %idx sort order of x-variable if a scalarplot
+    [ax,idx,ids] = userPlot(cobj,mobj,idd,idv); %idx sort order of x-variable if a scalarplot
                                            %ids indices of selected sub-set (after sorting)                                           
 
     %select variable to use for classification (restrict to selection from
     %same case but allow different dataset to be used
-    promptxt = 'Select classification variable:'; 
+    if length(mobj.Cases.DataSets.muiTableImport)>1
+        prmptxt = 'Select case to use for type classificaton';
+        cobj = selectCaseObj(mobj.Cases,[],{'muiTableImport'},prmptxt);
+    end
+    promptxt = 'Select type classification variable:'; 
     datasetname = getDataSetName(cobj,promptxt); 
     classdst = cobj.Data.(datasetname);    
     [varname,idc] = selectAttribute(classdst,1,promptxt); %1 - select a variable
@@ -45,6 +49,8 @@ function type_plot(mobj)
     if isnumeric(typevar)
         %find set of unique index values
         types = unique(typevar);
+    elseif iscategorical(typevar)
+        types = categories(typevar);
     elseif ischar(typevar{1}) || isstring(typevar{1})
         %if char or string convert to categorical and ordinal
         typevar = categorical(typevar);    
