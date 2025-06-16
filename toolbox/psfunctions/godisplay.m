@@ -7,6 +7,7 @@ function godisplay(src,~)
 %   Display the legend name or DisplayName of the selected graphical object
 % USAGE
 %   godisplay(src,~)
+%   e.g. plot(ax,.....,'ButtonDownFcn',@godisplay)
 % INPUTS
 %   src - handle to graphic object
 %   evt - event (not used)

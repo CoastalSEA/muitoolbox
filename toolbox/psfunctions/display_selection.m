@@ -7,6 +7,7 @@ function hd = display_selection(src,~)
 %   callback function to display text from a uicontrol in a dialog box
 % USAGE
 %   display_selection(src,~)
+%   e.g. callback =  @(src,evt)display_selection(src,evt)
 % INPUTS
 %   src - handle to uicontrol that calls the function
 % OUTPUT
