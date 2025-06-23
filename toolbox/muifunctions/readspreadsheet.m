@@ -1,4 +1,4 @@
-function datable = readspreadsheet(filename,isdst,cell_ids)
+function datable = readspreadsheet(filename,isdst,cell_ids,promptxt)
 %
 %-------header-------------------------------------------------------------
 % NAME
@@ -14,7 +14,9 @@ function datable = readspreadsheet(filename,isdst,cell_ids)
 %           (optional, default is false)
 %   cell_ids - location of start cells in spreadsheet for variable names,
 %           data and row names as character cell array (optional, default 
-%           uses 'B1';'B2';'A2')
+%           uses 'B1';'B2';'A2'). Use empty '' value if no variable names
+%           or row names.
+%   promptxt - prompt for selection of worksheet if more than one worksheet
 % OUTPUT
 %   datable - table of selected data
 % NOTES
@@ -28,20 +30,27 @@ function datable = readspreadsheet(filename,isdst,cell_ids)
     if nargin<2
         isdst = false; 
         cell_ids = {'B1';'B2';'A2'};
+        promptxt = 'Select worksheet:';
     elseif nargin<3
         cell_ids = {'B1';'B2';'A2'};
+        promptxt = 'Select worksheet:';
+    elseif nargin<4
+        promptxt = 'Select worksheet:';
     end
 
     snames = sheetnames(filename);
     if length(snames)>1
         %select worksheet if more more than one.
-        selection = listdlg("ListString",snames,"PromptString",'Select worksheet:',...
+        selection = listdlg("ListString",snames,"PromptString",promptxt,...
                     'ListSize',[150,200],'Name','EDBimports','SelectionMode','single');
         if isempty(selection), return; end   %user cancelled
     else
         selection = 1;
     end
-    opts = detectImportOptions(filename,'FileType','spreadsheet','Sheet',selection);
+
+    opts = detectImportOptions(filename,'FileType','spreadsheet','Sheet',selection,...
+                   'VariableNamesRange',cell_ids{1},...
+                   'DataRange',cell_ids{2},'RowNamesRange',cell_ids{3});
     
     %prompt user to select data range, row range, etc
     promptxt = sprintf('Edit defaults to required variables and ranges\nTo omit Row Names, set Row names start cell to empty\nIf included Row Names must use column either side of the data range\n\nVariables to use:');
@@ -53,6 +62,11 @@ function datable = readspreadsheet(filename,isdst,cell_ids)
     defaults = [{varnames};cell_ids(:)];
     answers = inputdlg(promptxt,'Read spreadsheet',1,defaults);
     if isempty(answers), datable = []; return; end
+    
+    %assign start of variables range if known
+    if isempty(opts.VariableNamesRange) && ~isempty(answers{2})
+        opts.VariableNamesRange = answers{2};
+    end
     
     %use response to amend the opts struct and read the data
     varnames = split(answers{1});
