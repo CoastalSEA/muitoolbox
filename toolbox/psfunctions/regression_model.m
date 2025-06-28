@@ -11,7 +11,8 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
 % INPUT
 %   inddata - independent variable
 %   depdata - dependent variable
-%   model - regression model to use (linear,power,exp,log)
+%   model - regression model to use (linear,linear0,power,exp,log). 
+%           linear0 fits a linear model with zero intercept
 %   nint - number of points for regression line. 
 %          If not supplied or empty uses the inddata points
 %   isplot- true generates a plot of the fit
@@ -37,6 +38,9 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
         case 'linear'
             depvar = depdata;
             indvar = inddata;
+        case 'linear0'
+            depvar = depdata;
+            indvar = inddata;            
         case 'power'
             depvar = log(depdata);
             indvar = log(inddata);
@@ -50,11 +54,16 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
     %remove infinite values in power/logarithm cases when data<=0
     depvar(isinf(depvar)) = NaN;
     indvar(isinf(indvar)) = NaN;
-    %fit transformed data and create regression line
-    [b,a,Rsq] = simpleLinearRegression(indvar,depvar);
-    if b==0
-        x = []; y  = []; txt = 'No solution found';
-        return;
+    if strcmp(model,'linear0')
+        [b,Rsq] = zeroInteceptRegression(indvar,depvar);
+        a = 0;
+    else
+        %fit transformed data and create regression line
+        [b,a,Rsq] = simpleLinearRegression(indvar,depvar);
+        if b==0
+            x = []; y  = []; txt = 'No solution found';
+            return;
+        end
     end
     %
     if nargin<4 || isempty(nint)
@@ -68,6 +77,8 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
     switch model
         case 'linear'
             txt = sprintf('y=%.3f+%.3f.x; R^2=%.3f',a,b,Rsq);
+        case 'linear0'
+            txt = sprintf('y=%.3f.x; R^2=%.3f',b,Rsq);   
         case 'power'
             x = exp(x);
             y = exp(y);
@@ -115,6 +126,28 @@ function [slope,intercept,Rsq] = simpleLinearRegression(x,y)
     Rsq = 1 - sum((yy - yCalc).^2)/sum((yy - mean(yy)).^2);
     slope = a_b(2);
     intercept = a_b(1);
+end
+
+%%
+function [b,Rsq] = zeroInteceptRegression(x,y)
+    %fit a model of the form y = a·x, Fit slope through origin
+    [~,idx] = rmmissing(x);  %requires v2016b - handles NaN and NaT
+    [~,idy] = rmmissing(y);
+    idd = ~idx & ~idy;
+    xx = x(idd);
+    yy = y(idd);   
+    
+    if size(xx,2)>1
+        xx = xx';   yy = yy'; 
+    end
+    
+	b = xx\yy;
+    y_fit = b * xx;
+    
+    % Compute R² manually
+    SS_res = sum((yy - y_fit).^2);         %Residual sum of squares
+    SS_tot = sum((yy - mean(yy)).^2);      %Total sum of squares
+    Rsq = 1 - SS_res / SS_tot;
 end
 %%
 function plot_of_fit(xi,yi,xo,yo,res)
