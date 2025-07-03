@@ -557,8 +557,8 @@ classdef (Abstract = true) muiModelUI < handle
             switch src.Text
                 case {'Project','Model'}
                     obj.clearModel;
-                case 'Figures'
-                    obj.clearFigures;
+                case {'Figures','UI Figures','Tag Figures'}
+                    clearFigures(obj,src);
                 case {'Cases','Data','Models'}
                     clearCases(obj,src.Text);
             end
@@ -581,7 +581,15 @@ classdef (Abstract = true) muiModelUI < handle
             obj.DrawMap;              
         end
 %%        
-        function clearFigures(~,~,~)
+        function clearFigures(~,src,~)
+            %clear the figures created by a UI or all figures with tag
+            %'PlotFig'
+            if strcmp(src.Text,'Tag Figures')
+                hpf = findobj('tag','PlotFig');
+                delete(hpf); clear hpf
+                return
+            end
+
             hpf = findobj('tag','PlotFig');
             hsf = findobj('tag','StatFig');
             haf = findobj('tag','ProbeFig');
