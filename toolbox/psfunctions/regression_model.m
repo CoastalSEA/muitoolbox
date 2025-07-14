@@ -76,21 +76,21 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
     %now transform back
     switch model
         case 'linear'
-            txt = sprintf('y=%.3f+%.3f.x; R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y=%.2e+%.2e.x; R^2=%.3f',a,b,Rsq);
         case 'linear0'
-            txt = sprintf('y=%.3f.x; R^2=%.3f',b,Rsq);   
+            txt = sprintf('y=%.2e.x; R^2=%.3f',b,Rsq);   
         case 'power'
             x = exp(x);
             y = exp(y);
             a = exp(a);
-            txt = sprintf('y=%.3f.x^{%.3f}; R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y=%.2e.x^{%.2e}; R^2=%.3f',a,b,Rsq);
         case 'exponential'
             y = exp(y);
             a = exp(a);
-            txt = sprintf('y=%.3f.exp(%.3f.x); R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y=%.2e.exp(%.2e.x); R^2=%.3f',a,b,Rsq);
         case 'logarithm'
             x = exp(x);
-            txt = sprintf('y=%.3f+%.3f.Log(x); R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y=%.2e+%.2e.Log(x); R^2=%.3f',a,b,Rsq);
     end
     if isplot
         plot_of_fit(inddata,depdata,x,y,txt);
