@@ -355,7 +355,7 @@ classdef muiTableImport < muiDataSet
         function delDataset(obj,classrec,~,muicat)
             %delete a dataset
             dst = obj.Data;
-            if length(fieldnames(dst))==1
+            if isscalar(fieldnames(dst))
                 %catch if only one dataset as need to delete Case
                 warndlg(sprintf('There is only one dataset in this Case\nTo delete the Case use: Project > Cases > Delete Case'))
                 return
@@ -408,6 +408,8 @@ classdef muiTableImport < muiDataSet
                             'SelectionMode','single','ListString',rowdesc);                        
                     if isempty(idx), return; end
                     arrayplot(obj,ax,dst,idv,idx);
+                    cb = colorbar;
+                    cb.Label.String = dst.VariableDescriptions{idv};
                 else
                     warndlg('Tab plot currently only handles 1-3 dimensions')                    
                 end
@@ -448,7 +450,9 @@ classdef muiTableImport < muiDataSet
             ht = findobj(src,'-not','Type','uitab'); %clear any existing content
             delete(ht)
             datasetname = getDataSetName(obj);
+            if isempty(datasetname), return; end
             dst = obj.Data.(datasetname);
+            if isempty(dst), return; end
 
             %generate table
             table_figure(dst,src)

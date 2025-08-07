@@ -54,6 +54,9 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
     %remove infinite values in power/logarithm cases when data<=0
     depvar(isinf(depvar)) = NaN;
     indvar(isinf(indvar)) = NaN;
+    if isrow(depvar), depvar = depvar'; end     %force column vectors
+    if isrow(indvar), indvar = indvar'; end   
+
     if strcmp(model,'linear0')
         [b,Rsq] = zeroInteceptRegression(indvar,depvar);
         a = 0;
@@ -108,9 +111,9 @@ function [slope,intercept,Rsq] = simpleLinearRegression(x,y)
     if length(x)~=length(y)
         slope = 0; intercept = 0; Rsq = 0;
         return;
-    end
+    end  
     
-    [~,idx] = rmmissing(x);  %requires v2016b - handles NaN and NaT
+    [~,idx] = rmmissing(x);      %requires v2016b - handles NaN and NaT
     [~,idy] = rmmissing(y);
     idd = ~idx & ~idy;
     xx = x(idd);
