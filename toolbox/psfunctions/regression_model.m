@@ -79,21 +79,21 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
     %now transform back
     switch model
         case 'linear'
-            txt = sprintf('y=%.2e+%.2e.x; R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y= %.2e+%.2e.x; R^2= %.3f',a,b,Rsq);
         case 'linear0'
-            txt = sprintf('y=%.2e.x; R^2=%.3f',b,Rsq);   
+            txt = sprintf('y= %.2e.x; R^2= %.3f',b,Rsq);   
         case 'power'
             x = exp(x);
             y = exp(y);
             a = exp(a);
-            txt = sprintf('y=%.2e.x^{%.2e}; R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y= %.2e.x^{%.2e}; R^2= %.3f',a,b,Rsq);
         case 'exponential'
             y = exp(y);
             a = exp(a);
-            txt = sprintf('y=%.2e.exp(%.2e.x); R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y= %.2e.exp(%.2e.x); R^2= %.3f',a,b,Rsq);
         case 'logarithm'
             x = exp(x);
-            txt = sprintf('y=%.2e+%.2e.Log(x); R^2=%.3f',a,b,Rsq);
+            txt = sprintf('y= %.2e+%.2e.Log(x); R^2= %.3f',a,b,Rsq);
     end
     if isplot
         plot_of_fit(inddata,depdata,x,y,txt);
@@ -124,6 +124,12 @@ function [slope,intercept,Rsq] = simpleLinearRegression(x,y)
     end
 
     X = [ones(length(xx),1) xx]; %this adds intercept to l.sq. estimate
+
+    %check if X of Y contain imaginary parts
+    % maxImagX = max(abs(imag(X(:))));
+    % maxImagY = max(abs(imag(yy(:))));
+    % condX = cond(X);
+
     a_b = X\yy;       %the \ operator performs a least-squares regression
     yCalc = X*a_b;
     Rsq = 1 - sum((yy - yCalc).^2)/sum((yy - mean(yy)).^2);
@@ -155,7 +161,7 @@ end
 %%
 function plot_of_fit(xi,yi,xo,yo,res)
     %plot the curve fit
-    hf = figure('Name','Regression plot', ...
+    figure('Name','Regression plot', ...
             'Units','normalized', ...
             'Resize','on','HandleVisibility','on', ...
             'Tag','PlotFig');
