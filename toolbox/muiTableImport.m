@@ -373,9 +373,9 @@ classdef muiTableImport < muiDataSet
         end
 
 %%
-        function tabPlot(obj,mobj,src)
+        function tabPlot(obj,src,mobj)
             %generate plot for display on Q-Plot tab
-            tabcb  = @(src,evdat)tabPlot(obj,mobj,src);
+            tabcb  = @(src,evdat)tabPlot(obj,src,mobj);
             ax = tabfigureplot(obj,src,tabcb,false);
             %get data and variable id
             [dst,idd,idv] =selectDataSet(obj);
@@ -512,7 +512,7 @@ classdef muiTableImport < muiDataSet
             elseif isdatetime(y)
                 ytk = ax.YTick;
                 dtime = stdate+ytk;
-                yticklabels(datestr(dtime))  
+                yticklabels(string(dtime))  
             end
             xlabel(dst.RowLabel)
             if isempty(dst.VariableLabels)
