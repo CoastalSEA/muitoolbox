@@ -155,6 +155,10 @@
 % * *saveanimation2file.m*
 % - saves movie to selected file type
 %
+% * *set_tile_legend.m*
+% - manage legends across multiple tiles with the option to hide plot lines
+% (generated using GPT-5).
+%
 % * *setaxis_yearsbp.m*
 % - adjust the x-axis to display years Before Present (BP), reverse
 % the axis tick labels and add new axis label
