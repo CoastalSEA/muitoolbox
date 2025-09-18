@@ -18,7 +18,9 @@ function set_tile_legend(ax, loc)
 %   Freeze the legend: Prevents disappearance during redraws, and you can 
 %                      still manually refresh it when you choose.
 %   Filter by IconDisplayStyle: Preserves any p.Annotation.LegendInformation.IconDisplayStyle='off' exclusions.
-%   Limit to a specific axes: Never pull objects from other tiles    
+%   Limit to a specific axes: Never pull objects from other tiles 
+%
+%   NB use hold(ax,'on') when adding lines to existing plot.
 %
 % Author: Ian Townend
 % CoastalSEA (c) Sept 25
