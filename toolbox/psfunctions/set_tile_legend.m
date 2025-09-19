@@ -22,7 +22,7 @@ function set_tile_legend(ax, loc)
 %
 %   NB use hold(ax,'on') when adding lines to existing plot.
 %
-% Author: Ian Townend
+% Author: GPT-5
 % CoastalSEA (c) Sept 25
 %--------------------------------------------------------------------------
 %
