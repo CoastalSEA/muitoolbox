@@ -155,6 +155,11 @@
 % * *saveanimation2file.m*
 % - saves movie to selected file type
 %
+% * *set_slider_figure.m*
+% - initialise a figure with two tiles and one or two sliders. The sliders
+% can be used to control the display by calling a function, with the 
+% function name passed as an input variable.
+%
 % * *set_tile_legend.m*
 % - manage legends across multiple tiles with the option to hide plot lines
 % (generated using GPT-5).
