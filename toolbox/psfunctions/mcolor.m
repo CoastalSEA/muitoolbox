@@ -8,12 +8,13 @@ function acolor = mcolor(idx)
 % USAGE
 %   acolor = mcolor(idx)
 % INPUTS
-%   idx - index to row selection in colour table (integer or text)
+%   idx - index to row selection in colour table (integer or text) - optional
+%         if mcolor called without idx, user is prompted to select a color       
 % OUTPUT
 %   acolor - RGB values for selected colour
 % NOTES
 %   colours defined include dark blue, orange, yellow, purple, green, light
-%   blue, scarlet, light grey dark grey
+%   blue, scarlet, dark grey, mid grey, light grey 
 %
 % Author: Ian Townend
 % CoastalSEA (c)June 2020
@@ -26,13 +27,18 @@ matlabcolor = [ 0,      0.4470, 0.7410;...   %dark blue
                 0.4660, 0.6740, 0.1880;...   %green
                 0.3010, 0.7450, 0.9330;...   %light blue
                 0.6350, 0.0780, 0.1840;...   %scarlet
-                0.90,   0.90,   0.90;...     %light grey
-                0.95,   0.95,   0.95];       %dark grey
+                0.70,   0.70,   0.70;...     %dark grey
+                0.80,   0.80,   0.80;...     %mid grey
+                0.90,   0.90,   0.90];       %light grey
             
 colornames = {'dark blue';'orange';'yellow';'purple';'green';'light blue';...
-              'scarlet';'light grey';'dark grey'};
-          
-if ~isnumeric(idx)
+              'scarlet';'dark grey';'mid grey';'light grey'};
+
+if nargin<1
+    idx = listdlg("PromptString",'Select colour:','Name','Colour',...
+                  'SelectionMode','single','ListSize',[120,160],...
+                  'ListString',colornames);
+elseif ~isnumeric(idx)
     idx = find(strcmp(colornames,idx));    
 end
 %

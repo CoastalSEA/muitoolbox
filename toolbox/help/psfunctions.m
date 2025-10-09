@@ -155,6 +155,10 @@
 % * *saveanimation2file.m*
 % - saves movie to selected file type
 %
+% * *select_figure.m*
+% - allow the user to interactively select an existing figure and control
+% the selection using valid Tags
+%
 % * *set_slider_figure.m*
 % - initialise a figure with two tiles and one or two sliders. The sliders
 % can be used to control the display by calling a function, with the 

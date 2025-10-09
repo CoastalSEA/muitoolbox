@@ -73,17 +73,24 @@ function addShapeFile(filename,isok,cfig)
     %add shape file to current plot
     if isok
         Shp = shaperead(filename);   %requires Mapping toolbox
+        ftypes = unique({Shp(:).Theme});
+        idf = listdlg("PromptString",'Select themes to Exclude','Name','Themes',...
+                      'SelectionMode','multiple','ListSize',[160,300],'ListString',ftypes);
+        for i=1:length(idf)
+            idx = strcmp({Shp(:).Theme},ftypes{idf(i)});
+            Shp(idx) = [];
+        end
     else
         shp = m_shaperead(filename); %not tested
         for i=1:length(shp.ncst)
-            Shp(i).X = shp.ncst{i}(:,1); 
-            Shp(i).Y = shp.ncst{i}(:,2);
+            Shp(i).X = shp.ncst{i}(:,1); %#ok<AGROW>
+            Shp(i).Y = shp.ncst{i}(:,2); %#ok<AGROW>
         end
     end
     nrec = length(Shp);
     figure(cfig);
     ax = gca;
-    green = mcolor('green');
+    green = mcolor();
     hold on
     for i=1:nrec
         plot(ax,Shp(i).X,Shp(i).Y,'Color',green,'LineWidth',0.01)

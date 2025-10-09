@@ -104,6 +104,9 @@
 % * *isvalidrange.m*
 % - check user input is valid for the data type used and within bounds
 % 
+% * *loga.m*
+% - compute the logarithm of x to base a
+%
 % * *matrixtableUI.m*
 % - generate UI to edit a matrix using tablefigureUI
 %
