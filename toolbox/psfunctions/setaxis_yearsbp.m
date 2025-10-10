@@ -9,7 +9,8 @@ function setaxis_yearsbp(cfig,zeroyear)
 % USAGE
 %   setaxis_yearsbp; or setaxis_yearsbp(cfig); or setaxis_yearsbp(cfig,zeroyear);
 % INPUTS
-%   cfig - handle to figure to modify (optional)
+%   cfig - handle to figure to modify (optional). If figure handle is not
+%          included user is prompted to select an existing figure
 %   zeroyear - year for Present when defining Years Before Present (optional)
 % OUTPUT
 %   updated figure
@@ -21,32 +22,21 @@ function setaxis_yearsbp(cfig,zeroyear)
 %--------------------------------------------------------------------------
 % 
     if nargin<1 || isempty(cfig)
-        cfig = selectedFigure; 
+        cfig = select_figure; 
     end
     figure(cfig);
     ax = gca;
     ax.XLabel.String = 'Years BP';
     xtcks = ax.XTick;
     if nargin<2
-        zeroyear = xtcks(end);
+        zeroyear = ax.XLim(2);    %use upper x-limit as the Present
     end
-    ax.XTickLabel = zeroyear-xtcks;
-end
-%
-function cfig = selectedFigure
-    %prompt user to select a figure
-    cfig = [];
-    figs = findall(0,'type','figure');
-    if isempty(figs), return; end
-    fignums = sort([figs(:).Number]);
-    if length(fignums)>1
-        prmptxt = 'Select Figure Number:';                       
-        hd = listdlg('PromptString',prmptxt,'ListString',string(fignums'),...
-                     'ListSize',[100,200],'SelectionMode','single'); 
-        if isempty(hd), return; end
+    newtime = zeroyear-xtcks;
+    if contains(xtcks.Format,'u')
+        newtime.Format = 'y';     %force to years if generic format
     else
-        hd = fignums;
+        newtime.Format = xtcks.Format;
     end
-    
-    cfig = figs(hd);
+
+    ax.XTickLabel = string(newtime);
 end

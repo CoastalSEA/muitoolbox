@@ -1,12 +1,17 @@
-
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-   <!--
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>muiUserModel</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-26"><meta name="DC.source" content="muiusermodel.m"><style type="text/css">
+      -->
+<title>muiUserModel</title>
+<meta name="generator" content="MATLAB 24.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-10-10">
+<meta name="DC.source" content="muiusermodel.m">
+<style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,11 +72,70 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>muiUserModel</h1><!--introduction--><p>Class for data that are selected using the <a href="matlab:doc('muimanipui')">muiManipUI</a> interface included in  ModelUI, CoastalTools and other ModelUI apps.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#3">Description</a></li><li><a href="#4">muiUserModel properties</a></li><li><a href="#6">muiUserModel methods</a></li><li><a href="#11">See Also</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">obj = muiUserModel;
-</pre><h2 id="3">Description</h2><p>The class is used to evaluate user defined equations or functions and save results if required. Inherits from <a href="matlab:doc('muidataset')">muiDataSet</a> and is only accessible from classes that inherit <a href="matlab:doc('muidataset')">muiDataSet</a>, or <a href="matlab:doc('muidataui')">muiDataUI</a>.</p><h2 id="4">muiUserModel properties</h2><p>The class inherits the <a href="matlab:doc('muidataset')">muiDataSet</a> properties for Data, RunParam, MetaData and CaseIndex. In addition, the selection from a <a href="matlab:doc('muidataui')">muiDataUI</a> derived UI are held as transient properties.</p><div><ul><li><b>UIsel</b> - structure for the variable selection made in the calling UI.</li><li><b>UIset</b> - structure for the settings made in the calling UI.</li></ul></div><h2 id="6">muiUserModel methods</h2><p>The main purpose of <i>muiUserModel</i> is to implement the selections made in <a href="matlab:doc('muimanipui')">muiManipUI</a>.</p><p><b>createVar</b>  evaluate the user defined equation or function and report single valued results or save vector and array results as either a new variable in an existing dataset or as a new dataset.</p><pre class="language-matlab">createVar(obj,gobj,mobj);   <span class="comment">%where gobj is an instance of the calling UI</span>
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>muiUserModel</h1>
+<!--introduction-->
+<p>Class for data that are selected using the <a href="matlab:doc('muimanipui')">muiManipUI</a> interface included in ModelUI, CoastalTools and other ModelUI apps.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Syntax</a>
+</li>
+<li>
+<a href="#3">Description</a>
+</li>
+<li>
+<a href="#4">muiUserModel properties</a>
+</li>
+<li>
+<a href="#6">muiUserModel methods</a>
+</li>
+<li>
+<a href="#11">See Also</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Syntax</h2>
+<pre class="language-matlab">obj = muiUserModel;
+</pre>
+<h2 id="3">Description</h2>
+<p>The class is used to evaluate user defined equations or functions and save results if required. Inherits from <a href="matlab:doc('muidataset')">muiDataSet</a> and is only accessible from classes that inherit <a href="matlab:doc('muidataset')">muiDataSet</a>, or <a href="matlab:doc('muidataui')">muiDataUI</a>.</p>
+<h2 id="4">muiUserModel properties</h2>
+<p>The class inherits the <a href="matlab:doc('muidataset')">muiDataSet</a> properties for Data, RunParam, MetaData and CaseIndex. In addition, the selection from a <a href="matlab:doc('muidataui')">muiDataUI</a> derived UI are held as transient properties.</p>
+<div>
+<ul>
+<li>
+<b>UIsel</b> - structure for the variable selection made in the calling UI.</li>
+<li>
+<b>UIset</b> - structure for the settings made in the calling UI.</li>
+</ul>
+</div>
+<h2 id="6">muiUserModel methods</h2>
+<p>The main purpose of <i>muiUserModel</i> is to implement the selections made in <a href="matlab:doc('muimanipui')">muiManipUI</a>.</p>
+<p>
+<b>createVar</b> evaluate the user defined equation or function and report single valued results or save vector and array results as either a new variable in an existing dataset or as a new dataset.</p>
+<pre class="language-matlab">createVar(obj,gobj,mobj);   <span class="comment">%where gobj is an instance of the calling UI</span>
                             <span class="comment">%and mobj is an instancec of the main UI.</span>
-</pre><p><b>tabPlot</b> generates a plot for display on Q-Plot tab. Uses the default plotting method <i>tabDefaultPlot</i> in <a href="matlab:doc('muidataset')">muiDataSet</a>.</p><pre class="language-matlab">tabPlot(obj,src)            <span class="comment">%abstract method required by muiDataSet</span>
-</pre><h2 id="11">See Also</h2><p><a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muidataset')">muiDataSet</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+</pre>
+<p>
+<b>tabPlot</b> generates a plot for display on Q-Plot tab. Uses the default plotting method <i>tabDefaultPlot</i> in <a href="matlab:doc('muidataset')">muiDataSet</a>.</p>
+<pre class="language-matlab">tabPlot(obj,src)            <span class="comment">%abstract method required by muiDataSet</span>
+</pre>
+<h2 id="11">See Also</h2>
+<p>
+<a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muidataset')">muiDataSet</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>.</p>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
+<br>
+</p>
+</div>
+<!--
 ##### SOURCE BEGIN #####
 %% muiUserModel
 % Class for data that are selected using the <matlab:doc('muimanipui') muiManipUI> 
@@ -119,4 +183,6 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>.
  
 ##### SOURCE END #####
---></body></html>
+-->
+</body>
+</html>

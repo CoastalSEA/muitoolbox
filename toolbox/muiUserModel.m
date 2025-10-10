@@ -68,7 +68,8 @@ classdef muiUserModel < muiDataSet
                 varout = callfcn_var(obj,XYZT,mobj,inp,hw);
             end
             
-            if isempty(varout)    %quit if no data returned
+            isNoData = cellfun(@isempty,varout);
+            if all(isNoData)    %quit if no data returned
                 warndlg('No results from function used in Derive output')
                 close(hw); return; 
             end
@@ -377,14 +378,24 @@ classdef muiUserModel < muiDataSet
             dsp = dsproperties(dspstruct,'Derived data set');             
             setDSproperties(dsp,[],'Derived data set',true); 
 
+            muicat = mobj.Cases;
             %assign model output to a dstable using the defined dsproperties 
             %metadata. Each variable should be an array in the 'results' 
             %cell array. If model returns single variable as array of 
             %doubles, use {results}            
             if isrows   %rows defined in output - save as new dataset
-                %call ui to edit - repeat description to prevent user prompt                
-                dst = dstable(results{:},'RowNames',rowdata,'DSproperties',dsp);
-                dst = addDims(obj,dst,props,ndim,ressze);
+                %call ui to edit - repeat description to prevent user prompt   
+                answer = questdlg('Save the results to an existing case or as a new dataset?',...
+                                  'Derive output','New Case','Existing','New Case');
+                if strcmp(answer,'New Case')
+                    dst = dstable(results{:},'RowNames',rowdata,'DSproperties',dsp);
+                    dst = addDims(obj,dst,props,ndim,ressze);
+                else
+                    [caserec,ok] = getExistingCase(muicat);
+                    if ok<1, return; end
+                    addVariable2CaseDS(muicat,caserec,results,dsp);
+                    return;
+                end
             else        %only variable(s) returned - prompt user
                 answer = questdlg('Save the results to an existing case or as a new dataset?',...
                                   'Derive output','Input Case','New Case','Existing','New Case');
@@ -408,7 +419,6 @@ classdef muiUserModel < muiDataSet
                     dst = addDims(obj,dst,props,ndim,ressze);
                 elseif strcmp(answer,'Input Case')
                     %need to find which input dataset to add the new variable to
-                    muicat = mobj.Cases;
                     caserec = [obj.UIsel.caserec];
                     caserec = unique(caserec(caserec>0));
                     if length(caserec)>1  %more than one so need to select
@@ -423,17 +433,21 @@ classdef muiUserModel < muiDataSet
                     addVariable2CaseDS(muicat,caserec,results,dsp);
                     return;
                 else
-                    muicat = mobj.Cases;
-                    casedesc = muicat.Catalogue.CaseDescription;
-                    [caserec,ok] = listdlg('PromptString','Select a Case (must be same number of rows)',...
-                                   'SelectionMode','single',...
-                                   'ListSize',[300,100],'ListString',casedesc); 
+                    [caserec,ok] = getExistingCase(muicat);
                     if ok<1, return; end
                     addVariable2CaseDS(muicat,caserec,results,dsp);
                     return;
                 end
             end
             save2obj(obj,mobj,dst,inputxt) 
+
+            %--------------------------------------------------------------
+            function [caserec,ok] = getExistingCase(muicat)
+                    casedesc = muicat.Catalogue.CaseDescription;
+                    [caserec,ok] = listdlg('PromptString','Select a Case (must be same number of rows)',...
+                                   'SelectionMode','single',...
+                                   'ListSize',[300,100],'ListString',casedesc);                               
+            end
         end
 %%
         function dst = addDims(~,dst,props,ndim,ressze)

@@ -34,9 +34,8 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
     if nargin<5
         func = 'mean';
     end
-    
+
     tm = []; vm = [];
-    
     %convert text values to durations
     if ischar(tdur) || isstring(tdur)      
         tdur = str2duration(tdur);
@@ -51,6 +50,12 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
         warndlg('Step interval, tstep, must be duration or character data type')
         return
     end
+
+    if isempty(tdur) || isempty(tstep)
+        msg = sprintf('Incorrect input\nDuration and time step should be:\ncharacter string containing ''X u''\nwhere X is a number and u is the time unit');
+        warndlg(msg); return;
+    end
+    
     txt = sprintf('Edit durations - Cancel to use existing values\nAveraging period (y,d,h,m,s):');
     promptxt = {txt,'Time step interval (y,d,h,m,s)'};
     defaults = [cellstr(tdur),cellstr(tstep)];
@@ -80,5 +85,6 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
         vm(i) = func(var(idx));
         istartime = istartime+tstep;        
     end
+end
 
     

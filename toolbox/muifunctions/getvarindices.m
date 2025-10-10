@@ -32,16 +32,21 @@ function valididx = getvarindices(var,limtxt)
                 excnan = true;
             end 
             
-            if isdatetime(var)  
+            if isdatetime(var) 
                 try 
-                    minB = datetime(lowerlimit,'InputFormat',var.Format);
-                    maxB = datetime(upperlimit,'InputFormat',var.Format);
+                    minB = datetime(lowerlimit);
+                    maxB = datetime(upperlimit);
                     if strcmp(var.Format,'y')
                         maxB = maxB+364;
                     end
                 catch
-                    warndlg('Specified Date Range is not valid');                    
-                    return;
+                    try
+                        minB = datetime(lowerlimit,'InputFormat',var.Format);
+                        maxB = datetime(upperlimit,'InputFormat',var.Format);
+                    catch
+                        warndlg('Specified Date Range is not valid');                    
+                        return;
+                    end
                 end
             elseif isduration(var)
                 minB = str2duration(lowerlimit,var.Format);

@@ -3,11 +3,8 @@
 % help function in the command window to get further details of each
 % function.
 
-%%
-% * *addgeodata.m*
-% - add data to an existing figure from a shape file, geospatial table file, 
-% or raster image file
-%
+
+%% Functions
 % * *annual_polar_plot.m*
 % - plot the monthly or seasonal values of a timeseries variable
 %
@@ -168,10 +165,6 @@
 % - manage legends across multiple tiles with the option to hide plot lines
 % (generated using GPT-5).
 %
-% * *setaxis_yearsbp.m*
-% - adjust the x-axis to display years Before Present (BP), reverse
-% the axis tick labels and add new axis label
-%
 % * *setfigslider.m*
 % - initialise a slider on a figure with the option to include text 
 % displaying the current slider value and an action button
@@ -231,3 +224,17 @@
 % * *zero_crossing.m*
 % - Function to calculate the zero-crossing. Used to calculate the up and
 % down crossings of a threshold for time series data
+
+%% Command line utility functions
+% * *addgeodata.m*
+% - add data to an existing figure from a shape file, geospatial table file, 
+% or raster image file
+%
+% * *compile_tiled_figure.m*
+% - interactively add existing axes from single axes figures to a figure
+% with multiple tiles (regular grid only)
+%
+% * *setaxis_yearsbp.m*
+% - adjust the x-axis to display years Before Present (BP), reverse
+% the axis tick labels and add new axis label
+%

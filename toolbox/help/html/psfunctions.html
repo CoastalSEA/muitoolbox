@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>Plotting and statistical functions</title>
 <meta name="generator" content="MATLAB 24.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2025-10-09">
+<meta name="DC.date" content="2025-10-10">
 <meta name="DC.source" content="psfunctions.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -80,12 +80,18 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <!--introduction-->
 <p>Summary of the functions available in the <i>psfunctions</i> folder. Use the Matlab&trade; help function in the command window to get further details of each function.</p>
 <!--/introduction-->
+<h2>Contents</h2>
 <div>
 <ul>
 <li>
-<b>addgeodata.m</b> - add data to an existing figure from a shape file, geospatial table file, or raster image file</li>
+<a href="#1">Functions</a>
+</li>
+<li>
+<a href="#2">Command line utility functions</a>
+</li>
 </ul>
 </div>
+<h2 id="1">Functions</h2>
 <div>
 <ul>
 <li>
@@ -333,12 +339,6 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <div>
 <ul>
 <li>
-<b>setaxis_yearsbp.m</b> - adjust the x-axis to display years Before Present (BP), reverse the axis tick labels and add new axis label</li>
-</ul>
-</div>
-<div>
-<ul>
-<li>
 <b>setfigslider.m</b> - initialise a slider on a figure with the option to include text displaying the current slider value and an action button</li>
 </ul>
 </div>
@@ -432,6 +432,25 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <b>zero_crossing.m</b> - Function to calculate the zero-crossing. Used to calculate the up and down crossings of a threshold for time series data</li>
 </ul>
 </div>
+<h2 id="2">Command line utility functions</h2>
+<div>
+<ul>
+<li>
+<b>addgeodata.m</b> - add data to an existing figure from a shape file, geospatial table file, or raster image file</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
+<b>compile_tiled_figure.m</b> - interactively add existing axes from single axes figures to a figure with multiple tiles (regular grid only)</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
+<b>setaxis_yearsbp.m</b> - adjust the x-axis to display years Before Present (BP), reverse the axis tick labels and add new axis label</li>
+</ul>
+</div>
 <p class="footer">
 <br>
 <a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
@@ -445,11 +464,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % help function in the command window to get further details of each
 % function.
 
-%%
-% * *addgeodata.m*
-% - add data to an existing figure from a shape file, geospatial table file, 
-% or raster image file
-%
+
+%% Functions
 % * *annual_polar_plot.m*
 % - plot the monthly or seasonal values of a timeseries variable
 %
@@ -610,10 +626,6 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % - manage legends across multiple tiles with the option to hide plot lines
 % (generated using GPT-5).
 %
-% * *setaxis_yearsbp.m*
-% - adjust the x-axis to display years Before Present (BP), reverse
-% the axis tick labels and add new axis label
-%
 % * *setfigslider.m*
 % - initialise a slider on a figure with the option to include text 
 % displaying the current slider value and an action button
@@ -674,6 +686,19 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % - Function to calculate the zero-crossing. Used to calculate the up and
 % down crossings of a threshold for time series data
 
+%% Command line utility functions
+% * *addgeodata.m*
+% - add data to an existing figure from a shape file, geospatial table file, 
+% or raster image file
+%
+% * *compile_tiled_figure.m*
+% - interactively add existing axes from single axes figures to a figure
+% with multiple tiles (regular grid only)
+%
+% * *setaxis_yearsbp.m*
+% - adjust the x-axis to display years Before Present (BP), reverse
+% the axis tick labels and add new axis label
+%
 ##### SOURCE END #####
 -->
 </body>
