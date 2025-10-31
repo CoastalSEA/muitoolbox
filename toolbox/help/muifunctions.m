@@ -70,6 +70,10 @@
 % - compute  the mean values of the input dst, inpdst, for the 
 % interval preceeding each occurrence in the reference timeseries,
 % refdst, using the duration defined by prevint in days 
+%
+% * *getsampleusingrange.m*
+% - uses an input UI to obtain a date range and then extract the data for
+% that range from the input table
 % 
 % * *getvarindices.m*
 % - unpack the limits text and find indices of values that lie 
