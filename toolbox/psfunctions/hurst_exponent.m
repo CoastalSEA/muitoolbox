@@ -39,6 +39,7 @@ function H = hurst_exponent(ts,metatxt,method)
         metatxt = 'Hurst Exponent';
     end
     
+    H = []; 
     if isa(ts,'timeseries')
         x = ts.Data;
         labeltxt = ts.UserData.Labels;
@@ -60,17 +61,15 @@ function H = hurst_exponent(ts,metatxt,method)
     end
     
     if isempty(method)
-%         questxt = sprintf('Select method\n  1 = Chiarello matrix\n  2 = Abramov loop\n  3 = Aste - unweighted');
-%         answer = questdlg(questxt,'Hurst exponent','1','2','3','2');
-%         method = str2double(answer);
         listxt = {'1 = Chiarello matrix','2 = Abramov loop','3 = Aalok-Ihlen',...
                                         '4 = Aste - unweighted'};
         method = listdlg('PromptString','Select method to use:',...
                          'SelectionMode','single','ListSize',[160,180],...
                          'ListString',listxt);
-        
+        if isempty(method), return; end
     end
     
+    %x = x(1:length(x)/20); %experiment with shortemning record length
     Nvar=length(x);        
     utime = 2:Nvar;              %unit-time vector
     

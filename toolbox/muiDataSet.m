@@ -94,8 +94,8 @@ classdef (Abstract = true) muiDataSet < handle
                                                       adn_dst.(fnames{j}));
                             end
                         end
-                    end
-                    dst = updateSource(dst,filename,jf);
+                        dst = updateSource(dst,filename,jf);
+                    end                    
                     waitbar(jf/nfiles)
                 end                
             end

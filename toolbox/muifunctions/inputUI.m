@@ -76,20 +76,27 @@ classdef inputUI < handle
             unit_ht = 3.6;    %character height allocated to each row
             h_fig.Position(3) = 50+func(settings.InputFields,20)+...
                                         func(settings.DefaultInputs,100);
-            h_fig.Position(4) = unit_ht*(nvar+2); 
+            nrows = nvar+2;   %add rows for header and footer
+            if length(settings.PromptText)>100
+                nrows = (nvar+3);  %if header text is long add extra row
+            end
+            h_fig.Position(4) = unit_ht*(nrows); 
 
             %add panel to figure
-            pnlht = 1/(nvar+2);
+            ftht = 1/nrows;    %vertical height of footer (normalized units)
+            pnlht = 1-(nrows-nvar)/nrows; %height of panel
             h_pnl = uipanel(h_fig,'Tag','PlotPanel','Units','normalized',...
-                                 'Position',[0.005 pnlht 0.99 1-2*pnlht]);           
+                                 'Position',[0.005, ftht, 0.99, pnlht]);           
             %add prompt text to figure
             pos3 = h_fig.Position(3);
             pos4 = h_fig.Position(4);
+            hdpos = pos4*(ftht+pnlht);  %header positioned above panel
+            hdht = 2*(nrows-nvar)-1;      %height is 4 or 6 units 
             uicontrol('Parent',h_fig, 'Style','text',...
                       'String',settings.PromptText,...
                       'HorizontalAlignment', 'center',...
                       'Units','characters', ...
-                      'Position',[1 pos4-unit_ht pos3-2 3],...
+                      'Position',[1, hdpos, pos3-2, hdht],...
                       'Tag',sprintf('inptxt%d',0));
             
             %selcted variable
@@ -97,7 +104,9 @@ classdef inputUI < handle
             
             %add widgets (uicontrols) to panel
             intheight = 1/nvar;
-            txtheight = [0.4,0.18,0.12,0.09,0.06,0.06,0.05,0.05];
+            txtheight = [0.4,0.18,0.12,0.09,0.07,0.07,0.06,0.06];
+            txtlen = max(cellfun(@length,settings.InputFields))+5;
+            widgetpos.pos3 = txtlen/pos3;
             widgetpos.pos4 = txtheight(nvar);
             count = 1;
             for i=1:nvar
