@@ -1,4 +1,4 @@
-function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
+function ax = taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -27,7 +27,7 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 %                    uses a polyshape defined by:
 %                    ([ix0,ix0,ixN,ixN],[iy0,iyN,iy0,iyN])  
 % OUTPUT
-%   plot of Taylor diagram
+%   ax - axes to plot of Taylor diagram
 % NOTES
 %   Taylor, K, 2001, Summarizing multiple aspects of model performance 
 %   in a single diagram, JGR-Atmospheres, V106, D7. 
@@ -61,7 +61,7 @@ function taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
     
     %generate base figure
     if strcmp(option,'New')
-        TaylorPlotFigure(rLim);
+        ax = TaylorPlotFigure(rLim);
     end
 
     plotTaylor(metatxt,cfstats,option,skill);                                                    
@@ -293,7 +293,7 @@ function plotTaylor(metatxt,cfstats,option,score)
     end    
 end
 %%
-function TaylorPlotFigure(rLim)
+function ax = TaylorPlotFigure(rLim)
     %open a new figure and label axes
     %MSE contours based on Exchange Forum code by Guillaume Maze.
     %rLim is the radial limit for the plot
