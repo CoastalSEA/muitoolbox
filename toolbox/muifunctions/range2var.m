@@ -57,8 +57,12 @@ function [rangevar,pretext] = range2var(rangetext,bounds)
         dtype = getdatatype(bounds);
         rangevar = setdatatype(Vin,dtype);
     end
-    idx = regexp(rangetext,'F');
-    pretext = strip(rangetext(1:idx-1)); %text that precedes 'From ....
+    idx = regexp(rangetext,'From >');
+    if idx>1
+        pretext = strip(rangetext(1:idx-1)); %text that precedes 'From ....
+    else                                     %idx must be real scalar for use with colon operator
+        pretext = '';
+    end
 end
 %%
 function datevar = getdatevariable(Vin)

@@ -1,4 +1,4 @@
-function newdst =getsampleusingrange(obj)
+function [newdst,ok] =getsampleusingrange(obj)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -32,8 +32,10 @@ function newdst =getsampleusingrange(obj)
                          'PromptText','Select time range to use');
     if isempty(selection)
         newdst = copy(obj);
+        ok = 0;  %user cancelled
     else
         seltime = range2var(selection{1});                
         newdst = getsampleusingtime(obj,seltime{:});
+        ok = 1;
     end 
 end

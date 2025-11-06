@@ -47,7 +47,7 @@ function ax = taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
     if isa(refvar,'timeseries') || istimeseriesdst(refvar)
         %sort data type and interpolate if vars are timeseries datasets
         [refvar,testvar,ok] = sortTSdata(refvar,testvar);
-        if ok<1, return; end   %user cancelled or wrong data type
+        if ok<1, ax = []; return; end   %user cancelled or wrong data type
         cfstats = TS_DifferenceStatistics(refvar,testvar);
     else
         cfstats = DS_DifferenceStatistics(refvar,testvar);
@@ -157,6 +157,7 @@ function cfstats = DS_DifferenceStatistics(ds1,ds2)
     end
     if numel(ds1)~=numel(ds2)
         warndlg('Data sets must be of the same size');
+        cfstats = [];
         return
     end
     mver = version('-release'); 
@@ -344,7 +345,7 @@ function ax = TaylorPlotFigure(rLim)
     uicontrol('Style', 'pushbutton', 'String', 'Case list',...
             'Units','normalized','Position', [0.8 0.06 0.15 0.05],...
             'Callback', @uiCaseList);  
-    %
+    %-nested function------------------------------------------------------
     function uiNameValue(uitext,uipos,uirot)
         %function to generate text label at sppecified position
         %and angle
@@ -358,7 +359,7 @@ function ax = TaylorPlotFigure(rLim)
         h_ui.Units = 'normalized';
         h_ui.Position = uipos;
     end
-    %
+    %-nested function------------------------------------------------------
     function uiCaseList(~,~)
         %create figure that lists meta-data for all cases listed in
         %the current Talyor Plot legend
