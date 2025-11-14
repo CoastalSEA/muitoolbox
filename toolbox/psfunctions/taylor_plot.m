@@ -7,7 +7,7 @@ function ax = taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
 %   Create plot of Taylor diagram and, optionally, plot compute skill score
 %   and plot a skill map (2 or 3D depending on data)
 % USAGE
-%   taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
+%   ax = taylor_plot(refvar,testvar,metatxt,option,rLim,skill);
 % INPUTS
 %   refvar  - reference dataset or a time series (timeseries or dstable)
 %   testvar - test dataset or a time series (timeseries or dstable)
@@ -124,10 +124,10 @@ end
 function cfstats = TS_DifferenceStatistics(ts1,ts2)
     %compute difference statisics for two time series and plot
     %results on a Taylor diagram
-    %ts1 is the reference timeseries and ts2 is the test timeseries
-    %cfstats - descriptive statistics for both data sets
-    %timeseries must be for the sameperiod and have the same number
-    %of data points
+    % ts1 is the reference timeseries and ts2 is the test timeseries
+    % cfstats - descriptive statistics for both data sets
+    % timeseries must be for the sameperiod and have the same number
+    % of data points
     cfstats.refstd = std(ts1.Data,'omitnan');
     cfstats.teststd = std(ts2.Data,'omitnan');
     cfstats.refmean = mean(ts1.Data,'omitnan');            
@@ -183,12 +183,13 @@ function cfstats = DS_DifferenceStatistics(ds1,ds2)
     cfstats.crmsd = centredRMSD(ds1,ds2,cfstats);
 end
 %%
-function plotTaylor(metatxt,cfstats,option,score)
+function plotTaylor(metatxt,cfstats,option,skill)
     %generate the plot by adding or deleting points
-    %metatxt - cell array for data set and variable descriptions of the 
+    % metatxt - cell array for data set and variable descriptions of the 
     %          reference and test data (order is {reference, test})
-    %cfstats - descriptive statistics for both data sets
-    %option - New, Add, Delete; 
+    % cfstats - descriptive statistics for both data sets
+    % option - New, Add, Delete; 
+    % skill - struct which includes global and local skill estimates
 
     %unpack and normalize data to be plotted
     ndteststd = cfstats.teststd/cfstats.refstd; %normalised std
@@ -211,15 +212,15 @@ function plotTaylor(metatxt,cfstats,option,score)
         figax.RLim(2) = ceil(ndteststd);
     end
     symb = 'o';
-    restxt = sprintf('corr=%.3f; ndstd=%.3f for %s',corr,ndteststd,metatxt{2});     
-    if ~isempty(score.global)  
-        if score.iter
+    restxt = sprintf('corr= %.3f; ndstd= %.3f for %s',corr,ndteststd,metatxt{2});     
+    if ~isempty(skill.global)  
+        if skill.iter
             itxt = 'for all cells';
         else
             itxt = 'with no overlaps';
         end
-        usertst = sprintf('%s with skill S.G=%1.3g, S.L=%1.3g. (Ro=%1.2g, n=%1.1g, W=%d, %s)',...
-                 restxt,score.global,score.local,score.Ro,score.n,score.W,itxt);
+        usertst = sprintf('%s with skill S.G= %1.3g, S.L= %1.3g. (Ro= %1.2g, n= %1.1g, W= %d, %s)',...
+                 restxt,skill.global,skill.local,skill.Ro,skill.n,skill.W,itxt);
     else
         usertst = restxt;
     end
@@ -235,6 +236,7 @@ function plotTaylor(metatxt,cfstats,option,score)
             % to use replace polarplot calls with polarscatter and 
             % findobj(figax,'Type','Line') to  findobj(figax,'Type','Scatter');
             % in all case calls and uiCaseList]
+
             %plot first test case
             legtext = sprintf('cf #1: B=%.3f; E"=%.3f',bias,ndcrmsd);                                            
             polarplot(figax,acoscor,ndteststd,...
@@ -249,6 +251,7 @@ function plotTaylor(metatxt,cfstats,option,score)
             idx = length(hp)+1;
             hpoints = findobj(figax,'Type','Line','Marker',symb);
             idcase = length(hpoints)+1;
+
             %plot test case
             legtext = sprintf('cf #%d: B=%.3f; E"=%.3f',...
                                             idcase,bias,ndcrmsd);  
@@ -263,7 +266,7 @@ function plotTaylor(metatxt,cfstats,option,score)
             figpts = findobj(figax,'Type','Line','Marker',symb);
             figleg = findobj('Type','legend','Tag','Taylor');
             idx = [];
-            %
+            
             for ii=1:length(figpts)
                 plotval = [figpts(ii).ThetaData,figpts(ii).RData];
                 delval  = [acoscor,ndteststd];
@@ -271,7 +274,7 @@ function plotTaylor(metatxt,cfstats,option,score)
                     idx = [idx,ii];                             %#ok<AGROW>
                 end                       
             end
-            %
+            
             if ~isempty(idx)
                 delete(figpts(idx));
                 figpts(idx) = [];
@@ -287,7 +290,7 @@ function plotTaylor(metatxt,cfstats,option,score)
     hold(figax,'off')  
     %
     function newhp = suppressGridLines(hp)
-        %re-impose suppression of grid lines in the Taylot diagram plot
+        %re-impose suppression of grid lines in the Taylor diagram plot
         hgrd = findobj(hp,'Tag','RMSgrid'); 
         hp = findobj(hp,'-not','Tag','RMSgrid'); 
         newhp = vertcat(hp,hgrd(1));
