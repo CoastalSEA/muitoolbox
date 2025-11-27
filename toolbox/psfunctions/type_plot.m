@@ -83,7 +83,7 @@ function type_plot(mobj)
     %adjust bar face color to class colors    
     hb = findobj(ax.Children,'Type','bar');
     hb.FaceColor = 'flat';
-    for k = 1:size(typevar)
+    for k = 1:length(typevar)
         %assign color to variable bar based on typevar
         hb.CData(k,:) = custom_colormap(types==typevar(k),:);
     end
