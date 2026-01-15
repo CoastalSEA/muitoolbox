@@ -27,16 +27,19 @@ function datable = readspreadsheet(filename,isdst,cell_ids,promptxt)
 % CoastalSEA (c) May 2024
 %--------------------------------------------------------------------------
 % 
+    istime = false;
     if nargin<2
         isdst = false; 
-        cell_ids = {'B1';'B2';'A2'};
+        cell_ids = {'B1';'B2';'A2';'0'};
         promptxt = 'Select worksheet:';
     elseif nargin<3
-        cell_ids = {'B1';'B2';'A2'};
+        cell_ids = {'B1';'B2';'A2';'0'};
         promptxt = 'Select worksheet:';
     elseif nargin<4
         promptxt = 'Select worksheet:';
     end
+    istime = logical(str2double(cell_ids{4}));
+    cell_ids = cell_ids(1:3);
 
     snames = sheetnames(filename);
     if length(snames)>1
@@ -88,10 +91,19 @@ function datable = readspreadsheet(filename,isdst,cell_ids,promptxt)
     opts.VariableNamesRange = answers{2};
     opts.DataRange = answers{3};
     opts.RowNamesRange = answers{4};
-    datable = readtable(filename,opts);
+
+    if istime
+        temp = readtimetable(filename,opts,'RowTimes','Date');
+        rownames = temp.Properties.RowTimes;
+        datable = timetable2table(temp,'ConvertRowTimes',false);
+        clear temp
+    else
+        datable = readtable(filename,opts);
+        rownames = datable.Properties.RowNames;
+    end
 
     if isdst
-        rownames = datable.Properties.RowNames;
+        
         if isempty(rownames)
             datable = dstable(datable);
         else

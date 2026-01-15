@@ -391,8 +391,8 @@ classdef muiPlots < handle
             end   
 
             %check axis values are compatible
-            dtype = whos(figax.XLim);
-            if ~isa(x,dtype.class)    
+            dtype = class(figax.XLim);
+            if ~isa(x,dtype)    
                 warndlg('X-data type not compatible with existing axis')
                 return;
             end

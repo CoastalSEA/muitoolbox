@@ -94,6 +94,7 @@ classdef muiTableImport < muiDataSet
             setDataSetRecord(obj,muicat,dst,'data');           
         end 
     end
+
 %%
     methods (Static, Access = protected)
         function [newdst,fname] = loadFile()
@@ -143,11 +144,19 @@ classdef muiTableImport < muiDataSet
                 newdst = dstable(intable,'RowNames',rownames);
             elseif strcmp(ext,'.xlsx')
                 %load data from an Excel spreadsheet
-                newdst = readspreadsheet([path,fname],true); %return a dstable
+                answer = questdlg('Are rows datetime/duration?','Import data type',...
+                                   'No','Yes','No');
+                if strcmp(answer,'Yes')
+                    cell_ids = {'A1';'A2';'';'1'};
+                    newdst = readspreadsheet([path,fname],true,cell_ids); %return a dstable
+                else
+                    newdst = readspreadsheet([path,fname],true); %return a dstable
+                end
             else
                 warndlg('File type not handled in muiTableImport.loadFile')
             end
         end
+
 %%
         function newdst = getDSpropertyFile(newdst)
             %load DSproperties from a struct in an m file or as variables
@@ -176,7 +185,7 @@ classdef muiTableImport < muiDataSet
                 newdst.DSproperties = dsp;   
             elseif strcmp(ext,'.xlsx')
                 %load data from an Excel spreadsheet
-                cell_ids = {'A1';'A2';''};
+                cell_ids = {'A1';'A2';'';'0'};
                 vartable = readspreadsheet([path,fname],false,cell_ids); %return a table
                 dspvars = table2struct(vartable);
                 dsp = muiTableImport.loadDSproperties(dspvars);
@@ -186,6 +195,7 @@ classdef muiTableImport < muiDataSet
                 newdst = [];
             end    
         end
+
 %%
         function dst = updateDSproperties(dst)
             %prompt user to edit the variable and row definitions
@@ -209,8 +219,8 @@ classdef muiTableImport < muiDataSet
                 dst.VariableQCflags{i} = dtype{1};
             end
         end
-
     end   
+
 %%
     methods
         function addRows(obj,classrec,~,muicat) 
@@ -375,11 +385,25 @@ classdef muiTableImport < muiDataSet
 %%
         function tabPlot(obj,src,mobj)
             %generate plot for display on Q-Plot tab
-            tabcb  = @(src,evdat)tabPlot(obj,src,mobj);
-            ax = tabfigureplot(obj,src,tabcb,false);
+            %get data for variable
+            datasetname = getDataSetName(obj);
+            dst = obj.Data.(datasetname);
+            if isempty(dst), return; end
+
+            rowdesc = dst.RowNames;
+            if ~islist(rowdesc)
+                %if x-axis data are numeric rather than text use the
+                %default plotting in the muiDataSet super class
+                tabDefaultPlot(obj,src);
+                return;
+            end
+
             %get data and variable id
             [dst,idd,idv] =selectDataSet(obj);
             if isempty(idv), return; end
+
+            tabcb  = @(src,evdat)tabPlot(obj,src,mobj);
+            ax = tabfigureplot(obj,src,tabcb,false);
 
             %test for array of allowed data types for a color image
             [vdim,cdim,~] = getvariabledimensions(dst,idv);
@@ -388,9 +412,8 @@ classdef muiTableImport < muiDataSet
                 %cannot be image if single row but can be an array
                 %isim(1) is color and isim(2) is greyscale
                 img = dst.(dst.VariableNames{idv});
-                location = dst.RowNames;
                 idl = listdlg('PromptString','Select estuary:',...
-                          'SelectionMode','single','ListString',location);                    
+                          'SelectionMode','single','ListString',rowdesc);                    
                 imshow(img{idl});
             else
                 if cdim==0                       %scalar values
@@ -401,8 +424,7 @@ classdef muiTableImport < muiDataSet
                             'SelectionMode','single','ListString',vardesc);                        
                     if isempty(idx), return; end
                     vectorplot(obj,ax,dst,idv,idx);
-                elseif cdim==2                  %arrays
-                    rowdesc = dst.RowNames;
+                elseif cdim==2                  %arrays                    
                     if isnumeric(rowdesc), rowdesc = num2str(rowdesc); end
                     idx = listdlg('PromptString','Select X-variable:',...
                             'SelectionMode','single','ListString',rowdesc);                        
@@ -459,6 +481,7 @@ classdef muiTableImport < muiDataSet
         end
 
     end
+
 %%
     methods(Access = protected)
         function [idx,ids] = scalarplot(obj,mobj,ax,idd,idv)
@@ -466,7 +489,7 @@ classdef muiTableImport < muiDataSet
             % idx - sort order of x-variable
             % ids - indices of selected sub-set (after sorting)
             datasets = fieldnames(obj.Data);
-            dst = obj.Data.(datasets{idd});  %selected dataset
+            dst = obj.Data.(datasets{idd});  %selected dataset        
             location = dst.RowNames;
             rn = categorical(location,location);
 
@@ -612,6 +635,7 @@ classdef muiTableImport < muiDataSet
             ylabel(dst.DimensionLabels{2})
             title(sprintf('Case: %s, Row: %s',dst.Description,rowvar))
         end
+
 %%
         function [dst,idd,idv] =selectDataSet(obj)
             %select dataset and variable to use for plot/analysis
@@ -630,6 +654,7 @@ classdef muiTableImport < muiDataSet
             end
         end
     end
+    
 %%
     methods(Static, Access=protected)
         function dsp = loadDSproperties(dspvars)

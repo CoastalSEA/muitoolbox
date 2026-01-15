@@ -347,7 +347,7 @@ classdef (Abstract = true) muiDataSet < handle
 %% ------------------------------------------------------------------------
 %   Methods to set DataSet, RunParam, FileFormat and FileFormatID
 %--------------------------------------------------------------------------     
-    methods (Access = {?muiDataSet,?muiCatalogue}) %self reference is equivalent to protected
+    methods (Access = {?muiDataSet,?muiCatalogue,?muiTableImport}) %self reference is equivalent to protected
         function setRunParam(obj,mobj,varargin)
             %assign the run parameters needed for a model (NB data source
             %files are saved to the dstable.Source property)
