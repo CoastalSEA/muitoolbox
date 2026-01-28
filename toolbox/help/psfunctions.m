@@ -66,7 +66,11 @@
 % * *getpeaks.m*
 % - find peak in a timeseries with options to adjust threshold, 
 % method of selection and interval between peaks
-% 
+%
+% * *getplothandles.m*
+% - find only the handles corresponding to actual plotted data (plot, line, 
+% scatter, stem, bar, etc.) from the specified axes (ax).
+%
 % * *godisplay.m*
 % - display the legend name or DisplayName of the selected graphical object
 %

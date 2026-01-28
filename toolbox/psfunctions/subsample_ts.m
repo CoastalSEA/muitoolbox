@@ -13,6 +13,8 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method)
 %   vartime - time of var to be subsampled
 %   mobj - handle to muiModelUI instance to allow access to data
 %   method - interpolation method used in interp1 (optional, default = linear)
+%            when method defined as none, function only selects data with a
+%            date match.
 % OUTPUT
 %   newtime - time for the resampled variable
 %   newvar - resampled variable 
@@ -31,8 +33,14 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method)
     [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
                                                     'ListSize',[300,100]);
     if isok<1, return; end %user cancelled 
-    
     dst = getDataset(muicat,caserec,1);           
-    newtime = dst.RowNames;        
-    newvar = interp1(vartime,var,newtime,method);
+    newtime = dst.RowNames;       
+
+    if strcmp(method,'none')
+        [idn,idv] = ismember(newtime, vartime);
+        newvar = var(idv(idv>0));
+        newtime = newtime(idn);
+    else
+        newvar = interp1(vartime,var,newtime,method);
+    end
 end

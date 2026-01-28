@@ -23,10 +23,10 @@ function setPolar(src,~)
     if strcmp(src.String,'+')
         src.String = 'O';
         src.UserData = 1;
-        src. Tooltip = 'Switch Polar to XY';
+        src.Tooltip = 'Switch Polar to XY';
     elseif strcmp(src.String,'O')
         src.String = '+';
         src.UserData = 0;
-        src. Tooltip = 'Switch XY to Polar; X data in degrees or radians';
+        src.Tooltip = 'Switch XY to Polar; X data in degrees or radians';
     end
 end

@@ -1035,11 +1035,19 @@ classdef (Abstract = true) muiModelUI < handle
             MapTable(obj,ht);
         end        
 %%
-        function isvalidmodel = isValidModel(obj,modelname)
+        function isvalidmodel = isValidModel(obj,modelname,altclasses)
             %check whether the minimum set of classes needed to run model
             %have valid data. This function uses getCharProperties in
             %PropertyInterface and so the classes checked need to
             %inherit this interface for this function to work.
+            % modelname - class name as used in obj.ModelInputs defintion
+            % altclasses - struct array of classes that can also be used
+            % instead of those defined for modelname. idv - index of class
+            % being replaced in obj.ModelInputs, class - name of
+            % alternate class 
+            % [eg: altclass = struct('idv',{2,4},'class',{'class1','class2'});]
+
+            if nargin<3, altclasses = struct('idv',0,'class',{}); end
             
             % first check that Input & DataSet classes exist  
             if isempty(obj.Inputs) && isempty(obj.Cases.DataSets)
@@ -1047,29 +1055,44 @@ classdef (Abstract = true) muiModelUI < handle
                 return; 
             end
             
-            inphandles = obj.ModelInputs.(modelname);  
-            isvalidmodel = false(length(inphandles),1);
+            %get fieldnames of input classes used to define model
+            inphandles = obj.ModelInputs.(modelname); 
+            definputs = fieldnames(obj.Inputs);
+            defdata = fieldnames(obj.Cases.DataSets);
+            alternates = {altclasses(:).class};
+            idalts = [altclasses(:).idv];
+            ninp = length(inphandles);
+            isvalidmodel = false(ninp,1);
 
-            if ~isempty(obj.Inputs)
-                definedinput = fieldnames(obj.Inputs);
-                isinp = find(ismember(inphandles,definedinput));
-                for i=1:length(isinp)
-                    localObj = obj.Inputs.(inphandles{isinp(i)}); 
-                    %input data is loaded using PropertyInterface
-                    isvalidmodel(isinp(i)) = isValidInstance(localObj);
-                end               
-            end
-            
-            if ~isempty(obj.Cases.DataSets)
-                definedsets = fieldnames(obj.Cases.DataSets);
-                isdata = find(ismember(inphandles,definedsets));
-                for i=1:length(isdata)
-                    localObj = obj.Cases.DataSets.(inphandles{isdata(i)});
-                    isvalidmodel(isdata(i)) = isa(localObj,inphandles{isdata(i)});
+            for i=1:ninp
+                isinp = ismember(inphandles{i},definputs);
+                isdat = ismember(inphandles{i},defdata);
+                if isinp
+                    %check input to ensure all properties are defined
+                    localObj = obj.Inputs.(inphandles{i});
+                    isvalidmodel(i) = isValidInstance(localObj);
+                elseif isdat
+                    %at least one Dataset exists
+                    isvalidmodel(i) = true;
+                elseif ~isdat && ~isinp && ~isempty(idalts)
+                    %if not input or dataset, see if alternate class exists
+                    isalt = ismember(idalts,i);
+                    if any(isalt)
+                        isinpalt = ismember(alternates{isalt},definputs);
+                        isdatalt = ismember(alternates{isalt},defdata);
+                        if isinpalt || isdatalt
+                            isvalidmodel(i) = true;
+                        else
+                            isvalidmodel(i) = false; 
+                        end
+                    end
+                else
+                    isvalidmodel(i) = false;
                 end
             end
             isvalidmodel = all(isvalidmodel);  
         end 
+        
 %%  
         function clearDataUI(obj,guiobj)
             %function to tidy up plotting and data access GUIs

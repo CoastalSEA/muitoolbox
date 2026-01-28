@@ -2,3 +2,6 @@
 /toolbox/Working Docs
 /toolbox/remmuipath.m
 /toolbox/setmuipath.m
+/toolbox/*.asv
+/toolbox/muifunctions/*.asv
+/toolbox/psfunctions/*.asv

@@ -249,6 +249,9 @@ classdef muiPlots < handle
                     end
                 elseif iscategorical(invar) && isunique(invar)
                     var = categorical(invar,invar,'Ordinal',true); %retains order of invar
+                elseif strcmp(obj.UIset.Type.String,'bar') && ...
+                                   (isdatetime(invar) || isduration(invar))
+                    var = categorical(invar,invar,'Ordinal',true); %retains order of invar
                 else
                     var = invar;
                 end
@@ -315,6 +318,11 @@ classdef muiPlots < handle
                 ytxt = y; y = 1:length(y); ylist = true;
             end
             
+            %check whether RightYaxis button has been set to use right axis
+            if obj.UIset.RightYaxis
+                yyaxis(figax,'right')         %use right axis if true
+            end
+
             %hptype uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hp = hptype(figax,x,y,symb{1},symb{2},obj.Legend,'1');
             hp.UserData = obj.MetaData;
@@ -368,14 +376,9 @@ classdef muiPlots < handle
         function add2Dplot(obj)
             %add data set to existing 2D plot
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
-            figax = hfig.CurrentAxes; 
-            hold(figax,'on');                 
-            if strcmp(obj.UIset.Type.String,'stairs')
-                hp = findobj(figax,'Type','stair'); %Matlab function call and type inconsistent
-            else
-                hp = findobj(figax,'Type',obj.UIset.Type.String);
-            end
-            idline = length(hp)+1;
+            figax = hfig.CurrentAxes;                  
+            hp = allchild(figax); %seems to do what getplothandles does without the validType check
+            idline = numel(hp)+1;
             if isa(figax,'matlab.graphics.axis.PolarAxes')
                 x = deg2rad(x);
             end
@@ -396,11 +399,38 @@ classdef muiPlots < handle
                 warndlg('X-data type not compatible with existing axis')
                 return;
             end
-
+            
+            %check whether RightYaxis button has been set to use right axis
+            %only use hold on if axes has already been defined
+            is2Yaxes = ~isscalar(figax.YAxis);
+            if ~is2Yaxes && obj.UIset.RightYaxis
+                %yyaxis(figax,'left') 
+                yyaxis(figax,'right') 
+            elseif is2Yaxes && obj.UIset.RightYaxis 
+                yyaxis(figax,'right')    
+                hold(figax,'on');
+            elseif is2Yaxes && ~obj.UIset.RightYaxis 
+                %reset y-axis to use the left axis
+                yyaxis(figax,'left') 
+                hold(figax,'on');
+            else
+                hold(figax,'on');
+            end            
+                        
             [hptype,symb] = get2DPlotFunc(obj); %function handle for plot type
             %call uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
             hp(idline) = hptype(figax,x,y,symb{1},symb{2},...
                                             obj.Legend,num2str(idline));
+            
+            %if left and right axes are being used check they are labelled
+            if ~isscalar(figax.YAxis) %NB:can be updated by plot from is2Yaxes
+                if obj.UIset.RightYaxis && isempty(figax.YAxis(2).Label.String)
+                    figax.YAxis(2).Label.String = obj.AxisLabels.Y;
+                elseif ~obj.UIset.RightYaxis && isempty(figax.YAxis(1).Label.String)
+                    figax.YAxis(1).Label.String = obj.AxisLabels.Y;
+                end
+            end
+
             hp(idline).UserData = obj.MetaData;                             
             hp =sortplots(hp);
             hl = legend(figax,hp,'Location','best');
@@ -413,11 +443,7 @@ classdef muiPlots < handle
             [x,y,hfig,fnum,~] = plot2Ddata(obj);
             figax = hfig.CurrentAxes; 
             hold(figax,'on');
-            if strcmp(obj.UIset.Type.String,'stairs')
-                hp = findobj(figax,'Type','stair'); %Matlab function call and type inconsistent
-            else
-                hp = findobj(figax,'Type',obj.UIset.Type.String);
-            end
+            hp = allchild(figax); %seems to do what getplothandles does without the validType check
             hl = findobj('Type','legend','Tag',fnum);
             idline = [];
 
