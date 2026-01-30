@@ -22,10 +22,10 @@ function setXYorder(src,~)
     if strcmp(src.String,'XY')
         src.String = 'YX';
         src.UserData = 1;
-        src. Tooltip = 'Switch from Y-X to X-Y axes';
+        src.Tooltip = 'Switch from Y-X to X-Y axes';
     elseif strcmp(src.String,'YX')
         src.String = 'XY';
         src.UserData = 0;
-        src. Tooltip = 'Switch from X-Y to Y-X axes';
+        src.Tooltip = 'Switch from X-Y to Y-X axes';
     end
 end

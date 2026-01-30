@@ -12,6 +12,7 @@ function [locs,pks] = peaksoverthreshold(var,vthr,method,mdate,tint,outflg)
 %   var - variable
 %   vthr - threshold to be used
 %   method - types of peaks to find
+%            0 = all values above threshold (not just the peaks)
 %            1 = all peaks above threshold
 %            2 = peak within each up-down crossing of threshold
 %            3 = peaks that have a separation of at least tint hours
@@ -38,12 +39,15 @@ function [locs,pks] = peaksoverthreshold(var,vthr,method,mdate,tint,outflg)
     if isrow(var), var = var'; end         %force column variables
     if isrow(mdate), mdate = mdate'; end 
     %minpeakdist =1; minpeakh = 0; %default values in peakseek
-    [alocs,apks] = peakseek(var);  %find all peaks and all location indices
-    idx = find(apks>=vthr);
+    [alocs,apks] = peakseek(var,0);  %find all peaks and all location indices
+    idx = find(apks>vthr);
     pks = zeros(1,1); 
     locs = []; 
     %
-    if method==1   %all peaks above a threshold
+    if method==0
+        locs = find(var>vthr);
+        pks = var(locs);
+    elseif method==1   %all peaks above a threshold
         pks=apks(idx);
         locs=alocs(idx);
         %

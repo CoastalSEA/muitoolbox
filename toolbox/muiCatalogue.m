@@ -1141,6 +1141,10 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             classname = catrec.CaseClass; 
             %clear instance of data set class
             obj.DataSets.(classname)(classrec) = [];
+            if isempty(obj.DataSets.(classname))
+                %remove empty class if no longer any instances
+                obj.DataSets = rmfield(obj.DataSets,classname);
+            end
         end          
 %%
         function indices = getIndices(~,var,value)

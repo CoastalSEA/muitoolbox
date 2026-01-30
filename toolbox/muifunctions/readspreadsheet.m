@@ -95,6 +95,8 @@ function datable = readspreadsheet(filename,isdst,cell_ids,promptxt)
     if istime
         temp = readtimetable(filename,opts,'RowTimes','Date');
         rownames = temp.Properties.RowTimes;
+        fmt  = inputdlg({'Datetime format:'},'Import',1,{'dd-MM-yyyy HH:mm:ss'});
+        rownames.Format = fmt{1};
         datable = timetable2table(temp,'ConvertRowTimes',false);
         clear temp
     else

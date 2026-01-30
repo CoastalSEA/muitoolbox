@@ -23,10 +23,10 @@ function setExcNaN(src,~)
     if strcmp(src.String,'+N')
         src.String = '-N';
         src.UserData = 1;
-        src. Tooltip = 'Exclude NaNs in output';
+        src.Tooltip = 'Exclude NaNs in output';
     elseif strcmp(src.String,'-N')
         src.String = '+N';
         src.UserData = 0;
-        src. Tooltip = 'Include NaNs in output';
+        src.Tooltip = 'Include NaNs in output';
     end
 end 

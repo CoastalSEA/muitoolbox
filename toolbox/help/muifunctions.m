@@ -171,6 +171,10 @@
 % - callback function for button to switch X and Y data (eg on
 % a UI selecting data for plotting)
 %
+% * *setRightYaxis.m*
+% - callback function for button to switch between using the left and right
+% Y-axis
+%
 % * *sort_var.m*
 % - function to sort avar array to order defined by a selected index or in 
 % ascending order Input variable can be numeric, character, string or 

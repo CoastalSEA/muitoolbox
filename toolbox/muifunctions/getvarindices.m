@@ -34,15 +34,15 @@ function valididx = getvarindices(var,limtxt)
             
             if isdatetime(var) 
                 try 
-                    minB = datetime(lowerlimit);
-                    maxB = datetime(upperlimit);
+                    minB = datetime(lowerlimit,'InputFormat',var.Format);
+                    maxB = datetime(upperlimit,'InputFormat',var.Format);
                     if strcmp(var.Format,'y')
                         maxB = maxB+364;
                     end
                 catch
                     try
-                        minB = datetime(lowerlimit,'InputFormat',var.Format);
-                        maxB = datetime(upperlimit,'InputFormat',var.Format);
+                        minB = datetime(lowerlimit);
+                        maxB = datetime(upperlimit);
                     catch
                         warndlg('Specified Date Range is not valid');                    
                         return;
@@ -77,7 +77,7 @@ function valididx = getvarindices(var,limtxt)
                 loweridx = find(var>=minV);
                 upperidx = find(var<=maxV); 
                 if ~isempty(loweridx) && ~isempty(upperidx)
-                    if length(loweridx)==1 ||  length(upperidx)==1
+                    if isscalar(loweridx) ||  isscalar(upperidx)
                         %handle case of only one value in the index range
                         minB = minV-minV/100; %arbitrary small offset
                         maxB = maxV+maxV/100;
