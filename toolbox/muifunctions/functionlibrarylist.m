@@ -47,7 +47,8 @@ fname = {'moving(x,n,''func'')';...                                         %1
          '[z.*repmat(1,length(t)),length(x),length(y))]';...                %25
          '[NaN;diff(x)]';...                                                %26
          '[diff(x);NaN]';...                                                %27
-         'diffpadded(var,n,dim,ispad)'};                                    %28
+         'diffpadded(var,n,dim,ispad)';...                                  %28
+         'plot_difference(x,t,y,t)'};                                       %29
  
 fvars = {'Any variable, number of points in sample window, function (optional, default is mean). Use %time to include time dimension in result';...
          'Any variable, Time, duration to average over - ''N u'' ( where ''u'' is y,d,h,m, or s), duration of time step - ''N u'' ( where ''u'' is y,d,h,m, or s), function (optional, default is mean)';...  
@@ -76,7 +77,8 @@ fvars = {'Any variable, number of points in sample window, function (optional, d
          'X and Y are dimension variables, Z is a 2D dstable variable and T is time';...
          'Variable to be differenced';...
          'Variable to be differenced';...
-         'Variable to be differenced, nth difference, dimension to use, ispad true to pad end'};        
+         'Variable to be differenced, nth difference, dimension to use, ispad true to pad end';...
+         'Variables X and Y to be plotted as X-Y. Different length variables interpolated to shorter'};        
        
 fdesc = {'Stats - Moving average (or similar statistic)';...
          'Stats - Moving average (or similar) of timeseries, over defined duration, advancing at defined interval';...
@@ -105,7 +107,8 @@ fdesc = {'Stats - Moving average (or similar statistic)';...
          'Data - Sub-sample a time dependent array variable';...
          'Data - Differences assigned to the end of the difference interval';...
          'Data - Differences assigned to the beginning of the difference interval';...
-         'Data - Differences of array padded along selected dimension'};
+         'Data - Differences of array padded along selected dimension';...
+         'PLot - Plot the difference between two variables (x-y)'};
 
 classmeta = metaclass(mobj);
 classname = classmeta.Name;
@@ -113,17 +116,17 @@ classname = classmeta.Name;
 %now define any subselection so that only valid functions are displayed
 switch classname
     case 'Asmita'
-        idinc = [1:9,24:28];
+        idinc = [1:9,24:29];
     case {'CoastalTools','SpitDeltaSEM','WaveRayModel'}
-        idinc = [1:22,24:28];
+        idinc = [1:22,24:29];
     case {'TableViewer','EstuaryDB'}
-        idinc = [1:9,15,24:28];
+        idinc = [1:9,15,24:29];
     case 'ChannelForm'
-        idinc = [1,7:9,24:28];
+        idinc = [1,7:9,24:29];
     case 'Diffusion'
         idinc = [1,23:28];   
     otherwise
-        idinc = [1,7:9,24:28];
+        idinc = [1,7:9,24:29];
 end
 
 lib.fname = fname(idinc);
