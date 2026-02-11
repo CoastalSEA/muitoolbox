@@ -44,7 +44,13 @@ function [valididx,range,cats] = listrange(var,limtxt)
             upperlimit = limtxt(idx(2)+1:end);
             minV = categorical({lowerlimit},cats,'Ordinal',true);
             maxV = categorical({upperlimit},cats,'Ordinal',true);
-            valididx = find(var>=(minV) & var<=(maxV));
+            checkMin = find(var==minV);
+            checkMax = find(var==maxV);
+            if checkMin<checkMax
+                valididx = find(var>=(minV) & var<=(maxV));
+            else
+                valididx = find(var>=(maxV) & var<=(minV));
+            end
         end
     end  
 end

@@ -130,6 +130,9 @@ classdef inputUI < handle
                     %popupmenu that includes an edit button
                     hw(2).Callback = @(src,evt)editlist(src,evt);
                     hw(2).UserData = settings.UserData{i};
+                elseif strcmp(settings.Style{i},'popupmenu') && ...
+                                         ~isempty(settings.UserData{1})
+                    hw(1).Value = settings.UserData{i};
                 end
             end
             

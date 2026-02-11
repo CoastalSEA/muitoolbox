@@ -1,12 +1,17 @@
-
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-   <!--
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>muiCatalogue</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-12-02"><meta name="DC.source" content="muicatalogue.m"><style type="text/css">
+      -->
+<title>muiCatalogue</title>
+<meta name="generator" content="MATLAB 24.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2026-02-02">
+<meta name="DC.source" content="muicatalogue.m">
+<style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,44 +72,186 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>muiCatalogue</h1><!--introduction--><p>Class to manage catalogue of classes held in the mui comprising both the catlogue record and the associated datasets.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#3">Description</a></li><li><a href="#9">muiCatalogue properties</a></li><li><a href="#10">muiCatalogue methods</a></li><li><a href="#51">muiCatalogue methods used in the default Project menu</a></li><li><a href="#66">See Also</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">muicat = muiCatalogue;
-</pre><h2 id="3">Description</h2><p>Imported and model data sets are all assigned to a handle in muiCatalogue which is in turn assigned to a handle in the main UI.</p><p>Within UIs developed using the <i>muitoolbox</i>, the access syntax is as follows (see <a href="matlab:doc('muitoolbox')">muitoolbox</a> for details of the main UI structure):</p><pre class="language-matlab">mobj.Cases = muiCatalogue;  <span class="comment">%the main UI holds an instance of muiCatalogue in the Cases property</span>
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>muiCatalogue</h1>
+<!--introduction-->
+<p>Class to manage catalogue of classes held in the mui comprising both the catlogue record and the associated datasets.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Syntax</a>
+</li>
+<li>
+<a href="#3">Description</a>
+</li>
+<li>
+<a href="#9">muiCatalogue properties</a>
+</li>
+<li>
+<a href="#10">muiCatalogue methods</a>
+</li>
+<li>
+<a href="#51">muiCatalogue methods used in the default Project menu</a>
+</li>
+<li>
+<a href="#66">See Also</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Syntax</h2>
+<pre class="language-matlab">muicat = muiCatalogue;
+</pre>
+<h2 id="3">Description</h2>
+<p>Imported and model data sets are all assigned to a handle in muiCatalogue which is in turn assigned to a handle in the main UI.</p>
+<p>Within UIs developed using the <i>muitoolbox</i>, the access syntax is as follows (see <a href="matlab:doc('muitoolbox')">muitoolbox</a> for details of the main UI structure):</p>
+<pre class="language-matlab">mobj.Cases = muiCatalogue;  <span class="comment">%the main UI holds an instance of muiCatalogue in the Cases property</span>
 mobj.Cases.Catalogue = dscatalogue;                   <span class="comment">%catalogue table</span>
 mobj.Cases.DataSets.(classname)(classrec) = classobj; <span class="comment">%an instance of a class</span>
-</pre><p>Note: <i>classrec</i> is not the same as <i>caserec</i>. The former, <i>classrec</i>, is an instance of a class where there can be multiple instances, whereas <i>caserec</i> is the current index in the Catalogue (which may change if cases are deleted). For models and data that are based on the muiDataSet abstract class, the CaseIndex property provides a unique identifier. The <i>case id</i>, <i>case record</i> and <i>class record</i> can be found from each other using the following methods:</p><pre class="language-matlab">caserec = caseRec(muicat,cobj.CaseIndex); <span class="comment">%cobj is the instance of a Case</span>
+</pre>
+<p>Note: <i>classrec</i> is not the same as <i>caserec</i>. The former, <i>classrec</i>, is an instance of a class where there can be multiple instances, whereas <i>caserec</i> is the current index in the Catalogue (which may change if cases are deleted). For models and data that are based on the muiDataSet abstract class, the CaseIndex property provides a unique identifier. The <i>case id</i>, <i>case record</i> and <i>class record</i> can be found from each other using the following methods:</p>
+<pre class="language-matlab">caserec = caseRec(muicat,cobj.CaseIndex); <span class="comment">%cobj is the instance of a Case</span>
 caseid = caseID(muicat,caserec);
 classrec = classRec(muicat,caserec);
-</pre><p>For further details on <b>caseRec</b> and <b>caseID</b> see the <a href="matlab:doc('dscatalogue')">dscatalogue</a> documentation. For <b>classRec</b> see below.</p><h2 id="9">muiCatalogue properties</h2><div><ul><li><b>Catalogue</b> inherited property from <a href="matlab:doc('dscatalogue')">dscatalogue</a> that holds the case index, description, class name and class type.</li><li><b>DataSets</b> handle to dataset class instances, stored as a struct with the field names derived from the class names.</li></ul></div><h2 id="10">muiCatalogue methods</h2><p><b>setCase</b> add a case to the Catalogue and assign to DataSets.</p><pre class="language-matlab">setCase(muicat,cobj,varargin) <span class="comment">%where varargin are as defined for addRecord method in dscatalogue</span>
-</pre><p><b>getCase</b> retrieve the class instance, class record and catalogue record</p><pre class="language-matlab">[cobj,classrec,catrec] = getCase(muicat,caserec)  <span class="comment">%caserec is the current index of the record in the catalogue</span>
-</pre><p><b>getCases</b> retrieve an array of objects held as DataSets based on <i>caserecs</i>.</p><pre class="language-matlab">cobj = getCases(muicat,caserecs) <span class="comment">%where caserecs is a list of index values</span>
-</pre><p><b>getDataSet</b> retrieve a case and return the selected dataset, the numeric case record id, the numeric dataset id and associated dataset name (the dataset names are used in the Data property struct of class objects that inherits <a href="matlab:doc('muidataset')">muiDataSet</a>.</p><pre class="language-matlab">[dst,caserec,idset,dstxt] = getDataset(muicat,caserec,idset)
-</pre><p>where the inputs value of <i>caserec</i> can be the case desecription, or the case record number (not the CaseIndex), and <i>idset</i> can be the dataset name, or the numeric dataset id.</p><p><b>getProperty</b> extract data based on the selection made using a UI that inherits <a href="matlab:doc('muidataui')">muiDataUI</a> and provides the UIselection struct. The UIselection struct defines the case, dataset, variable and subselections of the data based on any of the dimensions of the variable. The <i>outopt</i> input defines the format of the output, <i>props</i>. The options available include an 'array', 'table', 'dstable', a 'splittable' (where the 2nd dimension has been split into variables), or a 'timeseries' data set to return a tscollection.</p><pre class="language-matlab">props = getProperty(muicat,UIsel,outopt);
-</pre><p><b>selectCase</b> select a case to use with options to subselect, where <i>promptxt</i> is the text to prompt user, <i>mode</i> is 'single' or 'multiple' selection mode and <i>selopt</i> is an option value from 0-3 (0 = no subselection, 1 = subselect using class, 2 = subselect using type, 3 = subselect using both). Returns the case record ids for the selected cases and a check value of ok=1 for a correct selection and ok=0 if the user cancels.</p><pre class="language-matlab">[caserec,ok] = selectCase(muicat,promptxt,mode,selopt);
-</pre><p><b>selectCaseObj</b> select a single case and return the class instance and the class record id, where <i>casetype</i> and <i>classname</i> can be used to control the Case selection. They can be empty, or cell arrays of types/classes, e.g. [], or {'type1','type2'} and {class1'}. The <i>promptxt</i> input overides the default prompt of 'Select Case'.</p><pre class="language-matlab">[cobj,classrec] = selectCaseObj(muicat,casetype,classname,promptxt)
-</pre><p>Inputs for <i>casetype</i>, <i>classname</i> and <i>promptxt</i> are optional, or empty, but must be included in order, e.g.:</p><pre class="language-matlab">[cobj,classrec] = selectCaseObj(muicat);                <span class="comment">%no sub-selection and default prompt</span>
+</pre>
+<p>For further details on <b>caseRec</b> and <b>caseID</b> see the <a href="matlab:doc('dscatalogue')">dscatalogue</a> documentation. For <b>classRec</b> see below.</p>
+<h2 id="9">muiCatalogue properties</h2>
+<div>
+<ul>
+<li>
+<b>Catalogue</b> inherited property from <a href="matlab:doc('dscatalogue')">dscatalogue</a> that holds the case index, description, class name and class type.</li>
+<li>
+<b>DataSets</b> handle to dataset class instances, stored as a struct with the field names derived from the class names.</li>
+</ul>
+</div>
+<h2 id="10">muiCatalogue methods</h2>
+<p>
+<b>setCase</b> add a case to the Catalogue and assign to DataSets.</p>
+<pre class="language-matlab">setCase(muicat,cobj,varargin) <span class="comment">%where varargin are as defined for addRecord method in dscatalogue</span>
+</pre>
+<p>
+<b>getCase</b> retrieve the class instance, class record and catalogue record</p>
+<pre class="language-matlab">[cobj,classrec,catrec] = getCase(muicat,caserec)  <span class="comment">%caserec is the current index of the record in the catalogue</span>
+</pre>
+<p>
+<b>getCases</b> retrieve an array of objects held as DataSets based on <i>caserecs</i>.</p>
+<pre class="language-matlab">cobj = getCases(muicat,caserecs) <span class="comment">%where caserecs is a list of index values</span>
+</pre>
+<p>
+<b>getDataSet</b> retrieve a case and return the selected dataset, the numeric case record id, the numeric dataset id and associated dataset name (the dataset names are used in the Data property struct of class objects that inherits <a href="matlab:doc('muidataset')">muiDataSet</a>.</p>
+<pre class="language-matlab">[dst,caserec,idset,dstxt] = getDataset(muicat,caserec,idset)
+</pre>
+<p>where the inputs value of <i>caserec</i> can be the case desecription, or the case record number (not the CaseIndex), and <i>idset</i> can be the dataset name, or the numeric dataset id.</p>
+<p>
+<b>getProperty</b> extract data based on the selection made using a UI that inherits <a href="matlab:doc('muidataui')">muiDataUI</a> and provides the UIselection struct. The UIselection struct defines the case, dataset, variable and subselections of the data based on any of the dimensions of the variable. The <i>outopt</i> input defines the format of the output, <i>props</i>. The options available include an 'array', 'table', 'dstable', a 'splittable' (where the 2nd dimension has been split into variables), or a 'timeseries' data set to return a tscollection.</p>
+<pre class="language-matlab">props = getProperty(muicat,UIsel,outopt);
+</pre>
+<p>
+<b>selectCase</b> select a case to use with options to subselect, where <i>promptxt</i> is the text to prompt user, <i>mode</i> is 'single' or 'multiple' selection mode and <i>selopt</i> is an option value from 0-3 (0 = no subselection, 1 = subselect using class, 2 = subselect using type, 3 = subselect using both). Returns the case record ids for the selected cases and a check value of ok=1 for a correct selection and ok=0 if the user cancels.</p>
+<pre class="language-matlab">[caserec,ok] = selectCase(muicat,promptxt,mode,selopt);
+</pre>
+<p>
+<b>selectCaseObj</b> select a single case and return the class instance and the class record id, where <i>casetype</i> and <i>classname</i> can be used to control the Case selection. They can be empty, or cell arrays of types/classes, e.g. [], or {'type1','type2'} and {class1'}. The <i>promptxt</i> input overides the default prompt of 'Select Case'.</p>
+<pre class="language-matlab">[cobj,classrec] = selectCaseObj(muicat,casetype,classname,promptxt)
+</pre>
+<p>Inputs for <i>casetype</i>, <i>classname</i> and <i>promptxt</i> are optional, or empty, but must be included in order, e.g.:</p>
+<pre class="language-matlab">[cobj,classrec] = selectCaseObj(muicat);                <span class="comment">%no sub-selection and default prompt</span>
 [cobj,classrec] = selectCaseObj(muicat,[],{<span class="string">'c1'</span>,<span class="string">'c2'</span>}); <span class="comment">%selection uses classes c1 and c2 and default prompt</span>
-</pre><p><b>selectCaseDatasetRow</b> select a row from a Dataset of a Case and return the class instance and class record id and the row id. The call is similar to <b>selectCaseObj</b> above, with the optional addition of the id of the dataset in the Data struct. If this is omitted and there is more than one dataset the user is prompted to select a dataset.</p><pre class="language-matlab">[cobj,classrec,irow] = selectCaseDatasetRow(muicat,casetype,classname,promptxt,itable);
-</pre><p><b>selectCaseDataset</b> select a case and and dataset and return the class instance, the class record id, datesetnames and the id of the selected dataset, where <i>casetype</i> and <i>classname</i> can be used to control the Case selection and <i>promptxt</i> is used as a prompt for case selection.</p><pre class="language-matlab">[cobj,classrec,datasets,idd] = selectCaseDataset(muicat,casetype,classname,promptxt);
-</pre><p><b>selectCaseDatasetVariable</b> prompt user to select a Case, Dataset (if not specified) and a variable, return instance and variable id. All inputs except muicat are optional. if unspecified pass as []</p><pre class="language-matlab">[cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(muicat,casetype,classname,promptxt,idd);
+</pre>
+<p>
+<b>selectCaseDatasetRow</b> select a row from a Dataset of a Case and return the class instance and class record id and the row id. The call is similar to <b>selectCaseObj</b> above, with the optional addition of the id of the dataset in the Data struct. If this is omitted and there is more than one dataset the user is prompted to select a dataset.</p>
+<pre class="language-matlab">[cobj,classrec,irow] = selectCaseDatasetRow(muicat,casetype,classname,promptxt,itable);
+</pre>
+<p>
+<b>selectCaseDataset</b> select a case and and dataset and return the class instance, the class record id, datesetnames and the id of the selected dataset, where <i>casetype</i> and <i>classname</i> can be used to control the Case selection and <i>promptxt</i> is used as a prompt for case selection.</p>
+<pre class="language-matlab">[cobj,classrec,datasets,idd] = selectCaseDataset(muicat,casetype,classname,promptxt);
+</pre>
+<p>
+<b>selectCaseDatasetVariable</b> prompt user to select a Case, Dataset (if not specified) and a variable, return instance and variable id. All inputs except muicat are optional. if unspecified pass as []</p>
+<pre class="language-matlab">[cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(muicat,casetype,classname,promptxt,idd);
 cobj = selectCaseDatasetVariable(muicat);
 [cobj,classrec] = selectCaseDatasetVariable(muicat,[],classname);
-</pre><p><b>selectDataset</b> select a dataset table to use for a given class instance, cobj. Returns dataset name, dsname, and index, idd.</p><pre class="language-matlab">[dsname,idd] = selectDataset(muicat,cobj);
-</pre><p><b>useCase</b> select which existing data set to use and pass to another method, where <i>mode</i> is 'none', 'single' or 'multiple' selection mode, <i>classname</i> is the name of the class object to be used to call the method defined by the character vector in <i>action</i>. If the <i>mode</i> is 'single' or 'multiple', the user selects a case from a list. If the <i>mode</i> is 'none' the <i>action</i> is assumed to be a static method and is called using (<i>classname</i>).(<i>action</i>). The method uses the Matlab function <a href="matlab:doc('str2func')">str2func</a> to call function defined by <i>action</i>.</p><pre class="language-matlab">useCase(muicat,mode,classname,action);
-</pre><p><b>updateCase</b> update the saved record with a new version of the class instance, where <i>cobj</i> is the new class instance, <i>classrec</i> is the id of the instance to be updated and <i>ismsg</i> is a logical flag which true if a message is to be displayed upon completion.</p><pre class="language-matlab">updateCase(obj,cobj,classrec,ismsg)
-</pre><p><b>addVariable2CaseDS</b> add a variable to an existing Case dataset in the Catalogue, where <i>caserec</i> is the existing record to use, <i>newvar</i> is the data for the variable to be added and <i>dsp</i> is a <a href="matlab:doc('dsproperties')">dsproperties</a>, template for the variable being added. The user is prompted to edit the variable definition before it is added as a new variable to an existing <a href="matlab:doc('dstable')">dstable</a> dataset.</p><pre class="language-matlab">addVariable2CaseDS(muicat,caserec,newvar,dsp)
-</pre><p><b>activateTables</b> activates the dynamic properties of all the tables held as Cases in the Catalogue. When a <a href="matlab:doc('dstable')">dsctable</a> is loaded the dynamic properties need to be restored. Calls the dstable function <i>activatedynamicprops</i> which initialises the dynamic properties for the variables in the dstable. This is useful when loading classes that contain dstables from a file. It is used by the <i>loadModel</i> function in <a href="matlab:doc('muimodelui')">muiModelUI</a>.</p><pre class="language-matlab">activateTables(muicat)
-</pre><p><b>classRec</b> find the class record number using the case record  in the Catalogue Case list, where <i>caserec</i> is the existing record to use.</p><pre class="language-matlab">classrec = classRec(muicat,caserec);
-</pre><p><b>modifyVariableType</b> select a variable and modify that data type of the variable used mainly to make data catagorical or ordinal</p><pre class="language-matlab">modifyVariableType(muicat)
-</pre><p><b>setDataClassID</b> get the index for a new instance of class held in DataSets, where <i>classname</i> is the name of the class to use.</p><pre class="language-matlab">id_class = setDataClassID(muicat,classname);
-</pre><p><b>setPropsStruct</b> initialise struct used in getProperty</p><pre class="language-matlab">props = setPropsStruct(muicat);
-</pre><h2 id="51">muiCatalogue methods used in the default Project menu</h2><p>The example interface provided in <a href="matlab:doc('modelui')">ModelUI</a> uses a number of tools that manipulate Cases held in muiCatalogue. These are accessed from the Project&gt;Cases menu, which is standard for most Apps.</p><p><b>editCase</b> edit Case description of the selected case. Calls <i>editRecord</i> in <a href="matlab:doc('dscatalogue')">dscatalogue</a> to update the catalogue and updates the Description property in any dstables held in the Case DataSets property.</p><pre class="language-matlab">editCase(muicat,caserec);          <span class="comment">%caserec is optonal</span>
-</pre><p><b>saveCase</b> writes the results for a selected case to an Excel file, or as dstable or table in a mat file. The Excel option is only available if the variables are column vectors (e.g. function of time). The <i>caserec</i> input is optional and if it is not defined the user is prompted to select a case.</p><pre class="language-matlab">saveCase(muicat,caserec);          <span class="comment">%caserec is optonal</span>
-</pre><p><b>deleteCases</b> select one or more records and delete records from catalogue and class instances. The <i>caserec</i> input is optional and if it is not defined the user is prompted to select case(s).</p><pre class="language-matlab">deleteCases(muicat,caserec);       <span class="comment">%caserec is optonal</span>
-</pre><p><b>reloadCase</b> reload model input variables as the current settings. Where <i>mobj</i> is a handle to the main UI and <i>caserec</i> is optional and if it is not defined the user is prompted to select a case.</p><pre class="language-matlab">reloadCase(muicat,mobj,caserec);   <span class="comment">%caserec is optonal</span>
-</pre><p><b>viewCaseSettings</b> view the saved input data for a selected Case. Where <i>caserec</i> is optional and if it is not defined the user is prompted to select a case.</p><pre class="language-matlab">viewCaseSettings(muicat,caserec)   <span class="comment">%caserec is optonal</span>
-</pre><p><b>importCase</b> import a case from a mat file that was saved using exportCase</p><pre class="language-matlab">importCase(muicat);
-</pre><p><b>exportCase</b> save selected case to a mat file. The <i>caserec</i> input is optional and if it is not defined the user is prompted to select a case.</p><pre class="language-matlab">exportCase(muicat,caserec);        <span class="comment">%caserec is optonal</span>
-</pre><h2 id="66">See Also</h2><p><a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muidataset')">muiDataSet</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dscatalogue')">dscatalogue</a>.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+</pre>
+<p>
+<b>selectDataset</b> select a dataset table to use for a given class instance, cobj. Returns dataset name, dsname, and index, idd.</p>
+<pre class="language-matlab">[dsname,idd] = selectDataset(muicat,cobj);
+</pre>
+<p>
+<b>useCase</b> select which existing data set to use and pass to another method, where <i>mode</i> is 'none', 'single' or 'multiple' selection mode, <i>classname</i> is the name of the class object to be used to call the method defined by the character vector in <i>action</i>. If the <i>mode</i> is 'single' or 'multiple', the user selects a case from a list. If the <i>mode</i> is 'none' the <i>action</i> is assumed to be a static method and is called using (<i>classname</i>).(<i>action</i>). The method uses the Matlab function <a href="matlab:doc('str2func')">str2func</a> to call function defined by <i>action</i>.</p>
+<pre class="language-matlab">useCase(muicat,mode,classname,action);
+</pre>
+<p>
+<b>updateCase</b> update the saved record with a new version of the class instance, where <i>cobj</i> is the new class instance, <i>classrec</i> is the id of the instance to be updated and <i>ismsg</i> is a logical flag which true if a message is to be displayed upon completion.</p>
+<pre class="language-matlab">updateCase(obj,cobj,classrec,ismsg)
+</pre>
+<p>
+<b>addVariable2CaseDS</b> add a variable to an existing Case dataset in the Catalogue, where <i>caserec</i> is the existing record to use, <i>newvar</i> is the data for the variable to be added and <i>dsp</i> is a <a href="matlab:doc('dsproperties')">dsproperties</a>, template for the variable being added. The user is prompted to edit the variable definition before it is added as a new variable to an existing <a href="matlab:doc('dstable')">dstable</a> dataset.</p>
+<pre class="language-matlab">addVariable2CaseDS(muicat,caserec,newvar,dsp)
+</pre>
+<p>
+<b>activateTables</b> activates the dynamic properties of all the tables held as Cases in the Catalogue. When a <a href="matlab:doc('dstable')">dsctable</a> is loaded the dynamic properties need to be restored. Calls the dstable function <i>activatedynamicprops</i> which initialises the dynamic properties for the variables in the dstable. This is useful when loading classes that contain dstables from a file. It is used by the <i>loadModel</i> function in <a href="matlab:doc('muimodelui')">muiModelUI</a>.</p>
+<pre class="language-matlab">activateTables(muicat)
+</pre>
+<p>
+<b>classRec</b> find the class record number using the case record in the Catalogue Case list, where <i>caserec</i> is the existing record to use.</p>
+<pre class="language-matlab">classrec = classRec(muicat,caserec);
+</pre>
+<p>
+<b>modifyVariableType</b> select a variable and modify that data type of the variable used mainly to make data catagorical or ordinal</p>
+<pre class="language-matlab">modifyVariableType(muicat)
+</pre>
+<p>
+<b>setDataClassID</b> set the index for a new instance of class held in DataSets, where <i>classname</i> is the name of the class to use.</p>
+<pre class="language-matlab">id_class = setDataClassID(muicat,classname);
+</pre>
+<p>
+<b>setPropsStruct</b> initialise struct used in getProperty</p>
+<pre class="language-matlab">props = setPropsStruct(muicat);
+</pre>
+<h2 id="51">muiCatalogue methods used in the default Project menu</h2>
+<p>The example interface provided in <a href="matlab:doc('modelui')">ModelUI</a> uses a number of tools that manipulate Cases held in muiCatalogue. These are accessed from the Project&gt;Cases menu, which is standard for most Apps.</p>
+<p>
+<b>editCase</b> edit Case description of the selected case. Calls <i>editRecord</i> in <a href="matlab:doc('dscatalogue')">dscatalogue</a> to update the catalogue and updates the Description property in any dstables held in the Case DataSets property.</p>
+<pre class="language-matlab">editCase(muicat,caserec);          <span class="comment">%caserec is optonal</span>
+</pre>
+<p>
+<b>saveCase</b> writes the results for a selected case to an Excel file, or as dstable or table in a mat file. The Excel option is only available if the variables are column vectors (e.g. function of time). The <i>caserec</i> input is optional and if it is not defined the user is prompted to select a case.</p>
+<pre class="language-matlab">saveCase(muicat,caserec);          <span class="comment">%caserec is optonal</span>
+</pre>
+<p>
+<b>deleteCases</b> select one or more records and delete records from catalogue and class instances. The <i>caserec</i> input is optional and if it is not defined the user is prompted to select case(s).</p>
+<pre class="language-matlab">deleteCases(muicat,caserec);       <span class="comment">%caserec is optonal</span>
+</pre>
+<p>
+<b>reloadCase</b> reload model input variables as the current settings. Where <i>mobj</i> is a handle to the main UI and <i>caserec</i> is optional and if it is not defined the user is prompted to select a case.</p>
+<pre class="language-matlab">reloadCase(muicat,mobj,caserec);   <span class="comment">%caserec is optonal</span>
+</pre>
+<p>
+<b>viewCaseSettings</b> view the saved input data for a selected Case. Where <i>caserec</i> is optional and if it is not defined the user is prompted to select a case.</p>
+<pre class="language-matlab">viewCaseSettings(muicat,caserec)   <span class="comment">%caserec is optonal</span>
+</pre>
+<p>
+<b>importCase</b> import a case from a mat file that was saved using exportCase</p>
+<pre class="language-matlab">importCase(muicat);
+</pre>
+<p>
+<b>exportCase</b> save selected case to a mat file. The <i>caserec</i> input is optional and if it is not defined the user is prompted to select a case.</p>
+<pre class="language-matlab">exportCase(muicat,caserec);        <span class="comment">%caserec is optonal</span>
+</pre>
+<h2 id="66">See Also</h2>
+<p>
+<a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muidataset')">muiDataSet</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dscatalogue')">dscatalogue</a>.</p>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
+<br>
+</p>
+</div>
+<!--
 ##### SOURCE BEGIN #####
 %% muiCatalogue
 % Class to manage catalogue of classes held in the mui comprising both the
@@ -297,7 +444,7 @@ cobj = selectCaseDatasetVariable(muicat);
 %   modifyVariableType(muicat)
 
 %%
-% *setDataClassID* get the index for a new instance of class held in
+% *setDataClassID* set the index for a new instance of class held in
 % DataSets, where _classname_ is the name of the class to use.
 %%
 %   id_class = setDataClassID(muicat,classname);
@@ -365,4 +512,6 @@ cobj = selectCaseDatasetVariable(muicat);
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muidataset') muiDataSet>,
 % <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dscatalogue') dscatalogue>.
 ##### SOURCE END #####
---></body></html>
+-->
+</body>
+</html>

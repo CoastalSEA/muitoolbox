@@ -20,35 +20,36 @@ function lib = functionlibrarylist(mobj)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-fname = {'moving(x,n,''func'')';...                                         %1
-         'movingtime(x,t,''tdur'',''tstep'',''func'')';...                  %2
-         'downsample(x,t,''period'',''func'')';...                          %3
-         'interpwithnoise(x,t,npad,scale,''method'',ispos)';...             %4
-         'subsample_ts(x,t,mobj,''method'')';...                            %5
-         'conditional_subsample(x,t,thr,mobj,''method'')';...               %6
+fname = {'moving(x, n, ''func'')';...                                       %1
+         'movingtime(x, t, ''tdur'', ''tstep'', ''func'')';...              %2
+         'downsample(x, t, ''period'', ''func'')';...                       %3
+         'interpwithnoise(x, t, npad,scale, ''method'', ispos)';...         %4
+         'subsample_ts(x, t, mobj, ''method'')';...                         %5
+         'conditional_subsample(x, t, thr, mobj, ''method'')';...           %6
          'scale_variables(dst)';...                                         %7
-         'phaseplot(x,y,t)';...                                             %8
-         'recursive_plot(x,''varname'',nint)';...                           %9
-         'scale_waterlevels(x,t,issave,isplot)';...                         %10
-         'addslrtotides(x,t,delta,exp-rate,pivot-year)';...                 %11     
-         'tidalrange(x,t,issave,isplot)';...                                %12
-         'tidalrange_nltc(x,t,issave,isplot,''titletext'')';...             %13
-         'waterlevelfreqplots(x,t)';...                                     %14
-         'frequencyanalysis(x,t,''vardesc'')';...                           %15
-         'wave_steepness(x,y,z,t)';...                                      %16
-         'wave_scatter(dst)';...                                            %17
-         'wave_scatter_3d(x,y,z)';...                                       %18
-         'beachtransportratio(x,theta,isvector)';...                        %19
-         'littoraldriftstats(x,t,''period'')';...                           %20
-         'posneg_dv_stats(x,t,''varlabel'')';...                            %21
-         'binned_wave_climate(x,y,z) or (dst)';...                          %22
-         'userderivedoutput(t,x,y,z,flag)';...                              %23
-         '[z.*repmat(1,1,length(x),length(y))]';...                         %24
-         '[z.*repmat(1,length(t)),length(x),length(y))]';...                %25
-         '[NaN;diff(x)]';...                                                %26
-         '[diff(x);NaN]';...                                                %27
-         'diffpadded(var,n,dim,ispad)';...                                  %28
-         'plot_difference(x,t,y,t)'};                                       %29
+         'phaseplot(x, y, t)';...                                           %8
+         'recursive_plot(x, ''varname'', nint)';...                         %9
+         'scale_waterlevels(x, t, issave, isplot)';...                      %10
+         'addslrtotides(x, t, delta, exp-rate, pivot-year)';...             %11     
+         'tidalrange(x, t, issave, isplot)';...                             %12
+         'tidalhighlow(x, t)';...                                           %13
+         'tidalrange_nltc(x, t, issave, isplot, ''titletext'')';...         %14
+         'waterlevelfreqplo ts(x, t)';...                                   %15
+         'frequencyanalysis(x, t, ''vardesc'')';...                         %16
+         'wave_steepness(x, y, z, t)';...                                   %17
+         'wave_scatter(dst)';...                                            %18
+         'wave_scatter_3d(x, y, z)';...                                     %19
+         'beachtransportratio(x, theta, isvector)';...                      %20
+         'littoraldriftstats(x, t, ''period'')';...                         %21
+         'posneg_dv_stats(x, t, ''varlabel'')';...                          %22
+         'binned_wave_climate(x, y, z) or (dst)';...                        %23
+         'userderivedoutput(t, x, y, z, flag)';...                          %24
+         '[z.*repmat(1, 1, length(x), length(y))]';...                      %25
+         '[z.*repmat(1, length(t)), length(x), length(y))]';...             %26
+         '[NaN; diff(x)]';...                                               %27
+         '[diff(x); NaN]';...                                               %28
+         'diffpadded(var, n, dim, ispad)';...                               %29
+         'plot_difference(dst, isangle, ''method'')'};                      %30
  
 fvars = {'Any variable, number of points in sample window, function (optional, default is mean). Use %time to include time dimension in result';...
          'Any variable, Time, duration to average over - ''N u'' ( where ''u'' is y,d,h,m, or s), duration of time step - ''N u'' ( where ''u'' is y,d,h,m, or s), function (optional, default is mean)';...  
@@ -62,6 +63,7 @@ fvars = {'Any variable, number of points in sample window, function (optional, d
          'Any variable, Time, true to return range values, true to plot results';...
          'WaterLevels, Time, slr in 1900, exponential rate, pivot year';... 
          'WaterLevels, Time, true to return range values, true to plot results';...
+         'WaterLevels, Time';...
          'WaterLevels, Time, true to return fitted values, true to plot results, text to use on plot';...
          'WaterLevels, Time';...
          'Variable, Time, Variable description';...
@@ -78,7 +80,7 @@ fvars = {'Any variable, number of points in sample window, function (optional, d
          'Variable to be differenced';...
          'Variable to be differenced';...
          'Variable to be differenced, nth difference, dimension to use, ispad true to pad end';...
-         'Variables X and Y to be plotted as X-Y. Different length variables interpolated to shorter'};        
+         'Variables X and Y to be plotted as X-Y. Different length variables interpolated to shorter. isangle=true if directions in degrees. method optional default is linear'};        
        
 fdesc = {'Stats - Moving average (or similar statistic)';...
          'Stats - Moving average (or similar) of timeseries, over defined duration, advancing at defined interval';...
@@ -92,6 +94,7 @@ fdesc = {'Stats - Moving average (or similar statistic)';...
          'Data - Scale the water level range by factors for +ve and -ve values';...
          'Data - Add sea level rise to a water level time series (uses exp fun)';...
          'Data - Derive tidal range and mean values from water level timeseries';...
+         'Data - Extract High and Low waters from water level timeseries';...
          'Stats - Fit tidal range, HW, LW, etc, to trend and cycles';...
          'Plot - Selection of plots for water level frequency and duration';... 
          'Plot - Selection of frequency analysis plots of timeseries data';...
@@ -108,7 +111,7 @@ fdesc = {'Stats - Moving average (or similar statistic)';...
          'Data - Differences assigned to the end of the difference interval';...
          'Data - Differences assigned to the beginning of the difference interval';...
          'Data - Differences of array padded along selected dimension';...
-         'PLot - Plot the difference between two variables (x-y)'};
+         'Plot - Plot the difference between two variables (x-y)'};
 
 classmeta = metaclass(mobj);
 classname = classmeta.Name;
@@ -116,17 +119,17 @@ classname = classmeta.Name;
 %now define any subselection so that only valid functions are displayed
 switch classname
     case 'Asmita'
-        idinc = [1:9,24:29];
+        idinc = [1:9,25:30];
     case {'CoastalTools','SpitDeltaSEM','WaveRayModel'}
-        idinc = [1:22,24:29];
+        idinc = [1:23,25:30];
     case {'TableViewer','EstuaryDB'}
-        idinc = [1:9,15,24:29];
+        idinc = [1:9,16,25:30];
     case 'ChannelForm'
-        idinc = [1,7:9,24:29];
+        idinc = [1,7:9,25:30];
     case 'Diffusion'
-        idinc = [1,23:28];   
+        idinc = [1,24:29];   
     otherwise
-        idinc = [1,7:9,24:29];
+        idinc = [1,7:9,25:30];
 end
 
 lib.fname = fname(idinc);

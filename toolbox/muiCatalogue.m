@@ -902,7 +902,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
         end
 %%
         function id_class = setDataClassID(obj,classname)                                                          
-            %get the index for a new instance of class held in DataSets
+            %set the index for a new instance of class held in DataSets
             if isfield(obj.DataSets,classname) && ...
                                     ~isempty(obj.DataSets.(classname))
                 id_class = length(obj.DataSets.(classname))+1;

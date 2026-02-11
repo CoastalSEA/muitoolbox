@@ -1057,8 +1057,9 @@ classdef (Abstract = true) muiModelUI < handle
             
             %get fieldnames of input classes used to define model
             inphandles = obj.ModelInputs.(modelname); 
-            definputs = fieldnames(obj.Inputs);
-            defdata = fieldnames(obj.Cases.DataSets);
+            definputs = {}; defdata = {};
+            if ~isempty(obj.Inputs), definputs = fieldnames(obj.Inputs); end
+            if ~isempty(obj.Cases), defdata = fieldnames(obj.Cases.DataSets); end
             alternates = {altclasses(:).class};
             idalts = [altclasses(:).idv];
             ninp = length(inphandles);

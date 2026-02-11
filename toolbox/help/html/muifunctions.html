@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>muitoolbox functions</title>
 <meta name="generator" content="MATLAB 24.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2026-01-27">
+<meta name="DC.date" content="2026-02-11">
 <meta name="DC.source" content="muifunctions.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -113,7 +113,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <div>
 <ul>
 <li>
-<b>check_unique_names.m</b> - check that names in list are unique and if required replace suplicates with a unique name</li>
+<b>check_unique_names.m</b> - check that names in list are unique and if required replace duplicates with a unique name</li>
 </ul>
 </div>
 <div>
@@ -263,6 +263,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <div>
 <ul>
 <li>
+<b>match_timeseries.m</b> - compute mappings between two multivariate time series</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
 <b>matrixtableUI.m</b> - generate UI to edit a matrix using tablefigureUI</li>
 </ul>
 </div>
@@ -294,6 +300,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <ul>
 <li>
 <b>readspreadsheet.m</b> - prompt user for selection on what to read from Excel spreadsheet and load selected data as table, or a dstable</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
+<b>reconstruct_timeseries.m</b> - apply a learned linear transform to X1 to match X2 and test match against additional validation data from X2</li>
 </ul>
 </div>
 <div>
@@ -425,6 +437,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <div>
 <ul>
 <li>
+<b>wrap_angle.m</b> - wrap a direction variable over a defined range using degree or radian input</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
 <b>wraptext.m</b> - wrap text to fit within a given graphical object (eg figure,panel,etc)</li>
 </ul>
 </div>
@@ -459,7 +477,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % - check whether a toolbox is available
 %
 % * *check_unique_names.m*
-% - check that names in list are unique and if required replace suplicates
+% - check that names in list are unique and if required replace duplicates
 % with a unique name
 %
 % * *check_vector_lengths.m*
@@ -549,6 +567,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * *loga.m*
 % - compute the logarithm of x to base a
 %
+% * *match_timeseries.m*
+% - compute mappings between two multivariate time series
+%
 % * *matrixtableUI.m*
 % - generate UI to edit a matrix using tablefigureUI
 %
@@ -568,6 +589,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * *readspreadsheet.m*
 % - prompt user for selection on what to read from Excel spreadsheet and
 % load selected data as table, or a dstable
+%
+% * *reconstruct_timeseries.m*
+% - apply a learned linear transform to X1 to match X2 and test match 
+% against additional validation data from X2
 % 
 % * *rotatebutton.m*
 % - callback for the rotate button on a figure or tab plot
@@ -646,6 +671,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * *var2str.m*
 % - convert the input variable to a cell array of strings and return the 
 % data type and format (for datetime and duration only) 
+%
+% * *wrap_angle.m*
+% - wrap a direction variable over a defined range using degree or radian
+% input
 %
 % * *wraptext.m*
 % - wrap text to fit within a given graphical object (eg figure,panel,etc)

@@ -218,14 +218,15 @@ function stats = getDSstats(data,metatxt)
         data = categorical(data,'Ordinal',true); %includes duplicates
         data = double(data);        
     end
-    dummy = zeros(9,1);
+    dummy = zeros(10,1);
     stats = table(dummy);
-    stats.Properties.RowNames = {'No of records',...
+    stats.Properties.RowNames = {'No of records','No of NaN records',...
                     'Mean','St.Dev.','Min','Max','Sum',...
                     'Slope','Intercept@x0','R_squared'};
     varname = 'Results';            
     stats.Properties.VariableNames = {varname};
     stats.Properties.DimensionNames = {'Statistic','Statistical_Results'};
+    numnan = sum(isnan(data));
     nrec = numel(data);
     x = 1:nrec;    
     if isvector(data) && ~iscategorical(data)
@@ -236,7 +237,7 @@ function stats = getDSstats(data,metatxt)
     end
     
     %create results vector and assign to table
-    vals = [nrec;mean(data,[1,2],'omitnan');std(data,0,[1,2],'omitnan');...
+    vals = [nrec;numnan;mean(data,[1,2],'omitnan');std(data,0,[1,2],'omitnan');...
                            min(data,[],[1,2]);max(data,[],[1,2]);...
                            sum(data,[1,2],'omitnan');slope;intcpt;Rsq];   
     stats.(varname) = vals;

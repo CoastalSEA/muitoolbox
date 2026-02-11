@@ -21,7 +21,7 @@
 % - check whether a toolbox is available
 %
 % * *check_unique_names.m*
-% - check that names in list are unique and if required replace suplicates
+% - check that names in list are unique and if required replace duplicates
 % with a unique name
 %
 % * *check_vector_lengths.m*
@@ -111,6 +111,9 @@
 % * *loga.m*
 % - compute the logarithm of x to base a
 %
+% * *match_timeseries.m*
+% - compute mappings between two multivariate time series
+%
 % * *matrixtableUI.m*
 % - generate UI to edit a matrix using tablefigureUI
 %
@@ -130,6 +133,10 @@
 % * *readspreadsheet.m*
 % - prompt user for selection on what to read from Excel spreadsheet and
 % load selected data as table, or a dstable
+%
+% * *reconstruct_timeseries.m*
+% - apply a learned linear transform to X1 to match X2 and test match 
+% against additional validation data from X2
 % 
 % * *rotatebutton.m*
 % - callback for the rotate button on a figure or tab plot
@@ -208,6 +215,10 @@
 % * *var2str.m*
 % - convert the input variable to a cell array of strings and return the 
 % data type and format (for datetime and duration only) 
+%
+% * *wrap_angle.m*
+% - wrap a direction variable over a defined range using degree or radian
+% input
 %
 % * *wraptext.m*
 % - wrap text to fit within a given graphical object (eg figure,panel,etc)

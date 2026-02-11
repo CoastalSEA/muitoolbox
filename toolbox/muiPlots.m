@@ -319,7 +319,7 @@ classdef muiPlots < handle
             end
             
             %check whether RightYaxis button has been set to use right axis
-            if obj.UIset.RightYaxis
+            if isfield(obj.UIset,'RightYaxis') && obj.UIset.RightYaxis
                 yyaxis(figax,'right')         %use right axis if true
             end
 
@@ -402,20 +402,24 @@ classdef muiPlots < handle
             
             %check whether RightYaxis button has been set to use right axis
             %only use hold on if axes has already been defined
-            is2Yaxes = ~isscalar(figax.YAxis);
-            if ~is2Yaxes && obj.UIset.RightYaxis
-                %yyaxis(figax,'left') 
-                yyaxis(figax,'right') 
-            elseif is2Yaxes && obj.UIset.RightYaxis 
-                yyaxis(figax,'right')    
-                hold(figax,'on');
-            elseif is2Yaxes && ~obj.UIset.RightYaxis 
-                %reset y-axis to use the left axis
-                yyaxis(figax,'left') 
-                hold(figax,'on');
+            if isfield(obj.UIset,'RigthYaxis')
+                is2Yaxes = ~isscalar(figax.YAxis);
+                if ~is2Yaxes && obj.UIset.RightYaxis
+                    %yyaxis(figax,'left') 
+                    yyaxis(figax,'right') 
+                elseif is2Yaxes && obj.UIset.RightYaxis 
+                    yyaxis(figax,'right')    
+                    hold(figax,'on');
+                elseif is2Yaxes && ~obj.UIset.RightYaxis 
+                    %reset y-axis to use the left axis
+                    yyaxis(figax,'left') 
+                    hold(figax,'on');
+                else
+                    hold(figax,'on');
+                end  
             else
                 hold(figax,'on');
-            end            
+            end         
                         
             [hptype,symb] = get2DPlotFunc(obj); %function handle for plot type
             %call uses figax,x,y,'LineStyle','Marker','DisplayName','Tag'
@@ -423,7 +427,7 @@ classdef muiPlots < handle
                                             obj.Legend,num2str(idline));
             
             %if left and right axes are being used check they are labelled
-            if ~isscalar(figax.YAxis) %NB:can be updated by plot from is2Yaxes
+            if isfield(obj.UIset,'RigthYaxis') && ~isscalar(figax.YAxis) %NB:can be updated by plot from is2Yaxes
                 if obj.UIset.RightYaxis && isempty(figax.YAxis(2).Label.String)
                     figax.YAxis(2).Label.String = obj.AxisLabels.Y;
                 elseif ~obj.UIset.RightYaxis && isempty(figax.YAxis(1).Label.String)

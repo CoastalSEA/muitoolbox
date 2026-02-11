@@ -189,7 +189,7 @@
 %   modifyVariableType(muicat)
 
 %%
-% *setDataClassID* get the index for a new instance of class held in
+% *setDataClassID* set the index for a new instance of class held in
 % DataSets, where _classname_ is the name of the class to use.
 %%
 %   id_class = setDataClassID(muicat,classname);

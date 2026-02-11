@@ -1,4 +1,4 @@
-function [newdst,ok] =getsampleusingrange(obj)
+function [newdst,ok] =getsampleusingrange(obj,promptxt)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -10,6 +10,7 @@ function [newdst,ok] =getsampleusingrange(obj)
 %    newdst =getsampleusingrange(obj)
 % INPUTS
 %   obj - instance of a dstable class object
+%   promptxt - prompt to use (optional)
 % OUTPUTS
 %   newdst - dstable containing data for the selected time range
 % NOTES
@@ -22,6 +23,8 @@ function [newdst,ok] =getsampleusingrange(obj)
 %
 %--------------------------------------------------------------------------
 % 
+    if nargin<2, promptxt = 'Select time range to use'; end
+
     timerange = var2range(obj.RowRange);
     selection = inputgui('FigureTitle','Levels',...
                          'InputFields',{'Time'},...
@@ -29,7 +32,7 @@ function [newdst,ok] =getsampleusingrange(obj)
                          'ControlButtons',{'Ed'},...
                          'ActionButtons', {'Select','Cancel'},...
                          'DefaultInputs',{timerange},...
-                         'PromptText','Select time range to use');
+                         'PromptText',promptxt);
     if isempty(selection)
         newdst = copy(obj);
         ok = 0;  %user cancelled

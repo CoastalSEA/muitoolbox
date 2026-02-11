@@ -12,12 +12,20 @@
 % - sort the data into interval bins for each interval within a period (e.g
 % monthly bins for each year of a record)
 %
+% * *clean_saved_figure.m*
+% - function to clean mui obj declarations in fig files (eg when saving for
+% reuse)
+%
 % * *clusters.m*
 % - function to find clusters of peaks over a threshold
 %
 % * *cmap_selection.m*
 % - select a color map definition from Matlab(TM) default list and cbrewer
 % generated mat files
+%
+% * *compile_tiled_figure*
+% - interactively add existing axes from single axes figures to a figure
+% with multiple tiles (regular grid only)
 %
 % * *complex_vector_plot.m*
 % - creates a polar plot of the movement at each interval from one position
@@ -123,6 +131,10 @@
 % * *phaseplot.m*
 % - variation of x and y with time. e.g. centroid of beach profiles or 
 % recursive plots such as x = x(t) v  y = x(t+1)  
+%
+% * *plot_difference.m*
+% - find the difference between two variables interpolating one of them if
+% they are not at the same datetimes and plot the result
 %
 % * *poisson_stats.m*
 % - compute the inter-arrival time, magnitude and duration of
