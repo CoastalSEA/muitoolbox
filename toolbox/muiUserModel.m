@@ -330,9 +330,33 @@ classdef muiUserModel < muiDataSet
                 if ~strcmp(var{1},'no output')
                     displaySingleResult(obj,var{1},eqn)
                 end
-            elseif isa(var{1},'dstable') || isstruct(var{1})  %not tested for struct of dstables     
-                    inputxt = setMetaData(obj,eqn);
+            elseif isa(var{1},'dstable')
+                inputxt = setMetaData(obj,eqn);
+                save2obj(obj,mobj,var{1},inputxt);
+            elseif isstruct(var{1}) 
+                inputxt = setMetaData(obj,eqn);
+                isdst = structfun(@(v) isa(v,'dstable'),var{1});
+                if all(isdst)   %struct of dstables
                     save2obj(obj,mobj,var{1},inputxt);
+                else 
+                    %struct holds mix of types. use save2obj if dstables
+                    %present and setdsp2save if numeric. struct field names
+                    %used are dst for dstable, var for numeric data and
+                    %meta for metadata. metadata is a struct with caserec 
+                    %and desc used to pass text
+                    fnames = fieldnames(var{1});
+                    if any(strcmp(fnames,'meta'))
+                        inputxt = sprintf('%s\n %s',inputxt,var{1}.meta.desc);
+                    end
+                    %
+                    if any(strcmp(fnames,'dst'))
+                        save2obj(obj,mobj,var{1}.dst,inputxt);
+                    elseif any(strcmp(fnames,'var')) %see subsample_ts for eg of use
+                        setdsp2save(obj,mobj,var{1}.var,props,inputxt);
+                    else
+                        msgdlg('Unknown output format returned from function to muiUsereModel.setEqnData')
+                    end
+                end
             else
                 inputxt = setMetaData(obj,eqn);
                 setdsp2save(obj,mobj,var,props,inputxt);
@@ -343,7 +367,7 @@ classdef muiUserModel < muiDataSet
                 idx = find([obj.UIsel.caserec]~=0);  %index to used XYZ variables
                 inputxt = sprintf('Used: %s with inputs:',eqn);
                 for j=1:length(idx)
-                    inputxt = sprintf('%s\n%s',inputxt,(obj.UIsel(idx(j)).desc));
+                    inputxt = sprintf(' %s\n %s',inputxt,(obj.UIsel(idx(j)).desc));
                 end
             end
         end
@@ -369,7 +393,7 @@ classdef muiUserModel < muiDataSet
             
             %set the metadata for the new variable  
             ressze = size(results{1});
-            sz = ressze>1;   %dimensions with more than single value
+            sz = ressze>1;             %dimensions with more than single value
             ndim = sum(sz(2:end));     %number of dimensions excluding rows
             nvar = length(results);
             istime = isa(rowdata,'datetime') || isa(rowdata,'duration');

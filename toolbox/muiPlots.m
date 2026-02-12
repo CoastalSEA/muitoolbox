@@ -674,8 +674,10 @@ classdef muiPlots < handle
 %--------------------------------------------------------------------------
         function newAnimation(obj)
             %generate an animation for user selection.
+            %code to inpaint nans commented out
             hfig = obj.Plot.CurrentFig;
             hfig.Visible = 'on';
+            % isinpaint = false;
 
             t = obj.Data.T;  %obj.Data.T is modified by call to converTime in new3Dplot
             nrec = length(t);
@@ -701,6 +703,10 @@ classdef muiPlots < handle
                 case '3DT'
                     var = obj.Data.Z;
                     vari = setTimeDependentVariable(obj,var,1); 
+                    % if sum(isnan(vari),'all')/numel(vari)>0.5
+                    %     vari = inpaint_nans(vari,4);
+                    %     isinpaint = true;
+                    % end
                     obj.Data.Z = vari;  %first time step
                     new3Dplot(obj)
                     if ~isvalid(hfig), return; end
@@ -713,8 +719,7 @@ classdef muiPlots < handle
                     hp.ZDataSource = 'vari';   %changed from CDataSource to plot contours and surfaces 23Aug23
 
                     figax.ZLimMode = 'manual'; %fix limits of z-axis
-                    figax.ZLim = minmax(var);  
-                    figax.CLim = figax.ZLim;  
+                    figax.CLim = minmax(var);
 
                     if isfield(obj.UIset,'Polar') && obj.UIset.Polar
                         theta = obj.Data.X;
@@ -749,6 +754,7 @@ classdef muiPlots < handle
             Mframes(1) = getframe(gcf); %NB print function allows more control of 
             for i=2:nrec
                 vari = setTimeDependentVariable(obj,var,i); %#ok<NASGU>
+                % if isinpaint, vari = inpaint_nans(vari,4); end %#ok<NASGU>
                 refreshdata(hp,'caller')
                 title(sprintf('%s \nTime = %s',obj.Title,string(t(i))))
                 drawnow;                 

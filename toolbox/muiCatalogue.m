@@ -45,6 +45,7 @@ classdef muiCatalogue < dscatalogue
                 end
             end
         end
+
 %%
         function saveCase(obj,caserec)  
             %write the results for a selected case to an excel file   
@@ -99,7 +100,8 @@ classdef muiCatalogue < dscatalogue
                 save([pwd,'/',filename{1},'.mat'],'atable') %save as table
             end 
             getdialog(sprintf('Data saved as ''%s'' to: %s',saveas,filename{1}));
-        end         
+        end  
+
 %%
         function deleteCases(obj,caserec)
             %select one or more records and delete records from catalogue 
@@ -122,7 +124,35 @@ classdef muiCatalogue < dscatalogue
             end            
             obj.Catalogue(caserec,:) = [];     %delete selected records
             close(hw)
-        end    
+        end
+
+%%
+        function deleteCaseDataset(obj,caserec)
+            %select a records and if it has more than one dataset allow 
+            %user to select one dataset for deletion from Case
+
+            if nargin<2  %if case to delete has not been specified
+                [caserec,ok] = selectCase(obj,'Select Case to delete Dateset from:',...
+                                                       'single',2,true);                                      
+                if ok<1, return; end  
+            end 
+            cobj = getCase(obj,caserec);      %selected case
+
+            datasetnames = fieldnames(cobj.Data);
+            if numel(datasetnames)>1
+                 idd = listdlg('PromptString','Select dataset:','ListString',datasetnames,...
+                                    'SelectionMode','single','ListSize',[160,200]);
+                 if isempty(idd), return; end
+                 dsetname = cobj.Data.(datasetnames{idd}).Description;
+                 cobj.Data.(datasetnames{idd}) = [];  %remove data set
+                 cobj.Data = rmfield(cobj.Data,datasetnames{idd});
+                 msg = sprintf('%s deleted from %s',datasetnames{idd},dsetname);
+                 getdialog(msg,[],3)
+            else
+                getdialog(sprintf('              Only one dataset\nUse Delete Case to remove Case rather than Dataset'),[],4)
+            end
+        end
+
 %%
         function reloadCase(obj,mobj,caserec)  
             %reload model input variables as the current settings
@@ -148,6 +178,7 @@ classdef muiCatalogue < dscatalogue
             casedesc = obj.Catalogue.CaseDescription(caserec);
             getdialog(sprintf('Reloaded: %s',casedesc));
         end
+
 %% 
         function viewCaseSettings(obj,caserec)
             %view the saved input data for a selected Case
@@ -241,7 +272,8 @@ classdef muiCatalogue < dscatalogue
                 h_fig = tablefigure('Case settings',figtitle,{},varnames,propdata); %#ok<NASGU>
                 %use h_fig to adjust position on screen if required                
             end            
-        end   
+        end  
+
 %%
         function importCase(obj)
             %import a case from a mat file that was saved using exportCase
@@ -265,10 +297,11 @@ classdef muiCatalogue < dscatalogue
             setCase(obj,cobj,datatype,{casename},false);
             activateTables(obj);
         end
+
 %%
         function exportCase(obj,caserec)
             %save selected case to a mat file
-            if nargin<2  %if case to delete has not been specified
+            if nargin<2  %if case to export has not been specified
                 [caserec,ok] = selectCase(obj,'Select case to ecport:',...
                                                        'single',2);                                      
                 if ok<1, return; end  
@@ -287,6 +320,7 @@ classdef muiCatalogue < dscatalogue
             save([pwd,'/',filename{1},'.mat'],'cobj') %save as cobj
             getdialog(sprintf('Case exported to: %s',filename{1}));
         end
+
 %% ------------------------------------------------------------------------
 % Methods to manipulate Cases held in the Catalogue
 %--------------------------------------------------------------------------
@@ -303,6 +337,7 @@ classdef muiCatalogue < dscatalogue
                 getdialog(sprintf('Updated case for %s',casedesc));
             end
         end  
+
 %%
         function cobj = getCases(obj,caserecs)
             %retrieve an array of objects held as DataSets based on caserecs
@@ -319,6 +354,7 @@ classdef muiCatalogue < dscatalogue
                 cobj(i) = getCase(obj,caserecs(i));
             end            
         end
+
 %% 
         function [cobj,classrec,catrec] = getCase(obj,caserec)
             % PURPOSE
@@ -340,6 +376,7 @@ classdef muiCatalogue < dscatalogue
             classrec = [lobj.CaseIndex]==catrec.CaseID;            
             cobj = lobj(classrec);
         end
+
 %%
         function caseid = setCase(obj,cobj,varargin)
             % PURPOSE
@@ -375,6 +412,7 @@ classdef muiCatalogue < dscatalogue
             obj.DataSets.(classname)(id_class) = cobj;
             caseid = casedef.CaseID;
         end
+
 %%
         function [dst,caserec,idset,dstxt] = getDataset(obj,caserec,idset)
             % PURPOSE
@@ -414,6 +452,7 @@ classdef muiCatalogue < dscatalogue
                 dst = activatedynamicprops(dst); %dstable now uses 
             end                                  %ConstructOnLoad so this 
         end                                      %should no longer be needed BUT IT IS!
+
 %%
         function props = getProperty(obj,UIsel,outopt)
             % PURPOSE
@@ -514,6 +553,7 @@ classdef muiCatalogue < dscatalogue
             props.dvals = dvals; 
             props.idx = idx;
         end
+
 %%
         function [caserec,ok] = selectCase(obj,promptxt,mode,selopt,ischeck)
             % PURPOSE
@@ -560,6 +600,7 @@ classdef muiCatalogue < dscatalogue
                                 'SelectionMode',mode,'ListSize',[250,200],...
                                 'CheckSingle',ischeck);
         end
+
 %%
 function [cobj,classrec,catrec] = selectCaseObj(obj,casetype,classname,...
                                                                  promptxt)
@@ -601,7 +642,8 @@ function [cobj,classrec,catrec] = selectCaseObj(obj,casetype,classname,...
                               'SelectionMode','single','ListSize',[250,200]);
             if ok<1, cobj = []; classrec = []; catrec = []; return; end
             [cobj,classrec,catrec] = getCase(obj,caserec);    
-        end
+end
+
 %%
         function [cobj,classrec,datasets,idd] = selectCaseDataset(obj,...
                                               casetype,classname,promptxt)
@@ -636,6 +678,7 @@ function [cobj,classrec,catrec] = selectCaseObj(obj,casetype,classname,...
                                     'SelectionMode','single','ListSize',[160,200]);
             end
         end
+
 %%
         function [cobj,classrec,irow] = selectCaseDatasetRow(obj,casetype,...
                                                 classname,promptxt,idd)
@@ -704,8 +747,9 @@ function [cobj,classrec,catrec] = selectCaseObj(obj,casetype,classname,...
                 irow = 1;
             end
         end        
+
 %%
-function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,...
+        function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,...
                                                         classname,promptxt,idd)
             % PURPOSE
             %   prompt user to select a Case, Dataset (if not specified) and 
@@ -783,6 +827,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             end
             dsname = dsnames{idd};
         end
+
 %%
         function useCase(obj,mode,classname,action)
             % PURPOSE
@@ -814,6 +859,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 heq(cobj,classrec,catrec,obj);  %instance of class object
             end
         end 
+
 %%
         function activateTables(obj)
             %load dstables held as Data in muiDataSet derived classes and 
@@ -837,6 +883,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 end
             end
         end
+
 %%
         function addVariable2CaseDS(obj,caserec,newvar,dsp)
             %add a variable to an existing Case dataset in the Catalogue
@@ -869,6 +916,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             %save dstable to source class record
             obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;
         end
+
 %%
         function editDSprops(obj,caserec)
             %edit the DSproperties of a selected dataset
@@ -891,6 +939,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             %save dstable to source class record
             obj.DataSets.(classname)(classrec).Data.(datasetname) = dst;
         end
+
 %%
         function classrec = classRec(obj,caserec)
             %find the class record number using the case record number in the
@@ -900,6 +949,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
             lobj = obj.DataSets.(catrec.CaseClass);  
             classrec = [lobj.CaseIndex]==catrec.CaseID; 
         end
+
 %%
         function id_class = setDataClassID(obj,classname)                                                          
             %set the index for a new instance of class held in DataSets
@@ -910,12 +960,14 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 id_class = 1;
             end 
         end
+
 %%
         function props = setPropsStruct(~)
             %initialise struct used in muiCatalogue.getProperty
             props = struct('case',[],'dset',[],'desc',[],'label',[],...
                            'data',[],'attribs',[],'dvals',[],'idx',[]);
         end 
+
 %%
         function [idx,dimnames] = getSelectedIndices(obj,UIsel,dst,attnames)
             %find the indices for the selected variable, and the row and 
@@ -961,6 +1013,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 end  
             end
         end 
+
 %%
         function modifyVariableType(obj)
             %select a variable and modify that data type of the variable
@@ -1060,6 +1113,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 warndlg('Only categorial and ordinal currently handled');
             end
         end
+
 %%
         function [data,idx] = getVariableSubSelection(~,data,range,selrange,outopt)
             %if the range of a variable has been subselected, assign the
@@ -1145,7 +1199,8 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 %remove empty class if no longer any instances
                 obj.DataSets = rmfield(obj.DataSets,classname);
             end
-        end          
+        end 
+
 %%
         function indices = getIndices(~,var,value)
             %get the index or vector of indices based on selection
@@ -1176,6 +1231,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 indices = 1;
             end
         end  
+
 %%
         function seldim = setDimNames(~,array,dimvalues,varatt)
             %match the selected dimensions to the data array and convert to
@@ -1225,6 +1281,7 @@ function [cobj,classrec,dsname,ivar] = selectCaseDatasetVariable(obj,casetype,..
                 seldim{j} = cellfun(myfun,seldim{j},'UniformOutput',false);
             end
         end
+
 %%
         function [propdata,proplabels] = setPropertyData(~,localObj) 
             %extract the properties from localObj and return data and

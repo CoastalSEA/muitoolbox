@@ -1,4 +1,4 @@
-function [newtime,newvar] = subsample_ts(var,vartime,mobj,method,tol)
+function output = subsample_ts(var,vartime,mobj,method,tol)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -7,7 +7,7 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method,tol)
 %   create a timeseries by interpolating one time time series to the times
 %   of another timeseries
 % USAGE
-%   [newtime,newvar] = subsample_ts(var,vartime,mobj,method,tol)
+%   output = subsample_ts(var,vartime,mobj,method,tol)
 % INPUT
 %   var - variable to be subsampled
 %   vartime - time of var to be subsampled
@@ -18,15 +18,14 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method,tol)
 %   tol - only required if menthod ='none' and the datetimes are to be
 %         matched using a tolerance. tol in seconds
 % OUTPUT
-%   newtime - time for the resampled variable
-%   newvar - resampled variable 
-%   metadata - struct of casevar and description used to define time intervals
-%                               USE NOT YET IMPLEMENTED IN muiManipUI
+%   output - struct with fields for:
+%           var - cell array for newtime and resampled variable 
+%           meta - struct of casevar and description used to define time intervals
 % Author: Ian Townend
 % CoastalSEA (c)June 2020
 %--------------------------------------------------------------------------
 %
-    newtime = []; newvar = [];
+    output = [];
     muicat = mobj.Cases;
     if nargin<4
         method = 'linear';
@@ -60,7 +59,6 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method,tol)
             tol = seconds(tol);
         end
 
-
         if isempty(tol)
             [idn,idv] = ismember(newtime, vartime);
             newvar = var(idv(idv>0));
@@ -76,8 +74,13 @@ function [newtime,newvar] = subsample_ts(var,vartime,mobj,method,tol)
     else
         newvar = interp1(vartime,var,newtime,method);
     end
+    %put new time and variable into a cell to match the output for default
+    %derive output functions that return [time,variable] which is captured
+    %as a cell array in muiUserModel.callfcn_dst using varout.
+    outvar = {newtime,newvar};
     metadata.caserec = caserec;
-    metadata.desc = dst.Description;
+    metadata.desc = sprintf('Sampled times obtained from %s',dst.Description);
+    output = struct('var',{outvar},'meta',metadata);
 end
 
 
