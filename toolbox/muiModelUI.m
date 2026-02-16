@@ -533,15 +533,23 @@ classdef (Abstract = true) muiModelUI < handle
             spath = obj.Info.PathName;
             sfile = obj.Info.FileName;
             sobj = obj; 
-            try 
-                save([spath,sfile],'sobj','-v7'); %much smaller file
+
+            % nbytes = structsize(sobj); %finds full size of sobj but is slow
+            % if nbytes < 2e9            %whereas whos.bytes only finds top level
+            try                
+                save([spath, sfile], 'sobj', '-v7');
             catch
-                msgbox('Unable to save as v7 and saving as v7.3. File likely to be large')
+                msgbox('Unable to save as v7 and saving as v7.3. File is likely to be large')
                 %this was -v7.3 but this created large files in some cases
                 %https://uk.mathworks.com/matlabcentral/answers/153759
-                %https://uk.mathworks.com/matlabcentral/answers/311544
-                save([spath,sfile],'sobj','-v7.3'); 
+                %https://uk.mathworks.com/matlabcentral/answers/311544                
+                sobj = obj;  %save deletess object if it fails so reassign
+                save([spath, sfile], 'sobj', '-v7.3');
             end
+            % else
+            %     save([spath, sfile], 'sobj', '-v7.3');
+            % end
+
             clear sobj
         end
 %%
