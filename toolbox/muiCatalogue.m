@@ -646,7 +646,7 @@ end
 
 %%
         function [cobj,classrec,datasets,idd] = selectCaseDataset(obj,...
-                                              casetype,classname,promptxt)
+                                           casetype,classname,promptxt,idd)
             % PURPOSE
             %   select case and dataset for use in plot or analysis
             % USAGE
@@ -669,10 +669,12 @@ end
             % SEE ALSO
             %   uses selectCaseObj above. 
             %
+            if nargin<5, idd = []; end
             [cobj,classrec] = selectCaseObj(obj,casetype,classname,promptxt);
             if isempty(cobj), datasets = []; idd = []; return; end   %user cancelled
             datasets = fields(cobj.Data);
-            idd = 1;
+
+            if idd>0, return; else, idd = 1; end          
             if length(datasets)>1
                 idd = listdlg('PromptString','Select table:','ListString',datasets,...
                                     'SelectionMode','single','ListSize',[160,200]);

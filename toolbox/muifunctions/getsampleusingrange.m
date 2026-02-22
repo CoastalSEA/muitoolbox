@@ -7,7 +7,7 @@ function [newdst,ok] =getsampleusingrange(obj,promptxt)
 %    uses an input UI to obtain a date range and then extract the data for
 %    that range from the input table
 % USAGE
-%    newdst =getsampleusingrange(obj)
+%    newdst = getsampleusingrange(obj)
 % INPUTS
 %   obj - instance of a dstable class object
 %   promptxt - prompt to use (optional)
@@ -16,7 +16,7 @@ function [newdst,ok] =getsampleusingrange(obj,promptxt)
 % NOTES
 %   uses inputUI to get datetime and function getsampleusingtime in dstable
 % SEE ALSO
-%   used in ctWaveSpectra and waveModels
+%   used in ctWaveSpectrum and waveModels
 %
 % Author: Ian Townend
 % CoastalSEA (c) Oct 2025
@@ -37,7 +37,11 @@ function [newdst,ok] =getsampleusingrange(obj,promptxt)
         newdst = copy(obj);
         ok = 0;  %user cancelled
     else
-        seltime = range2var(selection{1});                
+        seltime = range2var(selection{1});    
+        isnotdate = cellfun(@ismissing, seltime);
+        if any(isnotdate)  %failed to find a valid range
+            newdst = []; ok = 0; return; 
+        end
         newdst = getsampleusingtime(obj,seltime{:});
         ok = 1;
     end 

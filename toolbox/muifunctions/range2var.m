@@ -42,13 +42,16 @@ function [rangevar,pretext] = range2var(rangetext,bounds)
                         else                              %numeric
                             rangevar{i} = str2double(Vin{i});  
                         end
-                    catch                                  
+                        %                        
                         if isnan(rangevar{i}) 
                             %return erroneous text + message - should not get
                             %here since addition of categorical/text
                             msgbox(sprintf('%s Invald value. Please correct input', Vin{i}))
                             return
                         end
+                    catch    
+                        msgbox(sprintf('%s Invald value. Please correct input', Vin{i}))
+                        return
                     end
                 end
             end
@@ -64,6 +67,7 @@ function [rangevar,pretext] = range2var(rangetext,bounds)
         pretext = '';
     end
 end
+
 %%
 function datevar = getdatevariable(Vin)
     %extract a datetime variable checking for non-standard format
@@ -73,8 +77,31 @@ function datevar = getdatevariable(Vin)
         %this traps the format day-month-year that is not
         %recognised by datetime (does accept yyyy-mm-dd)
         fmt = ['dd',matches{1},'MM',matches{2},'yyyy',' HH:mm:ss'];
-        datevar = datetime(char(Vin),'InputFormat',fmt);
+        try
+            datevar = datetime(char(Vin),'InputFormat',fmt);
+        catch
+            msgbox(validatemsg(datebrk))
+        end
     else
-        datevar = datetime(char(Vin),'Format','preserveinput'); 
+        try
+            datevar = datetime(char(Vin),'Format','preserveinput'); 
+        catch
+            msgbox('datetime format not recognised in range2var')
+        end
     end 
 end
+
+%%
+function msg = validatemsg(datebrk)
+    aday = str2double(datebrk{1});
+    amon = str2double(datebrk{2});
+    if amon<1 || amon>12
+        msg = 'Month must be between 01 and 12'; return;
+    end
+
+    ndays = [31,29,31,30,31,30,31,31,30,31,30,31];
+    if aday>ndays(amon)
+        msg = sprintf('Date exceeds length of month (%d days)',ndays(amon));
+    end
+end
+

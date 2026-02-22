@@ -17,6 +17,7 @@ classdef inputUI < handle
 %    ControlButtons  - text for buttons to edit or update selection 
 %    DefaultInputs   - default text or selection lists
 %    UserData        - data assigned to UserData of uicontrol
+%                      [for popupmenu cell array used to set initial values]
 %    DataObject      - data object to use for selection
 %    SelectedVar     - index vector to define case,dataset,variable selection  
 %    ActionButtons   - text for buttons to take action based on selection
@@ -131,7 +132,7 @@ classdef inputUI < handle
                     hw(2).Callback = @(src,evt)editlist(src,evt);
                     hw(2).UserData = settings.UserData{i};
                 elseif strcmp(settings.Style{i},'popupmenu') && ...
-                                         ~isempty(settings.UserData{1})
+                                            ~isempty(settings.UserData{i}) 
                     hw(1).Value = settings.UserData{i};
                 end
             end
