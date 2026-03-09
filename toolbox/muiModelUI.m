@@ -487,8 +487,13 @@ classdef (Abstract = true) muiModelUI < handle
             warning ('off','MATLAB:load:cannotInstantiateLoadedVariable');
             load([ipath,ifile],'sobj');
             warning ('on','MATLAB:load:cannotInstantiateLoadedVariable');            
+            
+            if isstruct(sobj)
+                sobjclass = sobj.modelName;
+            else
+                sobjclass = metaclass(sobj).Name; %maintain legacy loading of class instance
+            end
 
-            sobjclass = metaclass(sobj).Name;
             if ~strcmp(classname,sobjclass) 
                 errtxt = sprintf('Unable to load selected file\nModel class is %s and selected file is %s',...
                                  classname,sobjclass);
@@ -503,6 +508,7 @@ classdef (Abstract = true) muiModelUI < handle
             obj.Constants = sobj.Constants; 
             obj.Inputs = sobj.Inputs;
             obj.Cases = sobj.Cases;
+            
             if ~strcmp(obj.vNumber,sobj.vNumber) && ~obj.SupressPrompts  %supress prompts if true
                 %preserve vNumber and vDate to version currently running 
                 %overwrites saved values, if the loaded model is saved 
@@ -532,8 +538,18 @@ classdef (Abstract = true) muiModelUI < handle
             %save model setup and results to a mat file as sobj
             spath = obj.Info.PathName;
             sfile = obj.Info.FileName;
-            sobj = obj; 
 
+            %save as a struct rather than an instance of the class
+            %when loading this stops Matlab keeping the source file open
+            sobj.modelName = obj.modelName;
+            sobj.vNumber = obj.vNumber;         %version number of model
+            sobj.vDate = obj.vDate;             %date of current version
+            sobj.SupressPrompts = obj.SupressPrompts;
+            sobj.Info = obj.Info;
+            sobj.Constants = obj.Constants; 
+            sobj.Inputs = obj.Inputs;
+            sobj.Cases = obj.Cases;
+            
             % nbytes = structsize(sobj); %finds full size of sobj but is slow
             % if nbytes < 2e9            %whereas whos.bytes only finds top level
             try                
