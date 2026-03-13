@@ -7,10 +7,10 @@ function [tin,vm] = wrap_angle(var,tin,varRange,israd)
 %   wrap a direction variable over a defined range using degree or radian
 %   input
 % USAGE
-%   [tin,vm] = wrap_angle(var,tin,israd)
+%   [tin,vm] = wrap_angle(var,tin,varRange,israd)
 % INPUTS
 %   var - input vector of angles in degrees or radians
-%   tin - time variable not used, just passed to output
+%   tin - time variable - not used, just passed to output
 %   varRange - 2 element vector with min and max range values in degrees
 %              eg [-180,180] or [0,360]
 %   israd - flag, true if input variable is in radians (optional, defaults

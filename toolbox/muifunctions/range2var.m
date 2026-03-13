@@ -86,7 +86,7 @@ function datevar = getdatevariable(Vin)
         try
             datevar = datetime(char(Vin),'Format','preserveinput'); 
         catch
-            msgbox('datetime format not recognised in range2var')
+            %msgbox('datetime format not recognised in range2var')
         end
     end 
 end

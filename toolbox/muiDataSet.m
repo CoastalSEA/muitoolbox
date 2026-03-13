@@ -76,7 +76,7 @@ classdef (Abstract = true) muiDataSet < handle
             %assign metadata about data, Note dst can be a struct
             dst = updateSource(dst,filename,1);
             
-            hw = waitbar(0, 'Loading data. Please wait');
+            hw = waitbar(0, sprintf('Loading data. File 1 of %d',nfiles));
             %now load any other files of the same format
             if nfiles>1
                 for jf = 2:nfiles
@@ -96,8 +96,23 @@ classdef (Abstract = true) muiDataSet < handle
                         end
                         dst = updateSource(dst,filename,jf);
                     end                    
-                    waitbar(jf/nfiles)
-                end                
+                    waitbar(jf/nfiles,hw,sprintf('Loading data. File %d of %d',jf,nfiles))
+                end 
+
+                %sort by row if date or duration (sortorws updates range)
+                if isstruct(dst)
+                    fnames = fieldnames(dst);
+                    for ii=1:numel(fnames)
+                        if strcmp(dst.(fnames{ii}).RowType,'datetime') || ...
+                                 strcmp(dst.(fnames{ii}).RowType,'duration')
+                            dst.(fnames{ii}) = sortrows(dst.(fnames{ii}));
+                        end                        
+                    end
+                else
+                    if strcmp(dst.RowType,'datetime') || strcmp(dst.RowType,'duration')
+                        dst = sortrows(dst);
+                    end
+                end
             end
             close(hw);
             

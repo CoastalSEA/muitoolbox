@@ -55,19 +55,26 @@ function res = plot_difference(dstruct,isangle,method)
     end
     diffvar = var1(:)-var2(:);            %force column vectors
     if isangle
-        [~,diffvar] = wrap_angle(diffvar,[],[-180,180],0);
+        [~,diffvar] = wrap_angle(diffvar,[],[-180,180],0); %var,tin=[],varRange,israd=0
     end
 
     hf = figure('Tag','PlotFig');
     ax = axes(hf);
-    plot(ax,seltime,diffvar)
-    xlabel('Time')
+    s1 = subplot(2,1,1,ax);
+    plot(s1,seltime,diffvar)
     ylabel(dst1.VariableLabels{1})
-    title(sprintf('Diff: %s - %s',dst1.Description,dst2.Description))
+    
     mn = mean(diffvar,'omitnan');
     stdv =std(diffvar,'omitnan');
     mnmx = minmax(diffvar);
     legtxt = sprintf('Diff - mean=%.2f; std=%.2f; min=%.2f; max=%.2f',...
                                                  mn,stdv,mnmx(1),mnmx(2));
     legend(legtxt,'Location','northeast')
+
+    s2 = subplot(2,1,2);
+    var1(abs(var1)<0.1) = NaN;
+    plot(s2,seltime,abs(diffvar)./abs(var1));
+    xlabel(dst1.RowDescription)
+    ylabel('Percentage difference to Var1')
+    sgtitle(sprintf('Diff: %s - %s',dst1.Description,dst2.Description))
 end

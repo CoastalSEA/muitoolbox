@@ -204,7 +204,7 @@
 % regression line
 %
 % * *subsample_ts.m*
-% - create a timeseries by interpolating one time time series to the times
+% - create a timeseries by interpolating one timeseries to the times
 % of another timeseries
 %
 % * *tabfigureplot*
