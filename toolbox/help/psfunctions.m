@@ -218,6 +218,9 @@
 % - create plot of Taylor diagram and, optionally, plot compute skill score
 % and a skill map (2 or 3D depending on data)
 %
+% * *taylor_plot_figure.m*
+% - create base plot for a Taylor diagram 
+%
 % * *user_model.m*
 % - function to run a user class defined using the Model_template.m
 %
