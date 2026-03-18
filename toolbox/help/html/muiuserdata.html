@@ -1,12 +1,17 @@
-
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-   <!--
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>muiUserData</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-11-10"><meta name="DC.source" content="muiuserdata.m"><style type="text/css">
+      -->
+<title>muiUserData</title>
+<meta name="generator" content="MATLAB 24.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2026-03-18">
+<meta name="DC.source" content="muiuserdata.m">
+<style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,8 +72,51 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>muiUserData</h1><!--introduction--><p>Class to import data sets, adding the results to dstable and a record in the muiCatalogue.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#3">Description</a></li><li><a href="#4">muiDataSet properties</a></li><li><a href="#5">muiDataSet methods</a></li><li><a href="#7">muiUserData format file</a></li><li><a href="#8">See Also</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">obj = muiUserData;
-</pre><h2 id="3">Description</h2><p>The class is used for importing <i>ad hoc</i> datasets using a format file, details of which are provided below. The class inherits the <a href="matlab:doc('muidatadet')">muiDataSet</a> bstract class.</p><h2 id="4">muiDataSet properties</h2><p>The class inherits the <a href="matlab:doc('muidataset')">muiDataSet</a> properties for Data, RunParam, MetaData and CaseIndex. Importing data requires muiDataSet properties <i>DataFormats</i> and <i>FileSpec</i>, which are defined in the class constructor by prompting the user to select a format file.</p><h2 id="5">muiDataSet methods</h2><p>Methods for loading, adding, deleting and applying quality to control to datasets are inherited from the muitoolbox <a href="matlab:doc('muidataset')">muiDataSet</a> abstract class.</p><p><b>tabPlot</b> generates a plot for display on Q-Plot tab. Uses the default plotting method <i>tabDefaultPlot</i> in <a href="matlab:doc('muidataset')">muiDataSet</a>.</p><h2 id="7">muiUserData format file</h2><p>Data import into a <i>muitoolbox</i> UI using <i>muiUserData</i> and classes that inherit <a href="matlab:doc('muidatadet')">muiDataSet</a> requires a format file to be created. A template is provided in the <a href="matlab:mui_template_folder">muitemplates folder</a>, and sets out the code for each of the functions requied, with comments to highlight where the files need to be edited to adapt the templates to a different application. The format file has the following form:</p><pre class="language-matlab">
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>muiUserData</h1>
+<!--introduction-->
+<p>Class to import data sets, adding the results to dstable and a record in the muiCatalogue.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Syntax</a>
+</li>
+<li>
+<a href="#3">Description</a>
+</li>
+<li>
+<a href="#4">muiDataSet properties</a>
+</li>
+<li>
+<a href="#5">muiDataSet methods</a>
+</li>
+<li>
+<a href="#7">muiUserData format file</a>
+</li>
+<li>
+<a href="#8">See Also</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Syntax</h2>
+<pre class="language-matlab">obj = muiUserData;
+</pre>
+<h2 id="3">Description</h2>
+<p>The class is used for importing <i>ad hoc</i> datasets using a format file, details of which are provided below. The class inherits the <a href="matlab:doc('muidatadet')">muiDataSet</a> bstract class.</p>
+<h2 id="4">muiDataSet properties</h2>
+<p>The class inherits the <a href="matlab:doc('muidataset')">muiDataSet</a> properties for Data, RunParam, MetaData and CaseIndex. Importing data requires muiDataSet properties <i>DataFormats</i> and <i>FileSpec</i>, which are defined in the class constructor by prompting the user to select a format file.</p>
+<h2 id="5">muiDataSet methods</h2>
+<p>Methods for loading, adding, deleting and applying quality to control to datasets are inherited from the muitoolbox <a href="matlab:doc('muidataset')">muiDataSet</a> abstract class.</p>
+<p>
+<b>tabPlot</b> generates a plot for display on Q-Plot tab. Uses the default plotting method <i>tabDefaultPlot</i> in <a href="matlab:doc('muidataset')">muiDataSet</a>.</p>
+<h2 id="7">muiUserData format file</h2>
+<p>Data import into a <i>muitoolbox</i> UI using <i>muiUserData</i> and classes that inherit <a href="matlab:doc('muidatadet')">muiDataSet</a> requires a format file to be created. A template is provided in the <a href="matlab:mui_template_folder">muitemplates folder</a>, and sets out the code for each of the functions requied, with comments to highlight where the files need to be edited to adapt the templates to a different application. The format file has the following form:</p>
+<pre class="language-matlab">
 <span class="keyword">function</span> output = dataimport_format_template(funcall,varargin) <span class="comment">% &lt;&lt;Edit to identify data type</span>
 <span class="comment">%</span>
 <span class="comment">%-------function help------------------------------------------------------</span>
@@ -189,7 +237,17 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-</pre><h2 id="8">See Also</h2><p><a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muidatadet')">muiDataSet</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>,</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+</pre>
+<h2 id="8">See Also</h2>
+<p>
+<a href="matlab:doc('muitoolbox')">muitoolbox</a>, <a href="matlab:doc('muidatadet')">muiDataSet</a>, <a href="matlab:doc('dstoolbox')">dstoolbox</a>, <a href="matlab:doc('dstable')">dstable</a>.</p>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
+<br>
+</p>
+</div>
+<!--
 ##### SOURCE BEGIN #####
 %% muiUserData
 % Class to import data sets, adding the results to dstable
@@ -231,7 +289,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muidatadet') muiDataSet>,
-% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>,
+% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>.
  
 ##### SOURCE END #####
---></body></html>
+-->
+</body>
+</html>

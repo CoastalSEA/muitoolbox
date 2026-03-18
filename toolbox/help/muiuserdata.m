@@ -38,5 +38,5 @@
 
 %% See Also
 % <matlab:doc('muitoolbox') muitoolbox>, <matlab:doc('muidatadet') muiDataSet>,
-% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>,
+% <matlab:doc('dstoolbox') dstoolbox>, <matlab:doc('dstable') dstable>.
  

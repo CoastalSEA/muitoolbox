@@ -92,12 +92,29 @@ function ax = taylor_plot_figure(rLim)
         figpts = findobj(figax,'Type','Line','-not','Tag','RMSgrid');
         figpts = sortplots(figpts);
         nrec = length(figpts);
-        tstrings = cell(nrec,1);
-        tstrings{1} = [figpts(1).DisplayName,': ',figpts(1).UserData];                                            
-        for i=2:nrec
-            tstrings{i} = [figpts(i).DisplayName,'; ',figpts(i).UserData];                             
+        if nrec>10000
+            qtxt = sprintf('%d records in data set\nDisplay All or Summary',nrec);
+            answer = questdlg({qtxt},'Taylor Stats','All','Summary','All');
+            if strcmp(answer,'All')
+                tstrings = cell(nrec,1);
+                tstrings{1} = [figpts(1).DisplayName,': ',figpts(1).UserData];                                            
+                for i=2:nrec
+                    tstrings{i} = [figpts(i).DisplayName,'; ',figpts(i).UserData];                             
+                end
+            else
+                tstrings{1} = [figpts(1).DisplayName,': ',figpts(1).UserData];  
+                tstrings{2} = [figpts(end-1).DisplayName,'; ',figpts(end-1).UserData];
+                tstrings{3} = [figpts(end).DisplayName,'; ',figpts(end).UserData];
+            end
+        else
+            tstrings = cell(nrec,1);
+            tstrings{1} = [figpts(1).DisplayName,': ',figpts(1).UserData];                                            
+            for i=2:nrec
+                tstrings{i} = [figpts(i).DisplayName,'; ',figpts(i).UserData];                             
+            end           
         end
         if isempty(tstrings), return; end
+
         hg = figure('Name','Taylor Diagram Summary','Units','normalized',...                
             'Resize','on','HandleVisibility','on','Tag','PlotFig');
         hg.Position(1) = 1-hg.Position(3)-0.01;  %top right

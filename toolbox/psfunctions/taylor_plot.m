@@ -297,7 +297,7 @@ function plotTaylor(metatxt,cfstats,option,skill)
     end    
 end
 %%
-% function ax = TaylorPlotFigure(rLim) NOW FUNCTION taylor_plot_figurre.m
+% function ax = TaylorPlotFigure(rLim) NOW FUNCTION taylor_plot_figure.m
 %     %open a new figure and label axes
 %     %MSE contours based on Exchange Forum code by Guillaume Maze.
 %     %rLim is the radial limit for the plot

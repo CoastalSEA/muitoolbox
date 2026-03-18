@@ -14,6 +14,8 @@
 % * <matlab:doc('muiplotsui') muiPlotsUI>: data selection UI to generate plots. 
 % * <matlab:doc('muiplots') muiPlots>: methods for plot options based on UI selection.
 % * <matlab:doc('muiselectui') muiSelectUI>: stand alone UI for Case, Dataset and Variable selection.
+% * <matlab:doc('muiskill_runparams') muiSkill_RunParams>: UI to set parameters used for the skill score
+% calculation.
 % * <matlab:doc('muistatsui') muiStatsUI>: data selection UI for statistical anlysis.
 % * <matlab:doc('muistats') muiStats>: methods for statistical analysis based on UI selection. 
 % * <matlab:doc('muimanipui') muiManipUI>: data selection UI to define an equation or function call.
