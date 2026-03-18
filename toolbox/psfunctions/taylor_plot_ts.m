@@ -11,7 +11,7 @@ function ax = taylor_plot_ts(ax,stats,skill,metatxt)
 % INPUTS
 %   ax - axes of base plot for a Taylor diagraam (taylor_plot_figure.m)
 %   stats - struct array of statistics needed for Taylor diagram
-%   skill - instance of MS_RunParams defining skill input parameters
+%   skill - instance of muiSkill_RunParams defining skill input parameters
 %   metatxt - cell array of text names for plot UserData
 % OUTPUT
 %   ax - axes to plot of Taylor diagram
