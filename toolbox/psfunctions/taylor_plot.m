@@ -61,7 +61,7 @@ function ax = taylor_plot(refvar,testvar,metatxt,option,rLim,skill)
     
     %generate base figure
     if strcmp(option,'New')
-        ax = TaylorPlotFigure(rLim);
+        ax = taylor_plot_figure(rLim);
     end
 
     plotTaylor(metatxt,cfstats,option,skill);                                                    
