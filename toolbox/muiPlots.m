@@ -531,14 +531,16 @@ classdef muiPlots < handle
                 case 'Rose'
                     hfig.Name = 'Rose plot';
                     promptxt = {'To add reference line enter angle to degTN:',...
-                                'Variable intensity subdivistions (eg 0 0.5 1 ...)',...
-                                'Percentage circles to draw (eg 10 20 30)'};
+                                'Variable intensity subdivisions (eg 0 0.5 1 ...)',...
+                                'Percentage circles to draw (eg 10 20 30)',...
+                                'Number of direction intervals (default is 36)'};
                     rinp = inputdlg(promptxt,'Rose plot');
                     rose.theta = parseInput(rinp{1});
                     rose.di = parseInput(rinp{2});
                     rose.ci = parseInput(rinp{3});
+                    rose.nd = parseInput(rinp{4});
                     rh = wind_rose(x,y,'parent',figax,'dtype','meteo',...
-                        'shore',rose.theta,'di',rose.di,'ci',rose.ci,...
+                        'shore',rose.theta,'nd',rose.nd,'di',rose.di,'ci',rose.ci,...
                         'labtitle',obj.Legend,'lablegend',obj.AxisLabels.Y);
                     rax = rh.Parent;
                     rax.UserData = rose;
@@ -647,8 +649,12 @@ classdef muiPlots < handle
             end
             %
             if isfield(obj.UIset,'Polar') && obj.UIset.Polar
-                muiPlots.rtSurface(x,y,z,24,yint,obj.AxisLabels.Y,...
+                 muiPlots.rtSurface(x,y,z,24,yint,obj.AxisLabels.Y,...
                                                obj.Legend,obj.Title,iscmap);
+                % tb = table(x(:),y(:),z(:),'VariableNames',{'x','y','z'});
+                % tb = rmmissing(tb,1);
+                % muiPlots.rtSurface(tb.x,tb.y,tb.z,24,yint,obj.AxisLabels.Y,...
+                %                                obj.Legend,obj.Title,iscmap);
             else
                 if isempty(obj.UIset.Type.String)
                     ptype = 'surf';
@@ -1074,7 +1080,7 @@ classdef muiPlots < handle
             radrange = [0,ceil(max(y))];
             [tq,rq] = meshgrid(theints,radints);                    
             warning('off',wid)
-            vq = griddata(deg2rad(x),y,z,tq,rq);
+            vq = griddata(deg2rad(x),y,z(:),tq,rq);
             warning('on',wid)
             polarplot3d(vq,'plottype','surfn','TickSpacing',360/tint,...
                 'RadLabels',4,'RadLabelLocation',{20 'top'},...

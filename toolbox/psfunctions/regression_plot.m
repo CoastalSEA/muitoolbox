@@ -1,4 +1,4 @@
-function regression_plot(ind_ds,dep_ds,metatxt,model)
+function ax = regression_plot(ind_ds,dep_ds,metatxt,model)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -16,6 +16,7 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
 %   model - regression model to fit
 % OUTPUT
 %   plot of results from regression_model
+%   ax = handle to figure axes
 % NOTES
 %   Input data can be numeric, datetime, duration, ordinal, or
 %   timeseries data in a dstable which are interpolated to a common time
@@ -28,7 +29,7 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
 % CoastalSEA (c)June 2019
 %--------------------------------------------------------------------------
 %
-    istime = []; indat = []; depdat = [];
+    istime = []; indat = []; depdat = []; hf = [];
     if isa(ind_ds,'dstable') && isa(dep_ds,'dstable')
         %both are timeseries data sets and may need interpolation
         if (isdatetime(ind_ds.RowNames) || isduration(ind_ds.RowNames)) && ...
@@ -130,16 +131,16 @@ function regression_plot(ind_ds,dep_ds,metatxt,model)
     nint = 10; %number of points in regression line
     [~,~,~,x,y,res] = regression_model(indat,depdat,model,nint);
 
-    plot_figure(indat,depdat,x,y,res,metatxt);
+    ax = plot_figure(indat,depdat,x,y,res,metatxt);
 end
 %%
-function plot_figure(indat,depdat,x,y,res,metatxt)
+function ax = plot_figure(indat,depdat,x,y,res,metatxt)
     %generate plot of results
     figure('Name','Regression plot', ...
             'Units','normalized', ...
             'Resize','on','HandleVisibility','on', ...
             'Tag','StatFig');
-    hp = plot(indat,depdat,'o');
+    hp = plot(indat,depdat,'o','Tag','DataPoints');
     if length(metatxt)>3
         %add metadata to line if provided
         hp.UserData  = metatxt{4};
@@ -149,7 +150,7 @@ function plot_figure(indat,depdat,x,y,res,metatxt)
     xlabel(metatxt{1});
     ylabel(metatxt{2});
     hold on
-    plot(x,y,'-')
+    plot(x,y,'-','Tag','RegressionLine')
     hold off
     
     if length(metatxt)>2

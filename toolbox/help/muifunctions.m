@@ -194,6 +194,9 @@
 % * *tablefigureUI.m*
 % - generate tablefigure and add buttons and controls to edit and return
 % updated table
+%
+% * *textfigure.m*
+% - generate figure with panel displaying editable text
 % 
 % * *test_utilfunctions.m*
 % - functions to test utility functions

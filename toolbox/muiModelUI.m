@@ -580,10 +580,15 @@ classdef (Abstract = true) muiModelUI < handle
             %callback function for Tools menu options
             switch src.Text
                 case {'Project','Model'}
+                    answer = questdlg('Confirm deletion of current project?','Clear','Delete','Quit','Quit');  
+                    if strcmp(answer,'Quit'), return; end
                     obj.clearModel;
                 case {'Figures','UI Figures','Tag Figures'}
                     clearFigures(obj,src);
                 case {'Cases','Data','Models'}
+                    quest = sprintf('Confirm deletion of ALL %s Cases?',src.Text);
+                    answer = questdlg(quest,'Clear','Delete','Quit','Quit');  
+                    if strcmp(answer,'Quit'), return; end
                     clearCases(obj,src.Text);
             end
         end
@@ -663,9 +668,9 @@ classdef (Abstract = true) muiModelUI < handle
         end      
 %%        
         function clearCases(obj,type)
-            %delete selected cases from Case list and delete case 
+            %delete cases based on type from Case list and delete case 
             muicat = obj.Cases;
-            if strcmp(type,'Cases')
+            if strcmp(type,{'Cases'})
                 deleteCases(muicat);
             else
                 caserec = find(tabSubset(obj,type));

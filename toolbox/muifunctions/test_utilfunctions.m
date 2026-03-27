@@ -40,6 +40,8 @@ function test_utilfunctions(func,caseid)
             test_getwidget(caseid)
         case 'tablefigure'
             test_tablefigure(caseid)
+        case 'textfigure'
+            test_textfigure
         case 'cellstruct2cell'
             test_cellstruct2cell(caseid)
         case 'mcolor'
@@ -271,6 +273,22 @@ function test_tablefigure(option)
                h_fig.Position(4) = height;
                h_fig.Visible = 'on';
        end
+end
+%%
+function test_textfigure()
+    %test geneartion and editing using textfigure
+    summary = '';
+    figtitle = {'Summary'};
+    headtxt = sprintf('Add or edit a short descrition of the estuary\nPlain text with no formatting');
+    text2edit = 'The tide was going out as the sun rose';
+    butdef = {'Save','Quit'};
+    [hf,hb,ht] = textfigure(figtitle,headtxt,text2edit,butdef);
+    uiwait(hf)
+    if any([hb(:).UserData]==1)
+        summary = ht.String;
+    end
+    delete(hf)
+    disp(summary)
 end
 %%
 function test_cellstruct2cell(option)

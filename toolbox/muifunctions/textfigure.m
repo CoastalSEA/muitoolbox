@@ -2,11 +2,23 @@ function varargout = textfigure(figtitle,headtext,intext,butdef)
 %
 %-------function help------------------------------------------------------
 % NAME
-%   tablefigure.m
+%   textfigure.m
 % PURPOSE
-%   generate plot figure to show table with a button to copy to clipboard
+%   generate figure with panel displaying editable text
 % USAGE
-%   varargout = tablefigure(figtitle,headtext,intext);
+%   varargout = textfigure(figtitle,headtext,intext,butdef);
+%   e.g
+%       figtitle = {'Summary'};
+%       headtxt = sprintf('Add or edit a short descrition of the estuary\nPlain text with no formatting');
+%       text2edit = 'The tide was going out as the sun rose';
+%       butdef = {'Save','Quit'};
+%       [hf,hb,ht] = textfigure(figtitle,headtxt,text2edit,butdef);
+%       uiwait(hf)
+%       if any([hb(:).UserData]==1)
+%           summary = ht.String;
+%       end
+%       delete(hf)
+%   
 % INPUT
 %   figtitle  - figure title - this can be a cell array where the 
 %               figtitle{1} is used for the figure title and figtitle{2} is
@@ -20,10 +32,11 @@ function varargout = textfigure(figtitle,headtext,intext,butdef)
 %      2: h_pan - handle to panel
 %      3: ht - handle to text box
 % NOTES
-%  
-%    
+%   button assignment assumes buttons text labels are Save and Quit
+%   in setSelection *****
 % SEE ALSO
-%   
+%   used in EDBimport.m. 
+%   test using test_utilfunctions('textfigure')
 %
 % Author: Ian Townend
 % CoastalSEA (c) Mar 2025
@@ -34,7 +47,7 @@ function varargout = textfigure(figtitle,headtext,intext,butdef)
     
     %create figure with a panel
     [h_fig,h_tab] = setFigure(figtitle);    h_fig.Visible = 'on';  
-    h_fig.CloseRequestFcn= @(src,evt)closeuicallback(src,evt);   
+    % h_fig.CloseRequestFcn = @(src,evt)closeuicallback(src,evt);   
     tabpos = h_tab.Position;
     rowheight = tabpos(2)/(nrows+2*nlines);
     headfootsize = nlines*rowheight;
@@ -52,8 +65,8 @@ function varargout = textfigure(figtitle,headtext,intext,butdef)
                    'String',intext,'HorizontalAlignment','left','FontSize',9);                 
     ht.Position = [1,1,548,262];            
     % Set vertical alignment (e.g., top, center, bottom)
-%     jEdit = findjobj(ht);  %Forum function: https://uk.mathworks.com/matlabcentral/fileexchange/14317-findjobj-find-java-handles-of-matlab-graphic-objects
-%     jEdit.setVerticalAlignment(javax.swing.JTextField.TOP);
+    % jEdit = findjobj(ht);  %Forum function: https://uk.mathworks.com/matlabcentral/fileexchange/14317-findjobj-find-java-handles-of-matlab-graphic-objects
+    % jEdit.setVerticalAlignment(javax.swing.JTextField.TOP);
     
     %add header text
     headerpos = h_pan.Position(4)+headfootsize;
@@ -172,6 +185,6 @@ end
 
 %%
 function closeuicallback(src,~)
-    %close callback function for tablefigureUIfig
+    %close callback function
     uiresume(src);
 end

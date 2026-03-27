@@ -63,7 +63,7 @@ function ax = taylor_plot_figure(rLim)
     end            
     hold off
     %Add axis labels (not part of polar plot)
-    uiNameValue('Normalized Std. Dev',[0.38 -0.08],0); 
+    uiNameValue('Normalized Std. Dev.',[0.38 -0.08],0); 
     uiNameValue('Normalized Std. Dev.',[-0.05 0.38],90); 
     uiNameValue('Correlation Coefficient',[0.75 0.85],-50); 
     uicontrol('Style', 'pushbutton', 'String', 'Case list',...

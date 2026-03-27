@@ -32,20 +32,10 @@ function output = subsample_ts(var,vartime,mobj,method,tol)
     end
     
     promptxt = 'Select dataset to define sub-sample time intervals';
-    [caserec,isok] = selectRecord(muicat,'PromptText',promptxt,...
-                                                    'ListSize',[300,100]);
-    if isok<1, return; end %user cancelled
-    cobj = getCase(muicat,caserec);
+    [cobj,~,dnames,idd] = selectCaseDataset(muicat,[],[],promptxt);
     if isempty(cobj), return; end
-
-    dnames = fields(cobj.Data);
-    if numel(dnames)>1
-        [~,idd] = selectDataset(muicat,cobj);
-    else
-        idd = 1;
-    end
-    dst =  cobj.Data.(dnames{idd});          
-    newtime = dst.RowNames;       
+    timedst =  cobj.Data.(dnames{idd});          
+    newtime = timedst.RowNames;    
 
     if strcmp(method,'none')
         if nargin<5
@@ -64,12 +54,30 @@ function output = subsample_ts(var,vartime,mobj,method,tol)
             newvar = var(idv(idv>0));
             newtime = newtime(idn);
         else
-            D = abs(newtime - vartime');      % duration matrix
-            [minDiff, idx] = min(D, [], 2);
+            %original code runs out of memory with long timeseries vectors
+            % D = abs(newtime - vartime');      % duration matrix
+            % [minDiff, idx] = min(D, [], 2);
+            % tf = minDiff <= tol;
+            % loc = idx(tf);
+            % newtime = newtime(tf);
+            % newvar = var(loc,:);   %works for scalar or vector data
+
+            % Ensure vartime is sorted
+            [vartimeSorted, order] = sort(vartime);
+            varSorted = var(order,:);
+            
+            % Find nearest neighbour index for each newtime
+            idx = interp1(vartimeSorted, 1:numel(vartimeSorted), newtime, 'nearest', 'extrap');
+            
+            % Compute actual time difference
+            minDiff = abs(newtime - vartimeSorted(idx));
+            
+            % Apply tolerance
             tf = minDiff <= tol;
-            loc = idx(tf);
+            
+            % Filter
             newtime = newtime(tf);
-            newvar = var(loc,:);   %works for scalar or vector data
+            newvar  = varSorted(idx(tf), :);
         end
     else
         newvar = interp1(vartime,var,newtime,method); %var can be scalar or vector data (ie interp1 handles vector or matrix)

@@ -497,14 +497,14 @@ function [Xi,Yi,Zi] = polarplot3d(Zp,varargin)
     switch p.plottype
        case 'wire',    grid on;
        case 'meshc',   mesh(Xi,Yi,Zi,Ci);
-                       addcontours(Xi,Yi,Zi,p.contourlines);
+                       addcontours(Xi,Yi,Zi,p);
        case 'mesh',    mesh (Xi,Yi,Zi,Ci);
        case 'surf',    surf (Xi,Yi,Zi,Ci);
        case 'surfc',   surf (Xi,Yi,Zi,Ci);
-                       addcontours(Xi,Yi,Zi,p.contourlines);
+                       addcontours(Xi,Yi,Zi,p);
        case 'surfn',   surf (Xi,Yi,Zi,Ci,'LineStyle','none');
        case 'surfcn',  surf (Xi,Yi,Zi,Ci,'LineStyle','none');
-                       addcontours(Xi,Yi,Zi,p.contourlines);
+                       addcontours(Xi,Yi,Zi,p);
        case 'contour', contour(Xi,Yi,Zi,p.contourlines);
                        axis equal; xlim(xlim*1.1); ylim(ylim*1.1);
                        set(gca,'visible','off');
@@ -696,15 +696,15 @@ end
 
 %%
 %-- Local functions--------------------------------------------------------
-function addcontours(x,y,z,levels)
+function addcontours(x,y,z,p)
     % Add a contour plot to the current surface or mesh plot
-    if isempty(levels), levels = 16; end
+    if isempty(p.contourlines), p.contourlines = 16; end
     hold(p.axes,'on');
     a    = get(gca,'zlim');
     zpos = a(1);               % find smallest z value in 3d plot
     
     % Add contours
-    [~,hh] = contour3(x,y,z,levels);
+    [~,hh] = contour3(x,y,z,p.contourlines);
     
     % Change all contour group positions to bottom of plot
     for j = 1:length(hh)

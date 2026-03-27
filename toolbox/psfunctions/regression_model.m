@@ -50,6 +50,9 @@ function [a,b,Rsq,x,y,txt] = regression_model(inddata,depdata,model,nint,isplot)
         case 'logarithm'
             depvar = depdata;
             indvar = log(inddata);
+        otherwise
+            warndlg('Model selection not known'); 
+            a=[];b=[];Rsq=[];x=[];y=[];txt=''; return
     end
     %remove infinite values in power/logarithm cases when data<=0
     depvar(isinf(depvar)) = NaN;

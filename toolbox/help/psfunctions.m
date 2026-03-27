@@ -6,66 +6,69 @@
 
 %% Functions
 % * *annual_polar_plot.m*
-% - plot the monthly or seasonal values of a timeseries variable
+% - plot the monthly or seasonal values of a timeseries variable.
 %
 % * *binned_variable.m*
 % - sort the data into interval bins for each interval within a period (e.g
-% monthly bins for each year of a record)
+% monthly bins for each year of a record).
 %
 % * *clean_saved_figure.m*
 % - function to clean mui obj declarations in fig files (eg when saving for
-% reuse)
+% reuse).
 %
 % * *clusters.m*
-% - function to find clusters of peaks over a threshold
+% - function to find clusters of peaks over a threshold.
 %
 % * *cmap_selection.m*
 % - select a color map definition from Matlab(TM) default list and cbrewer
-% generated mat files
+% generated mat files.
 %
 % * *compile_tiled_figure*
 % - interactively add existing axes from single axes figures to a figure
-% with multiple tiles (regular grid only)
+% with multiple tiles (regular grid only).
 %
 % * *complex_vector_plot.m*
 % - creates a polar plot of the movement at each interval from one position
-% to the next
+% to the next.
 %
 % * *conditional_subsample.m*
-% - subsample input variable based on a condition set by another variable
+% - subsample input variable based on a condition set by another variable.
+%
 % * *general_logisitic.m*
-% - function to return a curve defined by the generalised logisitc equation
+% - function to return a curve defined by the generalised logisitc
+% equation.
 %
 % * *descriptive_stats.m*
-% - generate descriptive stats table for timeseries or table of a variable
+% - generate descriptive stats table for timeseries or table of a variable.
 %
 % * *diffpadded.m*
 % - differences and approximate derivatives, padded to be same length as
-% input variable
+% input variable.
 %
 % * *display_selection.m*
-% - callback function to display text from a uicontrol in a dialog box
+% - callback function to display text from a uicontrol in a dialog box.
 %
 % * *downsample.m*
 % - wrapper to put downsample_ts, output into an array. From Matlab(TM) Forum, 
-% by Chad A. Greene (c) 2014, 
+% by Chad A. Greene (c) 2014.
 %
 % * *extreme_stats.m*
 % - compute extreme values for a range of return periods using the GPD
-% method (General Pareto Distrtibution)
+% method (General Pareto Distrtibution).
 %
 % * *fittedtitle.m*
 % - fit title text to the width of a figure (handles title and sgtitle).
 %
 % * *frequencyanalysis.m*
 % - generate a range of plots of frequency, probability of exceedance and
-% duration of exceedance for a timeseries of data
+% duration of exceedance for a timeseries of data.
 %
 % * *genhurstw.m*
 % - calculates the weighted generalized Hurst exponent H(q) from 
 % the scaling of the renormalized q-moments of the distribution 
 % From Matlab(TM) Forum (c) Tomaso Aste (2022). Weighted generalized Hurst 
-% exponent (https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent)
+% exponent
+% (https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent).
 %
 % * *getclusters.m*
 % - identify cluster in a timeseries with options to adjust threshold, 
@@ -80,12 +83,16 @@
 % scatter, stem, bar, etc.) from the specified axes (ax).
 %
 % * *godisplay.m*
-% - display the legend name or DisplayName of the selected graphical object
+% - display the legend name or DisplayName of the selected graphical
+% object.
 %
 % * *gram_charlier_pdf.m*
 % - estimates the Probability Density Function of the Gram Charlier Distribution 
 % for a series of x values, given the mean, variance, skewness and kurtosis 
 % parameters (or a timeseries of values).
+%
+% * *histogram_plot.m*
+% - 2D histogram plot for 2 variables of same length.
 %
 % * *hurst_aalok_ihlen.m*
 % - estimate the Hurst exponent of a timeseries, using the method proposed
@@ -94,31 +101,43 @@
 % * *hurst_exponent.m*
 % - estimate the Hurst exponent of a timeseries, using one of a a number of
 % methods available from the Matlab Forum, including:
-% https://www.mathworks.com/matlabcentral/fileexchange/70192-hurst-exponent   
-% https://www.mathworks.com/matlabcentral/fileexchange/39069-hurst-exponent-estimation 
-% https://www.mathworks.com/matlabcentral/fileexchange/100988-hurst-exponent
-% https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent
-%
+
+%%
+% <html>
+% <style>
+%     /* Optional: CSS method for tab spacing */
+%     .tab {
+%         display: inline-block;
+%         width: 2em; /* Adjust tab width */
+%     }
+% </style>
+% <span class="tab"></span><a href="https://www.mathworks.com/matlabcentral/fileexchange/70192-hurst-exponent" target="_blank">https://www.mathworks.com/matlabcentral/fileexchange/70192-hurst-exponent </a> <br>
+% <span class="tab"></span><a href="https://www.mathworks.com/matlabcentral/fileexchange/39069-hurst-exponent-estimation" target="_blank">https://www.mathworks.com/matlabcentral/fileexchange/39069-hurst-exponent-estimation</a>  <br>
+% <span class="tab"></span><a href="https://www.mathworks.com/matlabcentral/fileexchange/100988-hurst-exponent" target="_blank">https://www.mathworks.com/matlabcentral/fileexchange/100988-hurst-exponent </a> <br>
+% <span class="tab"></span><a href="https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent" target="_blank">https://www.mathworks.com/matlabcentral/fileexchange/36487-weighted-generalized-hurst-exponent </a> .
+% </html>
+
+%%
 % * *interpwithnoise.m*
 % - insert additional records into a timeseries interpolating between 
-% existing values and adding noise to the values added
+% existing values and adding noise to the values added.
 %
 % * *mcolor.m*
-% - select a default Matlab(TM) color definition from table
+% - select a default Matlab(TM) color definition from table.
 %
 % * *mgpdfit.m*
 % - maximum likelihood estimate of the fit parameters for a GPD and compute return period
-% estimates and confidence intervals (user prompt for plotted output)
+% estimates and confidence intervals (user prompt for plotted output).
 %
 % * *moving.m*
-% - computes moving averages of order n (best taken as odd)
+% - computes moving averages of order n (best taken as odd).
 %
 % * *movingtime.m*
-% - computes moving averages for a window of tint duration
+% - computes moving averages for a window of tint durationm.
 %
 % * *my_mui_plot.m*
 % - generate a plot by calling muiPlots. Example produces an animation 
-% from a 3D dstable passed as a class object that inherits DGinterface 
+% from a 3D dstable passed as a class object that inherits DGinterface.
 %
 % * *peakseek.m* 
 % - alternative to the findpeaks function. From Matlab(TM) Forum, 
@@ -130,16 +149,16 @@
 %
 % * *phaseplot.m*
 % - variation of x and y with time. e.g. centroid of beach profiles or 
-% recursive plots such as x = x(t) v  y = x(t+1)  
+% recursive plots such as x = x(t) v  y = x(t+1).  
 %
 % * *plot_difference.m*
 % - find the difference between two variables interpolating one of them if
-% they are not at the same datetimes and plot the result
+% they are not at the same datetimes and plot the result.
 %
 % * *poisson_stats.m*
 % - compute the inter-arrival time, magnitude and duration of
-% events assuming that they are a Poisson process
-% fitting an exponential pdf and plotting 
+% events assuming that they are a Poisson process fitting an exponential 
+% pdf and plotting.
 %
 % * *polarplot3D.m*
 % - plot a 3D surface from polar coordinate data. Function from Matlab(TM)
@@ -150,27 +169,27 @@
 % - compute the R-squared value a measure of goodness of fit between the 
 % observed data and its estimation (may be from a regression or other
 % model). Function by Shoaibur Rahman:
-% https://www.mathworks.com/matlabcentral/fileexchange/55128-calculate-r-squared-value
+% https://www.mathworks.com/matlabcentral/fileexchange/55128-calculate-r-squared-value.
 %
 % * *recursive_plot.m*
-% - plot a variable against itself with a step interval of nint
+% - plot a variable against itself with a step interval of nint.
 %
 % * *regression_model.m*
 % - transform data for selected regression model and return regression
-% coefficients and sample values
+% coefficients and sample values.
 %
 % * *regression_plot.m*
-% - generate regression plot for 2-D data and fitted regression model
+% - generate regression plot for 2-D data and fitted regression model.
 %
 % * *reshape_axes.m*
-% - reshape subplots in a figure from a single column to two columns
+% - reshape subplots in a figure from a single column to two columns.
 %
 % * *saveanimation2file.m*
-% - saves movie to selected file type
+% - saves movie to selected file type.
 %
 % * *select_figure.m*
 % - allow the user to interactively select an existing figure and control
-% the selection using valid Tags
+% the selection using valid Tags.
 %
 % * *set_slider_figure.m*
 % - initialise a figure with two tiles and one or two sliders. The sliders
@@ -183,77 +202,85 @@
 %
 % * *setfigslider.m*
 % - initialise a slider on a figure with the option to include text 
-% displaying the current slider value and an action button
+% displaying the current slider value and an action button.
 %
 % * *setlog.m*
-% - callback function for button to set XY plot to have log/linear y-axis
+% - callback function for button to set XY plot to have log/linear y-axis.
 %
 % * *setnan.m*
-% - callback function for button to include or exclude NaN values from plot
+% - callback function for button to include or exclude NaN values from
+% plot.
 %
 % * *setskillparameters.m*
 % - initialise the skill properties used for Taylor plot and local skill
 % score plots. Skill score requires correlation coefficient and exponent.
-% Other parameters relate to local skill score
+% Other parameters relate to local skill score.
 %
 % * *sortplots.m*
-% - reorder plot handles so that the legend plots in sequence added
+% - reorder plot handles so that the legend plots in sequence added.
 %
 % * *stderror.m*
 % - compute the standard error of a data set relative to a fitted
-% regression line
+% regression line.
+%
+% * *subsample_dst.m*
+% - subsample all variables in a dstable using the times from another
+% dataset (+/- a tolerance in seconds).
 %
 % * *subsample_ts.m*
 % - create a timeseries by interpolating one timeseries to the times
-% of another timeseries
+% of another timeseries.
 %
 % * *tabfigureplot*
 % - generate axes on Q-Plot tab including '>Figure' and 'Rotate'
-% buttons (Rotate is optional), or as a standalone figure
+% buttons (Rotate is optional), or as a standalone figure.
 %
 % * *target_marker.m*
-% - add one or more target symbols to a plot
+% - add one or more target symbols to a plot.
 %
 % * *taylor_plot.m*
 % - create plot of Taylor diagram and, optionally, plot compute skill score
-% and a skill map (2 or 3D depending on data)
+% and a skill map (2 or 3D depending on data).
 %
 % * *taylor_plot_figure.m*
-% - create base plot for a Taylor diagram 
+% - create base plot for a Taylor diagram .
 %
 % * *user_model.m*
-% - function to run a user class defined using the Model_template.m
+% - function to run a user class defined using the Model_template.m.
 %
 % * *user_plot.m*
-% - function to allow user to implement own plotting function
+% - function to allow user to implement own plotting function.
 %
 % * *user_stats.m*
-% - function to allow user to implement own statistical function
+% - function to allow user to implement own statistical function.
 %
 % * *wind_rose.m* 
 % - plot wind/wave rose to show direction and intensity of variable. 
 % From Matlab(TM) Forum (c) MMA 26-11-2007, Instituto Español de Oceanografía
-% La Coruña, España)
+% La Coruña, España).
 %
 % * *xcorrelation_plot.m*
 % - generate a cross-correlation plot for user selected data and model
 % timeseries data are interpolated to a common time over shortest record,
-% all other data have to be the same length vectors 
+% all other data have to be the same length vectors .
 %
 % * *zero_crossing.m*
 % - Function to calculate the zero-crossing. Used to calculate the up and
-% down crossings of a threshold for time series data
+% down crossings of a threshold for time series data.
 
 %% Command line utility functions
 % * *addgeodata.m*
 % - add data to an existing figure from a shape file, geospatial table file, 
-% or raster image file
+% or raster image file.
+%
+% * *clean_saved_figure.m*
+% - function to clean mui obj declarations in fig files (eg when saving for reuse)
 %
 % * *compile_tiled_figure.m*
 % - interactively add existing axes from single axes figures to a figure
-% with multiple tiles (regular grid only)
+% with multiple tiles (regular grid only).
 %
 % * *setaxis_yearsbp.m*
 % - adjust the x-axis to display years Before Present (BP), reverse
-% the axis tick labels and add new axis label
+% the axis tick labels and add new axis label.
 %

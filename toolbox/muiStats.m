@@ -14,11 +14,6 @@ classdef muiStats < handle
 %--------------------------------------------------------------------------
 %
     properties (Transient)
-%         Stats           %struct array for 
-%                         %   FigNum - index to figures created
-%                         %   CurrentFig - handle to current figure
-%                         %   Order - struct that defines variable order for
-%                         %           stats type options (selection held in Order)
         UIsel           %structure for the variable selection made in the UI
         UIset           %structure for the plot settings made in the UI
         Data            %data to use in statistic (x,y,z)
@@ -224,12 +219,14 @@ classdef muiStats < handle
         function getRegressionStats(obj)
             %call regression_plot based on user selection
             % X taken as indpendent variable and Y as dependent variable
-            regression_models = {'Linear','Power','Exponential','Logarithm'};
-            [indx,ok] = listdlg('PromptString','Select a regression model:',...
-                           'SelectionMode','single','ListSize',[150,60],...
-                           'ListString',regression_models);
-            if ok<1, return, end
-            model = regression_models{indx}; %selected model type
+            model = regression_selection();
+            if isempty(model), return; end
+            % regression_models = {'Linear','Linear0','Power','Exponential','Logarithm'};
+            % [indx,ok] = listdlg('PromptString','Select a regression model:',...
+            %                'SelectionMode','single','ListSize',[150,100],...
+            %                'ListString',regression_models);
+            % if ok<1, return, end
+            % model = regression_models{indx}; %selected model type
             
             hw = waitbar(0,'Checking data');
             %check that user has correctly defined X and Y
