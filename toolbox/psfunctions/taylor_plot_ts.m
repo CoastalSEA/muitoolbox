@@ -139,6 +139,13 @@ function hax = plotSurface(ax,ps,mn,metatxt,skill)
 
     R = acos(ps.corr);           %acos for trig angles, 
     sig = ps.ndteststd;
+    ids = sig>5;    
+    if any(ids)
+        sig(ids) = NaN;
+        hw = warndlg(sprintf('%d values >5 out of %d not plotted',sum(ids),numel(R)));
+        waitfor(hw)
+         mn.ndteststd = mean(sig,'All','omitnan');
+    end
 
     xx = sig.*cos(R);
     yy = sig.*sin(R);
@@ -210,7 +217,6 @@ function hax = plotSurface(ax,ps,mn,metatxt,skill)
         % hp = findobj(hp,'-not','Tag','RMSgrid'); 
         % newhp = vertcat(hp,hgrd(1)); 
     fprintf('Mode score %.3f; Mean score %.3f\n',score,mn.gskill)
-
 end
 %%
 function plotRMSEcircles(ax)

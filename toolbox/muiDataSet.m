@@ -59,76 +59,11 @@ classdef (Abstract = true) muiDataSet < handle
                 if ok<1, return; end
             end
 
-            [fname,path,nfiles] = getfiles('MultiSelect',obj.FileSpec{1},...
-                'FileType',obj.FileSpec{2},'PromptText','Select file(s):');
-            if nfiles==0
-                return;
-            elseif iscell(fname)
-                filename = [path fname{1}]; %multiselect returns cell array
-            else
-                filename = [path fname];    %single select returns char
-            end
-            
-            %get data
-            funcname = 'getData';
-            [dst,ok] = callFileFormatFcn(obj,funcname,obj,filename);
-            if ok<1 || isempty(dst), return; end
-            %assign metadata about data, Note dst can be a struct
-            dst = updateSource(dst,filename,1);
-            
-            hw = waitbar(0, sprintf('Loading data. File 1 of %d',nfiles));
-            %now load any other files of the same format
-            if nfiles>1
-                for jf = 2:nfiles
-                    jf_file = fname{jf};
-                    filename = [path jf_file];
-                    adn_dst = callFileFormatFcn(obj,funcname,obj,filename);
-                    if ~isempty(adn_dst)
-                        if isa(adn_dst,'dstable')
-                            dst = vertcat(dst,adn_dst); %#ok<AGROW>
-                        elseif isstruct(adn_dst)
-                            %multiple tables so concatenate each one
-                            fnames = fieldnames(adn_dst);
-                            for j=1:length(fnames)
-                                dst.(fnames{j}) = vertcat(dst.(fnames{j}),...
-                                                      adn_dst.(fnames{j}));
-                            end
-                        end
-                        dst = updateSource(dst,filename,jf);
-                    end                    
-                    waitbar(jf/nfiles,hw,sprintf('Loading data. File %d of %d',jf,nfiles))
-                end 
+            dst = loadFiles(obj);
+            if isempty(dst), return; end
 
-                %sort by row if date or duration (sortorws updates range)
-                if isstruct(dst)
-                    fnames = fieldnames(dst);
-                    for ii=1:numel(fnames)
-                        if strcmp(dst.(fnames{ii}).RowType,'datetime') || ...
-                                 strcmp(dst.(fnames{ii}).RowType,'duration')
-                            dst.(fnames{ii}) = sortrows(dst.(fnames{ii}));
-                        end                        
-                    end
-                else
-                    if strcmp(dst.RowType,'datetime') || strcmp(dst.RowType,'duration')
-                        dst = sortrows(dst);
-                    end
-                end
-            end
-            close(hw);
-            
             setDataSetRecord(obj,muicat,dst,'data');
             getdialog(sprintf('Data loaded in class: %s',classname));
-            %--------------------------------------------------------------
-            function dst = updateSource(dst,filename,jf)
-                if isstruct(dst)
-                    fnames = fieldnames(dst);
-                    for i=1:length(fnames)
-                        dst.(fnames{i}).Source{jf,1} = filename;
-                    end
-                else
-                    dst.Source{jf,1} = filename;
-                end
-            end
         end
     end
 %%    
@@ -171,7 +106,8 @@ classdef (Abstract = true) muiDataSet < handle
             obj.Data.(datasetname) = dst;  
             updateCase(muicat,obj,classrec,false);
             getdialog(sprintf('Data added to: %s',catrec.CaseDescription));
-        end        
+        end       
+
 %%
         function deleteData(obj,classrec,catrec,muicat)
             %delete variable or rows from a dataset
@@ -232,6 +168,22 @@ classdef (Abstract = true) muiDataSet < handle
             updateCase(muicat,obj,classrec,false);
             getdialog(sprintf('Data deleted from: %s',catrec.CaseDescription));
         end
+        
+%%
+        function addMultiFiles(obj,classrec,catrec,muicat) 
+            %add data from multiple files to an existing user dataset
+            dst = obj.Data;
+
+            newdst = loadFiles(obj);
+            if isempty(newdst), return; end
+            dst = concatDStables(obj,dst,newdst);
+            dst = sortDSTrows(obj,dst); %required in case new data is out or sequence
+
+            obj.Data = dst;  
+            updateCase(muicat,obj,classrec,false);
+            getdialog(sprintf('Data added to: %s',catrec.CaseDescription));
+        end
+
 %%
         function qcData(obj,classrec,~,muicat)
             %apply quality control to a dataset
@@ -239,10 +191,101 @@ classdef (Abstract = true) muiDataSet < handle
             [output,ok] = callFileFormatFcn(obj,funcname,obj);
             if ok<1 || isempty(output), return; end
             
-            %update dataset record - output contains {dst,datasetname}
-            obj.Data.(output{2}) = output{1};             
+            %update dataset record
+            if isscalar(output)
+                obj.Data = output{1}; %output contains a struct of dstables
+            else
+                obj.Data.(output{2}) = output{1};  %output contains {dst,datasetname}   
+            end
             updateCase(muicat,obj,classrec);
         end
+
+%%
+        function dst = loadFiles(obj)
+            %load a set of one or files into a dstable - used in loadData
+            %and addMultiFiles
+            [fname,path,nfiles] = getfiles('MultiSelect',obj.FileSpec{1},...
+                'FileType',obj.FileSpec{2},'PromptText','Select file(s):');
+            if nfiles==0
+                dst =  []; return;
+            elseif iscell(fname)
+                filename = [path fname{1}]; %multiselect returns cell array
+            else
+                filename = [path fname];    %single select returns char
+            end          
+
+            %get data
+            funcname = 'getData';            
+            [dst,ok] = callFileFormatFcn(obj,funcname,obj,filename);
+            if ok<1 || isempty(dst), dst =  []; return; end
+            %assign metadata about data, Note dst can be a struct
+            dst = updateSource(dst,filename,1);           
+
+            hw = waitbar(0, sprintf('Loading data. File 1 of %d',nfiles));
+            %now load any other files of the same format
+            if nfiles>1
+                for jf = 2:nfiles
+                    jf_file = fname{jf};
+                    filename = [path jf_file];
+                    adn_dst = callFileFormatFcn(obj,funcname,obj,filename);
+                    if ~isempty(adn_dst)
+                        dst = concatDStables(obj,dst,adn_dst);
+                        dst = updateSource(dst,filename,jf);
+                    end                    
+                    waitbar(jf/nfiles,hw,sprintf('Loading data. File %d of %d',jf,nfiles))
+                end 
+
+                %sort by row if date or duration (sortorws updates range)
+                dst = sortDSTrows(obj,dst);
+            end
+            close(hw);
+
+            %--------------------------------------------------------------
+            function dst = updateSource(dst,filename,jf)
+                if isstruct(dst)
+                    dnames = fieldnames(dst);
+                    for i=1:length(dnames)
+                        dst.(dnames{i}).Source{jf,1} = filename;
+                    end
+                else
+                    dst.Source{jf,1} = filename;
+                end
+            end
+        end
+
+%%
+        function dst = concatDStables(~,dst,adn_dst)
+            %vertically concatenate dstable or struct of dstables
+
+            if isa(adn_dst,'dstable')
+                dst = vertcat(dst,adn_dst); 
+            elseif isstruct(adn_dst)
+                %multiple tables so concatenate each one
+                fnames = fieldnames(dst);
+                for j=1:length(fnames)
+                    dst.(fnames{j}) = vertcat(dst.(fnames{j}),...
+                                          adn_dst.(fnames{j}));
+                end
+            end
+        end
+
+%%  
+        function dst = sortDSTrows(~,dst)
+            if isstruct(dst)
+                fnames = fieldnames(dst);
+                for ii=1:numel(fnames)
+                    if strcmp(dst.(fnames{ii}).RowType,'datetime') || ...
+                            strcmp(dst.(fnames{ii}).RowType,'duration')
+                        dst.(fnames{ii}) = sortrows(dst.(fnames{ii}));
+                    end
+                end
+            else
+                if strcmp(dst.RowType,'datetime') || strcmp(dst.RowType,'duration')
+                    dst = sortrows(dst);
+                end
+            end
+        end
+
 %%
         function [datasetname,ok,idd] = getDataSetName(obj,promptxt,selectmode)
             %check whether there is more than one dstable and select
@@ -272,7 +315,8 @@ classdef (Abstract = true) muiDataSet < handle
             else
                 datasetname = datasetnames(idd);  %add option for multi-selection
             end
-        end  
+        end
+
 %%
         function [cobj,dst,ok] = selectClassInstance(obj,propname,propvalue)
             %Prompt to select a class instance. Filter based on a class
@@ -310,6 +354,7 @@ classdef (Abstract = true) muiDataSet < handle
             cobj = obj(select);
             dst = cobj.Data.(dsname);
         end
+
 %%
         function caseidx = getClassInstances(obj,propname,propvalue)
             %get the class indices for the instances where propname 
@@ -318,6 +363,7 @@ classdef (Abstract = true) muiDataSet < handle
             idx = ismember(proplist,propvalue);
             caseidx = [obj(idx).CaseIndex];
         end
+
 %%
         function data = readTSinputFile(~,filename)
             %uses Matlab detectImportOptions to decipher the header and read the
@@ -340,7 +386,8 @@ classdef (Abstract = true) muiDataSet < handle
             data = standardizeMissing(data,[99,99.9,99.99,999,9999]);
             %check for incorrect date-time (NAT)
             data = rmmissing(data,'DataVariables',1);
-        end   
+        end  
+
 %%
         function caseid = setDataSetRecord(obj,muicat,dataset,varargin)
             %assign dataset to class Data property and update catalogue
@@ -388,6 +435,7 @@ classdef (Abstract = true) muiDataSet < handle
                 setRunParam_InputDataSet(obj,mobj,varargin{:});
             end
         end
+
 %%
         function setRunParam_InputDataSet(obj,mobj,varargin)
             %add any input data sets used to run model
@@ -405,12 +453,14 @@ classdef (Abstract = true) muiDataSet < handle
                     obj.RunParam.(cname).caseclass = cname;
                 end
             end            
-        end                 
+        end   
+
 %%
         function setCaseIndex(obj,caseid)
             %Assign the CaseIndex property (called by muiCatalogue.setCase)
             obj.CaseIndex = caseid;
         end
+
 %%
         function formatfile = setFileFormat(~)
             %prompt user to select a FileFormat m file
@@ -425,6 +475,7 @@ classdef (Abstract = true) muiDataSet < handle
                 formatfile = [];
             end
         end
+
 %%
         function ok = setFileFormatID(obj)
             %prompt user to select a file format 
@@ -438,6 +489,7 @@ classdef (Abstract = true) muiDataSet < handle
                 ok = 1;
             end
         end
+
 %%
         function idf = getFileFormatID(obj,muicat)
             %extract all the file formats from a set of objects
@@ -449,6 +501,7 @@ classdef (Abstract = true) muiDataSet < handle
             if isempty(cobj), return; end
             idf = unique([cobj.idFormat]);
         end
+
 %%
         function [out1,ok] = callFileFormatFcn(obj,funcname,varargin)
             %call a function in the data format file 
@@ -589,6 +642,7 @@ classdef (Abstract = true) muiDataSet < handle
             title (dst.Description);
             ax.Color = [0.96,0.96,0.96];  %needs to be set after plot          
         end
+
 %%
         function h = DSplot(~,ax,data,labels)
             %line plot for 1D variable
@@ -612,6 +666,7 @@ classdef (Abstract = true) muiDataSet < handle
             xlabel(labels.X); 
             ylabel(labels.V);  
         end
+
 %%
         function h = DSbar(~,ax,data,labels)
             %line plot for 1D variable
@@ -639,6 +694,7 @@ classdef (Abstract = true) muiDataSet < handle
             xlabel(labels.X); 
             ylabel(labels.V);  
         end
+
 %%
         function h = DSsurface(~,ax,data,labels)
             %surface plot for 2D variable            
@@ -650,10 +706,12 @@ classdef (Abstract = true) muiDataSet < handle
             zlabel(labels.V)  
             view(3);
             cmap = cmap_selection;
+            if isempty(cmap), cmap = cmap_selection(1); end
             colormap(cmap)
             cb = colorbar;
             cb.Label.String = labels.V;
         end   
+
 %%
         function h = DSvolume(~,ax,data,labels)
             %volume plot for 3D variable
@@ -669,6 +727,7 @@ classdef (Abstract = true) muiDataSet < handle
             ylabel(labels.X);
             zlabel(labels.Z);
         end
+
 %%
         function DSanimation(obj,ax,data,labels,titletxt,cdim)
             %aninmate surface for time+2D data            
@@ -715,6 +774,7 @@ classdef (Abstract = true) muiDataSet < handle
             end 
             hold(ax,'off')
         end         
+
 %%
         function DSrotatebutton(~,ax,src)
             %button to rotate surface plot

@@ -709,6 +709,8 @@ classdef (Abstract = true) muiModelUI < handle
                     obj.DrawMap;
                 case 'Delete Dataset'
                     deleteCaseDataset(muicat);
+                case 'Delete Variable'
+                    deleteCaseDatasetVariable(muicat);
                 case 'Reload Case'
                     reloadCase(muicat,obj);      
                 case 'View Case Settings'
