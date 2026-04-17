@@ -584,6 +584,10 @@ classdef (Abstract = true) muiModelUI < handle
                     if strcmp(answer,'Quit'), return; end
                     obj.clearModel;
                 case {'Figures','UI Figures','Tag Figures'}
+                    %Figures deletes figures linked to selected UIs
+                    % default muiModel menu option. some Apps have options:
+                    %UI figures deletes figures linked to selected UIs
+                    %Tag figures deletes all figures with 'PlotFig' Tag
                     clearFigures(obj,src);
                 case {'Cases','Data','Models'}
                     quest = sprintf('Confirm deletion of ALL %s Cases?',src.Text);
