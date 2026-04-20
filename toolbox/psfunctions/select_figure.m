@@ -40,11 +40,23 @@ function selectedFig = select_figure(validTags,invalidTags)
     if isempty(figs), return; end      %no figures available
 
     prmptxt = 'Select figure to use';
-    hd = setdialog(prmptxt);     
+    hd = setdialog(prmptxt);    
+
     % Assign a temporary callback to each figure
-    for f = figs'
+    for f = figs'    
+        % Clear any active interactive mode (version-safe)
+        zoom(f,'off');
+        pan(f,'off');
+        rotate3d(f,'off');
+        datacursormode(f,'off');
+        brush(f,'off');
+        plotedit(f,'off');
+    
+        % Store old callback
         oldFcn = get(f,'WindowButtonDownFcn');
-        setappdata(f,'OldWBDFcn',oldFcn);   % store old callback
+        setappdata(f,'OldWBDFcn',oldFcn);
+    
+        % Assign temporary callback
         f.WindowButtonDownFcn = @(src,evt) localClickCallback(src,evt,hd,validTags);
     end
     
@@ -61,7 +73,7 @@ function selectedFig = select_figure(validTags,invalidTags)
             f.WindowButtonDownFcn = getappdata(f,'OldWBDFcn');
             rmappdata(f,'OldWBDFcn');
         end
-    end    
+    end   
 end
 
 %%

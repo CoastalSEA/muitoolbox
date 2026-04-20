@@ -64,10 +64,10 @@ function res = plot_difference(dstruct,isangle,method)
     plot(s1,seltime,diffvar)
     ylabel(dst1.VariableLabels{1})
     
-    mn = mean(diffvar,'omitnan');
-    stdv =std(diffvar,'omitnan');
+    mn = mean(abs(diffvar),'omitnan');
+    stdv =std(abs(diffvar),'omitnan');
     mnmx = minmax(diffvar);
-    legtxt = sprintf('Diff - mean=%.2f; std=%.2f; min=%.2f; max=%.2f',...
+    legtxt = sprintf('Diff - abs.mean=%.2f; abs.std=%.2f; min=%.2f; max=%.2f',...
                                                  mn,stdv,mnmx(1),mnmx(2));
     legend(legtxt,'Location','northeast')
 

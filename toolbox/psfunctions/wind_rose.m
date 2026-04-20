@@ -139,7 +139,9 @@ function varargout = wind_rose(D,F,varargin)
                 case 'dtype'
                     dtype=vin{i+1};
                 case 'nd'
-                    nAngles=vin{i+1};
+                    if ~isempty(vin{i+1}) %default is 36
+                        nAngles=vin{i+1};
+                    end
                 case 'ri'
                     ri=vin{i+1};
                 case 'quad'
