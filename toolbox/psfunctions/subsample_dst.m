@@ -41,9 +41,10 @@ function outdst = subsample_dst(muicat)
     %save sumsampled dataset
     classname = metaclass(obj).Name;
     heq = str2func(classname);
-    obj = heq();  %new instance of class object
-    obj.Data.(dsnames{ido}) = outdst;
-    setCase(muicat,obj,'data');
+    newobj = heq();  %new instance of class object
+    newobj.Data.(dsnames{ido}) = outdst;
+    newobj.idFormat = obj.idFormat;       %needed if inherits muiDataSet
+    setCase(muicat,newobj,'data');
     getdialog(sprintf('Subsampled dataset saved as %s',classname));
 end
 %%

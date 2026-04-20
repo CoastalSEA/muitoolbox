@@ -154,6 +154,24 @@ classdef muiCatalogue < dscatalogue
         end
 
 %%
+        function deleteCaseDatasetVariable(obj)
+            %select a records and dataset allow user to select a variable
+            %for deletion
+            promptxt = 'Select Case to delete Variable from:';
+            [cobj,~,datasets,idd] = selectCaseDataset(obj,[],[],promptxt);
+            dst = cobj.Data.(datasets{idd});
+            vardesc = dst.VariableDescriptions;
+            varnames = dst.VariableNames;
+            idv = listdlg('PromptString','Select variable(s) to delete:',...
+                          'ListString',vardesc,'SelectionMode','multiple',...
+                          'Name','Delete Variable','ListSize',[160,200]);                                    
+            if isempty(idv), return; end %user cancelled
+
+            newdst = removevars(dst,varnames(idv));
+            cobj.Data.(datasets{idd}) = newdst;
+        end
+
+%%
         function reloadCase(obj,mobj,caserec)  
             %reload model input variables as the current settings
             if nargin<3  %if case to reload has not been specified
