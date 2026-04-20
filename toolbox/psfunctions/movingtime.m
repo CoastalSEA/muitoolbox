@@ -1,4 +1,4 @@
-function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
+function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -19,6 +19,8 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
 %        time t0 to the nearest interval that is less than tdur from the
 %        end of the record
 %   vm - is output vector of same length as x
+%   tdur - duration of the sampling period (y,d,h,m,s) (in case input values changed)
+%   tstep - duration of time step interval (y,d,h,m,s)
 % EXAMPLE
 %   [tm,vm] = movingtime(x,t,1 yr,1 m,'std') returns the standard deviation at
 %   monthly intervals and averaged over 1 year.
@@ -40,7 +42,7 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
     if ischar(tdur) || isstring(tdur)      
         tdur = str2duration(tdur);
     elseif ~isduration(tdur)
-        warndlg('Averaging period, tdur, must be duration or character data type')
+        warndlg('Sampling period, tdur, must be duration or character data type')
         return
     end
     
@@ -56,7 +58,7 @@ function [tm,vm] = movingtime(var,tin,tdur,tstep,func)
         warndlg(msg); return;
     end
     
-    txt = sprintf('Edit durations - Cancel to use existing values\nAveraging period (y,d,h,m,s):');
+    txt = sprintf('Edit durations - Cancel to use existing values\nSampling period (y,d,h,m,s):');
     promptxt = {txt,'Time step interval (y,d,h,m,s)'};
     defaults = [cellstr(tdur),cellstr(tstep)];
     answer = inputdlg(promptxt,'MovingTime',1,defaults);

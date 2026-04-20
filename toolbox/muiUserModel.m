@@ -57,7 +57,7 @@ classdef muiUserModel < muiDataSet
             if ~isvalid,  close(hw); return; end
             
             waitbar(0.2)
-            [XYZT,props,ok] = getData(obj,mobj.Cases);
+            [XYZT,props,inp,ok] = getData(obj,mobj.Cases,inp);
             if ok<1, close(hw); return; end 
             waitbar(0.8)
             %use t,x,y,z variables to evaluate user equation
@@ -100,14 +100,15 @@ classdef muiUserModel < muiDataSet
             %string. 'inp' is a struct with fields:
             % isdst - logical true if eqn references dst
             % idm - loigcal true if eqn references model instance, mobj
+            % iscvar - logical true if 'casevar' included as text in call
             % utext - for all strings in the call
             % comtxt - for any comment text which are assigned in 
             %         parseEquation but not currently used
             % varsused - list of whether x,y,z,t or dst are used in equation
             % fcn - function name in equation (if used)
             % eqn - input usereqn forced to lower case
-            inp = struct('isdst',[],'idm',[],'utext',[],'comtxt',[],... 
-                                        'varsused',[],'fcn',[],'eqn',[]);
+            inp = struct('isdst',[],'idm',[],'utext',[],'iscvar',false,... 
+                              'comtxt',[],'varsused',[],'fcn',[],'eqn',[]);
             %find whether user is passing 'dst' to the function
             inp.isdst = contains(usereqn,'dst','IgnoreCase',true);
             %find whether user is passing 'mobj' to the function
@@ -137,6 +138,10 @@ classdef muiUserModel < muiDataSet
                     usertxt(idchar(i):idchar(i+1)) = repmat('u',1,nchar);
                     count = count+1;
                 end
+            end
+
+            if any(strcmp(inp.utext,'casevar'))
+                inp.iscvar = true;
             end
 
             %strip out input variables: x,y,z,t.
@@ -211,7 +216,7 @@ classdef muiUserModel < muiDataSet
             isvalid = true;
         end
 %%
-        function [XYZT,props,ok] = getData(obj,muicat)
+function [XYZT,props,inp,ok] = getData(obj,muicat,inp)
             %get the data to be used in the equation or function
             ok = 1;
             nvar = length(obj.UIsel);
@@ -232,6 +237,14 @@ classdef muiUserModel < muiDataSet
                         if ~isempty(props(i).data.RowRange)
                             range(i,:) = props(i).data.RowRange;
                         end
+                    end
+                    %
+                    if inp.iscvar
+                        idv = strcmp(inp.utext,'casevar');
+                        casevar = [props(1).case,' (',props(1).dset,') .',...
+                                    props(1).desc,':',props(1).label];
+                        inp.utext{idv} = casevar;
+                        inp.eqn = replace(inp.eqn,'casevar',casevar);
                     end
                 end
             end 
