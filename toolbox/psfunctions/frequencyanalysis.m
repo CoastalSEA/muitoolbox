@@ -153,10 +153,12 @@ end
 function thr_durations(var,t,z0,ismoving,vartxt,isabove)
     %Plot - 'Duration of threshold exceedance' 
     [stid,edid] = zero_crossing(var,z0);
+
     if isempty(stid)
-        hw = warndlg('No exceedances found'); 
-        waitfor(hw);
-        return; 
+        hw = warndlg('No zero-crossings found'); waitfor(hw); return; 
+    elseif numel(stid)<=1
+        hw = warndlg('Only one zero-crossing found. Try changing threshold'); 
+        waitfor(hw); return; 
     end
     %
     if ~isabove

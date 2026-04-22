@@ -64,17 +64,23 @@ function res = plot_difference(dstruct,isangle,method)
     plot(s1,seltime,diffvar)
     ylabel(dst1.VariableLabels{1})
     
+    bs = mean(diffvar,'omitnan');
     mn = mean(abs(diffvar),'omitnan');
     stdv =std(abs(diffvar),'omitnan');
     mnmx = minmax(diffvar);
-    legtxt = sprintf('Diff - abs.mean=%.2f; abs.std=%.2f; min=%.2f; max=%.2f',...
-                                                 mn,stdv,mnmx(1),mnmx(2));
+    legtxt = sprintf('Bias=%.2f; abs.mean=%.2f; abs.std=%.2f; min=%.2f; max=%.2f',...
+                                              bs,mn,stdv,mnmx(1),mnmx(2));
     legend(legtxt,'Location','northeast')
 
     s2 = subplot(2,1,2);
     var1(abs(var1)<0.1) = NaN;
-    plot(s2,seltime,abs(diffvar)./abs(var1));
+    reldiff = abs(diffvar)./abs(var1(:));
+    plot(s2,seltime,reldiff);
     xlabel(dst1.RowDescription)
-    ylabel('Percentage difference to Var1')
+    ylabel('Relative difference to Var1')
     sgtitle(sprintf('Diff: %s - %s',dst1.Description,dst2.Description))
+    mnreldiff = mean(reldiff,'omitnan');
+    mnvar = mean(abs(var1(:)),'omitnan');
+    legtxt = sprintf('Mean relative diff=%.2f; Mean Var1=%.2f',mnreldiff,mnvar);
+    legend(legtxt,'Location','northeast')
 end
