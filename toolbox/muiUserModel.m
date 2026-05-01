@@ -493,9 +493,11 @@ function [XYZT,props,inp,ok] = getData(obj,muicat,inp)
             if ndim>0 
                 for i=1:length(props)
                     dims = props(i).data.Dimensions;
-                    lengthdims = structfun(@length,dims);
-                    if all(sort(lengthdims)'-sort(ressze(2:end))==0)
-                        break
+                    if ~isempty(dims)
+                        lengthdims = structfun(@length,dims);
+                        if ~all(sort(lengthdims)'-sort(ressze(2:end))==0)
+                            break
+                        end
                     end
                 end
                 dst.Dimensions = dims;
