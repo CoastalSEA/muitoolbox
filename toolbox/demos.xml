@@ -92,6 +92,12 @@
          <file>help/html/muiselectui.html</file>
       </demoitem>
       <demoitem>
+         <label>muiskill_runparams</label>
+         <type>other</type>
+         <source>muiskill_runparams</source>
+         <file>help/html/muiskill_runparams.html</file>
+      </demoitem>
+      <demoitem>
          <label>muistats</label>
          <type>other</type>
          <source>muistats</source>
