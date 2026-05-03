@@ -149,14 +149,14 @@ function hax = plotSurface(ax,ps,mn,metatxt,skill)
 
     xx = sig.*cos(R);
     yy = sig.*sin(R);
-    plot(hax,xx,yy,'xk','MarkerSize',0.5,'DisplayName','Data points');
+    plot(hax,xx,yy,':k','MarkerSize',0.5,'DisplayName','Data points');
     hold(hax,'on')
 
     %get the histogram data
     nint = round(log10(numel(xx)))*10;
     nbins = [nint,nint];
     xy = [xx,yy];
-    [Z,XY] = hist3(xy,'Nbins',nbins);
+    [Z,XY] = hist3(xy,'Nbins',nbins); %requires Statistics and Machine Learning Toolbox
     htrec = max(length(find(~isnan(yy))),length(find(~isnan(xx))));
     Z = Z/htrec*100;                       %percentage occurrence
     
