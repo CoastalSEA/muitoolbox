@@ -6,7 +6,22 @@ classdef inputUI < handle
 % PURPOSE
 %   Creates a multi-field UI
 % USAGE
-%   Called by inputgui.m
+%   Called by inputgui.m, or directly using
+%   selection = inputUI.getUI(varargin);
+%   or
+%   h_inp = inputUI('FigureTitle',title,...
+%                   'PromptText',prompt,...
+%                   'InputFields',fields,...
+%                   'InputOrder',order,...
+%                   'Style',style,...
+%                   'ControlButtons',controls,...                            
+%                   'DefaultInputs',default,...
+%                   'UserData',userdata,...
+%                   'DataObject',dataobj,...
+%                   'SelectedVar',selvar,...
+%                   'ActionButtons',actions,...
+%                   'Position',position);
+%   waitfor(obj,'Action')
 % INPUT
 %   Defined using varargin for the following fields and assigned to settings
 %    FigureTitle     - title for the UI figure
@@ -55,7 +70,9 @@ classdef inputUI < handle
             nvar = length(varargin)/2;
             settings = obj.getPropertyStruct(nvar);
             for k=1:2:length(varargin)
-               settings.(varargin{k}) = varargin{k+1};
+                if ~isempty(varargin{k+1})
+                    settings.(varargin{k}) = varargin{k+1};
+                end
             end
             obj = inputUIfig(obj,settings);
         end
@@ -137,9 +154,11 @@ classdef inputUI < handle
                 end
             end
             
-            if nvar==2 && all(strcmp(settings.Style,'popupmenu'))
+            if nvar==2 && all(strcmp(settings.Style,'popupmenu')) && ...
+                                            numel(settings.UserData)==2
                 %two popupmenus - assume start and end range values and set
-                %second popupmenu to the end value.
+                %second popupmenu to the end value. To prevent this add an
+                %extra selection value in UserData
                 hw(1).Value = length(hw(1).String);
             end
             

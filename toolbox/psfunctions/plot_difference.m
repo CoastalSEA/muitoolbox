@@ -73,7 +73,7 @@ function res = plot_difference(dstruct,isangle,method)
     legend(legtxt,'Location','northeast')
 
     s2 = subplot(2,1,2);
-    var1(abs(var1)<0.1) = NaN;
+    var1(abs(var1)<mn) = NaN;
     reldiff = abs(diffvar)./abs(var1(:));
     plot(s2,seltime,reldiff);
     xlabel(dst1.RowDescription)

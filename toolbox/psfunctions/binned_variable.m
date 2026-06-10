@@ -14,7 +14,8 @@ function [bintable,binvar,bintime] = binned_variable(var,mtime,interval,period)
 %           or the 1st dimension of var (ie no of rows)
 %   interval - bin size, e.g. day, week, month
 %           interval is a character vector of any of the following:
-%           second, minute, hour, day, week, month, quarter, year
+%           second, minute, hour, day, week, month, quarter, year, decade,
+%           century
 %   period - recurrence duration, e.g. week, month, year - determines output
 %            format by setting the '<interval>Type' property for:
 %               secondofminute*, secondofday
@@ -43,20 +44,20 @@ function [bintable,binvar,bintime] = binned_variable(var,mtime,interval,period)
     end
     assert(size(var,1)==length(mtime),'Variable and time not the same length.')
 
-
     [intervals,intstart] = discretize(mtime,interval);
-    noType = {'year','quarter','hour','minute'};
-    if any(strcmp(noType,interval)) || any(strcmp(noType,period))
+    noType = {'century','decade','year','quarter','hour','minute'};    
+    if any(strcmp(noType,interval)) 
+        %use interval when no <interval>Type eg yearof??? cf monthofyear
         fi = str2func(interval);   
-        bintime.intervals = fi(intstart(1:end-1));
+        bintime.intervals = fi(intstart(1:end));
     else
         timeType = sprintf('%sof%s',interval,period);
         fi = str2func(['@(t,timeType) ',[interval,'(t,timeType)']]);  
-        bintime.intervals = fi(intstart(1:end-1),timeType);
+        bintime.intervals = fi(intstart(1:end),timeType);
     end
     
     nint = length(unique(bintime.intervals));
-    nper = ceil(length(bintime.intervals)/nint);
+    nper = round(numel(bintime.intervals)/nint);
 
     binvar = cell(nper,nint);
     k = 0;     
@@ -68,7 +69,6 @@ function [bintable,binvar,bintime] = binned_variable(var,mtime,interval,period)
         end
         k = k+nint;            
     end
-    bintime.periods(1) = mtime(1);
 
     switch period    
         case {'day','quarter'}
@@ -81,8 +81,28 @@ function [bintable,binvar,bintime] = binned_variable(var,mtime,interval,period)
             warndlg('Period not recognised (day, month or year)'), 
             return;
     end
-    bintime.intstart = intstart;
 
+    intstart(intstart>mtime(end)) = [];  %remove intervals that start after end of timeseries
+    bintime.intstart = intstart;
+    bintime.intervals = bintime.intervals(1:numel(intstart));
+    if numel(intstart)==numel(binvar)
+        bintime.intstart = intstart;
+    else
+        bindiff = numel(binvar)-numel(intstart);
+        switch interval
+            case 'quarter'
+                missints = calmonths(3:3:3*bindiff);
+            case 'month'
+                missints = calmonths(1:1:bindiff);
+            case 'week'
+                missints = calweeks(1:1:bindiff);
+            case 'day'
+                missints = caldays(1:1:bindiff);
+        end
+        bintime.intstart(end+1:end+bindiff) = intstart(end)+missints;
+        bintime.intervals(end+1:end+bindiff) = bintime.intervals(end)+(1:bindiff);
+    end
+    
     % checkplot(binvar,bintime,interval)
 
     %table output
