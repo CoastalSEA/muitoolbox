@@ -39,7 +39,7 @@ function res = frequencyanalysis(var,t,vartxt)
                     'Plot variable frequency above/below threshold',...
                     'Spectral analysis plot',...
                     'Duration of threshold exceedance',...
-                    'Rolling mean duration above/below a threshold'};
+                    'Rolling duration statistic above/below a threshold'};
         [idx,ok] = listdlg('Name','Plot options', ...
             'PromptString','Select a plot:', ...
             'SelectionMode','single', ...
@@ -79,7 +79,7 @@ function res = frequencyanalysis(var,t,vartxt)
                         var_freq_plot(thrvar,z0,vartxt,isabove);
                     case 'Duration of threshold exceedance'   
                         thr_durations(var,t,z0,false,vartxt,isabove);
-                    case 'Rolling mean duration above/below a threshold'
+                    case 'Rolling duration statistic above/below a threshold'
                         thr_durations(var,t,z0,true,vartxt,isabove);
                 end
         end
@@ -177,9 +177,18 @@ function thr_durations(var,t,z0,ismoving,vartxt,isabove)
     figure('Name','Duration exceedance','Units','normalized',...                
            'Resize','on','HandleVisibility','on','Tag','PlotFig'); 
     if ismoving
+        method = questdlg('Select statistic to use:','Rolling stats',...
+                           'Mean','Sum','95 prctile','Mean');
+        ytxt = method;
+        if strcmp(method,'95 prctile')
+            ytxt = '95^t^h percentile';
+        else
+            method = lower(method);
+        end
+
         vardur = hours(vardur);
         tper = years(1);  %set to annual but movingtime allows this to be changed!
-        [tm,vm,tdur,tstep] = movingtime(vardur,t(stid),tper,tper,'mean');
+        [tm,vm,tdur,tstep] = movingtime(vardur,t(stid),tper,tper,method);
         plot(tm,vm);        
         xlabel('Time')
 
@@ -188,20 +197,22 @@ function thr_durations(var,t,z0,ismoving,vartxt,isabove)
         numexc = mean(length(stid),length(edid));
         aveannumexc = numexc/years(reclen);
         if isabove
-            ylabel('Mean duration of exceedances (hours)')
-            title(sprintf('Rolling mean above %.3g threshold',z0))
+            ylabel(sprintf('%s duration of exceedances (hours)',ytxt))
+            title(sprintf('Rolling %s above %.3g threshold',method,z0))
             msg1 = sprintf('Percentage time above threshold in %.3g years = %.3g%%',years(reclen),pcntexcdur);
             msg2 = sprintf('Annual average number of events above threshold / year = %.3g',aveannumexc);
+            msg3 = 'Duration exceedance results';
         else
-            ylabel('Mean duration of non-exceedances (hours)')
-            title(sprintf('Rolling mean below %.3g threshold',z0))
+            ylabel(sprintf('%s duration of non-exceedances (hours)',ytxt))
+            title(sprintf('Rolling %s below %.3g threshold',method,z0))
             msg1 = sprintf('Percentage time below threshold in %.3g years = %.3g%%',years(reclen),pcntexcdur);
             msg2 = sprintf('Annual average number of events below threshold / year = %.3g',aveannumexc);
+            msg3 = 'Duration non-exceedance results';
         end
         subtitle(sprintf('Averaging period %s; Time step %s',...
                                                     char(tdur),char(tstep)))        
         msgtxt = sprintf('%s\n%s',msg1,msg2);
-        hm = msgbox(msgtxt,'Mean duration results');
+        hm = msgbox(msgtxt,msg3);
         waitfor(hm)
     else 
         sledges = min(vardur):(max(vardur)-min(vardur))/10:max(vardur);

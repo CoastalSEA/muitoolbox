@@ -31,16 +31,6 @@ function [idcls,options] = getclusters(ts,options)
 %----------------------------------------------------------------------
 %   
     idcls = []; 
-    if nargin<2 || isempty(options)
-        default = {num2str(mean(data,'omitnan')+2*std(data,'omitnan')),...
-                                    num2str(3),num2str(18),num2str(15)};
-    else
-        default{1} = num2str(options.threshold);
-        default{2} = num2str(options.method);
-        default{3} = num2str(options.tint);
-        default{4} = num2str(options.clint);
-    end
-
     if isa(ts,'timeseries')
         mdate = datetime(getabstime(ts));
         data = ts.Data;
@@ -55,6 +45,17 @@ function [idcls,options] = getclusters(ts,options)
         warndlg('Data format not recognised in getpeaks')
         return;
     end
+
+    if nargin<2 || isempty(options)
+        default = {num2str(mean(data,'omitnan')+2*std(data,'omitnan')),...
+                                    num2str(3),num2str(18),num2str(15)};
+    else
+        default{1} = num2str(options.threshold);
+        default{2} = num2str(options.method);
+        default{3} = num2str(options.tint);
+        default{4} = num2str(options.clint);
+    end
+
     %get plot figure with yes/no accept buttons
     figtitle = sprintf('Peaks plot for %s',figtxt);
     promptxt = 'Accept cluster definition';

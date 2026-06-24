@@ -70,6 +70,9 @@ function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
     %create anonymous function (different format for min/max)
     if strcmpi(func,{'min','max'})
         func = str2func(['@(x)', func, '(x,[],''omitnan'')']);
+    elseif strcmpi(func,'95 prctile')
+        func = split(func,' ');
+        func = str2func(['@(x)', func{2}, '(x,',func{1},')']);
     else
         func = str2func(['@(x)', func, '(x,''omitnan'')']);
     end
