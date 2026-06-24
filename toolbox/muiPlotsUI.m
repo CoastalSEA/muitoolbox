@@ -187,8 +187,8 @@ classdef muiPlotsUI < muiDataUI
             S.XYZlabels = {'Var','X'};               %default button labels
             
             %Action button specifications
-            S.ActButNames = {'Refresh','Swap','Polar'}; %names assigned selection struct
-            S.ActButText = {char(174),'XY','+'};     %labels for additional action buttons
+            S.ActButNames = {'Refresh','LeftRight','Swap','Polar'}; %names assigned selection struct
+            S.ActButText = {char(174),'yL','XY','+'};     %labels for additional action buttons
             % Negative values in ActButPos indicate that a
             % button is alligned with a selection option numbered in the 
             % order given by S.Titles

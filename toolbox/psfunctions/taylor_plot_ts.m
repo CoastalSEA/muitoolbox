@@ -149,7 +149,7 @@ function hax = plotSurface(ax,ps,mn,metatxt,skill)
 
     xx = sig.*cos(R);
     yy = sig.*sin(R);
-    plot(hax,xx,yy,':k','MarkerSize',0.5,'DisplayName','Data points');
+    plot(hax,xx,yy,'.k','MarkerSize',2,'DisplayName','Data points');
     hold(hax,'on')
 
     %get the histogram data

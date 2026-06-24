@@ -43,12 +43,15 @@ function H = hurst_exponent(ts,metatxt,method)
     if isa(ts,'timeseries')
         x = ts.Data;
         labeltxt = ts.UserData.Labels;
+        dt = mode(diff(ts.Time));
     elseif isa(ts,'dstable')
         x = ts.(ts.VariableNames{1});
         labeltxt = ts.VariableLabels{1};
+        dt = mode(diff(ts.RowNames));
     elseif isvector(ts)
         x = ts;
         labeltxt = 'variable';
+        dt = 1;
     else
         warndlg('Data format not recognised in poisson_stats')
         return;
@@ -69,7 +72,7 @@ function H = hurst_exponent(ts,metatxt,method)
         if isempty(method), return; end
     end
     
-    %x = x(1:length(x)/20); %experiment with shortemning record length
+    %x = x(1:length(x)/20); %experiment with shortening record length
     Nvar=length(x);        
     utime = 2:Nvar;              %unit-time vector
     
@@ -103,7 +106,7 @@ function H = hurst_exponent(ts,metatxt,method)
             % Date: 02.02.2018
             % Modified to handle NaN data and omit zeros in power law estimate
             R = zeros(1,Nvar-1); S = R;
-            for n=2:Nvar
+            parfor n=2:Nvar
                 % Calculate R statistic
                 Deviation=cumsum(x(1:n),'omitnan')-cumsum(ones(n,1))*sum(x(1:n),'omitnan')/n;
                 R(n-1)=max(Deviation)-min(Deviation);
@@ -180,6 +183,7 @@ function H = hurst_exponent(ts,metatxt,method)
     ylabel(['log(R/S) for ',labeltxt])
 
     exponent = sprintf('Hurst Line (exponent = %0.3f)',H);
-    legend('R/S',exponent,'Normal Line (exponent = 0.5)','Location','NorthWest')
+    legtxt = sprintf('R/S with dt = %.1f hours',hours(dt));
+    legend(legtxt,exponent,'Normal Line (exponent = 0.5)','Location','NorthWest')
     fittedtitle(hf,metatxt,false,0.68);
 end

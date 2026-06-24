@@ -34,7 +34,7 @@ fname = {'moving(x, n, ''func'')';...                                       %1
          'tidalrange(x, t, issave, isplot)';...                             %12
          'tidalhighlow(x, t)';...                                           %13
          'tidalrange_nltc(x, t, issave, isplot, ''titletext'')';...         %14
-         'waterlevelfreqplo ts(x, t)';...                                   %15
+         'waterlevelfreqplots(x, t)';...                                   %15
          'frequencyanalysis(x, t, ''vardesc'')';...                         %16
          'wave_steepness(x, y, z, t)';...                                   %17
          'wave_scatter(dst)';...                                            %18
