@@ -280,7 +280,18 @@
 % - interactively add existing axes from single axes figures to a figure
 % with multiple tiles (regular grid only).
 %
+% * *getplothandles.m*
+% - find only the handles corresponding to actual plotted data (plot, line, scatter, stem, bar, etc.) from the specified axes (ax).
+% 
+% * *reshape_axes.m*
+% - reshape subplots in a figure from a single column to two columns
+% 
+% * *select_figure.m*
+% - allow the user to interactively select an existing figure and control the selection using valid Tags
+%
 % * *setaxis_yearsbp.m*
 % - adjust the x-axis to display years Before Present (BP), reverse
 % the axis tick labels and add new axis label.
 %
+% * *sort_plots.m*
+% - reorder plot handles so that the legend plots in sequence added

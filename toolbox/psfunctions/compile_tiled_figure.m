@@ -47,7 +47,7 @@ function hf = compile_tiled_figure(mrows,ncols)
     getdialog('Tile order is across each row in order of rows')
     
     for i=1:mrows*ncols
-        hfig = select_figure('PlotFig');        %select a figure to use
+        hfig = select_figure({'PlotFig','StatFig'});        %select a figure to use
 
         %check whether the source figure is a tiled layout and if so find
         %the correct tile (NB not tested for subplots****)

@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>Plotting and statistical functions</title>
 <meta name="generator" content="MATLAB 24.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2026-03-27">
+<meta name="DC.date" content="2026-07-03">
 <meta name="DC.source" content="psfunctions.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -511,7 +511,31 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <div>
 <ul>
 <li>
+<b>getplothandles.m</b> - find only the handles corresponding to actual plotted data (plot, line, scatter, stem, bar, etc.) from the specified axes (ax).</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
+<b>reshape_axes.m</b> - reshape subplots in a figure from a single column to two columns</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
+<b>select_figure.m</b> - allow the user to interactively select an existing figure and control the selection using valid Tags</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
 <b>setaxis_yearsbp.m</b> - adjust the x-axis to display years Before Present (BP), reverse the axis tick labels and add new axis label.</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>
+<b>sort_plots.m</b> - reorder plot handles so that the legend plots in sequence added</li>
 </ul>
 </div>
 <p class="footer">
@@ -804,11 +828,21 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % - interactively add existing axes from single axes figures to a figure
 % with multiple tiles (regular grid only).
 %
+% * *getplothandles.m*
+% - find only the handles corresponding to actual plotted data (plot, line, scatter, stem, bar, etc.) from the specified axes (ax).
+% 
+% * *reshape_axes.m*
+% - reshape subplots in a figure from a single column to two columns
+% 
+% * *select_figure.m*
+% - allow the user to interactively select an existing figure and control the selection using valid Tags
+%
 % * *setaxis_yearsbp.m*
 % - adjust the x-axis to display years Before Present (BP), reverse
 % the axis tick labels and add new axis label.
 %
-
+% * *sort_plots.m*
+% - reorder plot handles so that the legend plots in sequence added
 ##### SOURCE END #####
 -->
 </body>

@@ -200,13 +200,13 @@ function thr_durations(var,t,z0,ismoving,vartxt,isabove)
             ylabel(sprintf('%s duration of exceedances (hours)',ytxt))
             title(sprintf('Rolling %s above %.3g threshold',method,z0))
             msg1 = sprintf('Percentage time above threshold in %.3g years = %.3g%%',years(reclen),pcntexcdur);
-            msg2 = sprintf('Annual average number of events above threshold / year = %.3g',aveannumexc);
+            msg2 = sprintf('Average number of events above threshold / year = %.3g',aveannumexc);
             msg3 = 'Duration exceedance results';
         else
             ylabel(sprintf('%s duration of non-exceedances (hours)',ytxt))
             title(sprintf('Rolling %s below %.3g threshold',method,z0))
             msg1 = sprintf('Percentage time below threshold in %.3g years = %.3g%%',years(reclen),pcntexcdur);
-            msg2 = sprintf('Annual average number of events below threshold / year = %.3g',aveannumexc);
+            msg2 = sprintf('Average number of events below threshold / year = %.3g',aveannumexc);
             msg3 = 'Duration non-exceedance results';
         end
         subtitle(sprintf('Averaging period %s; Time step %s',...

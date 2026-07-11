@@ -137,6 +137,7 @@ classdef muiCatalogue < dscatalogue
                 if ok<1, return; end  
             end 
             cobj = getCase(obj,caserec);      %selected case
+            if isempty(cobj), return; end
 
             datasetnames = fieldnames(cobj.Data);
             if numel(datasetnames)>1
@@ -159,6 +160,7 @@ classdef muiCatalogue < dscatalogue
             %for deletion
             promptxt = 'Select Case to delete Variable from:';
             [cobj,~,datasets,idd] = selectCaseDataset(obj,[],[],promptxt);
+            if isempty(cobj), return; end
             dst = cobj.Data.(datasets{idd});
             vardesc = dst.VariableDescriptions;
             varnames = dst.VariableNames;

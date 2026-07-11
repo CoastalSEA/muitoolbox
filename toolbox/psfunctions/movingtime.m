@@ -1,4 +1,4 @@
-function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
+function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func,isprompt)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -6,7 +6,8 @@ function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
 % PURPOSE
 %   Computes moving averages for a window of tint duration
 % USAGE
-%   [tm,vm] = movingtime(var,tin,tdur,tstep,func)
+%   [tm,vm] = movingtime(var,tin,tdur,tstep);
+%   [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func,isprompt);
 % INPUTS
 %   var - is the input vector to be smoothed. 
 %   tin - is the datetime vector (same legnth as x)
@@ -14,6 +15,8 @@ function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
 %   tstep - duration to advance for next calculation (string or duration) e.g.'6 m' 
 %   func -  custom function (e.g. mean, std etc) passed as character 
 %          string (optional - default is mean)
+%   isprompt - logical true if option to prompt user to adjust tdur and tstep
+%              is required (optional - default is true)
 % OUTPUT
 %   tm - time at the beginning of each stepping interval, ie every tstep from
 %        time t0 to the nearest interval that is less than tdur from the
@@ -35,6 +38,9 @@ function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
     
     if nargin<5
         func = 'mean';
+        isprompt = true;
+    elseif nargin<6
+        isprompt = true;
     end
 
     tm = []; vm = [];
@@ -58,19 +64,21 @@ function [tm,vm,tdur,tstep] = movingtime(var,tin,tdur,tstep,func)
         warndlg(msg); return;
     end
     
-    txt = sprintf('Edit durations - Cancel to use existing values\nSampling period (y,d,h,m,s):');
-    promptxt = {txt,'Time step interval (y,d,h,m,s)'};
-    defaults = [cellstr(tdur),cellstr(tstep)];
-    answer = inputdlg(promptxt,'MovingTime',1,defaults);
-    if ~isempty(answer)
-        tdur = str2duration(answer{1});
-        tstep = str2duration(answer{2});
+    if isprompt
+        txt = sprintf('Edit durations - Cancel to use existing values\nSampling period (y,d,h,m,s):');
+        promptxt = {txt,'Time step interval (y,d,h,m,s)'};
+        defaults = [cellstr(tdur),cellstr(tstep)];
+        answer = inputdlg(promptxt,'MovingTime',1,defaults);
+        if ~isempty(answer)
+            tdur = str2duration(answer{1});
+            tstep = str2duration(answer{2});
+        end
     end
     
     %create anonymous function (different format for min/max)
     if strcmpi(func,{'min','max'})
         func = str2func(['@(x)', func, '(x,[],''omitnan'')']);
-    elseif strcmpi(func,'95 prctile')
+    elseif contains(func,'prctile')
         func = split(func,' ');
         func = str2func(['@(x)', func{2}, '(x,',func{1},')']);
     else
