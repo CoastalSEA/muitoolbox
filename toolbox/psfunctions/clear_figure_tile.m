@@ -1,4 +1,3 @@
-
 function clear_figure_tile(tiledLayoutObj, row, col, varargin)
 % clear_figure_tile  Clears or removes a specific tile in a tiledlayout by row/column.
 %

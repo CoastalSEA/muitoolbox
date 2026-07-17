@@ -1,4 +1,4 @@
-function [idcls,options] = getclusters(ts,options)
+function [idcls,options] = getclusters(ts,options,promptxt)
 %
 %-------function help------------------------------------------------------
 % NAME
@@ -15,6 +15,7 @@ function [idcls,options] = getclusters(ts,options)
 %               Selection method, 
 %               Time between peaks (hours),
 %               Cluster time interval (days).
+%   promptxt - prompt to be used in accept figure (optional)
 %OUTPUT
 %   idcls - structure ('date','pks') containing values, the date of the 
 %         cluster and the values of peaks within each cluster  
@@ -46,19 +47,23 @@ function [idcls,options] = getclusters(ts,options)
         return;
     end
 
-    if nargin<2 || isempty(options)
-        default = {num2str(mean(data,'omitnan')+2*std(data,'omitnan')),...
-                                    num2str(3),num2str(18),num2str(15)};
-    else
-        default{1} = num2str(options.threshold);
-        default{2} = num2str(options.method);
-        default{3} = num2str(options.tint);
-        default{4} = num2str(options.clint);
+    if nargin<3
+        promptxt = 'Accept cluster definition';
     end
+
+    if nargin<2 || isempty(options)
+        options = struct('threshold',mean(data,'omitnan')+2*std(data,'omitnan'),...
+            'method',num2str(3),'tint',num2str(18),'clint',num2str(15));
+    end
+
+    default{1} = num2str(options.threshold);
+    default{2} = num2str(options.method);
+    default{3} = num2str(options.tint);
+    default{4} = num2str(options.clint);    
 
     %get plot figure with yes/no accept buttons
     figtitle = sprintf('Peaks plot for %s',figtxt);
-    promptxt = 'Accept cluster definition';
+    % promptxt = 'Accept cluster definition';
     [h_plt,h_but] = acceptfigure(figtitle,promptxt,'StatFig');
     h_ax = axes(h_plt);
     plot(h_ax,mdate,data);
