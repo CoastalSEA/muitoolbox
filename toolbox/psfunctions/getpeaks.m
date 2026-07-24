@@ -8,9 +8,9 @@ function [idpks,options] = getpeaks(ts)
 %   method of selection and interval between peaks
 % USAGE
 %   [idpks,options] = getpeaks(ts)
-%INPUT
+% INPUT
 %   ts - timeseries or dstable dataset
-%OUTPUT
+% OUTPUT
 %   idpks - array containing indices of peaks
 %   options - defines parameters used for cluster selection:
 %       Threshold for peaks,
